@@ -1,0 +1,21 @@
+{
+  "meta": { "son_guncelleme": "", "toplam_usdt": 0, "aciklama": "ORNEK defter sablonu. Gercek kripto_portfoy.json .gitignore'dadir, lokalde kalir." },
+  "aktif_futures": [
+    { "sembol": "", "yon": "LONG/SHORT", "giris": null, "durum": "acik", "not": "" }
+  ],
+  "spot_pozisyonlar": [
+    { "sembol": "", "miktar": 0, "maliyet_usdt": 0, "pnl_pct": 0, "durum": "TUT/IZLE/OLU", "not": "" }
+  ],
+  "aktif_spot_pozisyon": {
+    "sembol": "", "giris": 0, "miktar": 0, "yatirim_usdt": 0, "stop": null, "tp1": 0, "tp2": "", "tarih": ""
+  },
+  "kapatilan_futures": [
+    { "sembol": "", "yon": "", "giris": 0, "kaldirac": 0, "tarih": "", "sonuc_usdt": 0, "roi_pct": 0, "ders": "" }
+  ],
+  "dersler": [
+    { "no": 1, "kural": "" }
+  ],
+  "tahminler": [
+    { "no": 1, "tarih": "", "token": "", "yon": "L/S", "giris": 0, "senaryo": "", "sinyal": "X/4", "sonuc": null }
+  ]
+}

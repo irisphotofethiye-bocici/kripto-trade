@@ -1,0 +1,14 @@
+# === HASSAS — repo'ya GİRMEZ ===
+# CoinGecko/Apify anahtarları
+kripto-config.json
+# gerçek portföy/pozisyonlar (lokalde kalır)
+kripto_portfoy.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS / editor
+.DS_Store
+Thumbs.db

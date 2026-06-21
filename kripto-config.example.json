@@ -1,0 +1,9 @@
+{
+  "_aciklama": "ORNEK config. Kopyala -> kripto-config.json yap, kendi anahtarlarini gir. Gercek dosya .gitignore'dadir, repoya gitmez.",
+  "coingecko_demo_key": "",
+  "ollama_url": "http://localhost:11434",
+  "ollama_model": "gemma4:12b",
+  "apify_token": "",
+  "binance_spot_base": "https://api.binance.com",
+  "binance_fapi_base": "https://fapi.binance.com"
+}
