@@ -12,9 +12,40 @@ Kullanım:
   python olcucu.py --symbol BTC  --side short --tf 4h --limit 300
 Çıktı: JSON (skill bunu okur).
 """
-import sys, json, argparse, urllib.request, statistics
+import sys, os, json, argparse, urllib.request, statistics
 
 FAPI = "https://fapi.binance.com"
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+def get_json(url):
+    req = urllib.request.Request(url, headers={"User-Agent": "kripto-olcucu/1.0"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        return json.load(r)
+
+def _load_costs():
+    """Maliyet parametreleri: kripto-config.json -> 'maliyet'. Eksikse guvenli varsayilan."""
+    try:
+        c = json.load(open(os.path.join(HERE, "kripto-config.json"), encoding="utf-8")).get("maliyet", {})
+    except Exception:
+        c = {}
+    return {
+        "maker": float(c.get("maker_fee_pct", 0.018)),
+        "taker": float(c.get("taker_fee_pct", 0.045)),
+        "spot": float(c.get("spot_fee_pct", 0.075)),
+        "periyot": float(c.get("funding_periyot", 6)),
+        "slippage": float(c.get("slippage_pct", 0.02)),
+    }
+
+def _spread_pct(symbol, spot=False):
+    """Canli bid/ask spread % (varsayim degil)."""
+    base = "https://api.binance.com/api/v3/ticker/bookTicker" if spot else f"{FAPI}/fapi/v1/ticker/bookTicker"
+    try:
+        d = get_json(f"{base}?symbol={symbol}USDT")
+        bid, ask = float(d["bidPrice"]), float(d["askPrice"])
+        mid = (bid + ask) / 2
+        return (ask - bid) / mid * 100 if mid else 0.0
+    except Exception:
+        return None
 
 def fetch_klines(symbol, interval, limit):
     url = f"{FAPI}/fapi/v1/klines?symbol={symbol}USDT&interval={interval}&limit={limit}"
@@ -55,7 +86,7 @@ def nearest(price, highs, lows):
     sup = sorted([l for l in lows if l < price], reverse=True)  # alttaki en yakın destek
     return (res[0] if res else None), (sup[0] if sup else None)
 
-def measure(symbol, side, tf, limit):
+def measure(symbol, side, tf, limit, spot=False):
     bars = fetch_klines(symbol, tf, limit)
     if len(bars) < 20:
         raise ValueError("yetersiz mum verisi")
@@ -86,6 +117,30 @@ def measure(symbol, side, tf, limit):
         tp2 = tp1 - 1.5 * risk
         rr = (price - tp1) / risk if risk > 0 else 0.0
 
+    # --- NET R/R (maliyet sonrasi) — SADECE R/R; swing/ATR/yon mantigi degismez ---
+    cst = _load_costs()
+    spr = _spread_pct(symbol, spot=spot)
+    spr_v = spr if spr is not None else 0.0
+    try:
+        fr8 = fetch_funding(symbol)[0] * 100  # funding %/8h
+    except Exception:
+        fr8 = None
+    reward_g_pct = (abs(tp1 - price) / price * 100) if price else 0.0
+    risk_g_pct = (risk / price * 100) if price else 0.0
+    if spot:
+        f_in = f_tp = f_stop = cst["spot"]
+        funding_cost = 0.0                       # spotta funding yok
+    else:
+        f_in = f_tp = cst["maker"]               # limit giris/TP = maker
+        f_stop = cst["taker"]                    # stop market = taker
+        ftot = (fr8 or 0.0) * cst["periyot"]
+        funding_cost = ftot if side == "long" else -ftot   # ISARETLI: long+poz=gider, long+neg=gelir
+    c_reward = f_in + f_tp + funding_cost
+    c_risk = f_in + f_stop + spr_v + cst["slippage"] + funding_cost
+    net_reward = reward_g_pct - c_reward
+    net_risk = risk_g_pct + c_risk
+    rr_net = round(net_reward / net_risk, 2) if net_risk > 0 else 0.0
+
     return {
         "symbol": symbol, "side": side, "tf": tf, "price": round(price, 6),
         "atr14": round(a, 6),
@@ -98,7 +153,15 @@ def measure(symbol, side, tf, limit):
         "risk_birim": round(risk, 6),
         "rr_tp1": round(rr, 2),
         "VETO_rr": rr < 2.0,
-        "not": "CEO yon verir; sayilar ATR(14)+swing. R/R<1:2 ise VETO_rr=true -> giris reddi."
+        "rr_tp1_net": rr_net,
+        "VETO_rr_net": rr_net < 2.0,
+        "maliyet": {
+            "giris_fee_pct": f_in, "stop_fee_pct": f_stop, "spread_pct": round(spr_v, 3),
+            "slippage_pct": cst["slippage"], "funding_pct_8h": round(fr8, 4) if fr8 is not None else None,
+            "funding_periyot": cst["periyot"], "funding_toplam_isaretli_pct": round(funding_cost, 4),
+            "spot": spot, "C_reward_pct": round(c_reward, 4), "C_risk_pct": round(c_risk, 4),
+        },
+        "not": "Brut R/R=rr_tp1; maliyet sonrasi=rr_tp1_net. VETO NET uzerinden (VETO_rr_net). Funding ISARETLI (long+neg funding=gelir)."
     }
 
 # ---- Faz 3: çoklu-TF + erken belirti (anahtarsız, ek bağımlılık yok) ----
@@ -209,6 +272,7 @@ if __name__ == "__main__":
     ap.add_argument("--tf", default="1d", help="1d, 4h, 1h, 15m ...")
     ap.add_argument("--limit", type=int, default=200)
     ap.add_argument("--mtf", action="store_true", help="coklu-TF + erken belirti izleme raporu")
+    ap.add_argument("--spot", action="store_true", help="spot islem (funding yok, spot fee)")
     args = ap.parse_args()
     sym = args.symbol.upper()
     try:
@@ -219,7 +283,7 @@ if __name__ == "__main__":
         else:
             if not args.side:
                 raise ValueError("setup modunda --side zorunlu (long|short); izleme icin --mtf kullan")
-            out = measure(sym, args.side, args.tf, args.limit)
+            out = measure(sym, args.side, args.tf, args.limit, spot=args.spot)
         print(json.dumps(out, ensure_ascii=False, indent=2))
     except Exception as e:
         print(json.dumps({"error": str(e)}, ensure_ascii=False))

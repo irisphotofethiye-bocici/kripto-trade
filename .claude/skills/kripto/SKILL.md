@@ -135,7 +135,7 @@ CEO'ya: mcap:X | Bekçi:GECER/UYARI/RED | DEX likidite:X | Rejim:boğa/ayı | AL
 ⛔ PPI>%5 + aktif savaş → pozisyon %50 küçült (DERS#1)
 ⛔ Funding >+0.01% → long girme
 ⛔ Fiyat↓+OI↑ → long girme
-⛔ R/R <1:2 → red
+⛔ NET R/R <1:2 → red (maliyet sonrası; Ölçücü `VETO_rr_net`)
 ⛔ ETF çıkış >$1B haftalık → pozisyon küçült
 ⛔ F&G >80 → long girme
 ⛔ Bekçi (GoPlus) RED → küçük-cap girişi YOK · UYARI → pozisyon %50 küçült (Faz 5)
@@ -148,8 +148,8 @@ Toplam %100
 
 6. Pozisyon tavsiyesi: Yön | Giriş bölgesi | Stop | TP-1 | TP-2 | R/R | Max %portföy
 > **Faz 2 AKTİF:** giriş/SL/TP/R-R **Ölçücü'den** gelir; CEO yön verir, kod sayıyı.
-> Çalıştır: `python "c:/Users/alper/Desktop/kripto trade/olcucu.py" --symbol <SYM> --side <long|short> [--tf 1d|4h]` → JSON oku.
-> **`VETO_rr=true` (R/R<1:2) ise girişi REDDET** (4. maddedeki R/R vetosu). Ölçücü erişilemezse seviyeyi elle ver ve bunu raporda belirt.
+> Çalıştır: `python "c:/Users/alper/Desktop/kripto trade/olcucu.py" --symbol <SYM> --side <long|short> [--tf 1d|4h] [--spot]` → JSON oku.
+> **`VETO_rr_net=true` (NET R/R<1:2, maliyet sonrası) ise girişi REDDET** (4. maddedeki R/R vetosu). Brüt R/R de raporlanır (`rr_tp1`) — ikisini de göster. Spot işlemde `--spot` (funding yok, spot fee). Ölçücü erişilemezse seviyeyi elle ver ve bunu raporda belirt.
 
 7. Tavsiyeyi kaydet → "tahminler" dizisine ekle:
   { "no":X, "tarih":"X", "token":"X", "yon":"L/S", "giris":X, "senaryo":"X %X", "sinyal":"X/4", "sonuc":null }
@@ -214,9 +214,11 @@ Kurallar:
 - **BORSA:** Binance (işlem venue). **Faz 1 veri = Binance direct REST birincil** (public market data, anahtarsız, doğrulandı) → CoinDesk MCP yedek.
 - **GEMMA:** `CONFIG.ollama_url` (örn. `http://localhost:11434`) + `CONFIG.ollama_model` — D4 haber özeti. Boşsa adım atlanır (web özeti fallback).
 - **ANAHTARLAR:** `CONFIG.coingecko_demo_key` (D1/D4, ücretsiz demo) · `CONFIG.apify_token` (Faz 3 liq-map). GoPlus + Binance market-data anahtarsız. Boşsa ilgili adım web_search'e düşer.
-- **ÖLÇÜCÜ (Faz 2, aktif):** `python "c:/Users/alper/Desktop/kripto trade/olcucu.py" --symbol <SYM> --side <long|short> [--tf 1d|4h]` → giriş/SL/TP/R-R JSON (ATR14 + swing, Binance klines, anahtarsız, bağımlılıksız). `VETO_rr=true` → R/R<1:2, giriş reddi.
+- **ÖLÇÜCÜ (Faz 2, aktif):** `python "c:/Users/alper/Desktop/kripto trade/olcucu.py" --symbol <SYM> --side <long|short> [--tf 1d|4h] [--spot]` → giriş/SL/TP + **brüt (`rr_tp1`) ve NET (`rr_tp1_net`, maliyet sonrası: fee+spread+slippage+funding işaretli)** R/R. **Veto NET üzerinden (`VETO_rr_net`).** Maliyet parametreleri: `kripto-config.json → maliyet` (sen teyit edersin).
 - **İZLEME (Faz 3, aktif):** `python ".../olcucu.py" --symbol <SYM> --mtf` → çoklu-TF (15dk/1s/4s/G) trend uzlaşısı + erken belirti (volatilite genişlemesi, sıkışma, funding aşırı, OI hızlı değişim). Pozisyon yakalama = ELLE giriş+teyit; likidasyon = web_search (Apify kapalı).
 - **KÜÇÜK-CAP / BEKÇİ (Faz 5, aktif):** `python "c:/Users/alper/Desktop/kripto trade/kucukcap.py" --id <coingecko_id>` → mcap kapısı + GoPlus güvenlik (Bekçi). Anahtarsız. Bekçi RED → giriş yok. **Gerçek küçük-cap kararı Faz 4 geçene kadar YOK.**
 - **TARAYICI (Faz 6 çekirdek, aktif):** `python "c:/Users/alper/Desktop/kripto trade/tarayici.py" [--n 10] [--min_vol 25]` → Binance+CoinGecko momentum → çoklu-TF/türev doğrulama → Tier1/2/3 + KAÇIN (blow-off). **Deterministik, 0 token.** Kısa liste → Opus CEO derin analiz (Kademe-2). Gerçek karar Faz 4 geçince.
+- **RADAR (öncü tespit, aktif):** `python "c:/Users/alper/Desktop/kripto trade/radar.py" [--n 40] [--min_vol 8] [--chg_max 12]` → hareketten ÖNCE/başlarken: OI şişmesi + funding (squeeze) + volatilite sıkışması + hacim uyanışı → BASLIYOR / HAZIRLANIYOR / skor. Kripto-only (tokenize hisseler elenir), 0 token. **Öncü olasılık, garanti DEĞİL; yön iki taraflı.** Kısa liste → Opus CEO + Bekçi. Canlı yakalama = periyodik çalıştırma (yerel zamanlayıcı).
+  - **ANLIK durum = `radar_active.json`** (her taramada YENİDEN yazılır → birikme yok, eski/yeni karışmaz). "Şu an ne sıcak" için BUNU oku; `guncelleme` damgası ~20dk'dan eskiyse zamanlayıcı durmuş olabilir (veri bayat). `radar_alerts.log` = sadece geçmiş günlük (son 300 satırla sınırlı).
 - **CHROME:** (Faz 3) pozisyon yakalama Claude-in-Chrome ister; yoksa pozisyonu elle gir (teyit akışı aynı).
 - **GÜVENLİK:** hiçbir ajan işlem/para çekme yapmaz; emir her zaman kullanıcıda. Anahtarlar prompt'a/log'a girmez, yalnızca CONFIG_YOLU'ndan okunur.

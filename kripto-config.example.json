@@ -5,5 +5,13 @@
   "ollama_model": "gemma4:12b",
   "apify_token": "",
   "binance_spot_base": "https://api.binance.com",
-  "binance_fapi_base": "https://fapi.binance.com"
+  "binance_fapi_base": "https://fapi.binance.com",
+  "maliyet": {
+    "_teyit": "Binance Fee-Rate sayfandan kendi degerlerini gir. Asagidakiler Regular+BNB tipik degerleri.",
+    "maker_fee_pct": 0.018,
+    "taker_fee_pct": 0.045,
+    "spot_fee_pct": 0.075,
+    "funding_periyot": 6,
+    "slippage_pct": 0.02
+  }
 }

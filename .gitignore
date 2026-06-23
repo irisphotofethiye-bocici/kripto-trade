@@ -9,6 +9,12 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Radar runtime (lokal)
+radar_state.json
+radar_active.json
+radar_alerts.log
+radar_run.log
+
 # OS / editor
 .DS_Store
 Thumbs.db

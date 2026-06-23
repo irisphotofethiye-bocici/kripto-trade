@@ -30,9 +30,9 @@
 - **Not:** LINK aktif pozisyon stop'u kullanıcı tarafından kaldırıldı (korumasız).
 
 ## Gün 2 — 2026-06-22
-- faz4_check:
-- /kripto tahminleri:
-- not:
+- faz4_check: Max kaynak farkı %0.114 → VERİ PASS, ERİŞİM PASS.
+- /kripto tahminleri (dünkü 3 kararın takibi): AIXBT BEKLE **isabetli** (−%4, long olsaydı zarar) · WLD "kovalama" uyarısı **doğru** (−%2.7, giriş bölgesi $0.60‑61'e yaklaşıyor, değmedi) · LINK TUT korumalı (~yatay, stop $7.10 uzak). Disiplin (R/R veto + BEKLE) zarar önledi.
+- not: Radar canlı (15dk, KriptoRadar). Piyasa risk‑off/sakin, güçlü pre‑move sinyali yok.
 
 ## Gün 3 — 2026-06-23
 - faz4_check:
