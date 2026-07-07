@@ -1,0 +1,6 @@
+{
+  "_kaynak": "FOMC: federalreserve.gov takvimi (karar gunu = toplanti 2. gunu; web dogrulama 2026-07-02). CPI: BLS yayin takvimi (usinflationcalculator.com uzerinden cekildi 2026-07-02; saat 08:30 ET).",
+  "_bakim": "Her yil aralikta bir sonraki yilin tarihleriyle guncelle (federalreserve.gov/monetarypolicy/fomccalendars.htm + bls.gov/schedule/news_release/cpi.htm).",
+  "fomc": ["2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16", "2026-10-28", "2026-12-09"],
+  "cpi": ["2026-01-13", "2026-02-13", "2026-03-11", "2026-04-10", "2026-05-12", "2026-06-10", "2026-07-14", "2026-08-12", "2026-09-11", "2026-10-14", "2026-11-10", "2026-12-10"]
+}

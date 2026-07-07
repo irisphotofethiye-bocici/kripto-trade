@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FAZ 4 günlük sağlık kontrolü.
+Günlük sağlık kontrolü (Faz 4'te doğdu; kapı 2026-07-02'de GEÇTİ ile kapandı, kontrol kalıcı).
 Ölçer: (1) veri doğruluğu = Binance vs CoinGecko fiyat farkı (<%0.5 -> PASS),
-       (2) erişilebilirlik = Binance spot+fapi ulaşılabilir mi.
-Anahtarsız core; CoinGecko için key kripto-config.json'dan okunur (chat'e girmez).
+       (2) erişilebilirlik = Binance spot+fapi ulaşılabilir mi,
+       (3) ZAMANLAYICI BAYATLIK (m11/M8 duzeltmesi 2026-07-02): radar_active >25dk VEYA
+           piyasa_yapisi_log son satiri >14sa eski ise UYARI (gorev durmus/PC kapali kalmis).
+CoinGecko key yoksa veri karşılaştırması ATLANDI sayılır (ERİŞİM'den ayrı — m11).
 Kullanım: python faz4_check.py
 """
 import json, os, urllib.request, datetime
+
+def _yas_dakika(ts_str):
+    try:
+        t = datetime.datetime.strptime(ts_str, "%Y-%m-%d %H:%M")
+        return (datetime.datetime.now() - t).total_seconds() / 60
+    except Exception:
+        return None
 
 SPOT = "https://api.binance.com"
 FAPI = "https://fapi.binance.com"
@@ -52,18 +61,43 @@ def main():
         if div is not None:
             max_div = max(max_div, div)
         rows.append((sym, b, c, div))
-    veri_pass = (max_div < 0.5) and cg_ok
     erisim_pass = binance_ok and fapi_ok
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    print(f"=== FAZ4 kontrol {now} ===")
+    print(f"=== SAGLIK kontrol {now} ===")
     print(f"Binance spot: {'OK' if binance_ok else 'ERISILEMEDI'} | "
           f"Binance fapi: {'OK' if fapi_ok else 'ERISILEMEDI'} | "
-          f"CoinGecko: {'OK' if cg_ok else 'YOK/HATA'}")
+          f"CoinGecko: {'OK' if cg_ok else ('KEY YOK' if not key else 'HATA')}")
     for sym, b, c, div in rows:
         ds = ("%.3f%%" % div) if div is not None else "-"
         print(f"  {sym:6} Binance={b} CoinGecko={c} fark={ds}")
-    print(f"Max fark: {max_div:.3f}%  ->  VERI_DOGRULUGU: {'PASS' if veri_pass else 'FAIL'} (esik <0.5% + CoinGecko OK)")
+    if key and cg_ok:
+        print(f"Max fark: {max_div:.3f}%  ->  VERI_DOGRULUGU: {'PASS' if max_div < 0.5 else 'FAIL'} (esik <0.5%)")
+    else:
+        print("VERI_DOGRULUGU: ATLANDI (CoinGecko yok — erisimden ayri degerlendirilir, m11)")
     print(f"ERISIM: {'PASS' if erisim_pass else 'FAIL'}")
+
+    # --- Zamanlayici bayatlik (M8/m11): gorev calisiyor mu? ---
+    print("\n-- Zamanlayici bayatlik --")
+    try:
+        ra = json.load(open(os.path.join(HERE, "radar_active.json"), encoding="utf-8"))
+        yas = _yas_dakika(ra.get("guncelleme", ""))
+        if yas is None:
+            print("radar_active: guncelleme damgasi okunamadi -> UYARI")
+        else:
+            durum = "OK" if yas <= 25 else "BAYAT -> KriptoRadar gorevi durmus/PC uyumus olabilir"
+            print(f"radar_active: {yas:.0f} dk once ({durum}; beklenen ~15dk ritim)")
+    except Exception:
+        print("radar_active.json okunamadi -> UYARI")
+    try:
+        lines = [l for l in open(os.path.join(HERE, "piyasa_yapisi_log.jsonl"), encoding="utf-8").read().splitlines() if l.strip()]
+        yas = _yas_dakika(json.loads(lines[-1]).get("ts", "")) if lines else None
+        if yas is None:
+            print("piyasa_yapisi_log: bos/okunamadi -> UYARI")
+        else:
+            durum = "OK" if yas <= 14 * 60 else "BAYAT -> KriptoPiyasa gorevi kacirmis (11:00/23:00 ritim)"
+            print(f"piyasa_yapisi_log: {yas/60:.1f} saat once ({durum})")
+    except Exception:
+        print("piyasa_yapisi_log.jsonl okunamadi -> UYARI")
 
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@
 kripto-config.json
 # gerçek portföy/pozisyonlar (lokalde kalır)
 kripto_portfoy.json
+kripto_gecmis.json
 
 # Python
 __pycache__/
@@ -14,6 +15,28 @@ radar_state.json
 radar_active.json
 radar_alerts.log
 radar_run.log
+radar_archive.jsonl
+
+# Piyasa yapisi runtime (lokal trend logu)
+piyasa_yapisi_log.jsonl
+
+# Nobetci runtime (lokal alarm state/log)
+nobetci_state.json
+nobetci_alarm.log
+
+# TestBot runtime (sanal test verisi, lokal)
+testbot_state.json
+testbot_islemler.jsonl
+testbot_equity.jsonl
+
+# Likidasyon akisi runtime (lokal log)
+likidasyon_log.jsonl
+
+# Panel sunucu runtime (lokal log)
+panel_out.log
+
+# TestBot mutex kilidi (runtime, race-condition korumasi)
+testbot.lock
 
 # OS / editor
 .DS_Store

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TestBot — Sanal Paper Trading</title>
+<script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root {
+    --surface-1:      #1a1a19;
+    --page-plane:     #0d0d0d;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --gridline:       #2c2c2a;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #3987e5;  /* equity: sequential blue */
+    --good:           #0ca30c; /* LONG / kazanan / up-candle */
+    --critical:       #d03b3b; /* SHORT / kaybeden / down-candle */
+    --warning:        #fab219;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page-plane); color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 20px 28px 60px;
+  }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+  .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .badge.aktif { color: var(--good); border-color: var(--good); }
+  .badge.durdu { color: var(--warning); border-color: var(--warning); }
+  .badge.long { color: var(--good); }
+  .badge.short { color: var(--critical); }
+  .grid-cards {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
+  }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+  .card .value { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .card .value.good { color: var(--good); }
+  .card .value.critical { color: var(--critical); }
+  section {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px; margin-bottom: 20px;
+  }
+  section h2 { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: var(--text-secondary); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 10px; border-bottom: 1px solid var(--gridline); }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--gridline); font-variant-numeric: tabular-nums; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover { background: rgba(255,255,255,0.04); }
+  tr.selected { background: rgba(57,135,229,0.12); }
+  .pnl-pos { color: var(--good); }
+  .pnl-neg { color: var(--critical); }
+  .chart-box { height: 340px; }
+  .sym-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .sym-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
+    padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  .sym-btn.active { border-color: var(--series-1); color: var(--text-primary); }
+  .empty { color: var(--text-muted); font-size: 13px; padding: 8px 0; }
+</style>
+</head>
+<body>
+  <h1>TestBot — Sanal Paper Trading <span id="durum-badge" class="badge">-</span></h1>
+  <div class="sub" id="sub-line">Yükleniyor...</div>
+
+  <div class="grid-cards">
+    <div class="card"><div class="label">Bakiye (sanal)</div><div class="value" id="c-equity">-</div></div>
+    <div class="card"><div class="label">Serbest Bakiye</div><div class="value" id="c-serbest">-</div></div>
+    <div class="card"><div class="label">Kullanılan Marjin</div><div class="value" id="c-marjin">-</div></div>
+    <div class="card"><div class="label">Açık PnL</div><div class="value" id="c-acikpnl">-</div></div>
+  </div>
+  <div class="grid-cards">
+    <div class="card"><div class="label">Toplam İşlem</div><div class="value" id="c-islem">-</div></div>
+    <div class="card"><div class="label">Win-rate</div><div class="value" id="c-winrate">-</div></div>
+    <div class="card"><div class="label">Ortalama R</div><div class="value" id="c-ortr">-</div></div>
+    <div class="card"><div class="label">Toplam PnL</div><div class="value" id="c-toplampnl">-</div></div>
+  </div>
+
+  <section>
+    <h2>Equity Eğrisi</h2>
+    <div id="equity-chart" class="chart-box"></div>
+  </section>
+
+  <section>
+    <h2>Açık Pozisyonlar</h2>
+    <div id="acik-poz-empty" class="empty" style="display:none;">Açık pozisyon yok.</div>
+    <table id="acik-poz-table" style="display:none;">
+      <thead><tr>
+        <th>Coin</th><th>Yön</th><th>Kaldıraç</th><th>Marjin</th><th>Notional</th><th>Giriş</th><th>Anlık</th><th>PnL</th>
+        <th>Stop</th><th>TP1</th><th>TP2</th><th>Likidasyon</th><th>Skor</th>
+      </tr></thead>
+      <tbody id="acik-poz-body"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Mum Grafiği <span id="mum-sym-label" class="sub" style="margin:0;"></span></h2>
+    <div class="sym-picker" id="sym-picker"></div>
+    <div id="candle-chart" class="chart-box"></div>
+  </section>
+
+  <section>
+    <h2>Kapanan İşlemler (son 50)</h2>
+    <div id="islem-empty" class="empty" style="display:none;">Henüz kapanan işlem yok.</div>
+    <table id="islem-table" style="display:none;">
+      <thead><tr>
+        <th>Zaman</th><th>Coin</th><th>Yön</th><th>Sebep</th><th>Kaldıraç</th><th>PnL</th><th>R</th><th>Tutma (sa)</th>
+      </tr></thead>
+      <tbody id="islem-body"></tbody>
+    </table>
+  </section>
+
+<script>
+const fmt2 = (x) => (x === null || x === undefined) ? '-' : Number(x).toFixed(2);
+const pnlClass = (x) => (x > 0 ? 'pnl-pos' : (x < 0 ? 'pnl-neg' : ''));
+const pnlSign = (x) => (x > 0 ? '+' : '');
+
+function parseTs(s) {
+  const [d, t] = s.split(' ');
+  const [Y, M, D] = d.split('-').map(Number);
+  const [h, mi, se] = t.split(':').map(Number);
+  return Math.floor(new Date(Y, M - 1, D, h, mi, se).getTime() / 1000);
+}
+
+const chartOpts = {
+  layout: { background: { color: '#1a1a19' }, textColor: '#c3c2b7', fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' },
+  grid: { vertLines: { color: '#2c2c2a' }, horzLines: { color: '#2c2c2a' } },
+  rightPriceScale: { borderColor: '#383835' },
+  timeScale: { borderColor: '#383835', timeVisible: true, secondsVisible: false },
+  crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+};
+
+const equityChart = LightweightCharts.createChart(document.getElementById('equity-chart'), chartOpts);
+const equitySeries = equityChart.addLineSeries({ color: '#3987e5', lineWidth: 2 });
+
+const candleChart = LightweightCharts.createChart(document.getElementById('candle-chart'), chartOpts);
+const candleSeries = candleChart.addCandlestickSeries({
+  upColor: '#0ca30c', downColor: '#d03b3b', borderVisible: false,
+  wickUpColor: '#0ca30c', wickDownColor: '#d03b3b',
+});
+let priceLines = [];
+let selectedSym = null;
+
+new ResizeObserver(() => {
+  equityChart.applyOptions({ width: document.getElementById('equity-chart').clientWidth });
+  candleChart.applyOptions({ width: document.getElementById('candle-chart').clientWidth });
+}).observe(document.body);
+
+async function loadMumlar(sym) {
+  selectedSym = sym;
+  document.getElementById('mum-sym-label').textContent = '— ' + sym;
+  document.querySelectorAll('.sym-btn').forEach(b => b.classList.toggle('active', b.dataset.sym === sym));
+  document.querySelectorAll('#acik-poz-body tr').forEach(r => r.classList.toggle('selected', r.dataset.sym === sym));
+  priceLines.forEach(pl => candleSeries.removePriceLine(pl));
+  priceLines = [];
+  try {
+    const res = await fetch(`/api/mumlar?sym=${sym}&interval=15m&limit=200`);
+    const data = await res.json();
+    if (Array.isArray(data)) candleSeries.setData(data);
+  } catch (e) {}
+}
+
+function drawPriceLines(pos) {
+  if (!pos) return;
+  const lines = [
+    { price: pos.giris, color: '#c3c2b7', title: 'giriş' },
+    { price: pos.stop, color: '#d03b3b', title: 'stop' },
+    { price: pos.tp1, color: '#0ca30c', title: 'tp1' },
+    { price: pos.tp2, color: '#0ca30c', title: 'tp2' },
+    { price: pos.likidasyon, color: '#fab219', title: 'liq' },
+  ];
+  lines.forEach(l => {
+    priceLines.push(candleSeries.createPriceLine({
+      price: l.price, color: l.color, lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, title: l.title,
+    }));
+  });
+}
+
+function symBtn(sym) {
+  const b = document.createElement('button');
+  b.className = 'sym-btn'; b.textContent = sym; b.dataset.sym = sym;
+  b.onclick = () => loadMumlar(sym);
+  return b;
+}
+
+async function tick() {
+  let d;
+  try {
+    d = await (await fetch('/api/durum')).json();
+  } catch (e) { return; }
+
+  if (!d.basladi) {
+    document.getElementById('sub-line').textContent = 'Bot henüz başlamadı (KriptoTestBot görevi ilk çalıştığında başlar).';
+    return;
+  }
+
+  const badge = document.getElementById('durum-badge');
+  badge.textContent = d.durum;
+  badge.className = 'badge ' + (d.durum === 'AKTIF' ? 'aktif' : 'durdu');
+  const gunGecti = ((Date.now() - parseTs(d.baslangic_ts) * 1000) / 86400000).toFixed(1);
+  document.getElementById('sub-line').textContent =
+    `Başlangıç: ${d.baslangic_ts} · Sanal bütçe: $${d.baslangic_bakiye} · ${gunGecti}. gün`;
+
+  document.getElementById('c-equity').textContent = '$' + fmt2(d.equity);
+  document.getElementById('c-serbest').textContent = '$' + fmt2(d.serbest_bakiye);
+  document.getElementById('c-marjin').textContent = '$' + fmt2(d.kullanilan_marjin);
+  const ap = d.acik_pnl_toplam;
+  const apEl = document.getElementById('c-acikpnl');
+  apEl.textContent = pnlSign(ap) + fmt2(ap) + '$'; apEl.className = 'value ' + pnlClass(ap);
+  document.getElementById('c-islem').textContent = d.karne.toplam_islem;
+  document.getElementById('c-winrate').textContent = d.karne.win_rate !== null ? d.karne.win_rate + '%' : '-';
+  document.getElementById('c-ortr').textContent = d.karne.ort_r !== null ? d.karne.ort_r : '-';
+  const tp = d.karne.toplam_pnl;
+  const tpEl = document.getElementById('c-toplampnl');
+  tpEl.textContent = pnlSign(tp) + fmt2(tp) + '$'; tpEl.className = 'value ' + pnlClass(tp);
+
+  // equity curve
+  const eqData = d.equity_serisi.map(e => ({ time: parseTs(e.ts), value: e.equity }));
+  if (eqData.length) equitySeries.setData(eqData);
+
+  // acik pozisyonlar tablosu + sembol secici
+  const body = document.getElementById('acik-poz-body');
+  const picker = document.getElementById('sym-picker');
+  body.innerHTML = ''; picker.innerHTML = '';
+  document.getElementById('acik-poz-empty').style.display = d.acik_pozisyonlar.length ? 'none' : 'block';
+  document.getElementById('acik-poz-table').style.display = d.acik_pozisyonlar.length ? 'table' : 'none';
+  d.acik_pozisyonlar.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.className = 'clickable'; tr.dataset.sym = p.sym;
+    tr.onclick = () => loadMumlar(p.sym);
+    tr.innerHTML = `<td>${p.sym}</td><td><span class="badge ${p.yon === 'LONG' ? 'long' : 'short'}">${p.yon}</span></td>
+      <td>${p.kaldirac}x</td><td>$${fmt2(p.marjin)}</td><td>$${fmt2(p.notional)}</td>
+      <td>${p.giris}</td><td>${p.anlik_fiyat}</td>
+      <td class="${pnlClass(p.acik_pnl)}">${pnlSign(p.acik_pnl)}${fmt2(p.acik_pnl)}$</td>
+      <td>${p.stop}</td><td>${p.tp1}</td><td>${p.tp2}</td><td>${p.likidasyon}</td><td>${p.skor_giriste}</td>`;
+    body.appendChild(tr);
+    picker.appendChild(symBtn(p.sym));
+  });
+  if (!selectedSym && d.acik_pozisyonlar.length) {
+    await loadMumlar(d.acik_pozisyonlar[0].sym);
+  }
+  if (selectedSym) {
+    document.querySelectorAll('#acik-poz-body tr').forEach(r => r.classList.toggle('selected', r.dataset.sym === selectedSym));
+    priceLines.forEach(pl => candleSeries.removePriceLine(pl)); priceLines = [];
+    const pos = d.acik_pozisyonlar.find(p => p.sym === selectedSym);
+    if (pos) drawPriceLines(pos);
+  }
+  if (!picker.children.length && selectedSym) picker.appendChild(symBtn(selectedSym));
+
+  // kapanan islemler
+  const ibody = document.getElementById('islem-body');
+  ibody.innerHTML = '';
+  const closed = d.son_islemler.slice().reverse();
+  document.getElementById('islem-empty').style.display = closed.length ? 'none' : 'block';
+  document.getElementById('islem-table').style.display = closed.length ? 'table' : 'none';
+  closed.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.ts}</td><td>${t.sym}</td><td><span class="badge ${t.yon === 'LONG' ? 'long' : 'short'}">${t.yon}</span></td>
+      <td>${t.sebep}</td><td>${t.kaldirac}x</td>
+      <td class="${pnlClass(t.sonuc_usdt)}">${pnlSign(t.sonuc_usdt)}${fmt2(t.sonuc_usdt)}$</td>
+      <td>${t.r ?? '-'}</td><td>${t.tutma_saat ?? '-'}</td>`;
+    ibody.appendChild(tr);
+  });
+}
+
+tick();
+setInterval(tick, 30000);
+</script>
+</body>
+</html>

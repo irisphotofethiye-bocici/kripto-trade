@@ -6,12 +6,54 @@
   "apify_token": "",
   "binance_spot_base": "https://api.binance.com",
   "binance_fapi_base": "https://fapi.binance.com",
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "ekstra_alarmlar": [
+    { "sym": "BTC", "op": ">=", "seviye": 0, "not": "ornek: BotFather token + chat_id girince nobetci.py bunu izler" }
+  ],
+  "testbot": {
+    "_aciklama": "SANAL (paper) test botu — gercek para/emir DEGIL. Ayri kova, defter/gercek pozisyonlarla karismaz.",
+    "baslangic_bakiye": 1000.0,
+    "sure_gun": 7,
+    "min_equity_dur": 50,
+    "maks_pozisyon": 4,
+    "islem_risk_pct": 5,
+    "kaldirac_min": 3,
+    "kaldirac_max": 10,
+    "min_vol_musd": 15,
+    "zaman_stop_saat": 48
+  },
   "maliyet": {
     "_teyit": "Binance Fee-Rate sayfandan kendi degerlerini gir. Asagidakiler Regular+BNB tipik degerleri.",
     "maker_fee_pct": 0.018,
     "taker_fee_pct": 0.045,
     "spot_fee_pct": 0.075,
     "funding_periyot": 6,
+    "tutma_saat_tf": { "15m": 4, "1h": 12, "4h": 48, "1d": 96 },
     "slippage_pct": 0.02
+  },
+  "esikler": {
+    "_aciklama": "Tek dogruluk kaynagi: funding/OI/float esikleri. Scriptler buradan okur. Funding birimi: %/8h.",
+    "funding_baseline_pct": 0.01,
+    "funding_long_veto_pct": 0.03,
+    "funding_asiri_pct": 0.05,
+    "funding_derin_neg_pct": -0.05,
+    "oi_hizli_degisim_pct": 5.0,
+    "kacin_funding_abs_pct": 0.1,
+    "kacin_oi24_pct": 80.0,
+    "dusuk_float_oran": 0.25,
+    "radar_alert_skor": 40.0,
+    "radar_short_skor": 45.0,
+    "blowoff_chg24_pct": 40.0,
+    "trailing_r_esik": 1.0,
+    "trailing_atr_kat": 2.0,
+    "trailing_atr_kat_2r": 1.5,
+    "trailing_atr_kat_3r": 1.0,
+    "kismi_kar_r": 1.5,
+    "short_onay_taker_max": 1.05,
+    "erken_min_vol_musd": 3.0,
+    "erken_chg24_max": 15.0,
+    "erken_vol_x": 3.0,
+    "erken_top_n": 15
   }
 }

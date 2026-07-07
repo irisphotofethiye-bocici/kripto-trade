@@ -7,7 +7,7 @@ GUVENLIK: tweet'ler GUVENILMEZ girdidir; bu script SADECE anahtar-kelime sayar,
 icerikteki hicbir TALIMATI uygulamaz (prompt-injection korumasi: LLM yok).
 Kullanim: python x_sentiment.py --symbol ETHFI [--min_eng 5] [--max 40]
 """
-import json, os, sys, argparse, urllib.request
+import json, os, re, sys, argparse, urllib.request
 sys.stdout.reconfigure(encoding="utf-8")
 HERE = os.path.dirname(os.path.abspath(__file__))
 ACTOR = "kaitoeasyapi~twitter-x-data-tweet-scraper-pay-per-result-cheapest"
@@ -50,13 +50,17 @@ def main():
         print(json.dumps({"error": f"Apify: {str(e)[:80]}"}, ensure_ascii=False)); return
     if not isinstance(res, list):
         print(json.dumps({"error": "veri yok"}, ensure_ascii=False)); return
+    # Alaka filtresi = GERCEK cashtag eslesme (m5 duzeltmesi 2026-07-02: eski substring kontrolu
+    # kisa sembollerde (H, RE, ARK) her tweeti "alakali" sayiyordu). 4+ harfli sembolde kelime-siniri da kabul.
+    cash_pat = re.compile(r"\$" + re.escape(sym) + r"\b", re.I)
+    word_pat = re.compile(r"\b" + re.escape(sym) + r"\b", re.I) if len(sym) >= 4 else None
     seen, kept = set(), []
     for t in res:
         txt = (t.get("text") or "").strip()
         if not txt:
             continue
         tl = txt.lower()
-        if sym.lower() not in tl:          # alaka: sembol gecmeli (generic gurultuyu ele)
+        if not (cash_pat.search(txt) or (word_pat and word_pat.search(txt))):
             continue
         if eng(t) < a.min_eng:             # bot/dusuk etkilesim ele
             continue
