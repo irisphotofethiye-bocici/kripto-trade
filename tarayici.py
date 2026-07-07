@@ -25,6 +25,7 @@ def main():
     rejim = evren.btc_rejim()
     kacin_fund = evren.esik("kacin_funding_abs_pct", 0.1)
     kacin_oi = evren.esik("kacin_oi24_pct", 80.0)
+    blowoff_esik = evren.esik("blowoff_chg24_pct", 40.0)
 
     # 1) Binance 24s likit havuz (stable/gold/kaldirac-token elenir; evren tek kaynak)
     bpool = evren.binance_pool("spot", a.min_vol)
@@ -71,9 +72,14 @@ def main():
                 continue  # Binance perp yok -> deterministik tarama disi
             d7 = cg_taraf.get(sym)
             fund, oi = ew.get("funding_pct"), ew.get("oi_24s_degisim_pct")
+            chg24 = bchg.get(sym, 0.0) or 0.0
             rec = (sym, uz, d7, fund, oi)
-            if (fund is not None and abs(fund) > kacin_fund) or (oi is not None and oi > kacin_oi):
-                avoid.append(rec + (ew["belirtiler"][0],))   # blow-off / asiri funding-OI
+            # BLOW-OFF filtresi (2026-07-07 — testbot'un chg24 vetosunun tarayiciya tasinmasi;
+            # daha once burada YOKTU, zaten %40+ uzamis bir coin Tier1 LONG'a girebiliyordu -> TLM/MANTA riski).
+            if abs(chg24) >= blowoff_esik:
+                avoid.append(rec + (f"BLOW-OFF (24s {chg24:+.0f}%, zaten asiri uzamis - MANTA/TLM deseni)",))
+            elif (fund is not None and abs(fund) > kacin_fund) or (oi is not None and oi > kacin_oi):
+                avoid.append(rec + (ew["belirtiler"][0],))   # asiri funding-OI
             elif uz in ("GUCLU_YUKARI", "GUCLU_ASAGI"):
                 t1.append(rec)
             elif uz in ("YUKARI_EGILIM", "ASAGI_EGILIM"):

@@ -10,10 +10,11 @@ CoinGecko key yoksa veri karşılaştırması ATLANDI sayılır (ERİŞİM'den a
 Kullanım: python faz4_check.py
 """
 import json, os, urllib.request, datetime
+import evren
 
-def _yas_dakika(ts_str):
+def _yas_dakika(ts_str, fmt="%Y-%m-%d %H:%M"):
     try:
-        t = datetime.datetime.strptime(ts_str, "%Y-%m-%d %H:%M")
+        t = datetime.datetime.strptime(ts_str, fmt)
         return (datetime.datetime.now() - t).total_seconds() / 60
     except Exception:
         return None
@@ -70,13 +71,16 @@ def main():
     for sym, b, c, div in rows:
         ds = ("%.3f%%" % div) if div is not None else "-"
         print(f"  {sym:6} Binance={b} CoinGecko={c} fark={ds}")
+    fiyat_fark_esik = evren.esik("saglik_fiyat_fark_pct", 0.5)
     if key and cg_ok:
-        print(f"Max fark: {max_div:.3f}%  ->  VERI_DOGRULUGU: {'PASS' if max_div < 0.5 else 'FAIL'} (esik <0.5%)")
+        print(f"Max fark: {max_div:.3f}%  ->  VERI_DOGRULUGU: {'PASS' if max_div < fiyat_fark_esik else 'FAIL'} (esik <{fiyat_fark_esik}%)")
     else:
         print("VERI_DOGRULUGU: ATLANDI (CoinGecko yok — erisimden ayri degerlendirilir, m11)")
     print(f"ERISIM: {'PASS' if erisim_pass else 'FAIL'}")
 
     # --- Zamanlayici bayatlik (M8/m11): gorev calisiyor mu? ---
+    radar_bayat_dk = evren.esik("saglik_radar_bayat_dk", 25.0)
+    piyasa_bayat_saat = evren.esik("saglik_piyasa_bayat_saat", 14.0)
     print("\n-- Zamanlayici bayatlik --")
     try:
         ra = json.load(open(os.path.join(HERE, "radar_active.json"), encoding="utf-8"))
@@ -84,8 +88,11 @@ def main():
         if yas is None:
             print("radar_active: guncelleme damgasi okunamadi -> UYARI")
         else:
-            durum = "OK" if yas <= 25 else "BAYAT -> KriptoRadar gorevi durmus/PC uyumus olabilir"
+            durum = "OK" if yas <= radar_bayat_dk else "BAYAT -> KriptoRadar gorevi durmus/PC uyumus olabilir"
             print(f"radar_active: {yas:.0f} dk once ({durum}; beklenen ~15dk ritim)")
+        ek = ra.get("erken_kusak")
+        if ek is not None:
+            print(f"radar_active.erken_kusak: {len(ek)} aday (2026-07-06 eklendi — hacim-uyanisi, KAPI DEGIL)")
     except Exception:
         print("radar_active.json okunamadi -> UYARI")
     try:
@@ -94,10 +101,32 @@ def main():
         if yas is None:
             print("piyasa_yapisi_log: bos/okunamadi -> UYARI")
         else:
-            durum = "OK" if yas <= 14 * 60 else "BAYAT -> KriptoPiyasa gorevi kacirmis (11:00/23:00 ritim)"
+            durum = "OK" if yas <= piyasa_bayat_saat * 60 else "BAYAT -> KriptoPiyasa gorevi kacirmis (11:00/23:00 ritim)"
             print(f"piyasa_yapisi_log: {yas/60:.1f} saat once ({durum})")
     except Exception:
         print("piyasa_yapisi_log.jsonl okunamadi -> UYARI")
+    # Nobetci: _save_state her cycle KOSULSUZ cagriliyor (alarm olsun/olmasin) -> dosya mtime guvenilir gostergedir.
+    try:
+        mt = os.path.getmtime(os.path.join(HERE, "nobetci_state.json"))
+        yas = (datetime.datetime.now() - datetime.datetime.fromtimestamp(mt)).total_seconds() / 60
+        durum = "OK" if yas <= radar_bayat_dk else "BAYAT -> KriptoNobetci gorevi durmus olabilir"
+        print(f"nobetci_state (mtime): {yas:.0f} dk once ({durum}; beklenen ~5dk ritim)")
+    except Exception:
+        print("nobetci_state.json okunamadi -> UYARI (henuz hic calismamis olabilir)")
+    # TestBot: son_cycle_ts sadece durum AKTIF iken anlamli (HALT/SURE_DOLDU'da dogal olarak durur).
+    try:
+        tb = json.load(open(os.path.join(HERE, "testbot_state.json"), encoding="utf-8"))
+        if tb.get("durum") == "AKTIF":
+            yas = _yas_dakika(tb.get("son_cycle_ts", ""), fmt="%Y-%m-%d %H:%M:%S")
+            if yas is None:
+                print("testbot_state: son_cycle_ts okunamadi -> UYARI")
+            else:
+                durum = "OK" if yas <= radar_bayat_dk else "BAYAT -> KriptoTestBot gorevi durmus olabilir"
+                print(f"testbot_state: {yas:.0f} dk once, durum={tb['durum']} ({durum}; beklenen ~5dk ritim)")
+        else:
+            print(f"testbot_state: durum={tb.get('durum')} (AKTIF degil -> bayatlik kontrolu atlandi, bu normal)")
+    except Exception:
+        print("testbot_state.json okunamadi -> UYARI (henuz hic baslamamis olabilir)")
 
 if __name__ == "__main__":
     main()

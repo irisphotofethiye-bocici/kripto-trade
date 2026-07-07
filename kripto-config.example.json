@@ -54,6 +54,15 @@
     "erken_min_vol_musd": 3.0,
     "erken_chg24_max": 15.0,
     "erken_vol_x": 3.0,
-    "erken_top_n": 15
+    "erken_top_n": 15,
+    "kucukcap_mcap_alt_musd": 10.0,
+    "kucukcap_mcap_ust_musd": 250.0,
+    "goplus_sell_tax_uyari_pct": 10.0,
+    "goplus_sell_tax_red_pct": 20.0,
+    "goplus_buy_tax_uyari_pct": 10.0,
+    "goplus_holder_uyari_pct": 30.0,
+    "saglik_fiyat_fark_pct": 0.5,
+    "saglik_radar_bayat_dk": 25.0,
+    "saglik_piyasa_bayat_saat": 14.0
   }
 }
