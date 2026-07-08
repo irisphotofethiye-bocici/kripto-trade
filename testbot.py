@@ -27,7 +27,7 @@ Kullanım:
   python testbot.py --dur / --devam
   python testbot.py --zorla SOL:long (debug: sahte giriş, doğrulama için)
 """
-import json, os, sys, argparse, datetime, statistics, time, urllib.request
+import json, os, sys, argparse, datetime, statistics, time, random
 
 import evren
 import radar
@@ -110,8 +110,7 @@ def yeni_state():
 # ---------- fiyat/kline yardımcıları ----------
 
 def _get(u):
-    req = urllib.request.Request(u, headers={"User-Agent": "testbot/1.0"})
-    return json.load(urllib.request.urlopen(req, timeout=20))
+    return evren.get(u, headers={"User-Agent": "testbot/1.0"}, timeout=20)
 
 
 def fiyat_fapi(sym):
@@ -359,6 +358,7 @@ def funding_uygula(st, pos):
         isaret = 1 if pos["yon"] == "LONG" else -1
         maliyet = notional * e["rate"] * isaret  # LONG + pozitif funding = oder (equity azalir)
         st["equity"] -= maliyet
+        st["kumulatif_funding"] = st.get("kumulatif_funding", 0.0) - maliyet
     pos["son_funding_kontrol_ts"] = now_iso()
 
 
@@ -536,6 +536,7 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False):
     liq = likidasyon_fiyati(giris_ef, yon, kaldirac)
     taker = float(cst.get("taker_fee_pct", 0.045)) / 100.0
     st["equity"] -= notional * taker  # giris ucreti
+    st["kumulatif_giris_ucret"] = st.get("kumulatif_giris_ucret", 0.0) + notional * taker
     tp1 = tp1_efektif_hesapla(giris_ef, stop, tp1_yapisal, yon)
     pos = {
         "id": st["sonraki_id"], "sym": sym, "yon": yon, "giris": round(giris_ef, 6),
@@ -578,6 +579,7 @@ def yeni_giris_ara(st, rejim):
                 aday_rows.append(r)
         except Exception:
             continue
+        time.sleep(random.uniform(0.05, 0.15))  # rate-limit guvenlik payi (2026-07-08)
     aday_rows.sort(key=lambda x: -x["score"])
     aday_rows = aday_rows[:10]  # Pillar D sadece kisa listeye (API bütçesi)
 
@@ -745,6 +747,14 @@ def durum_yazdir():
               f"| Toplam PnL (kismi dahil): {sum(t['sonuc_usdt'] for t in islemler):+.2f}$")
         if kismi:
             print(f"TP1 kismi realize: {sum(t['sonuc_usdt'] for t in kismi):+.2f}$ ({len(kismi)} adet)")
+        # equity <-> islem-log mutabakati (2026-07-08, "equity + ama PnL -" karisikligi dersi):
+        # funding/giris-ucreti acik pozisyonlarda equity'yi SESSIZCE degistirir, jsonl'e hic yazilmaz.
+        kum_funding = st.get("kumulatif_funding", 0.0)
+        kum_ucret = st.get("kumulatif_giris_ucret", 0.0)
+        print(f"Funding (acik/kapanan poz., islem-log'unda YOK): {kum_funding:+.2f}$ | Giris ucretleri: {-kum_ucret:+.2f}$")
+        print(f"Equity degisimi (gercek, hepsi dahil): {st['equity']-st['baslangic_bakiye']:+.2f}$"
+              + (" (sayaclar 0'dan basladi, gecmis funding/ucret bu farka dahil DEGIL)"
+                 if kum_funding == 0.0 and kum_ucret == 0.0 else ""))
         if rler:
             print(f"Ortalama R: {statistics.mean(rler):+.2f} | Toplam R: {sum(rler):+.2f}")
         for t in islemler[-10:]:

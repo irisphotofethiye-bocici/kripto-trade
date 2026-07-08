@@ -7,16 +7,19 @@ GET /api/durum   -> {state, acik_pozisyonlar(guncel fiyat+PnL), son_islemler, eq
 GET /api/mumlar?sym=SOL&interval=15m&limit=200 -> Binance public klines proxy (CORS icin)
 Bağımlılık yok (stdlib http.server). Kullanım: python panel_sunucu.py [--port 8787]
 """
-import json, os, sys, argparse, urllib.request, urllib.parse
+import json, os, sys, time, argparse, urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import testbot
+import evren
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FAPI = "https://fapi.binance.com"
 
 if sys.stdout is None:
     sys.stdout = open(os.devnull, "w", encoding="utf-8")
+
+_mumlar_cache = {}  # (sym,interval,limit) -> (ts, data) — hizli ardisik grafik tiklamalarini yutar
 
 
 def _durum_json():
@@ -57,17 +60,27 @@ def _durum_json():
             "toplam_pnl": round(sum(t["sonuc_usdt"] for t in islemler), 2),
             "tp1_kismi_pnl": round(sum(t["sonuc_usdt"] for t in islemler if t.get("kismi")), 2),
             "ort_r": round(sum(rler) / len(rler), 2) if rler else None,
+            # funding/giris-ucreti acik pozisyonlarda equity'yi degistirir ama islem-log'a hic yazilmaz
+            # (2026-07-08, "equity+ ama PnL-" karisikligi dersi) -> ayri sayaclarla goruniyor.
+            "kumulatif_funding": round(st.get("kumulatif_funding", 0.0), 2),
+            "kumulatif_giris_ucret": round(st.get("kumulatif_giris_ucret", 0.0), 2),
         },
     }
 
 
-def _mumlar(sym, interval, limit):
+def _mumlar(sym, interval, limit, ttl=30.0):
+    key = (sym.upper(), interval, limit)
+    now = time.time()
+    hit = _mumlar_cache.get(key)
+    if hit and now - hit[0] < ttl:
+        return hit[1]
     try:
         url = f"{FAPI}/fapi/v1/klines?symbol={sym.upper()}USDT&interval={interval}&limit={limit}"
-        req = urllib.request.Request(url, headers={"User-Agent": "panel/1.0"})
-        d = json.load(urllib.request.urlopen(req, timeout=15))
-        return [{"time": int(k[0]) // 1000, "open": float(k[1]), "high": float(k[2]),
-                 "low": float(k[3]), "close": float(k[4])} for k in d]
+        d = evren.get(url, headers={"User-Agent": "panel/1.0"}, timeout=15)
+        out = [{"time": int(k[0]) // 1000, "open": float(k[1]), "high": float(k[2]),
+                "low": float(k[3]), "close": float(k[4])} for k in d]
+        _mumlar_cache[key] = (now, out)
+        return out
     except Exception as e:
         return {"error": str(e)}
 

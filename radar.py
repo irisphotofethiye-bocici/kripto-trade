@@ -11,7 +11,7 @@ RADAR - Faz 3/6: hareketten ONCE veya tam baslarken yakalama (öncü imza tarama
 Anahtarsiz Binance. Kullanim: python radar.py [--n 35] [--min_vol 8] [--chg_max 15]
 UYARI: bu ONCU olasilik tahminidir, garanti DEGIL; yon yukari da asagi da olabilir.
 """
-import json, os, sys, urllib.request, statistics, argparse, datetime
+import json, os, sys, random, time, statistics, argparse, datetime
 import olcucu
 import evren
 
@@ -26,8 +26,7 @@ FAPI = "https://fapi.binance.com"
 BAD = ("UPUSDT", "DOWNUSDT", "BULLUSDT", "BEARUSDT")
 
 def get(u):
-    req = urllib.request.Request(u, headers={"User-Agent": "radar/1.0"})
-    return json.load(urllib.request.urlopen(req, timeout=20))
+    return evren.get(u, headers={"User-Agent": "radar/1.0"}, timeout=20)
 
 def klines(sym, n=50):
     d = get(f"{FAPI}/fapi/v1/klines?symbol={sym}USDT&interval=1h&limit={n}")
@@ -135,28 +134,22 @@ def analyze(sym, btc_chg3=0.0):
             "pos": round(pos, 2), "last1": round(last1, 1), "last3": round(last3, 1),
             "dip_yakit": dip_yakit, "ayrisma": ayrisma, "rel3": rel3}
 
-def erken_kusak_tara(cryptos, haric=None, btc_chg3=0.0):
+def erken_kusak_tara(cryptos, tickers, haric=None, btc_chg3=0.0):
     """ERKEN KUSAK (2026-07-06): pump'i ERKEN yakalama evreni. Haftanin buyuk kazananlari (TLM +282%,
     VANRY +154%, HMSTR +107%) ana havuza HIC girmedi: (1) hacim-sirali ilk-N pump oncesi dusuk-hacimli
     coini gormuyor, (2) chg_max pump baslayinca eliyor - kor nokta yapisal.
     Bu kusak: bugunku hacmi onceki 7 gunun MEDYANINA gore >= erken_vol_x KAT uyanmis AMA 24s degisimi
     hala kucuk (<= erken_chg24_max) coinler. 'Hacim once, fiyat sonra' hipotezi (ALLO 06-28 kaniti:
     erken skor 40.5 HAZIRLANIYOR @ $0.304 -> +42%). KAPI DEGIL - gorunurluk + ERKEN-etiketli arsiv
-    (forward-return olcumu birikince arsiv_analiz ile edge dogrulanir; alarm entegrasyonu ONDAN SONRA)."""
+    (forward-return olcumu birikince arsiv_analiz ile edge dogrulanir; alarm entegrasyonu ONDAN SONRA).
+    tickers: main()'de evren.raw_tickers() ile ZATEN cekilmis ham liste (2026-07-08: eskiden burada
+    ayrica/tekrar cekiliyordu -> ayni veri iki kez indiriliyordu, rate-limit israfi)."""
     min_vol = evren.esik("erken_min_vol_musd", 3.0) * 1e6
     chg_max = evren.esik("erken_chg24_max", 15.0)
     vol_x_esik = evren.esik("erken_vol_x", 3.0)
     top_n = int(evren.esik("erken_top_n", 15))
     haric = haric or set()
-    # tum-semboller ticker'i buyuk payload -> standart 20sn timeout yetmeyebiliyor; genis timeout + 1 tekrar
-    tks = None
-    for _ in range(2):
-        try:
-            req = urllib.request.Request(f"{FAPI}/fapi/v1/ticker/24hr", headers={"User-Agent": "radar/1.0"})
-            tks = json.load(urllib.request.urlopen(req, timeout=60))
-            break
-        except Exception:
-            continue
+    tks = tickers
     if not tks:
         return []
     adaylar = []
@@ -188,6 +181,7 @@ def erken_kusak_tara(cryptos, haric=None, btc_chg3=0.0):
                             "vol_musd": round(qv / 1e6, 1)})
         except Exception:
             continue
+        time.sleep(random.uniform(0.05, 0.15))  # rate-limit guvenlik payi (2026-07-08, sabit degil rastgele -> deterministik cakisma kirilir)
     out.sort(key=lambda r: -r["vol_x_gun"])
     out = out[:top_n]
     dusuk_float_esik = evren.esik("dusuk_float_oran", 0.25)
@@ -218,7 +212,9 @@ def main():
     # Kripto evreni + havuz - ORTAK modul evren.py (m7 drift duzeltmesi: stable/gold da elenir)
     HERE = os.path.dirname(os.path.abspath(__file__))
     cryptos = evren.cg_universe()
-    pool = [s for s, _, _ in evren.binance_pool("fapi", a.min_vol, a.chg_max, cryptos)[:a.n]]
+    # tum-sembol ticker BIR KEZ cekilir (2026-07-08: eskiden erken_kusak_tara ayni veriyi tekrar cekiyordu)
+    tickers = evren.raw_tickers("fapi")
+    pool = [s for s, _, _ in evren.binance_pool("fapi", a.min_vol, a.chg_max, cryptos, tickers=tickers)[:a.n]]
 
     # AYRISMA icin BTC referansi - bir kez hesapla, tum coinlerde kullan
     btc_chg3, btc_chg24 = btc_ref()
@@ -239,6 +235,7 @@ def main():
                 rows.append(r)
         except Exception:
             continue
+        time.sleep(random.uniform(0.05, 0.15))  # rate-limit guvenlik payi (2026-07-08)
     rows.sort(key=lambda r: -r["score"])
 
     # REJIM (hipotez#1: yon = rejim; AYI -> yuksek skor = SHORT adayi) + Pillar D (kisa listeye)
@@ -251,7 +248,7 @@ def main():
             r.update({"top_ls": None, "glob_ls": None, "taker": None, "smart": None})
 
     # ERKEN KUSAK: hacim-uyanisi taramasi (ana havuzun kor noktasi; TLM/VANRY/HMSTR dersi 2026-07-06)
-    erken_rows = erken_kusak_tara(cryptos, haric=set(pool), btc_chg3=btc_chg3)
+    erken_rows = erken_kusak_tara(cryptos, tickers, haric=set(pool), btc_chg3=btc_chg3)
 
     # --- KALICI ARSIV (append-only): her tarama turunda TUM adaylar + sekil etiketleri + timestamp.
     # context'e yuklenmez; sadece diske. Hangi seklin gercekten kazandigini sonradan analiz icin veri seti.

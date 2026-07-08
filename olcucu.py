@@ -12,15 +12,14 @@ Kullanım:
   python olcucu.py --symbol BTC  --side short --tf 4h --limit 300
 Çıktı: JSON (skill bunu okur).
 """
-import sys, os, json, argparse, urllib.request, statistics
+import sys, os, json, argparse, statistics
+import evren
 
 FAPI = "https://fapi.binance.com"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 def get_json(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "kripto-olcucu/1.0"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        return json.load(r)
+    return evren.get(url, headers={"User-Agent": "kripto-olcucu/1.0"}, timeout=15)
 
 def _load_costs():
     """Maliyet parametreleri: kripto-config.json -> 'maliyet'. Eksikse guvenli varsayilan."""
@@ -83,9 +82,7 @@ def _spread_pct(symbol, spot=False):
 
 def fetch_klines(symbol, interval, limit):
     url = f"{FAPI}/fapi/v1/klines?symbol={symbol}USDT&interval={interval}&limit={limit}"
-    req = urllib.request.Request(url, headers={"User-Agent": "kripto-olcucu/1.0"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        data = json.load(r)
+    data = get_json(url)
     # kline: [openTime, open, high, low, close, volume, ...]
     return [{"o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in data]
 
@@ -223,16 +220,12 @@ def measure(symbol, side, tf, limit, spot=False, entry=None):
 
 def fetch_funding(symbol):
     url = f"{FAPI}/fapi/v1/premiumIndex?symbol={symbol}USDT"
-    req = urllib.request.Request(url, headers={"User-Agent": "kripto-olcucu/1.0"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        d = json.load(r)
+    d = get_json(url)
     return float(d.get("lastFundingRate", 0.0)), float(d.get("markPrice", 0.0))
 
 def fetch_oi_change(symbol):
     url = f"{FAPI}/futures/data/openInterestHist?symbol={symbol}USDT&period=1h&limit=24"
-    req = urllib.request.Request(url, headers={"User-Agent": "kripto-olcucu/1.0"})
-    with urllib.request.urlopen(req, timeout=15) as r:
-        d = json.load(r)
+    d = get_json(url)
     if len(d) < 2:
         return None
     first, last = float(d[0]["sumOpenInterest"]), float(d[-1]["sumOpenInterest"])

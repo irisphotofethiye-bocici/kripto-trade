@@ -15,7 +15,7 @@ Deterministik, 0 token, anahtarsiz (CoinGecko demo key config'ten okunur).
 UYARI: REJIM/yapi gostergesi; tek basina al/sat SINYALI degil. En guclu boga/donus doneminde.
 Kullanim: python piyasa_yapisi.py [--n 45] [--min_vol 15] [--tf 7g]
 """
-import json, os, sys, argparse, datetime, urllib.request
+import json, os, sys, argparse, datetime
 import evren  # evren/eleme TEK kaynak (m7 drift duzeltmesi 2026-07-02); stable/gold listeleri orada
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -28,8 +28,7 @@ if sys.stderr is None:
 
 
 def get(u, headers=None):
-    req = urllib.request.Request(u, headers=headers or {"User-Agent": "piyasa/1.0"})
-    return json.load(urllib.request.urlopen(req, timeout=25))
+    return evren.get(u, headers=headers or {"User-Agent": "piyasa/1.0"}, timeout=25)
 
 
 def cg_key():

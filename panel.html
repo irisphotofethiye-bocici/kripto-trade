@@ -84,7 +84,7 @@
     <div class="card"><div class="label">Toplam İşlem</div><div class="value" id="c-islem">-</div></div>
     <div class="card"><div class="label">Win-rate</div><div class="value" id="c-winrate">-</div></div>
     <div class="card"><div class="label">Ortalama R</div><div class="value" id="c-ortr">-</div></div>
-    <div class="card"><div class="label">Toplam PnL</div><div class="value" id="c-toplampnl">-</div></div>
+    <div class="card"><div class="label">Toplam PnL</div><div class="value" id="c-toplampnl">-</div><div class="sub" id="c-toplampnl-sub" style="margin:4px 0 0;font-size:11px;"></div></div>
   </div>
 
   <section>
@@ -224,6 +224,9 @@ async function tick() {
   const tp = d.karne.toplam_pnl;
   const tpEl = document.getElementById('c-toplampnl');
   tpEl.textContent = pnlSign(tp) + fmt2(tp) + '$'; tpEl.className = 'value ' + pnlClass(tp);
+  const kf = d.karne.kumulatif_funding, ku = d.karne.kumulatif_giris_ucret;
+  document.getElementById('c-toplampnl-sub').textContent =
+    `funding ${pnlSign(kf)}${fmt2(kf)}$ / ücret ${fmt2(-ku)}$ (equity'de var, bu PnL'de yok)`;
 
   // equity curve
   const eqData = d.equity_serisi.map(e => ({ time: parseTs(e.ts), value: e.equity }));
