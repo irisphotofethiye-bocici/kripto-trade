@@ -28,6 +28,7 @@ nobetci_alarm.log
 testbot_state.json
 testbot_islemler.jsonl
 testbot_equity.jsonl
+veto_log.jsonl
 
 # Likidasyon akisi runtime (lokal log)
 likidasyon_log.jsonl
