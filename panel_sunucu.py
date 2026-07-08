@@ -22,6 +22,20 @@ if sys.stdout is None:
 _mumlar_cache = {}  # (sym,interval,limit) -> (ts, data) — hizli ardisik grafik tiklamalarini yutar
 
 
+def _rejim_yon_karne(tam):
+    """Rejim x yon kirilimi (2026-07-08): AYI/NOTR/BOGA/BILINMIYOR her biri icin LONG/SHORT
+    islem/kazanan/PnL. 'hem-ayi-hem-boga' hedefine ne kadar yakiniz sorusunun olcum tablosu."""
+    out = {}
+    for rj in ("AYI", "NOTR", "BOGA", "BILINMIYOR"):
+        for yn in ("LONG", "SHORT"):
+            grp = [t for t in tam if t.get("rejim_giriste", "BILINMIYOR") == rj and t["yon"] == yn]
+            if grp:
+                kz = sum(1 for t in grp if t["sonuc_usdt"] > 0)
+                out[f"{rj}_{yn}"] = {"n": len(grp), "kazanan": kz,
+                                     "pnl": round(sum(t["sonuc_usdt"] for t in grp), 2)}
+    return out
+
+
 def _durum_json():
     st = testbot._load_state()
     if st is None:
@@ -64,6 +78,8 @@ def _durum_json():
             # (2026-07-08, "equity+ ama PnL-" karisikligi dersi) -> ayri sayaclarla goruniyor.
             "kumulatif_funding": round(st.get("kumulatif_funding", 0.0), 2),
             "kumulatif_giris_ucret": round(st.get("kumulatif_giris_ucret", 0.0), 2),
+            # rejim x yon kirilimi (2026-07-08, "hem-ayi-hem-boga" hedefi olcumu)
+            "rejim_yon": _rejim_yon_karne(tam),
         },
     }
 

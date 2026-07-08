@@ -17,6 +17,11 @@ CFG = os.path.join(HERE, "kripto-config.json")
 CG_TO_GOPLUS = {"ethereum": "1", "binance-smart-chain": "56", "polygon-pos": "137",
                 "arbitrum-one": "42161", "base": "8453", "avalanche": "43114",
                 "optimistic-ethereum": "10", "fantom": "250", "cronos": "25"}
+# CoinGecko platform adi -> GeckoTerminal ag slug'i (networks endpoint'inden dogrulandi 2026-07-08)
+CG_TO_GECKOTERMINAL = {"ethereum": "eth", "binance-smart-chain": "bsc", "polygon-pos": "polygon_pos",
+                       "arbitrum-one": "arbitrum", "base": "base", "avalanche": "avax",
+                       "optimistic-ethereum": "optimism", "fantom": "ftm", "cronos": "cro",
+                       "solana": "solana"}
 SEV = ["GECER", "UYARI", "RED"]
 
 def get(u, h=None):
@@ -85,6 +90,33 @@ def bekci_evm(addr, chain):
     return {"durum": durum, "buy_tax_pct": bt, "sell_tax_pct": st,
             "open_source": t.get("is_open_source"), "honeypot": t.get("is_honeypot"),
             "sebep": sebep or ["belirgin risk bayragi yok"]}
+
+
+def dex_likidite_gt(gt_network, addr):
+    """GeckoTerminal (anahtarsiz) — token'in en derin DEX havuzundaki kilitli likidite (reserve_in_usd).
+    En derin TEK havuz (toplam degil; cikis tipik tek havuzdan olur -> muhafazakar). Ag/parse hatasi
+    veya bos -> None (cagiran taraf UYARI'ya cevirir, ASLA cokmez). Rate-limit ~30/dk, on-demand tek cagri."""
+    try:
+        d = get(f"https://api.geckoterminal.com/api/v2/networks/{gt_network}/tokens/{addr}/pools?page=1",
+                {"User-Agent": "faz5/1.0"})
+    except Exception:
+        return None
+    if not isinstance(d, dict) or d.get("errors"):
+        return None
+    havuzlar = d.get("data") or []
+    if not havuzlar:
+        return None
+    en_derin, en_derin_ad = 0.0, None
+    for p in havuzlar:
+        a = p.get("attributes", {})
+        try:
+            r = float(a.get("reserve_in_usd") or 0.0)
+        except Exception:
+            continue
+        if r > en_derin:
+            en_derin, en_derin_ad = r, a.get("name")
+    return {"en_derin_havuz_usd": round(en_derin, 0), "havuz_sayisi": len(havuzlar),
+            "en_derin_havuz_ad": en_derin_ad, "zincir": gt_network}
 
 
 def cg_id_coz(sembol_veya_id, key):
@@ -169,10 +201,33 @@ def main():
             except Exception as e:
                 bekci = {"durum": "BILINMIYOR", "zincir": "solana", "sebep": [f"GoPlus solana hata: {e}"]}
 
+    # DEX likidite kapisi (2026-07-08 — exit-liquidity riski; GoPlus 'satabilir miyim'i olcer, 'ne kadar'i DEGIL).
+    # Ayri ucuncu kapi (mcap/bekci gibi paralel). Iki kademeli: <red RED, <uyari UYARI, else GECER.
+    red_esik = evren.esik("kucukcap_dex_liq_red_usd", 100000.0)
+    uyari_esik = evren.esik("kucukcap_dex_liq_uyari_usd", 250000.0)
+    gt_zincir = next((CG_TO_GECKOTERMINAL[p] for p in plats if p in CG_TO_GECKOTERMINAL), None)
+    if gt_zincir is None:
+        dex = {"durum": "UYARI", "sebep": ["kontrat adresi yok / GT-desteklenmeyen zincir - DEX likidite olculemedi"]}
+    else:
+        addr = next(v for p, v in plats.items() if CG_TO_GECKOTERMINAL.get(p) == gt_zincir)
+        lik = dex_likidite_gt(gt_zincir, addr)
+        if lik is None:
+            dex = {"durum": "UYARI", "sebep": ["Likidite dogrulanamadi (GeckoTerminal yanit vermedi/bos)"], "zincir": gt_zincir}
+        else:
+            d_usd = lik["en_derin_havuz_usd"]
+            if d_usd < red_esik:
+                durum = "RED"; sebep = f"Yetersiz DEX likidite (en derin havuz ${d_usd/1e3:.0f}k < ${red_esik/1e3:.0f}k)"
+            elif d_usd < uyari_esik:
+                durum = "UYARI"; sebep = f"Sig havuz (${d_usd/1e3:.0f}k) - pozisyon kucult, slippage riski"
+            else:
+                durum = "GECER"; sebep = f"Yeterli DEX likidite (en derin havuz ${d_usd/1e3:.0f}k)"
+            dex = {"durum": durum, "sebep": [sebep], **lik}
+
     out = {"id": cid, "girilen": a.id, "price_usd": price, "market_cap_usd": mcap, "vol24_usd": vol,
-           "mcap_kapisi": mcap_kapi, "bekci": bekci, "rejim": rejim.get("rejim"), "rejim_uyarisi": rejim_uyarisi,
+           "mcap_kapisi": mcap_kapi, "bekci": bekci, "dex_likidite": dex,
+           "rejim": rejim.get("rejim"), "rejim_uyarisi": rejim_uyarisi,
            "not": "Kucuk-cap: Binance perp YOK -> D2 turev sinirli. Bekci RED -> giris YOK; UYARI -> CEO ekstra dikkat + pozisyon kucult. "
-                  "DEX likidite kontrolu HENUZ YOK (bilinen eksik - guvenilir anahtarsiz kaynak bulununca eklenecek)."}
+                  "dex_likidite RED -> giris YOK (Bekci RED ile ayni disiplin); UYARI -> pozisyon kucult."}
     print(json.dumps(out, ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":

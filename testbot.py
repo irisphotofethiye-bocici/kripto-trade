@@ -39,6 +39,7 @@ FAPI = "https://fapi.binance.com"
 STATEF = os.path.join(HERE, "testbot_state.json")
 ISLEMLERF = os.path.join(HERE, "testbot_islemler.jsonl")
 EQUITYF = os.path.join(HERE, "testbot_equity.jsonl")
+VETO_LOGF = os.path.join(HERE, "veto_log.jsonl")  # 2026-07-08: reddedilen adaylar (olcum; davranis degismez)
 LOCKF = os.path.join(HERE, "testbot.lock")
 
 if sys.stdout is None:
@@ -176,9 +177,39 @@ def smart_hizali_mi(yon, smart):
     return smart == yon
 
 
-def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli):
+def _veto_ekle(veto_out, kategori, detay, olurdu_yon):
+    """karar_yon icindeki adlandirilmis veto noktalarinda cagrilir (2026-07-08 veto olcum katmani).
+    veto_out None ise HICBIR SEY yapmaz -> eski cagirim davranisi birebir korunur (drift yok)."""
+    if veto_out is not None:
+        veto_out.append({"kategori": kategori, "detay": detay, "olurdu_yon": olurdu_yon})
+
+
+def _veto_logla(st, sym, r, pillar, kategori, detay, olurdu_yon, rejim_ad):
+    """Reddedilen adayi veto_log.jsonl'e yaz (radar_archive deseni + forward-return icin baglam).
+    Dedup: ayni (sym,kategori) veto_log_cooldown_saat icinde tekrar yazilmaz (spam/cift-sayim onleme)."""
+    cd = st.setdefault("veto_cooldown", {})
+    anahtar = f"{sym}:{kategori}"
+    cooldown_saat = evren.esik("veto_log_cooldown_saat", 12.0)
+    son = cd.get(anahtar)
+    if son:
+        try:
+            if (now_dt() - parse_iso(son)).total_seconds() / 3600 < cooldown_saat:
+                return  # cooldown icinde -> ayni suregelen veto, tekrar yazma
+        except Exception:
+            pass
+    kayit = {"ts": now_iso(), "sym": sym, "price": r.get("price"), "kategori": kategori,
+             "detay": detay, "olurdu_yon": olurdu_yon, "skor": r.get("score"), "stage": r.get("stage"),
+             "chg24": r.get("chg24"), "pos": r.get("pos"), "oi24": r.get("oi24"),
+             "taker": pillar.get("taker"), "smart": pillar.get("smart"), "rejim": rejim_ad}
+    _append_jsonl(VETO_LOGF, kayit)
+    cd[anahtar] = now_iso()
+
+
+def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
     """r: radar.analyze() ciktisi. pillar: radar.pillar_d() ciktisi (top_ls/glob_ls/taker/smart).
-    Donus: None | ("LONG"|"SHORT", "ANINDA"|"ONAY_BEKLE", sebep)"""
+    Donus: None | ("LONG"|"SHORT", "ANINDA"|"ONAY_BEKLE", sebep)
+    veto_out: opsiyonel liste; verilirse adlandirilmis vetolar (long_veto/blowoff/taker_soguma)
+    kaydedilir (SADECE olcum, karar cikttisini DEGISTIRMEZ)."""
     skor = r["score"]
     smart = pillar.get("smart")
     taker = pillar.get("taker")
@@ -209,18 +240,30 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli):
         or asiri_dusmus                         # 24s'te -%40+ cakilmis (kapitulasyon ortasi)
         or (chg24 < 0 and oi24 >= oi_esik * 3)  # fiyat dusarken OI hizli artiyor = guclu dusus (SLX: -30.6% & OI+33%)
     )
+    # long_veto alt-tetik etiketi (olcum logu icin; karari etkilemez)
+    if pos < 0.25:
+        long_veto_detay = f"pos<0.25 (dip-bicak, pos={pos:.2f})"
+    elif asiri_dusmus:
+        long_veto_detay = f"asiri_dusmus (24s {chg24:+.0f}%)"
+    elif chg24 < 0 and oi24 >= oi_esik * 3:
+        long_veto_detay = f"fiyat-dusuk+OI-artis (chg24={chg24:+.1f}% oi24={oi24:+.0f}%)"
+    else:
+        long_veto_detay = ""
 
     if rejim_ad == "AYI":
         if r["stage"] == "BASLIYOR" and smart == "LONG" and (taker or 0) >= 1.0:
             if asiri_yukselmis:
+                _veto_ekle(veto_out, "blowoff", f"AYI blow-off redirect (24s {chg24:+.0f}%, LONG->SHORT-tepki)", "LONG")
                 return ("SHORT", "ONAY_BEKLE",
                         f"BLOW-OFF TUZAGI (24s {chg24:+.0f}%, MANTA deseni): smart-long+BASLIYOR = pump'in GEC "
                         f"safhasi, LONG DEGIL -> SHORT-tepki adayi, tepe/donus onayi bekle")
             if long_veto:
+                _veto_ekle(veto_out, "long_veto", f"AYI-istisna: {long_veto_detay}", "LONG")
                 return None  # dip-bicak/kapitulasyon/fiyat-dusuk-OI-artis -> AAVE istisnasi bile gecersiz
             return ("LONG", "ANINDA", "AYI-istisna: BASLIYOR+smart-LONG+taker-alim (AAVE deseni)")
         if skor >= esik_short and smart != "LONG" and not short_riskli_dip and r.get("pos", 0.5) >= 0.20:
             if asiri_dusmus and r.get("pos", 0.5) < 0.30:
+                _veto_ekle(veto_out, "blowoff", f"AYI-SHORT dusen-bicak (24s {chg24:+.0f}%, pos={r.get('pos',0.5):.2f})", "SHORT")
                 return None  # zaten cok dusmus + dipte -> dusen bicagi kovalama, SHORT girme (ders#4)
             return ("SHORT", "ONAY_BEKLE", f"AYI: skor={skor} short-aday, 1-cycle onay bekletme")
         return None
@@ -233,8 +276,10 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli):
             return ("SHORT", "ANINDA", "BOGA-istisna: BASLIYOR+smart-SHORT+taker-satis")
         if skor >= esik_short and smart != "SHORT" and r.get("pos", 0.5) <= 0.85:
             if asiri_yukselmis and r.get("pos", 0.5) > 0.70:
+                _veto_ekle(veto_out, "blowoff", f"BOGA-LONG tepe (24s {chg24:+.0f}%, pos={r.get('pos',0.5):.2f})", "LONG")
                 return None  # zaten cok yukselmis + tepede -> kovalama, LONG girme
             if long_veto:
+                _veto_ekle(veto_out, "long_veto", f"BOGA: {long_veto_detay}", "LONG")
                 return None  # BOGA'da da bicak dibine LONG acilmaz
             return ("LONG", "ONAY_BEKLE", f"BOGA: skor={skor} long-aday, 1-cycle onay bekletme")
         return None
@@ -242,8 +287,18 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli):
     if r["stage"] in ("BASLIYOR", "HAZIRLANIYOR") and skor >= esik_uzun:
         # taker>=1.0 sarti (2026-07-06): smart etiketi tek basina 3/3 kaybetti (RE/O/SLX);
         # AYI-istisnasiyla (AAVE deseni) ayni agresif-alici teyidi burada da aranir.
-        if smart == "LONG" and not asiri_yukselmis and not long_veto and (taker or 0) >= 1.0:
-            return ("LONG", "ANINDA", "NOTR: stage-aktif+smart-LONG+taker-alim")
+        # (2026-07-08) bilesik kosul alt-dallara ayrildi: karar cikttisi BIREBIR AYNI, sadece
+        # hangi filtrenin blokladigi veto_out'a yazilir (olcum). Oncelik eski && sirasiyla ayni:
+        # asiri_yukselmis -> long_veto -> taker<1.0.
+        if smart == "LONG":
+            if asiri_yukselmis:
+                _veto_ekle(veto_out, "blowoff", f"NOTR-LONG asiri_yukselmis (24s {chg24:+.0f}%)", "LONG")
+            elif long_veto:
+                _veto_ekle(veto_out, "long_veto", f"NOTR: {long_veto_detay}", "LONG")
+            elif (taker or 0) < 1.0:
+                _veto_ekle(veto_out, "taker_soguma", f"NOTR-LONG taker<1.0 (taker={taker}, agresif-alici teyidi yok)", "LONG")
+            else:
+                return ("LONG", "ANINDA", "NOTR: stage-aktif+smart-LONG+taker-alim")
         if smart == "SHORT" and not short_riskli_dip and not asiri_dusmus:
             return ("SHORT", "ANINDA", "NOTR: stage-aktif+smart-SHORT")
     return None
@@ -285,6 +340,7 @@ def pozisyon_kapat(st, pos, cikis_fiyat_piyasa, sebep):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
     }
     _append_jsonl(ISLEMLERF, kayit)
     st["cooldown"][pos["sym"]] = now_iso()
@@ -308,6 +364,7 @@ def pozisyon_liq(st, pos):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
     }
     _append_jsonl(ISLEMLERF, kayit)
     st["cooldown"][pos["sym"]] = now_iso()
@@ -343,6 +400,7 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
     }
     _append_jsonl(ISLEMLERF, kayit)
     telegram_gonder(f"[TESTBOT] TP1 {pos['sym']} {pos['yon']} yari kapatildi PnL={pnl_net:+.2f}$ (stop girise cekildi)")
@@ -503,7 +561,7 @@ def _cikar_havuzdan(pool_syms, st, cooldown_saat):
     return out
 
 
-def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False):
+def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None):
     skor = r["score"]
     smart_hiz = smart_hizali_mi(yon, pillar.get("smart"))
     kaldirac0 = kaldirac_hesapla(skor, smart_hiz)
@@ -545,6 +603,7 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False):
         "tp1_alindi": False, "likidasyon": round(liq, 6), "risk_usdt": round(risk_usdt, 2),
         "skor_giriste": skor, "smart_giriste": pillar.get("smart"),
         "chg24_giriste": r.get("chg24"), "range_pos_giriste": r.get("pos"), "stage_giriste": r.get("stage"),
+        "rejim_giriste": rejim_ad or "BILINMIYOR",  # 2026-07-08: rejim x yon karne icin (hem-ayi-hem-boga olcumu)
         "son_funding_kontrol_ts": now_iso(), "son_1m_kontrol_ts": now_iso(), "sebep_giris": sebep,
         # trailing stop icin (2026-07-03, "piyasa donunce de TP/SL bekliyor" geri bildirimi):
         "stop_orijinal": round(stop, 6), "atr_giriste": olc.get("atr14"),
@@ -607,15 +666,18 @@ def yeni_giris_ara(st, rejim):
             esik_fo = evren.esik("dusuk_float_oran", 0.25)
             dusuk_float = bool(fo is not None and fo < esik_fo)
 
-        karar = karar_yon(rejim.get("rejim"), r, pillar, dusuk_float)
+        vlist = []
+        karar = karar_yon(rejim.get("rejim"), r, pillar, dusuk_float, veto_out=vlist)
         if not karar:
+            for v in vlist:  # reddedilen aday -> olcum logu (davranis degismedi, sadece kaydediliyor)
+                _veto_logla(st, sym, r, pillar, v["kategori"], v["detay"], v["olurdu_yon"], rejim.get("rejim"))
             bekleyenler.pop(sym, None)
             continue
         yon, mod, sebep = karar
 
         if mod == "ANINDA":
             bekleyenler.pop(sym, None)
-            yeni_giris_ac(st, sym, yon, r, pillar, sebep)
+            yeni_giris_ac(st, sym, yon, r, pillar, sebep, rejim_ad=rejim.get("rejim"))
             continue
 
         # ONAY_BEKLE: bu adayi ilk kez mi goruyoruz?
@@ -631,7 +693,10 @@ def yeni_giris_ara(st, rejim):
             soguma_ok = (yon != "SHORT") or (taker_onay is None) or (taker_onay < taker_esigi)
             if onceki["cycle_sayaci"] >= 1 and soguma_ok:  # 1 tam cycle (5dk) gecti + ivme kirildi -> onayla
                 del bekleyenler[sym]
-                yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)")
+                yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)", rejim_ad=rejim.get("rejim"))
+            elif onceki["cycle_sayaci"] >= 1 and not soguma_ok:  # onaya hazir ama taker sogumadi -> bekletiliyor (olcum)
+                _veto_logla(st, sym, r, pillar, "taker_soguma",
+                            f"SHORT onay bekletildi: taker={taker_onay} >= {taker_esigi} (pump ivmesi surer)", "SHORT", rejim.get("rejim"))
         else:
             bekleyenler[sym] = {"yon": yon, "skor": r["score"], "ilk_gorulme_ts": now_iso(), "cycle_sayaci": 0}
 
@@ -757,8 +822,20 @@ def durum_yazdir():
                  if kum_funding == 0.0 and kum_ucret == 0.0 else ""))
         if rler:
             print(f"Ortalama R: {statistics.mean(rler):+.2f} | Toplam R: {sum(rler):+.2f}")
+        # REJIM x YON kirilimi (2026-07-08, "hem-ayi-hem-boga" hedefi olcumu): hangi rejimde hangi
+        # yon calisiyor? BILINMIYOR = rejim-etiketi eklenmeden ONCE acilan eski islemler.
+        print("\n-- Rejim x Yon karnesi (hangi kosulda hangi yon?) --")
+        rejimler = ["AYI", "NOTR", "BOGA", "BILINMIYOR"]
+        for rj in rejimler:
+            for yn in ("LONG", "SHORT"):
+                grp = [t for t in tam if t.get("rejim_giriste", "BILINMIYOR") == rj and t["yon"] == yn]
+                if grp:
+                    kz = sum(1 for t in grp if t["sonuc_usdt"] > 0)
+                    pnl = sum(t["sonuc_usdt"] for t in grp)
+                    print(f"  {rj:10} {yn:5}: {len(grp)} islem, {kz}W (%{kz/len(grp)*100:.0f}), PnL={pnl:+.1f}$")
+        print("  NOT: N kucukken (<25-30) kanit degil izlenimdir; gercek AYI verisi henuz yok (overfit'e dikkat).")
         for t in islemler[-10:]:
-            print(f"  {t['ts']} {t['sym']:8} {t['yon']:5} {t['sebep']:10} PnL={t['sonuc_usdt']:+.2f}$ R={t.get('r')}")
+            print(f"  {t['ts']} {t['sym']:8} {t['yon']:5} {t['sebep']:10} PnL={t['sonuc_usdt']:+.2f}$ R={t.get('r')} [{t.get('rejim_giriste','?')}]")
     else:
         print("\nHenuz kapanan islem yok.")
 
@@ -788,7 +865,8 @@ def zorla_giris(spec):
     if not r:
         print("analyze basarisiz (sembol/veri sorunu)"); return
     pillar = radar.pillar_d(sym)
-    ok = yeni_giris_ac(st, sym, yon, r, pillar, "ZORLA (debug)", zorla=True)
+    rejim_ad = evren.btc_rejim().get("rejim")
+    ok = yeni_giris_ac(st, sym, yon, r, pillar, "ZORLA (debug)", zorla=True, rejim_ad=rejim_ad)
     _save_state(st)
     print(f"zorla giris: {'basarili' if ok else 'reddedildi (VETO_rr_net veya kaldirac guvenlik)'}")
 
