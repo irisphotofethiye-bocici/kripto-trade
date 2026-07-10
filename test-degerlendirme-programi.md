@@ -74,6 +74,8 @@ Bu değerlendirmeyi güçlü model tasarladı; yürütmesi MEKANİKTİR, yargı 
 5. Sonuç raporu + verilen kararları proje hafızasına dated olarak yaz; kullanıcıya K1-K6 tablosu halinde sun.
 6. Uygulanacak değişiklikler (K4 kesin + kriter sağlayan K2/K3/K5): `fikir-defteri.md`'deki ilgili maddenin uygulama notlarını takip et — gerekçeler orada dondurulmuş, yeniden türetme.
 7. Değişiklik uygulama disiplini: tek seferde TEK değişken, önce py_compile + mock test + canlı tek koşu, sonra commit; `fikir-defteri.md` "Uygulama disiplini" bölümü bağlayıcı.
+8. **BUG İSTİSNASI (2026-07-10 eklendi):** Hata düzeltme ön-kayıt ihlali DEĞİLDİR — kod bariz yanlış davranıyorsa (çökme, yanlış hesap, veri bozulması) test sırasında bile düzeltilir; ama düzeltme DAVRANIŞI değiştirmemeli, TASARLANMIŞ davranışı geri getirmeli. Ayrım testi: "bu değişiklik botun hangi işlemi açacağını/kapatacağını değiştiriyor mu?" DEĞİŞTİRİYORSA strateji değişikliğidir → 21 Tem'i bekler; değiştirmiyorsa (log, mutabakat, çökme onarımı) bug-fix'tir → py_compile + mock test + tek canlı koşu doğrulamasıyla yapılır ve hafızaya not düşülür.
+9. **DEĞİŞİKLİK PROTOKOLÜ (2026-07-10 eklendi):** Kriter/fikir değişikliği SADECE kullanıcının açık kararıyla olur ve şöyle kaydedilir: eski kriter SİLİNMEZ, yanına "[DEĞİŞTİ tarih: yeni değer — kullanıcı kararı, gerekçe]" eklenir. Böylece ön-kayıt izi korunur; "sonuca bakıp kriteri mi değiştirdik" sorusu her zaman denetlenebilir kalır. Model kriter değişikliği ÖNEREBİLİR ama kendi inisiyatifiyle UYGULAYAMAZ.
 
 ## E. Sonraki Aşama Haritası
 

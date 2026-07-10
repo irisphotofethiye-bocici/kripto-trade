@@ -3,6 +3,7 @@
 > **Amaç (2026-07-10):** Bu dosya, güçlü modelle yapılan strateji tartışmalarının GEREKÇELERİYLE dondurulmuş hali.
 > Gelecek oturumlar (hangi model olursa olsun) buradan uygular; gerekçeyi yeniden türetmek zorunda kalmaz.
 > **Kural: Her madde kendi ön-koşul kapısına bağlı — kapı sağlanmadan UYGULANMAZ. Test bitene kadar (21 Tem) hiçbiri koda girmez.**
+> **İstisna ve değişiklik:** Bug-fix (tasarlanmış davranışı geri getiren onarım) her zaman serbest; kriter/fikir değişikliği SADECE kullanıcı kararıyla + tarihli izle yapılır — detay: `test-degerlendirme-programi.md` D bölümü madde 8-9.
 
 ## LONG tutarsızlığının teşhisi (kanıt özeti — kararların temeli)
 
