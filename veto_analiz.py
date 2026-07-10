@@ -28,7 +28,7 @@ import evren
 HERE = os.path.dirname(os.path.abspath(__file__))
 FAPI = "https://fapi.binance.com"
 VETO_LOGF = os.path.join(HERE, "veto_log.jsonl")
-KATEGORILER = ("long_veto", "taker_soguma", "blowoff")
+KATEGORILER = ("long_veto", "taker_soguma", "blowoff", "rr_veto")
 
 if sys.stdout is None:
     sys.stdout = open(os.devnull, "w", encoding="utf-8")

@@ -570,6 +570,9 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None):
     except Exception:
         return False
     if olc.get("VETO_rr_net") and not zorla:
+        # 2026-07-10: bu ret onceden SESSIZDI ("bot neden girmedi" cevabinda kor nokta) -> olcum loguna eklendi
+        _veto_logla(st, sym, r, pillar, "rr_veto",
+                    f"NET R/R {olc.get('rr_tp1_net')} < 1:2 (Olcucu mekanik veto)", yon, rejim_ad or "BILINMIYOR")
         return False  # edge kanitlanmamis giris -> mekanik veto (Olcucu ile ayni disiplin)
     giris_piyasa, stop, tp1_yapisal, tp2 = olc["giris"], olc["stop"], olc["tp1"], olc["tp2"]
     kaldirac = kaldirac_guvenlik_kirp(giris_piyasa, stop, yon, kaldirac0)

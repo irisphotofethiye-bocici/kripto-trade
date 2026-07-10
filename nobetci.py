@@ -121,6 +121,20 @@ def kontrol_radar(st, cooldown_dk, esik_skor):
         detay = (f"skor={skor} stage={stage} smart={s.get('smart')} "
                  f"fund={s.get('funding')} dusuk_float={s.get('dusuk_float')} rejim={ra.get('rejim', {}).get('rejim')}")
         tetikler.append(("RADAR", sym, detay, anahtar))
+    # ERKEN-KUSAK koprusu (2026-07-10, SKL dersi: skor 78'lik aday pump'tan 11 saat once erken-kusakta
+    # gorulmus ama alarm HIC gitmemisti — bu dizi sadece olcum icindi). KAPI DEGIL, sadece BILDIRIM;
+    # ayni skor esigi kullanilir (yeni esik icat edilmez), dusuk-skorlu hacim-uyanislari spam olmasin.
+    for s in ra.get("erken_kusak", []):
+        sym, skor = s.get("sym"), s.get("score") or 0
+        if skor < esik_skor:
+            continue
+        anahtar = f"erken:{sym}"
+        if not _cooldown_gecti(st, anahtar, cooldown_dk):
+            continue
+        detay = (f"[ERKEN] skor={skor} vol_x_gun={s.get('vol_x_gun')} chg24={s.get('chg24')} "
+                 f"smart={s.get('smart')} taker={s.get('taker')} rejim={ra.get('rejim', {}).get('rejim')} "
+                 f"(hacim-uyanisi, KAPI DEGIL - gozle degerlendir)")
+        tetikler.append(("RADAR", sym, detay, anahtar))
     return tetikler
 
 
