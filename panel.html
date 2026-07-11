@@ -68,11 +68,30 @@
   }
   .sym-btn.active { border-color: var(--series-1); color: var(--text-primary); }
   .empty { color: var(--text-muted); font-size: 13px; padding: 8px 0; }
+  .sayac-serit {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 16px; margin-bottom: 16px; display: flex; gap: 18px; align-items: center;
+    font-size: 13px; flex-wrap: wrap;
+  }
+  .sayac-serit b { font-variant-numeric: tabular-nums; }
+  .veto-sayac { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .veto-sayac .vk {
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .veto-sayac .vk b { color: var(--text-primary); font-size: 15px; margin-left: 6px; }
+  .not-satir { color: var(--text-muted); font-size: 11px; margin-top: 8px; }
 </style>
 </head>
 <body>
   <h1>TestBot — Sanal Paper Trading <span id="durum-badge" class="badge">-</span></h1>
   <div class="sub" id="sub-line">Yükleniyor...</div>
+
+  <div id="sayac-serit" class="sayac-serit" style="display:none;">
+    <span id="sayac-kalan">-</span>
+    <span id="sayac-k1">-</span>
+    <span class="sub" style="margin:0;font-size:11px;">K1 kesin değil — 21 Tem'de kapanan-R ve rejim-hücre kriterleriyle birlikte bakılır</span>
+  </div>
 
   <div class="grid-cards">
     <div class="card"><div class="label">Bakiye (sanal)</div><div class="value" id="c-equity">-</div></div>
@@ -119,6 +138,55 @@
       </tr></thead>
       <tbody id="islem-body"></tbody>
     </table>
+  </section>
+
+  <section>
+    <h2>Gerçek Pozisyonlar (senin defterin)</h2>
+    <div id="gercek-empty" class="empty" style="display:none;">Açık gerçek pozisyon yok.</div>
+    <table id="gercek-table" style="display:none;">
+      <thead><tr>
+        <th>Coin</th><th>Yön</th><th>Tarih</th><th>Kaldıraç</th><th>Marjin</th><th>Giriş</th><th>Anlık</th>
+        <th>PnL %</th><th>PnL $</th><th>Stop</th><th>Stopa Uzaklık</th><th>TP1</th><th>Risk $</th>
+      </tr></thead>
+      <tbody id="gercek-body"></tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Rejim × Yön Karnesi (hem-ayı-hem-boğa ölçümü)</h2>
+    <div id="rejim-empty" class="empty" style="display:none;">Henüz etiketli işlem yok.</div>
+    <table id="rejim-table" style="display:none;">
+      <thead><tr>
+        <th>Rejim</th><th>LONG (N / W / PnL)</th><th>SHORT (N / W / PnL)</th>
+      </tr></thead>
+      <tbody id="rejim-body"></tbody>
+    </table>
+    <div class="not-satir">Eski işlemler BİLİNMİYOR etiketli (07-08 öncesi). N&lt;25-30 = izlenim, kanıt değil.</div>
+  </section>
+
+  <section>
+    <h2>Bot'un Reddettikleri (Veto)</h2>
+    <div class="veto-sayac" id="veto-sayac"></div>
+    <div id="veto-empty" class="empty" style="display:none;">Henüz veto kaydı yok.</div>
+    <table id="veto-table" style="display:none;">
+      <thead><tr>
+        <th>Zaman</th><th>Coin</th><th>Fiyat</th><th>Kategori</th><th>Olurdu</th><th>Skor</th><th>Rejim</th><th>Sebep</th>
+      </tr></thead>
+      <tbody id="veto-body"></tbody>
+    </table>
+    <div class="not-satir">Koruma mı fırsat maliyeti mi → 21 Tem'de <code>veto_analiz.py</code> forward-return ile ölçülür.</div>
+  </section>
+
+  <section>
+    <h2>Erken Kuşak — Hacmi Uyananlar</h2>
+    <div id="erken-empty" class="empty" style="display:none;">Şu an erken-kuşak adayı yok.</div>
+    <table id="erken-table" style="display:none;">
+      <thead><tr>
+        <th>Coin</th><th>Skor</th><th>Hacim ×gün</th><th>24s %</th><th>Fiyat</th><th>Taker</th><th>Smart</th><th>Aşama</th>
+      </tr></thead>
+      <tbody id="erken-body"></tbody>
+    </table>
+    <div class="not-satir">KAPI DEĞİL — gözlem katmanı. Skor≥40 nöbetçi [ERKEN] alarmı üretir; giriş kararı değildir.</div>
   </section>
 
 <script>
@@ -228,6 +296,22 @@ async function tick() {
   document.getElementById('c-toplampnl-sub').textContent =
     `funding ${pnlSign(kf)}${fmt2(kf)}$ / ücret ${fmt2(-ku)}$ (equity'de var, bu PnL'de yok)`;
 
+  // rejim x yon karnesi
+  const ry = d.karne.rejim_yon || {};
+  const rbody = document.getElementById('rejim-body');
+  rbody.innerHTML = '';
+  const rejimler = ['AYI', 'NOTR', 'BOGA', 'BILINMIYOR'].filter(rj => ry[rj + '_LONG'] || ry[rj + '_SHORT']);
+  document.getElementById('rejim-empty').style.display = rejimler.length ? 'none' : 'block';
+  document.getElementById('rejim-table').style.display = rejimler.length ? 'table' : 'none';
+  const hucre = (h) => h
+    ? `${h.n} / ${h.kazanan} / <span class="${pnlClass(h.pnl)}">${pnlSign(h.pnl)}${fmt2(h.pnl)}$</span>`
+    : '<span style="color:var(--text-muted)">—</span>';
+  rejimler.forEach(rj => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${rj}</td><td>${hucre(ry[rj + '_LONG'])}</td><td>${hucre(ry[rj + '_SHORT'])}</td>`;
+    rbody.appendChild(tr);
+  });
+
   // equity curve
   const eqData = d.equity_serisi.map(e => ({ time: parseTs(e.ts), value: e.equity }));
   if (eqData.length) equitySeries.setData(eqData);
@@ -277,8 +361,87 @@ async function tick() {
   });
 }
 
+const VETO_AD = { long_veto: 'Long veto', taker_soguma: 'Taker soğuma', blowoff: 'Blow-off', rr_veto: 'R/R veto' };
+
+async function tickSistem() {
+  let d;
+  try {
+    d = await (await fetch('/api/sistem')).json();
+  } catch (e) { return; }
+
+  // 21 Tem sayaci
+  if (d.sayac) {
+    const s = d.sayac;
+    document.getElementById('sayac-serit').style.display = 'flex';
+    document.getElementById('sayac-kalan').innerHTML =
+      `Test bitişi: <b>${s.bitis_ts}</b> · kalan <b>${s.kalan_gun}</b> gün`;
+    const dEq = s.equity - s.baslangic_bakiye;
+    document.getElementById('sayac-k1').innerHTML =
+      `K1 equity ön-izleme: <b class="${pnlClass(dEq)}">$${fmt2(s.equity)} (${pnlSign(dEq)}${fmt2(dEq)}$) ${s.k1_equity_ok ? '✓' : '✗'}</b>`;
+  }
+
+  // gercek pozisyonlar
+  const gp = d.gercek_pozisyonlar || [];
+  const gbody = document.getElementById('gercek-body');
+  gbody.innerHTML = '';
+  document.getElementById('gercek-empty').style.display = gp.length ? 'none' : 'block';
+  document.getElementById('gercek-table').style.display = gp.length ? 'table' : 'none';
+  gp.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.sym}</td><td><span class="badge ${p.yon === 'LONG' ? 'long' : 'short'}">${p.yon}</span></td>
+      <td>${p.tarih ?? '-'}</td><td>${p.kaldirac ?? '-'}x</td><td>$${fmt2(p.marjin)}</td>
+      <td>${p.giris}</td><td>${p.anlik ?? '-'}</td>
+      <td class="${pnlClass(p.pnl_pct)}">${p.pnl_pct === null ? '-' : pnlSign(p.pnl_pct) + fmt2(p.pnl_pct) + '%'}</td>
+      <td class="${pnlClass(p.pnl_usdt)}">${p.pnl_usdt === null ? '-' : pnlSign(p.pnl_usdt) + fmt2(p.pnl_usdt) + '$'}</td>
+      <td>${p.stop || '-'}</td>
+      <td>${p.stop_uzaklik_pct === null ? '-' : fmt2(p.stop_uzaklik_pct) + '%'}</td>
+      <td>${p.tp1 ?? '-'}</td><td>$${fmt2(p.risk_usdt)}</td>`;
+    gbody.appendChild(tr);
+  });
+
+  // veto
+  const v = d.veto || { sayac: {}, son: [] };
+  const vs = document.getElementById('veto-sayac');
+  vs.innerHTML = '';
+  Object.entries(VETO_AD).forEach(([k, ad]) => {
+    const el = document.createElement('div');
+    el.className = 'vk';
+    el.innerHTML = `${ad}<b>${v.sayac[k] ?? 0}</b>`;
+    vs.appendChild(el);
+  });
+  const vbody = document.getElementById('veto-body');
+  vbody.innerHTML = '';
+  const son = v.son || [];
+  document.getElementById('veto-empty').style.display = son.length ? 'none' : 'block';
+  document.getElementById('veto-table').style.display = son.length ? 'table' : 'none';
+  son.forEach(o => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${o.ts ?? '-'}</td><td>${o.sym ?? '-'}</td><td>${o.price ?? '-'}</td>
+      <td>${VETO_AD[o.kategori] ?? o.kategori}</td>
+      <td><span class="badge ${o.olurdu_yon === 'LONG' ? 'long' : 'short'}">${o.olurdu_yon ?? '-'}</span></td>
+      <td>${o.skor ?? '-'}</td><td>${o.rejim ?? '-'}</td><td>${o.detay ?? '-'}</td>`;
+    vbody.appendChild(tr);
+  });
+
+  // erken kusak
+  const ek = d.erken_kusak || [];
+  const ebody = document.getElementById('erken-body');
+  ebody.innerHTML = '';
+  document.getElementById('erken-empty').style.display = ek.length ? 'none' : 'block';
+  document.getElementById('erken-table').style.display = ek.length ? 'table' : 'none';
+  ek.forEach(s => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.sym}</td><td>${s.score ?? '-'}</td><td>${s.vol_x_gun ?? '-'}</td>
+      <td class="${pnlClass(s.chg24)}">${s.chg24 === null || s.chg24 === undefined ? '-' : pnlSign(s.chg24) + fmt2(s.chg24) + '%'}</td>
+      <td>${s.price ?? '-'}</td><td>${s.taker ?? '-'}</td><td>${s.smart ?? '-'}</td><td>${s.stage ?? '-'}</td>`;
+    ebody.appendChild(tr);
+  });
+}
+
 tick();
+tickSistem();
 setInterval(tick, 30000);
+setInterval(tickSistem, 60000);
 </script>
 </body>
 </html>

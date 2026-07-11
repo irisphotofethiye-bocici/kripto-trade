@@ -5,6 +5,7 @@ PANEL SUNUCU — TestBot canlı dashboard (2026-07-03). Sadece 127.0.0.1:8787 (d
 GET /            -> panel.html
 GET /api/durum   -> {state, acik_pozisyonlar(guncel fiyat+PnL), son_islemler, equity_serisi}
 GET /api/mumlar?sym=SOL&interval=15m&limit=200 -> Binance public klines proxy (CORS icin)
+GET /api/sistem  -> {veto, gercek_pozisyonlar, erken_kusak, sayac} — olcum katmanlari (60s cache, 2026-07-11)
 Bağımlılık yok (stdlib http.server). Kullanım: python panel_sunucu.py [--port 8787]
 """
 import json, os, sys, time, argparse, urllib.parse
@@ -84,6 +85,97 @@ def _durum_json():
     }
 
 
+_sistem_cache = None  # (ts, data) — /api/sistem 60s TTL (veriler yavas degisir)
+
+VETO_KATEGORILER = ("long_veto", "taker_soguma", "blowoff", "rr_veto")
+
+
+def _veto_ozet(son_n=15):
+    """veto_log.jsonl -> kategori sayaclari + son N kayit. Dosya yoksa bos (gitignore'da)."""
+    sayac = {k: 0 for k in VETO_KATEGORILER}
+    kayitlar = []
+    try:
+        for line in open(os.path.join(HERE, "veto_log.jsonl"), encoding="utf-8"):
+            try:
+                d = json.loads(line)
+            except Exception:
+                continue
+            k = d.get("kategori")
+            if k in sayac:
+                sayac[k] += 1
+            kayitlar.append({a: d.get(a) for a in
+                             ("ts", "sym", "price", "kategori", "detay", "olurdu_yon", "rejim", "skor")})
+    except Exception:
+        pass
+    return {"sayac": sayac, "toplam": sum(sayac.values()), "son": kayitlar[-son_n:][::-1]}
+
+
+def _gercek_pozlar():
+    """kripto_portfoy.json aktif_futures -> canli fiyat + PnL% + stopa uzaklik. Panel'in gercek defteri."""
+    out = []
+    try:
+        pf = json.load(open(os.path.join(HERE, "kripto_portfoy.json"), encoding="utf-8"))
+        for p in pf.get("aktif_futures", []):
+            if p.get("durum") != "acik":
+                continue
+            sym, giris, stop = p["sembol"], float(p["giris"]), float(p.get("stop") or 0)
+            isaret = 1 if p.get("yon") == "LONG" else -1
+            px = testbot.fiyat_fapi(sym)
+            pnl_pct = pnl_usdt = stop_uzaklik = None
+            if px:
+                pnl_pct = round((px - giris) / giris * 100 * isaret, 2)
+                pnl_usdt = round((px - giris) / giris * float(p.get("notional_usdt") or 0) * isaret, 2)
+                if stop:
+                    stop_uzaklik = round((px - stop) / px * 100 * isaret, 2)  # +% = stopa mesafe var
+            out.append({"sym": sym, "yon": p.get("yon"), "giris": giris, "stop": stop,
+                        "tp1": p.get("tp1"), "kaldirac": p.get("kaldirac"), "tarih": p.get("tarih"),
+                        "marjin": p.get("marjin_usdt"), "risk_usdt": p.get("risk_usdt"),
+                        "anlik": px, "pnl_pct": pnl_pct, "pnl_usdt": pnl_usdt,
+                        "stop_uzaklik_pct": stop_uzaklik})
+    except Exception:
+        pass
+    return out
+
+
+def _erken_kusak(top_n=10):
+    """radar_active.json erken_kusak -> skora gore ilk N (KAPI DEGIL, gozlem katmani)."""
+    try:
+        ra = json.load(open(os.path.join(HERE, "radar_active.json"), encoding="utf-8"))
+        ek = sorted(ra.get("erken_kusak") or [], key=lambda s: -(s.get("score") or 0))
+        return [{a: s.get(a) for a in ("sym", "score", "vol_x_gun", "chg24", "price", "taker", "smart", "stage")}
+                for s in ek[:top_n]]
+    except Exception:
+        return []
+
+
+def _sayac(st):
+    """Test bitisine geri sayim + K1 equity on-izleme (SADECE gosterim — karar 21 Tem'de,
+    kapanan-R ve rejim-hucre kriterleriyle BIRLIKTE; test-degerlendirme-programi.md K1)."""
+    try:
+        bas = time.mktime(time.strptime(st["baslangic_ts"], "%Y-%m-%d %H:%M:%S"))
+        sure_gun = float(testbot._c("sure_gun", 7))
+        bitis = bas + sure_gun * 86400
+        kalan_sn = max(0, bitis - time.time())
+        return {"bitis_ts": time.strftime("%Y-%m-%d %H:%M", time.localtime(bitis)),
+                "kalan_gun": round(kalan_sn / 86400, 1), "sure_gun": sure_gun,
+                "equity": round(st["equity"], 2), "baslangic_bakiye": st["baslangic_bakiye"],
+                "k1_equity_ok": st["equity"] > st["baslangic_bakiye"]}
+    except Exception:
+        return None
+
+
+def _sistem_json(ttl=60.0):
+    global _sistem_cache
+    now = time.time()
+    if _sistem_cache and now - _sistem_cache[0] < ttl:
+        return _sistem_cache[1]
+    st = testbot._load_state()
+    out = {"veto": _veto_ozet(), "gercek_pozisyonlar": _gercek_pozlar(),
+           "erken_kusak": _erken_kusak(), "sayac": _sayac(st) if st else None}
+    _sistem_cache = (now, out)
+    return out
+
+
 def _mumlar(sym, interval, limit, ttl=30.0):
     key = (sym.upper(), interval, limit)
     now = time.time()
@@ -127,6 +219,8 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(html)
         elif u.path == "/api/durum":
             self._json(_durum_json())
+        elif u.path == "/api/sistem":
+            self._json(_sistem_json())
         elif u.path == "/api/mumlar":
             q = urllib.parse.parse_qs(u.query)
             sym = (q.get("sym") or ["BTC"])[0]
