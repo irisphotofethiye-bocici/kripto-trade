@@ -772,10 +772,17 @@ def _cycle_ic():
         telegram_gonder(f"[TESTBOT] BAKIYE BITTI (${st['equity']:.2f}) — islem DURDU")
 
     yonet_acik_pozisyonlar(st)
+    # Kapanislar HEMEN diske (2026-07-14 VELVET dersi, Madde 8 bug-fix): islem kaydi pozisyon_kapat
+    # icinde aninda yaziliyor ama state cycle sonunda kaydediliyordu -> arada yeni_giris_ara'nin ag
+    # hatasi cycle'i oldurunce ayni kapanis her cycle'da tekrar yazildi (VELVET 5x mukerrer kayit).
+    _save_state(st)
 
     if st["durum"] == "AKTIF":
-        rejim = evren.btc_rejim()
-        yeni_giris_ara(st, rejim)
+        try:
+            rejim = evren.btc_rejim()
+            yeni_giris_ara(st, rejim)
+        except Exception as e:
+            print(f"[{now_iso()}] yeni_giris_ara hatasi (cycle devam, state korundu): {e}")
 
     st["son_cycle_ts"] = now_iso()
     _save_state(st)
