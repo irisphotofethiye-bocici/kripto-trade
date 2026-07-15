@@ -124,7 +124,7 @@ def fiyat_fapi(sym):
 def klines_since(sym, interval, start_ms, limit=500):
     try:
         d = _get(f"{FAPI}/fapi/v1/klines?symbol={sym}USDT&interval={interval}&startTime={start_ms}&limit={limit}")
-        return [{"t": int(k[0]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in d]
+        return [{"t": int(k[0]), "o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in d]
     except Exception:
         return []
 
@@ -512,19 +512,26 @@ def yonet_acik_pozisyonlar(st):
             for b in bars:
                 trailing_guncelle(pos, b)
                 if pos["yon"] == "LONG":
-                    if b["l"] <= pos["likidasyon"]:
+                    # BUG-FIX 2026-07-15 (Madde 8, 1000XEC vakasi): ayni bar stop+liq'i birden
+                    # supurunce eski kod liq isliyordu — kaldirac_guvenlik_kirp'in "stop liq'ten
+                    # ONCE tetiklenir" garantisiyle celiski. Liq artik SADECE bar liq altinda
+                    # ACILDIYSA (stop'un kurtaramayacagi gercek gap); yoksa stop oncelikli,
+                    # gap-acilis stoptan kotuyse acilistan dolar (gercekci kayma).
+                    bar_acilis = b.get("o", b["c"])
+                    if bar_acilis <= pos["likidasyon"]:
                         pozisyon_liq(st, pos); kapandi = True; break
                     if b["l"] <= pos["stop"]:
-                        pozisyon_kapat(st, pos, pos["stop"], "STOP"); kapandi = True; break
+                        pozisyon_kapat(st, pos, min(pos["stop"], bar_acilis), "STOP"); kapandi = True; break
                     if not pos["tp1_alindi"] and b["h"] >= pos["tp1"]:
                         pozisyon_kismi_tp1(st, pos, pos["tp1"])
                     if pos["tp1_alindi"] and b["h"] >= pos["tp2"]:
                         pozisyon_kapat(st, pos, pos["tp2"], "TP2"); kapandi = True; break
-                else:  # SHORT
-                    if b["h"] >= pos["likidasyon"]:
+                else:  # SHORT (ayni bug-fix, simetrik)
+                    bar_acilis = b.get("o", b["c"])
+                    if bar_acilis >= pos["likidasyon"]:
                         pozisyon_liq(st, pos); kapandi = True; break
                     if b["h"] >= pos["stop"]:
-                        pozisyon_kapat(st, pos, pos["stop"], "STOP"); kapandi = True; break
+                        pozisyon_kapat(st, pos, max(pos["stop"], bar_acilis), "STOP"); kapandi = True; break
                     if not pos["tp1_alindi"] and b["l"] <= pos["tp1"]:
                         pozisyon_kismi_tp1(st, pos, pos["tp1"])
                     if pos["tp1_alindi"] and b["l"] <= pos["tp2"]:
