@@ -22,6 +22,8 @@
 - **Ön-koşul:** 21 Tem sonrası + BOGA rejimi gelmeden gerçek testi yapılamaz (K6 simetriği: "gerçek BOĞA görülmeden long karnesi yargılanamaz").
 - **Overfit koruması:** Yeni eşik yok; mevcut kapılar + tarayıcının mevcut Tier mantığı. Önce sanal.
 
+> **ÖLÇÜM GÜNCELLEMESİ (2026-07-15, patern araştırması N=14 pump + 15 kontrol, İZLENİM):** F2 kanıtı GÜÇLENDİ (kısa-ivme 9/14 pump vs 1/15 kontrol, öncülük 2-4h; 8/14 vaka arşiv kapsaması DIŞIYDI → F2 ancak TÜM-sembol olursa işler). F3 öncül iddiası ÇÜRÜDÜ (0/14; derin-neg funding hep T0 SONRASI = devam-teyidi, önden-görme değil). F4 0/4, F6 sadece KORU (FLOCK/RAVE yeni-listing DEĞİLDİ, hacim-eşiği-altı kapsama sorunuydu). OI-önbirikimi/smart-önyerleşimi ayrıştırmadı (3/14vs3/15, 5/6vs6/8) — kapı yapılmaz.
+
 ### F2. Snapshot-delta (15dk ivme) — BEDAVA ERKEN GÖRÜNÜRLÜK
 - **Ne:** Radar zaten her 15dk TÜM piyasa ticker'ını çekiyor (`evren.raw_tickers`) ve fark verisini çöpe atıyor. Ardışık iki anlık görüntünün farkı = 15dk fiyat/hacim ivmesi, SIFIR ek API çağrısı. Çıktı: erken-kuşak benzeri ölçüm katmanı (`radar_active.json`'a alan + arşive etiket), KAPI DEĞİL.
 - **Neden:** En hızlı sinyalimiz 1s mum + 24s hacim — pump'lar dakikalarda ateşleniyor; bu, tespiti saatler öne çeker. Literatür mikro-pencere anomalisini bir numaralı erken sinyal sayıyor.
