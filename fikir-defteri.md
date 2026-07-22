@@ -108,3 +108,13 @@
 3. Tek seferde TEK değişken değiştir (hangi değişikliğin işe yaradığını ayırt edebilmek için).
 4. Her değişiklik önce sanalda tam tur test.
 5. N<25-30 = izlenim. Tek-rejim verisiyle eşik oynatma.
+
+## ELENEN GİRİŞ FİKİRLERİ — "hareket kovalama" tuzağı (2026-07-22, ölçümle)
+
+Kullanıcı gainers-yakalama motivasyonuyla 4 "hareket yakalama" fikri getirdi; DÖRDÜ DE ölçümde çöktü (hepsi klines forward-return, rejim kırılımı, gerçek paraya dokunmadan):
+- **Beta-rotasyon** (ETH-ETHFI, lideri takip): geciken/yüksek-beta piyasayı yenmedi (negatif/gürültü). scratchpad/beta_backtest*.py
+- **F4 spot-öncülük** (RE örneği): spot-baskın pump 274'te 1 (istatistiksel yok); RE uç istisna, sınıf değil. scratchpad/f4_basis_test.py
+- **Trend-kırılım/breakout** (48bar direnç+hacim): +24h yukarı-long −0.38% (kontrolden kötü), **FAKEOUT %80-81** (hacimli kırılım bile 5'te 4 sahte — likidite avı). Aşağı-short ayıda +0.27% ama fakeout %81 kullanılamaz. scratchpad/trend_kirilim_test.py
+- (+ erken-tespit LONG N=298 medyan −2.62%, fade-boğa ham pump BOGA negatif — daha önce)
+
+**ORTAK DERS (sistemin kimliği):** Dört fikrin ortak yanı "hareketi KOVALA" (momentum/breakout/beta). Hepsi kripto'da fakeout/mean-reversion yüzünden kaybettiriyor. KAZANAN iki şey: (a) **fade** (aşırılığı tersine oyna — kanıtlı edge), (b) **para akışı + rejim** (durum oku — TOTAL2/3, F10). → **Sistem momentum-takipçisi DEĞİL, mean-reversion + rejim-okuyucu.** Yeni giriş fikri önerilirken bu kimlik hatırlanır: "yükseleni al" arketipleri (breakout/beta/anomali-long) ölçümde tekrar tekrar çöktü; enerji fade + rejim + (boğada) F1-pullback'e yönlendirilir. AYRIM: trend-BREAKOUT (kırılımı al, tepeden = çöktü) ≠ trend-PULLBACK (F1, geri-çekilmede al, destekten = HENÜZ AÇIK, gerçek boğa bekliyor). "Trend önemli" sezgisi ölmedi; "kırılımı kovala" versiyonu öldü.
