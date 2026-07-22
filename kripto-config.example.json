@@ -40,6 +40,8 @@
     "funding_derin_neg_pct": -0.05,
     "oi_hizli_degisim_pct": 5.0,
     "olcucu_nbar_stop": 10,
+    "f10_olu_bant_pct": 2.0,
+    "f10_histerezis_gun": 3,
     "kacin_funding_abs_pct": 0.1,
     "kacin_oi24_pct": 80.0,
     "dusuk_float_oran": 0.25,

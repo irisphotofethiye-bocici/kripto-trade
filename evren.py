@@ -150,21 +150,67 @@ def binance_pool(kaynak="fapi", min_vol_musd=8.0, chg_max=None, cryptos=None, ti
 
 
 def btc_rejim():
-    """Rejim tespiti (hipotez#1: 'yon = rejim'; ayi -> yuksek radar skoru = SHORT adayi).
-    Birincil: BTC gunluk kapanis vs SMA20 + egim. Ek baglam: piyasa_yapisi_log son satiri (taze ise)."""
+    """Rejim tespiti — F10 SEZON×HAVA katmanlama (2026-07-22, tur-2 Faz 1).
+    Eski tek-katman (1d SMA20+egim) kil-payi farki bile kesin BOGA/AYI diyordu -> 2026 boyunca
+    yanlis 'BOGA' (F10 replay: 35 islemin hicbiri gercek TAM_BOGA degildi, -$440 kayip).
+    Yeni: SEZON (haftalik 20-ort+egim, yavas) × HAVA (gunluk SMA20 + olu bant + histerezis, hizli).
+    Capraz -> TAM_BOGA/TEPKI_RALLISI/DERIN_AYI/BOGA_DUZELTME/BELIRSIZ. 'rejim' alani GERIYE-UYUMLU
+    3'lu uzaya (BOGA/AYI/NOTR) map'lenir; mevcut karar_yon degismeden dogru davranir
+    (TEPKI_RALLISI->AYI: long-aday kapanir, fade acilir). Saf fiyat (fundamental CEO'da).
+    Belirsizlik BIRINCI SINIF: kil-payi -> NOTR (SXT 'kil-payi-boga' hatasi imkansiz)."""
     rejim, detay = "BILINMIYOR", {}
     try:
-        d = get(f"{SPOT}/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=30")
+        d = get(f"{SPOT}/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=40")
         cl = [float(k[4]) for k in d]
-        sma20 = statistics.mean(cl[-20:])
-        slope = cl[-1] - cl[-20]
-        if cl[-1] > sma20 and slope > 0:
-            rejim = "BOGA"
-        elif cl[-1] < sma20 and slope < 0:
-            rejim = "AYI"
+        w = get(f"{SPOT}/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=30")
+        wc = [float(k[4]) for k in w]
+        # SEZON (yavas): haftalik kapanis vs son 20 kapali hafta ort + egim
+        sezon = "?"
+        if len(wc) >= 21:
+            w_ort = statistics.mean(wc[-21:-1])
+            w_egim = wc[-1] - wc[-21]
+            if wc[-1] > w_ort and w_egim > 0:
+                sezon = "BOGA"
+            elif wc[-1] < w_ort and w_egim < 0:
+                sezon = "AYI"
+            else:
+                sezon = "NOTR"
+        # HAVA (hizli): gunluk SMA20 + olu bant + histerezis (flip-flop yok)
+        olu = esik("f10_olu_bant_pct", 2.0)
+        hist = int(esik("f10_histerezis_gun", 3))
+        ham = []
+        for i in range(20, len(cl)):
+            sma = statistics.mean(cl[i-20:i])
+            uz = (cl[i] - sma) / sma * 100
+            ham.append("NOTR" if abs(uz) < olu else ("BOGA" if uz > 0 else "AYI"))
+        hava = ham[0] if ham else "NOTR"
+        for i in range(len(ham)):
+            if i < hist:
+                hava = ham[i]
+            else:
+                pen = ham[i-hist+1:i+1]
+                if all(x == pen[0] for x in pen):
+                    hava = pen[0]
+        # capraz F10 etiket
+        if sezon == "AYI" and hava == "BOGA":
+            f10 = "TEPKI_RALLISI"
+        elif sezon == "BOGA" and hava == "BOGA":
+            f10 = "TAM_BOGA"
+        elif sezon == "AYI" and hava == "AYI":
+            f10 = "DERIN_AYI"
+        elif sezon == "BOGA" and hava == "AYI":
+            f10 = "BOGA_DUZELTME"
         else:
+            f10 = "BELIRSIZ"
+        # 3'lu map (geriye-uyum: karar_yon BOGA/AYI/NOTR bekler; yon dogru tarafa duser)
+        if f10 == "TAM_BOGA":
+            rejim = "BOGA"
+        elif f10 in ("TEPKI_RALLISI", "DERIN_AYI"):
+            rejim = "AYI"
+        else:  # BOGA_DUZELTME, BELIRSIZ -> temkin
             rejim = "NOTR"
-        detay = {"btc": round(cl[-1], 0), "sma20": round(sma20, 0)}
+        detay = {"btc": round(cl[-1], 0), "sma20": round(statistics.mean(cl[-20:]), 0),
+                 "sezon": sezon, "hava": hava, "f10": f10}
     except Exception:
         pass
     # piyasa_yapisi trend logu (varsa ve <24h taze ise) baglama eklenir
