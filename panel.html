@@ -402,10 +402,13 @@ async function tickSistem() {
     document.getElementById('para-alt').innerHTML =
       `Altlar (TOTAL3): <b class="${altCls}">${pnlSign(pa.total3_chg)}${pa.total3_chg}% ${pa.alt_yon}</b>`;
     document.getElementById('para-breadth').innerHTML =
-      `Breadth: <b class="${(pa.breadth || 0) >= 50 ? 'pnl-pos' : 'pnl-neg'}">${pa.breadth}%</b>`;
-    document.getElementById('para-donus').innerHTML = pa.donus_teyit
-      ? `<b class="pnl-pos">↑ ALT-ROTASYON TEYİDİ (boğa-dönüş sinyali)</b>`
-      : `<span class="sub" style="margin:0;font-size:11px;">dönüş teyidi yok (TOTAL3↑ + BTC.D↓ + breadth≥50 bekleniyor)</span>`;
+      `Breadth: <b class="${(pa.breadth || 0) >= 50 ? 'pnl-pos' : 'pnl-neg'}">${pa.breadth}%</b>` +
+      ` · BTC.D 55'e <b class="${pa.btcd_55_uzaklik <= 0 ? 'pnl-pos' : 'pnl-neg'}">${pa.btcd_55_uzaklik > 0 ? pa.btcd_55_uzaklik + ' puan' : 'KIRDI'}</b>`;
+    document.getElementById('para-donus').innerHTML = pa.alt_boga
+      ? `<b class="pnl-pos">🚀 ALT-BOĞA (BTC.D<55 + TOTAL3↑ + breadth≥50 + BTC sağlıklı)</b>`
+      : (pa.donus_teyit
+        ? `<b class="pnl-pos">↑ alt-rotasyon başlıyor (BTC.D 55 kırılımı bekleniyor)</b>`
+        : `<span class="sub" style="margin:0;font-size:11px;">alt-boğa yok — tetik: BTC.D 55 altı + TOTAL3↑ + breadth≥50 + SEZON boğa</span>`);
   }
 
   // gercek pozisyonlar

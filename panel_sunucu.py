@@ -186,14 +186,24 @@ def _para_akisi(geri=14):
     t3_chg = yuzde(t3(son), t3(ilk))
     btcd_chg = round(son["btc_d"] - ilk["btc_d"], 2)
     breadth = brd(son)
-    # boga-donus erken teyidi (kullanici hipotez#3): TOTAL3 yukari + BTC.D asagi + breadth>=50
+    btcd = son["btc_d"]
+    # ALT-BOGA tetigi (kullanici tezi 2026-07-22): BTC.D 55 altina kirilim ASIL sinyal.
+    # AMA tek basina yetmez -> BTC saglikli (SEZON!=AYI) olmali; yoksa BTC.D dususu risk-off
+    # cokusu de olabilir (alt-katliam, boga degil). SEZON F10'dan (btc_rejim.sezon).
+    try:
+        sezon = evren.btc_rejim().get("sezon")
+    except Exception:
+        sezon = None
+    alt_boga = (btcd < 55.0 and t3_chg > 0 and (breadth or 0) >= 50 and sezon != "AYI")
+    # boga-donus erken teyidi (hipotez#3, alt-boga'dan once): TOTAL3 yukari + BTC.D asagi + breadth>=50
     donus_teyit = (t3_chg > 0 and btcd_chg < 0 and (breadth or 0) >= 50)
     return {"ts": son.get("ts"), "total_t": round(son["total"] / 1e12, 3),
             "total_chg": total_chg, "total2_chg": t2_chg, "total3_chg": t3_chg,
-            "btcd": round(son["btc_d"], 1), "btcd_chg": btcd_chg, "breadth": breadth,
+            "btcd": round(btcd, 1), "btcd_chg": btcd_chg, "btcd_55_uzaklik": round(btcd - 55, 1),
+            "breadth": breadth, "sezon": sezon,
             "alt_yon": "GIRIYOR" if t3_chg > 0 else "CIKIYOR",
             "btc_yon": "BTC'ye kaciyor" if btcd_chg > 0 else "BTC'den altlara",
-            "donus_teyit": donus_teyit, "gun": geri // 2}
+            "donus_teyit": donus_teyit, "alt_boga": alt_boga, "gun": geri // 2}
 
 
 def _sistem_json(ttl=60.0):
