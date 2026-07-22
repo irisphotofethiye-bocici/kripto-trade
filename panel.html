@@ -93,6 +93,16 @@
     <span class="sub" style="margin:0;font-size:11px;">K1 kesin değil — 21 Tem'de kapanan-R ve rejim-hücre kriterleriyle birlikte bakılır</span>
   </div>
 
+  <div id="para-serit" class="sayac-serit" style="display:none;">
+    <span style="font-weight:600;">Para Akışı (7g):</span>
+    <span id="para-total">-</span>
+    <span id="para-btc">-</span>
+    <span id="para-alt">-</span>
+    <span id="para-breadth">-</span>
+    <span id="para-donus"></span>
+    <span class="sub" style="margin:0;font-size:11px;">gösterge, kapı değil — para altlara akıyorsa poz güveni artar (CEO bağlamı)</span>
+  </div>
+
   <div class="grid-cards">
     <div class="card"><div class="label">Bakiye (sanal)</div><div class="value" id="c-equity">-</div></div>
     <div class="card"><div class="label">Serbest Bakiye</div><div class="value" id="c-serbest">-</div></div>
@@ -378,6 +388,24 @@ async function tickSistem() {
     const dEq = s.equity - s.baslangic_bakiye;
     document.getElementById('sayac-k1').innerHTML =
       `K1 equity ön-izleme: <b class="${pnlClass(dEq)}">$${fmt2(s.equity)} (${pnlSign(dEq)}${fmt2(dEq)}$) ${s.k1_equity_ok ? '✓' : '✗'}</b>`;
+  }
+
+  // para akisi (TOTAL2/3 gostergesi)
+  const pa = d.para_akisi;
+  if (pa) {
+    document.getElementById('para-serit').style.display = 'flex';
+    document.getElementById('para-total').innerHTML =
+      `Kripto: <b class="${pnlClass(pa.total_chg)}">${pnlSign(pa.total_chg)}${pa.total_chg}%</b> ($${pa.total_t}T)`;
+    document.getElementById('para-btc').innerHTML =
+      `BTC.D: <b>${pa.btcd}%</b> (${pnlSign(pa.btcd_chg)}${pa.btcd_chg}) <span class="sub" style="margin:0;font-size:11px;">${pa.btc_yon}</span>`;
+    const altCls = pa.total3_chg > 0 ? 'pnl-pos' : 'pnl-neg';
+    document.getElementById('para-alt').innerHTML =
+      `Altlar (TOTAL3): <b class="${altCls}">${pnlSign(pa.total3_chg)}${pa.total3_chg}% ${pa.alt_yon}</b>`;
+    document.getElementById('para-breadth').innerHTML =
+      `Breadth: <b class="${(pa.breadth || 0) >= 50 ? 'pnl-pos' : 'pnl-neg'}">${pa.breadth}%</b>`;
+    document.getElementById('para-donus').innerHTML = pa.donus_teyit
+      ? `<b class="pnl-pos">↑ ALT-ROTASYON TEYİDİ (boğa-dönüş sinyali)</b>`
+      : `<span class="sub" style="margin:0;font-size:11px;">dönüş teyidi yok (TOTAL3↑ + BTC.D↓ + breadth≥50 bekleniyor)</span>`;
   }
 
   // gercek pozisyonlar

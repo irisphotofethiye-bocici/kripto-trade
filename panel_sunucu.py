@@ -164,6 +164,38 @@ def _sayac(st):
         return None
 
 
+def _para_akisi(geri=14):
+    """TOTAL2/3 para-akisi gostergesi (2026-07-22, kullanici: 'baslibasina indikator, kapi degil').
+    piyasa_yapisi_log'dan turetilir (total/btc_d/eth_d zaten var). Kripto+altlara para giriyor mu,
+    BTC'ye mi kaciyor? Bota KAPI DEGIL — CEO/insan icin baglam + boga-donus erken teyidi."""
+    try:
+        lines = [json.loads(l) for l in open(os.path.join(HERE, "piyasa_yapisi_log.jsonl"),
+                                             encoding="utf-8").read().splitlines() if l.strip()]
+    except Exception:
+        return None
+    if len(lines) < 2:
+        return None
+    def t2(d): return d["total"] * (1 - d["btc_d"] / 100)
+    def t3(d): return d["total"] * (1 - d["btc_d"] / 100 - d.get("eth_d", 0) / 100)
+    def brd(d): return next((v for k, v in d.items() if k.startswith("breadth")), None)
+    son = lines[-1]
+    ilk = lines[-geri] if len(lines) >= geri else lines[0]
+    def yuzde(a, b): return round((a - b) / b * 100, 1) if b else 0.0
+    total_chg = yuzde(son["total"], ilk["total"])
+    t2_chg = yuzde(t2(son), t2(ilk))
+    t3_chg = yuzde(t3(son), t3(ilk))
+    btcd_chg = round(son["btc_d"] - ilk["btc_d"], 2)
+    breadth = brd(son)
+    # boga-donus erken teyidi (kullanici hipotez#3): TOTAL3 yukari + BTC.D asagi + breadth>=50
+    donus_teyit = (t3_chg > 0 and btcd_chg < 0 and (breadth or 0) >= 50)
+    return {"ts": son.get("ts"), "total_t": round(son["total"] / 1e12, 3),
+            "total_chg": total_chg, "total2_chg": t2_chg, "total3_chg": t3_chg,
+            "btcd": round(son["btc_d"], 1), "btcd_chg": btcd_chg, "breadth": breadth,
+            "alt_yon": "GIRIYOR" if t3_chg > 0 else "CIKIYOR",
+            "btc_yon": "BTC'ye kaciyor" if btcd_chg > 0 else "BTC'den altlara",
+            "donus_teyit": donus_teyit, "gun": geri // 2}
+
+
 def _sistem_json(ttl=60.0):
     global _sistem_cache
     now = time.time()
@@ -171,7 +203,8 @@ def _sistem_json(ttl=60.0):
         return _sistem_cache[1]
     st = testbot._load_state()
     out = {"veto": _veto_ozet(), "gercek_pozisyonlar": _gercek_pozlar(),
-           "erken_kusak": _erken_kusak(), "sayac": _sayac(st) if st else None}
+           "erken_kusak": _erken_kusak(), "sayac": _sayac(st) if st else None,
+           "para_akisi": _para_akisi()}
     _sistem_cache = (now, out)
     return out
 
