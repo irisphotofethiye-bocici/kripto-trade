@@ -298,7 +298,12 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
             elif (taker or 0) < 1.0:
                 _veto_ekle(veto_out, "taker_soguma", f"NOTR-LONG taker<1.0 (taker={taker}, agresif-alici teyidi yok)", "LONG")
             else:
-                return ("LONG", "ANINDA", "NOTR: stage-aktif+smart-LONG+taker-alim")
+                # Faz 2 (2026-07-22, kullanici karari "belirsizde long kapali, fade acik"):
+                # F10 BELIRSIZ/NOTR rejimde anomali-LONG artik ACILMAZ (temiz-aday olsa bile).
+                # Gerekce: replay/erken-kusak — belirsizde anomali-long negatif; F1 trend-long
+                # gelince yalniz TAM_BOGA'da acilir. AYI-AAVE-istisnasi (kullanici karari) KORUNDU;
+                # NOTR-SHORT/fade tarafi acik (pump'lari fade'le yakala).
+                _veto_ekle(veto_out, "long_veto", "NOTR-belirsiz: temiz-aday ama rejim-long kapali (fade acik)", "LONG")
         if smart == "SHORT" and not short_riskli_dip and not asiri_dusmus:
             return ("SHORT", "ANINDA", "NOTR: stage-aktif+smart-SHORT")
     return None
