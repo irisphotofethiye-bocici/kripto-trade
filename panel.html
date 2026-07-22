@@ -97,6 +97,7 @@
     <span style="font-weight:600;">Para Akışı (7g):</span>
     <span id="para-total">-</span>
     <span id="para-btc">-</span>
+    <span id="para-usdt">-</span>
     <span id="para-alt">-</span>
     <span id="para-breadth">-</span>
     <span id="para-donus"></span>
@@ -401,6 +402,9 @@ async function tickSistem() {
     const altCls = pa.total3_chg > 0 ? 'pnl-pos' : 'pnl-neg';
     document.getElementById('para-alt').innerHTML =
       `Altlar (TOTAL3): <b class="${altCls}">${pnlSign(pa.total3_chg)}${pa.total3_chg}% ${pa.alt_yon}</b>`;
+    const usdtCls = pa.usdtd_chg < 0 ? 'pnl-pos' : (pa.usdtd_chg > 0 ? 'pnl-neg' : '');
+    document.getElementById('para-usdt').innerHTML =
+      `USDT.D: <b>${pa.usdtd}%</b> (${pnlSign(pa.usdtd_chg)}${pa.usdtd_chg}) <span class="sub ${usdtCls}" style="margin:0;font-size:11px;">${pa.usdt_yon}</span>`;
     document.getElementById('para-breadth').innerHTML =
       `Breadth: <b class="${(pa.breadth || 0) >= 50 ? 'pnl-pos' : 'pnl-neg'}">${pa.breadth}%</b>` +
       ` · BTC.D 55'e <b class="${pa.btcd_55_uzaklik <= 0 ? 'pnl-pos' : 'pnl-neg'}">${pa.btcd_55_uzaklik > 0 ? pa.btcd_55_uzaklik + ' puan' : 'KIRDI'}</b>`;
