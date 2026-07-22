@@ -130,22 +130,36 @@ def measure(symbol, side, tf, limit, spot=False, entry=None):
     res, sup = nearest(ref, highs, lows)
     side = side.lower()
 
+    # K4/F9 (2026-07-22, SKL vakasi): swings(3,3) taze retrace dibini goremeyince stop 1.5*ATR
+    # fallback'e dusuyordu (SKL: -%10.6, mantikli seviye -%5.2). Duzeltme: 3 aday-invalidasyon
+    # (swing destegi + son N-bar dibi + 1.5*ATR) arasindan girise EN YAKIN gecerli olani secilir.
+    # Yeni esik icat yok; mevcut swing/ATR + config nbar. Yon/TP/R-R mantigi degismedi.
+    nbar = int(_esik("olcucu_nbar_stop", 10))
     if side == "long":
-        # SL: yapısal destek 3*ATR içindeyse onun biraz altı; değilse ATR tabanlı
+        adaylar = []
         if sup is not None and (ref - sup) <= 3 * a:
-            sl = sup - 0.25 * a
-        else:
-            sl = ref - 1.5 * a
+            adaylar.append(sup - 0.25 * a)               # yapisal destek
+        nbar_low = min(b["l"] for b in bars[-nbar:])
+        if nbar_low < ref:
+            adaylar.append(nbar_low - 0.25 * a)          # taze N-bar dibi
+        adaylar.append(ref - 1.5 * a)                    # ATR fallback
+        gecerli = [s for s in adaylar if s < ref]
+        sl = max(gecerli) if gecerli else ref - 1.5 * a  # girise en yakin (en yuksek)
         risk = ref - sl
         # TP1: en yakın yapısal direnç (varsa); yoksa 2R uzantı
         tp1 = res if (res is not None and res > ref) else ref + 2 * risk
         tp2 = tp1 + 1.5 * risk
         rr = (tp1 - ref) / risk if risk > 0 else 0.0
-    else:  # short
+    else:  # short (simetrik)
+        adaylar = []
         if res is not None and (res - ref) <= 3 * a:
-            sl = res + 0.25 * a
-        else:
-            sl = ref + 1.5 * a
+            adaylar.append(res + 0.25 * a)               # yapisal direnc
+        nbar_high = max(b["h"] for b in bars[-nbar:])
+        if nbar_high > ref:
+            adaylar.append(nbar_high + 0.25 * a)         # taze N-bar tepesi
+        adaylar.append(ref + 1.5 * a)                    # ATR fallback
+        gecerli = [s for s in adaylar if s > ref]
+        sl = min(gecerli) if gecerli else ref + 1.5 * a  # girise en yakin (en dusuk)
         risk = sl - ref
         tp1 = sup if (sup is not None and sup < ref) else ref - 2 * risk
         tp2 = tp1 - 1.5 * risk
