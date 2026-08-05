@@ -4,7 +4,9 @@
 RADAR - Faz 3/6: hareketten ONCE veya tam baslarken yakalama (öncü imza taramasi).
 "Sonradan en cok artan"i DEGIL, yukselisi tetikleyen oncu kosullari arar:
   - OI fiyat yatayken hizli sisiyor (pozisyon kuruluyor)
-  - funding negatife/asiriya kayiyor (squeeze yakiti) ama fiyat daha oynamadi
+  - funding asiriya kayiyor ama fiyat daha oynamadi
+    [2026-08-03: "negatife kayma = squeeze yakiti" okumasi OLCUMLE curudu; derin-negatif
+     funding LONG habercisi degil, dususe-devam uyarisidir. Bkz. analyze() s_fund notu.]
   - volatilite sikismasi (coiling) -> ilk genisleme
   - hacim tabandan uyaniyor
 2 asama: (1) Binance 24h ticker'dan likit + henuz-patlamamis havuz; (2) her aday icin 1h klines + OI + funding.
@@ -105,8 +107,26 @@ def analyze(sym, btc_chg3=0.0):
 
     # --- skor (0-100) ---
     s_oi = clamp((oi24 or 0)/20)*25 + clamp((oi3 or 0)/8)*10
-    # negatif funding = squeeze yakiti AMA yalniz fiyat dusmuyorsa (yoksa bu sadece dususte short baskisi)
+    # --- ADI YANLIS, ISI DOGRU: "squeeze_bonus" aslinda bir DUSUS habercisi ---
+    # Tarihce (uc adim, hepsi kayitli — Madde 9):
+    #  2026-07-07 EKLENDI: sezgiyle, "negatif funding = yukari squeeze yakiti" premisiyle. Olculmedi.
+    #  2026-08-03 KALDIRILDI: premis iki olcumle curudu (zemin etudu: en dusuk funding kovasi her
+    #             iki yarida da en kotu; arsiv_analiz: DIP_YAKIT +24h SHORT %73). Gerekce SU HATAYA
+    #             dayaniyordu: "premis yanlis" ile "kural zararli" karistirildi.
+    #  2026-08-03 GERI ALINDI (skor otopsisi, 125 epizot, 1h yol testi, kullanici karari "evet al"):
+    #             Premis gercekten yanlis (yukari squeeze DEGIL) AMA kural, DUSECEK coinleri
+    #             isaretliyor — ve bot bu skoru AYI rejiminde SHORT icin kullaniyor (6/6 islem SHORT).
+    #             Yani "long icin en kotu kova" = "short icin en iyi kova".
+    #             Olcum (stop +%3 / hedef -%6 / 72sa, skor>=60 bandi):
+    #               bonus ALAN  : hedef %58.7 stop %31.7  ort R=+0.89
+    #               bonus ALMAYAN: hedef %36.1 stop %52.5  ort R=+0.25
+    #             Botun fiili bandinda (45-60) fark NOTR (+0.30 vs +0.32) -> zarari yok, ustte faydasi var.
+    # SINIR: tek 41 gunluk pencere, YALNIZ ayi piyasasi. Bogada "sert duser" tersine donebilir.
+    #        Bogaya girildiginde bu kural YENIDEN olculmelidir.
     squeeze_bonus = 8 if (f is not None and f < -0.01 and last3 >= -1 and (oi3 or 0) >= 0) else 0
+    # NOT: abs() BILINCLI olarak DOKUNULMADI. Zemin etudu bilginin funding'in ISARETINDE
+    # oldugunu gosterdi, ama o olcum gun-hafta olcegindeydi; bot saatlik calisiyor.
+    # Puanlamayi isaretli hale getirmek AYRI bir olcum ister (Madde 9) — sezgiyle degistirilmez.
     s_fund = clamp(abs(f or 0)/0.05)*15 + squeeze_bonus
     s_comp = clamp((0.8 - comp)/0.5)*20
     s_vol = clamp((vol_x - 1.5)/3)*20
@@ -122,7 +142,12 @@ def analyze(sym, btc_chg3=0.0):
         stage = "izle"
 
     # --- DENEYSEL oncu-sekil etiketleri (KAPI DEGIL; sadece gorunurluk + arsiv, henuz dogrulanmadi) ---
-    # Sekil 3 DIP_YAKIT: asiri neg funding (short kalabalik) + dipte + OI dagilmamis = short-squeeze yakiti
+    # Sekil 3 DIP_YAKIT: asiri neg funding (short kalabalik) + dipte + OI dagilmamis.
+    # [ANLAM DEGISTI 2026-08-03 — hesap AYNEN korundu (arsiv sureklililigi), YORUMU dondu:]
+    #   ESKI okuma: "short-squeeze yakiti" = LONG kurulumu.
+    #   YENI okuma: **UYARI**. Iki olcum ayni yonu gosterdi — derin-negatif funding yukselisin
+    #   habercisi degil, dususe devamin isareti (bkz. s_fund'daki squeeze_bonus notu).
+    #   Etiket SILINMEDI cunku olcum degeri var; yalniz "yakit" degil "uyari" olarak okunur.
     # oi24 >= -1: gurultu seviyesi duzlugu tolere et, gercek dagilma (-3%+) elensin (kullanici karari 2026-06-24)
     dip_yakit = bool(f is not None and f < -0.05 and pos < 0.25 and (oi24 or 0) >= -1)
     # Sekil 4 AYRISMA: BTC duz/asagi iken coin yukari ayrisiyor = bagimsiz goreli guc (PENGU arketipi)
@@ -158,6 +183,8 @@ def erken_kusak_tara(cryptos, tickers, haric=None, btc_chg3=0.0):
         if not s.endswith("USDT") or any(b in s for b in BAD):
             continue
         sym = s[:-4]
+        if cryptos and sym not in cryptos:  # KRIPTO-ONLY (2026-07-23 bug-fix, Madde 8): erken-kusak
+            continue                          # cryptos'u hic kullanmiyordu -> tokenize-hisse (SKHY/SPCX/DELL/INTC...) sizyordu
         if sym in haric:
             continue
         try:
@@ -394,11 +421,12 @@ def main():
                   f"{(r.get('score') if r.get('score') is not None else '-'):>5} {(r.get('stage') or '-'):>12} "
                   f"{(r.get('pos') if r.get('pos') is not None else '-'):>5} "
                   f"{('%.3f' % r['funding']) if r.get('funding') is not None else '-':>7} {(r.get('smart') or '-')[:5]:>5}")
-    show("DIP_YAKIT - neg-funding dip / squeeze kurulumu (DENEYSEL etiket, kapi DEGIL)", [r for r in rows if r.get("dip_yakit")][:8])
+    show("DIP_YAKIT - derin-neg funding + dipte = UYARI (2026-08-03: squeeze DEGIL; kapi DEGIL)", [r for r in rows if r.get("dip_yakit")][:8])
     show("AYRISMA - BTC'ye karsi goreli guc (DENEYSEL etiket, kapi DEGIL)", [r for r in rows if r.get("ayrisma")][:8])
     show("EN YUKSEK SKOR (genel, ilk 10)", rows[:10])
     print("\nNot: oncu olasilik; yon yukari da asagi da olabilir. DIP_YAKIT/AYRISMA = DENEYSEL etiket (kapi DEGIL; AYRISMA ayi-rejiminde NEGATIF-edge cikti). "
-          "DIP_YAKIT + DUSUK_FLOAT = squeeze degil dusen-bicak riski (RE/FOGO). smart=top-trader yonu, taker=aggressor (Pillar D). Kisa liste -> CEO derin analiz + Bekci.")
+          "DIP_YAKIT 2026-08-03'ten beri UYARI olarak okunur (long yakiti DEGIL): derin-neg funding kovasi olcumde her iki donemde de en kotu cikti. "
+          "DIP_YAKIT + DUSUK_FLOAT = dusen-bicak riski (RE/FOGO). smart=top-trader yonu, taker=aggressor (Pillar D). Kisa liste -> CEO derin analiz + Bekci.")
 
 if __name__ == "__main__":
     main()
