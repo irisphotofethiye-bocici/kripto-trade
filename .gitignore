@@ -29,15 +29,27 @@ testbot_state.json
 testbot_islemler.jsonl
 testbot_equity.jsonl
 veto_log.jsonl
+testbot_aday_arsiv.jsonl
+btc_pay_log.jsonl
+panel_islem_log.jsonl
+
+# "Ben" hesabi — bagimsiz ikinci sanal kasa (2026-08-05)
+benim_state.json
+benim_islemler.jsonl
+benim_equity.jsonl
 
 # Likidasyon akisi runtime (lokal log)
 likidasyon_log.jsonl
+coinalyze_liq_log.jsonl
 
 # Panel sunucu runtime (lokal log)
 panel_out.log
 
 # TestBot mutex kilidi (runtime, race-condition korumasi)
 testbot.lock
+
+# Arsiv (olu kod + gecmis tur-loglari; 2026-07-23 sadelestirme, geri-alinabilir)
+arsiv/
 
 # OS / editor
 .DS_Store
