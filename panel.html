@@ -867,11 +867,12 @@ async function coinDetayYukle(){
     ].map(k=>'<div class="kart"><div class="etiket">'+(k[3]?T(k[3],k[4],k[0]):k[0])+'</div>'+
       '<div class="deger" style="font-size:17px">'+k[1]+'</div><div class="alt">'+k[2]+'</div></div>').join('')+'</div>'+
 
-    '<div class="satir" style="margin:14px 0 10px">'+
+    '<div class="satir" style="margin:14px 0 6px">'+
       '<span class="sonuk" style="font-size:11px">ZAMAN DİLİMİ</span>'+
       Object.keys(TF_AD).map(t=>'<button onclick="coinTfSec(\''+t+'\')" '+
         (t===coinTf?'style="border-color:var(--vurgu);color:var(--vurgu);font-weight:600"':'')+'>'+TF_AD[t]+'</button>').join('')+
     '</div>'+
+    '<div class="satir" id="katmanlar" style="margin:0 0 10px"></div>'+
     '<div id="gFiyat" style="height:320px"></div>'+
     '<div id="gHacim" style="height:80px;margin-top:2px"></div>'+
     '<div id="gRsi" style="height:95px;margin-top:2px"></div>'+
@@ -928,6 +929,8 @@ async function coinDetayYukle(){
       '</tbody></table></div>'+
     '<div class="not">Botun net ödül/risk eşiği <b>2,0</b>. Bunun altındaysa '+
       T('veto',null,'R/R vetosu')+' devreye girer ve bot girmez.</div>'+
+    '<h3>Grafikteki dilimin diğer seviyeleri</h3>'+
+    '<div id="seviyeListe"><div class="bos">yükleniyor…</div></div>'+
   '</section>'+
 
   '<section><h2>Bu işlemin gizli maliyeti</h2>'+
@@ -968,14 +971,44 @@ async function coinDetayYukle(){
   al('/api/coin_gecmis?sym='+coinSec).then(gecmisCiz).catch(()=>{});
 }
 
-/* ---- 3 panelli grafik (fiyat+BB+MA / hacim / RSI), zaman ekseni senkron ---- */
+/* ---- katman anahtarlari: varsayilan SADE, ne istersen ac ----
+   2026-08-05: onceden fiyat grafiginde 17 cizgi vardi (3 Bollinger + 2 MA +
+   12 yatay seviye) ve grafik okunmuyordu. Artik varsayilan yalniz mum +
+   en yakin destek/direnc; digerleri tek tikla aciliyor ve secim hatirlaniyor. */
+const KATMAN_VARSAYILAN = {bb:false, ma:false, sr:true, hacim:true, rsi:true};
+let katman = Object.assign({}, KATMAN_VARSAYILAN,
+  JSON.parse(localStorage.getItem('katmanlar')||'{}'));
+function katmanDegis(k){
+  katman[k] = !katman[k];
+  localStorage.setItem('katmanlar', JSON.stringify(katman));
+  coinGrafikYukle();
+}
+const KATMAN_AD = {bb:'Bollinger', ma:'MA50/200', sr:'Destek/direnç',
+                   hacim:'Hacim', rsi:'RSI'};
+
 async function coinGrafikYukle(){
   ['gFiyat','gHacim','gRsi'].forEach(id=>{ if(grafikler[id]){ try{grafikler[id].c.remove();}catch(e){} delete grafikler[id]; }});
   let d;
   try{ d = await al('/api/coin_mum?sym='+coinSec+'&tf='+coinTf+'&limit=300'); }catch(e){ return; }
   if(d.hata || !d.mumlar || !d.mumlar.length){ $('#grafikNot').textContent='Mum verisi alınamadı.'; return; }
   const m=d.mumlar, sv=d.seviyeler||{};
-  const yap = (id,h)=>{ const el=document.getElementById(id);
+  const varMi=a=>a && a.some(v=>v!=null);
+
+  // katman butonlari
+  $('#katmanlar').innerHTML = '<span class="sonuk" style="font-size:11px">GÖSTER</span>'+
+    Object.keys(KATMAN_AD).map(k=>{
+      const yok = (k==='ma' && !varMi(d.ma50) && !varMi(d.ma200));
+      return '<button onclick="katmanDegis(\''+k+'\')"'+
+        (katman[k]?' style="border-color:var(--vurgu);color:var(--vurgu);font-weight:600"':'')+
+        (yok?' disabled title="bu dilimde yeterli mum yok"':'')+'>'+
+        (katman[k]?'✓ ':'')+KATMAN_AD[k]+'</button>';}).join('');
+
+  // panel yuksekliklerini katmana gore ayarla
+  document.getElementById('gHacim').style.display = katman.hacim?'block':'none';
+  document.getElementById('gRsi').style.display   = katman.rsi?'block':'none';
+
+  const yap = id=>{ const el=document.getElementById(id);
+    if(el.style.display==='none') return null;
     const c=LightweightCharts.createChart(el, Object.assign(grafikSecenek(),
       {width:el.clientWidth, height:el.clientHeight}));
     grafikler[id]={c:c,el:el};
@@ -986,52 +1019,81 @@ async function coinGrafikYukle(){
   const mum=c1.addCandlestickSeries({upColor:renk('--iyi'),downColor:renk('--kotu'),
     borderVisible:false,wickUpColor:renk('--iyi'),wickDownColor:renk('--kotu')});
   mum.setData(m.map(x=>({time:x.time,open:x.open,high:x.high,low:x.low,close:x.close})));
-  const cizgi=(c,veri,color,w)=>{ const s=c.addLineSeries({color:color,lineWidth:w||1,
-    priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+
+  const cizgi=(c,veri,color,w,stil)=>{ const s=c.addLineSeries({color:color,lineWidth:w||1,
+    lineStyle:stil||0, priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
     s.setData(veri.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null)); return s; };
-  cizgi(c1,d.bollinger.ust,'#8888aa'); cizgi(c1,d.bollinger.orta,'#8888aa');
-  cizgi(c1,d.bollinger.alt,'#8888aa');
-  cizgi(c1,d.ma50,renk('--uyari'),2); cizgi(c1,d.ma200,renk('--vurgu'),2);
-  (sv.direncler||[]).forEach(v=>mum.createPriceLine({price:v,color:renk('--kotu'),
-    lineWidth:1,lineStyle:2,axisLabelVisible:false}));
-  (sv.destekler||[]).forEach(v=>mum.createPriceLine({price:v,color:renk('--iyi'),
-    lineWidth:1,lineStyle:2,axisLabelVisible:false}));
 
-  const hac=c2.addHistogramSeries({priceLineVisible:false});
-  hac.setData(m.map(x=>({time:x.time,value:x.volume,
-    color:(x.close>=x.open?renk('--iyi'):renk('--kotu'))+'99'})));
-  const rs=c3.addLineSeries({color:renk('--vurgu'),lineWidth:2,priceLineVisible:false});
-  rs.setData(d.rsi.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null));
-  [30,70].forEach(v=>rs.createPriceLine({price:v,color:renk('--yazi3'),lineWidth:1,
-    lineStyle:2,axisLabelVisible:true,title:String(v)}));
+  if(katman.bb){
+    cizgi(c1,d.bollinger.ust,'#7b7ba8',1);
+    cizgi(c1,d.bollinger.orta,'#7b7ba8',1,2);   // orta cizgi KESIKLI -> banttan ayrilir
+    cizgi(c1,d.bollinger.alt,'#7b7ba8',1);
+  }
+  if(katman.ma){
+    if(varMi(d.ma50))  cizgi(c1,d.ma50, renk('--uyari'),2);
+    if(varMi(d.ma200)) cizgi(c1,d.ma200,renk('--vurgu'),2);
+  }
+  if(katman.sr){
+    // YALNIZ en yakin bir direnc + bir destek (etiketli). Fazlasi grafigi bogar.
+    if(sv.en_yakin_direnc!=null) mum.createPriceLine({price:sv.en_yakin_direnc,
+      color:renk('--kotu'),lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'direnç'});
+    if(sv.en_yakin_destek!=null) mum.createPriceLine({price:sv.en_yakin_destek,
+      color:renk('--iyi'),lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'destek'});
+  }
 
-  [c1,c2,c3].forEach(c=>{ c.timeScale().fitContent();
+  if(c2){ const hac=c2.addHistogramSeries({priceLineVisible:false});
+    hac.setData(m.map(x=>({time:x.time,value:x.volume,
+      color:(x.close>=x.open?renk('--iyi'):renk('--kotu'))+'88'}))); }
+  if(c3){ const rs=c3.addLineSeries({color:renk('--vurgu'),lineWidth:2,priceLineVisible:false});
+    rs.setData(d.rsi.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null));
+    [30,70].forEach(v=>rs.createPriceLine({price:v,color:renk('--yazi3'),lineWidth:1,
+      lineStyle:2,axisLabelVisible:true,title:String(v)})); }
+
+  const hepsi=[c1,c2,c3].filter(Boolean);
+  hepsi.forEach(c=>{ c.timeScale().fitContent();
     c.timeScale().subscribeVisibleLogicalRangeChange(rg=>{ if(!rg) return;
-      [c1,c2,c3].forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} }); }); });
+      hepsi.forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} }); }); });
 
   const sonRsi=[...d.rsi].reverse().find(v=>v!=null);
-  const varMi=a=>a && a.some(v=>v!=null);
   const oge=(renkV,ad,terim,deger,sinif)=>'<span class="oge">'+
     '<i class="'+(sinif||'')+'" style="border-top-color:'+renkV+';'+
     (sinif==='kutu'?'background:'+renkV+';':'')+'"></i>'+
     (terim?T(terim,deger,ad):ad)+'</span>';
-  $('#grafikLegend').innerHTML =
-    oge(renk('--iyi'),'yükselen mum',null,null,'kutu')+
-    oge(renk('--kotu'),'düşen mum',null,null,'kutu')+
-    oge('#8888aa','Bollinger (20 mum ±2σ)','bollinger')+
-    (varMi(d.ma50)?oge(renk('--uyari'),'MA50 (50 mum ortalama)','ma50_200'):
-      '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA50 — yetersiz mum</span>')+
-    (varMi(d.ma200)?oge(renk('--vurgu'),'MA200 (200 mum ortalama)','ma50_200'):
-      '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA200 — bu dilimde 200 mum yok</span>')+
-    oge(renk('--kotu'),'direnç seviyeleri','destek_direnc',null,'kesik')+
-    oge(renk('--iyi'),'destek seviyeleri','destek_direnc',null,'kesik')+
-    oge(renk('--vurgu'),'RSI ('+n1(sonRsi)+')','rsi',sonRsi);
+  let lg = oge(renk('--iyi'),'yükselen',null,null,'kutu')+oge(renk('--kotu'),'düşen',null,null,'kutu');
+  if(katman.bb) lg += oge('#7b7ba8','Bollinger (20 mum ±2σ, orta çizgi kesikli)','bollinger');
+  if(katman.ma){
+    if(varMi(d.ma50))  lg += oge(renk('--uyari'),'MA50','ma50_200');
+    if(varMi(d.ma200)) lg += oge(renk('--vurgu'),'MA200','ma50_200');
+    else lg += '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA200 — bu dilimde 200 mum yok</span>';
+  }
+  if(katman.sr) lg += oge(renk('--kotu'),'en yakın direnç '+(sv.en_yakin_direnc!=null?sv.en_yakin_direnc:'–'),'destek_direnc',null,'kesik')+
+                      oge(renk('--iyi'),'en yakın destek '+(sv.en_yakin_destek!=null?sv.en_yakin_destek:'–'),'destek_direnc',null,'kesik');
+  if(katman.rsi) lg += oge(renk('--vurgu'),'RSI ('+n1(sonRsi)+')','rsi',sonRsi);
+  $('#grafikLegend').innerHTML = lg;
+
+  const dd=(sv.direncler||[]).length, ds=(sv.destekler||[]).length;
   $('#grafikNot').innerHTML =
     '<b>'+TF_AD[coinTf]+'</b> dilimi · '+m.length+' mum · '+
     'Bollinger ve hareketli ortalamalar <b>bu dilimin</b> mumlarını kullanıyor — '+
-    'yani şu an "20 mum" = <b>20 × '+TF_AD[coinTf]+'</b>. '+
-    'Botun kendi hesapları ise her zaman <b>1 saatlik</b> mumdan (aşağıdaki kutular). '+
-    'Kesikli çizgiler '+T('destek_direnc',null,'yapısal destek/direnç')+' — botun stopu tam olarak bunları kullanıyor.';
+    'yani burada "20 mum" = <b>20 × '+TF_AD[coinTf]+'</b>. '+
+    'Botun kendi hesapları ise her zaman <b>1 saatlik</b> mumdan (aşağıdaki kutular).'+
+    (katman.sr && (dd+ds)>0 ? '<br>Grafikte yalnız <b>en yakın</b> destek ve direnç çizili; '+
+      'diğer seviyeler aşağıdaki "Seviyeler" bölümünde listeli.' : '');
+
+  // grafikte cizilmeyen seviyeler tabloda gorunsun
+  const sl=$('#seviyeListe');
+  if(sl){
+    const fy=m[m.length-1].close;
+    const sat=(sv.direncler||[]).map(v=>['direnç',v]).concat((sv.destekler||[]).map(v=>['destek',v]))
+      .sort((a,b)=>b[1]-a[1])
+      .map(x=>'<tr><td class="'+(x[0]==='direnç'?'kotu':'iyi')+'">'+x[0]+'</td>'+
+        '<td class="sag">'+x[1]+'</td>'+
+        '<td class="sag '+snf((x[1]/fy-1)*100)+'">'+isar((x[1]/fy-1)*100)+n1((x[1]/fy-1)*100)+'%</td></tr>');
+    sl.innerHTML = tablo(['<th>Tür</th><th class="sag">Seviye</th><th class="sag">Fiyata uzaklık</th>'],
+      sat, 'Bu dilimde yapısal seviye bulunamadı.')+
+      '<div class="not">'+TF_AD[coinTf]+' mumlarından, fiyata en yakın 3\'er tane. '+
+      'Botun kendi stopu <b>1 saatlik</b> seviyeleri kullanır (yukarıdaki tablo).</div>';
+  }
 }
 
 /* ---- işlem formu: boyut, botun sizingiyle AYNI formülle önizlenir ---- */

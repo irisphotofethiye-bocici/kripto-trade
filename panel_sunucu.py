@@ -499,14 +499,20 @@ def _ohlcv(sym, interval, limit, ttl=30.0):
     return _tut(f"ohlcv:{sym}:{interval}:{limit}", ttl, uret)
 
 
-def _seviyeler(mumlar, fiyat):
-    """olcucu.swings + nearest — botun stopunun kullandigi YAPISAL seviyelerin aynisi."""
+def _seviyeler(mumlar, fiyat, adet=3):
+    """olcucu.swings + nearest — botun stopunun kullandigi YAPISAL seviyeler.
+
+    2026-08-05 DUZELTME: onceden en YUKSEK 6 direnc ve en DUSUK 6 destek
+    donuyordu (uc noktalar). 1 gunluk grafikte fiyat 74 iken direncler 146-211
+    cikiyor, grafik olcegi oraya kadar aciliyor ve gercek fiyat hareketi
+    okunamaz hale geliyordu. Artik FIYATA EN YAKIN olanlar donuyor."""
     bars = [{"o": m["open"], "h": m["high"], "l": m["low"], "c": m["close"]} for m in mumlar]
     try:
         hi, lo = olcucu.swings(bars)
         res, sup = olcucu.nearest(fiyat, hi, lo)
-        return {"direncler": sorted(set(round(x, 10) for x in hi))[-6:],
-                "destekler": sorted(set(round(x, 10) for x in lo))[:6],
+        ust = sorted({round(x, 10) for x in hi if x > fiyat}, key=lambda v: v - fiyat)[:adet]
+        alt = sorted({round(x, 10) for x in lo if x < fiyat}, key=lambda v: fiyat - v)[:adet]
+        return {"direncler": ust, "destekler": alt,
                 "en_yakin_direnc": res, "en_yakin_destek": sup}
     except Exception:
         return {"direncler": [], "destekler": [], "en_yakin_direnc": None, "en_yakin_destek": None}
