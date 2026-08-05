@@ -324,6 +324,21 @@ def _oku_json(ad, varsayilan=None):
         return varsayilan
 
 
+def _ticker_haritasi():
+    """TEK cagriyla tum perp ticker'lari (fiyat, 24s degisim, hacim, 24s yuksek/dusuk)."""
+    def uret():
+        h = {}
+        try:
+            for t in evren.raw_tickers("fapi") or []:
+                s = t.get("symbol", "")
+                if s.endswith("USDT"):
+                    h[s[:-4]] = t
+        except Exception:
+            pass
+        return h
+    return _tut("tickerlar", 30.0, uret)
+
+
 def _fiyat_haritasi():
     """TEK cagriyla tum semboller (21 spot pozisyon icin 21 ayri istek atmamak icin)."""
     def uret():
@@ -565,9 +580,20 @@ def _coin(sym):
         cg = (evren.cg_universe() or {}).get(sym) or {}
     except Exception:
         pass
+    tk = _ticker_haritasi().get(sym) or {}
+    def f(a):
+        try:
+            return float(tk[a])
+        except Exception:
+            return None
+    piyasa = {"fiyat": f("lastPrice"), "chg24": f("priceChangePercent"),
+              "hacim_musd": (f("quoteVolume")/1e6 if f("quoteVolume") else None),
+              "yuksek24": f("highPrice"), "dusuk24": f("lowPrice"),
+              "mcap": cg.get("mcap"), "dolasim": cg.get("circ"), "toplam_arz": cg.get("total"),
+              "float_oran": cg.get("float_oran")}
     st = testbot._load_state() or {}
     return {"sym": sym, "radar": r, "pillar": pillar, "olcucu": olc,
-            "bot_gorusu": gorus, "rejim": rejim_ad,
+            "bot_gorusu": gorus, "rejim": rejim_ad, "piyasa": piyasa,
             "mcap": cg.get("mcap"), "float_oran": cg.get("float_oran"),
             "equity_bot": st.get("equity"),
             "equity_benim": (benim_modul().yukle() or {}).get("equity"),

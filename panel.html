@@ -18,23 +18,32 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--zemin);color:var(--yazi);
-  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-h1{font-size:17px;margin:0;font-weight:600}
-h2{font-size:14px;margin:0 0 10px;font-weight:600;color:var(--yazi)}
-h3{font-size:12px;margin:16px 0 8px;font-weight:600;color:var(--yazi2);
-  text-transform:uppercase;letter-spacing:.06em}
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+h1{font-size:16px;margin:0;font-weight:650;letter-spacing:-.01em}
+h2{font-size:13.5px;margin:0 0 12px;font-weight:650;color:var(--yazi);letter-spacing:-.005em}
+h3{font-size:11px;margin:18px 0 8px;font-weight:600;color:var(--yazi3);
+  text-transform:uppercase;letter-spacing:.08em}
 
-.ust{position:sticky;top:0;z-index:40;background:var(--yuzey);border-bottom:1px solid var(--kenar);
-  padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ust{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--yuzey) 88%,transparent);
+  backdrop-filter:saturate(180%) blur(14px);-webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--kenar);
+  padding:11px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .ust .bosluk{flex:1}
-.rozet{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;
-  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi2)}
-.rozet.iyi{color:var(--iyi);border-color:var(--iyi)}
-.rozet.kotu{color:var(--kotu);border-color:var(--kotu)}
-.rozet.uyari{color:var(--uyari);border-color:var(--uyari)}
-button{font:inherit;font-size:12px;padding:5px 11px;border-radius:7px;cursor:pointer;
-  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi)}
-button:hover{border-color:var(--vurgu)}
+.rozet{display:inline-block;padding:2.5px 10px;border-radius:99px;font-size:10.5px;font-weight:600;
+  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi2);
+  letter-spacing:.03em;vertical-align:middle}
+.rozet.iyi{color:var(--iyi);border-color:color-mix(in srgb,var(--iyi) 45%,transparent);
+  background:color-mix(in srgb,var(--iyi) 12%,transparent)}
+.rozet.kotu{color:var(--kotu);border-color:color-mix(in srgb,var(--kotu) 45%,transparent);
+  background:color-mix(in srgb,var(--kotu) 12%,transparent)}
+.rozet.uyari{color:var(--uyari);border-color:color-mix(in srgb,var(--uyari) 45%,transparent);
+  background:color-mix(in srgb,var(--uyari) 12%,transparent)}
+button{font:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;
+  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi);
+  transition:border-color .13s,background .13s,transform .06s}
+button:hover{border-color:var(--vurgu);background:var(--yuzey)}
+button:active{transform:translateY(1px)}
 
 .sekmeler{position:sticky;top:45px;z-index:39;display:flex;gap:2px;padding:0 18px;
   background:var(--zemin);border-bottom:1px solid var(--kenar);overflow-x:auto}
@@ -44,22 +53,28 @@ button:hover{border-color:var(--vurgu)}
 .sekme.aktif{color:var(--yazi);border-bottom-color:var(--vurgu);font-weight:600}
 .sekme .kisayol{font-size:10px;color:var(--yazi3);margin-left:5px}
 
-main{padding:18px 18px 70px;max-width:1500px}
+main{padding:20px 20px 80px;max-width:1560px}
 .panel{display:none}
-.panel.aktif{display:block}
-section{background:var(--yuzey);border:1px solid var(--kenar);border-radius:11px;
-  padding:14px 16px;margin-bottom:14px}
-.kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px}
-.kart{background:var(--yuzey);border:1px solid var(--kenar);border-radius:11px;padding:12px 14px}
-.kart .etiket{font-size:11px;color:var(--yazi3);margin-bottom:5px}
-.kart .deger{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
-.kart .alt{font-size:11px;color:var(--yazi3);margin-top:3px}
+.panel.aktif{display:block;animation:gir .18s ease-out}
+@keyframes gir{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+section{background:var(--yuzey);border:1px solid var(--kenar);border-radius:14px;
+  padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin-bottom:14px}
+.kart{background:var(--yuzey);border:1px solid var(--kenar);border-radius:12px;padding:13px 15px;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);transition:border-color .13s}
+.kart:hover{border-color:color-mix(in srgb,var(--vurgu) 35%,var(--kenar))}
+.kart .etiket{font-size:10.5px;color:var(--yazi3);margin-bottom:6px;letter-spacing:.02em}
+.kart .deger{font-size:21px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kart .alt{font-size:10.5px;color:var(--yazi3);margin-top:4px}
 
-.tablo-sar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tablo-sar{overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border-radius:10px;border:1px solid var(--izgara)}
 table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
-th{text-align:left;color:var(--yazi3);font-weight:500;font-size:11px;padding:6px 9px;
-  border-bottom:1px solid var(--kenar);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
-td{padding:6px 9px;border-bottom:1px solid var(--izgara);white-space:nowrap}
+th{text-align:left;color:var(--yazi3);font-weight:600;font-size:10px;padding:8px 11px;
+  border-bottom:1px solid var(--kenar);white-space:nowrap;text-transform:uppercase;letter-spacing:.07em;
+  background:var(--yuzey2);position:sticky;top:0}
+td{padding:7px 11px;border-bottom:1px solid var(--izgara);white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
 tbody tr:hover{background:var(--yuzey2)}
 td.sag,th.sag{text-align:right}
 .bos{color:var(--yazi3);font-size:12.5px;padding:14px 2px}
@@ -74,13 +89,28 @@ td.sag,th.sag{text-align:right}
 .nokta{width:8px;height:8px;border-radius:99px;flex:none;background:var(--yazi3)}
 .nokta.iyi{background:var(--iyi)} .nokta.kotu{background:var(--kotu)} .nokta.uyari{background:var(--uyari)}
 
-[data-terim]{border-bottom:1px dotted var(--yazi3);cursor:help}
-#ipucu{position:fixed;z-index:100;max-width:340px;background:var(--yuzey2);color:var(--yazi);
-  border:1px solid var(--kenar);border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.5;
-  box-shadow:0 8px 26px rgba(0,0,0,.45);display:none;pointer-events:none}
-#ipucu .ad{font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
-  color:var(--vurgu);margin-bottom:5px}
-#ipucu .yorum{margin-top:7px;padding-top:7px;border-top:1px solid var(--kenar);color:var(--yazi2)}
+/* terim: TIKLA-AC/KAPA (2026-08-05, kullanici: "ustune basinca acilip kapansin") */
+[data-terim]{border-bottom:1px dashed var(--yazi3);cursor:pointer;transition:color .12s}
+[data-terim]:hover{color:var(--vurgu);border-bottom-color:var(--vurgu)}
+[data-terim]::after{content:"ⓘ";font-size:.78em;opacity:.45;margin-left:2px;vertical-align:super}
+[data-terim].acik{color:var(--vurgu);border-bottom-color:var(--vurgu)}
+[data-terim].acik::after{opacity:1}
+#ipucu{position:fixed;z-index:100;max-width:360px;background:var(--yuzey2);color:var(--yazi);
+  border:1px solid var(--kenar);border-radius:12px;padding:13px 15px;font-size:12.5px;line-height:1.6;
+  box-shadow:0 12px 40px rgba(0,0,0,.5);display:none}
+#ipucu .ad{font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--vurgu);margin-bottom:7px;padding-right:22px}
+#ipucu .yorum{margin-top:9px;padding-top:9px;border-top:1px solid var(--kenar);color:var(--yazi2)}
+#ipucu .kapat{position:absolute;top:8px;right:10px;cursor:pointer;color:var(--yazi3);
+  font-size:15px;line-height:1;padding:2px 4px;border-radius:5px}
+#ipucu .kapat:hover{color:var(--yazi);background:var(--kenar)}
+
+/* grafik gostergesi (legend) */
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:11.5px;align-items:center}
+.legend span.oge{display:inline-flex;align-items:center;gap:6px;color:var(--yazi2)}
+.legend i{width:16px;height:0;border-top-width:2px;border-top-style:solid;display:inline-block;flex:none}
+.legend i.kesik{border-top-style:dashed}
+.legend i.kutu{height:11px;border:none;border-radius:2px;width:11px}
 
 .grafik{height:210px}
 .satir{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
@@ -267,27 +297,38 @@ const TERIMLER = {
     ack:"Botun 'açmazdım' dediği hâlde senin açtığın işlemler. Bunların ayrı karnesi, 'botu dinlemek işime yarıyor mu' sorusunun doğrudan cevabı. Az sayıda işlemde çıkan fark tesadüf olabilir — 25-30 işleme kadar izlenimdir."}
 };
 
-/* ---- ipucu motoru (hover; klavye için focus da destekli) ---- */
+/* ---- ipucu motoru: TIKLA-AC / TIKLA-KAPA ----
+   Hover yerine tiklama (kullanici karari): metin secilebilir/kopyalanabilir kalir,
+   okurken kaybolmaz, dokunmatikte de calisir. Ayni terime tekrar basinca kapanir. */
 const ipucu = document.getElementById('ipucu');
+let ipucuAcikEl = null;
 function ipucuGoster(el){
   const t = TERIMLER[el.dataset.terim]; if(!t) return;
-  let h = '<div class="ad">'+t.ad+'</div><div>'+t.ack+'</div>';
+  let h = '<div class="kapat" onclick="ipucuGizle()">×</div><div class="ad">'+t.ad+'</div><div>'+t.ack+'</div>';
   if(t.yorum && el.dataset.deger!==undefined && el.dataset.deger!=='' && el.dataset.deger!=='null'){
     const y = t.yorum(parseFloat(el.dataset.deger));
     if(y) h += '<div class="yorum"><b>Şu an:</b> '+y+'</div>';
   }
   ipucu.innerHTML = h; ipucu.style.display='block';
+  if(ipucuAcikEl) ipucuAcikEl.classList.remove('acik');
+  el.classList.add('acik'); ipucuAcikEl = el;
   const r = el.getBoundingClientRect(), k = ipucu.getBoundingClientRect();
-  let x = r.left, y = r.bottom + 7;
+  let x = r.left, y = r.bottom + 8;
   if(x + k.width > innerWidth - 12) x = innerWidth - k.width - 12;
-  if(y + k.height > innerHeight - 12) y = r.top - k.height - 7;
+  if(y + k.height > innerHeight - 12) y = r.top - k.height - 8;
   ipucu.style.left = Math.max(8,x)+'px'; ipucu.style.top = Math.max(8,y)+'px';
 }
-function ipucuGizle(){ ipucu.style.display='none'; }
-document.addEventListener('mouseover', e=>{ const el=e.target.closest('[data-terim]'); if(el) ipucuGoster(el); });
-document.addEventListener('mouseout',  e=>{ if(e.target.closest('[data-terim]')) ipucuGizle(); });
-document.addEventListener('focusin',   e=>{ const el=e.target.closest('[data-terim]'); if(el) ipucuGoster(el); });
-document.addEventListener('focusout',  ipucuGizle);
+function ipucuGizle(){
+  ipucu.style.display='none';
+  if(ipucuAcikEl){ ipucuAcikEl.classList.remove('acik'); ipucuAcikEl=null; }
+}
+document.addEventListener('click', e=>{
+  const el = e.target.closest('[data-terim]');
+  if(el){ e.preventDefault(); e.stopPropagation();
+    if(ipucuAcikEl===el) ipucuGizle(); else ipucuGoster(el); return; }
+  if(!e.target.closest('#ipucu')) ipucuGizle();
+});
+addEventListener('keydown', e=>{ if(e.key==='Escape') ipucuGizle(); });
 document.addEventListener('scroll', ipucuGizle, true);
 
 /* ---- yardımcılar ---- */
@@ -808,37 +849,99 @@ async function coinDetayYukle(){
   coinVeri = d;
   const r=d.radar||{}, p=d.pillar||{}, bg=d.bot_gorusu||{};
 
+  const pi=d.piyasa||{}, ol=(d.olcucu||{}).short||{}, oL=(d.olcucu||{}).long||{};
+  const d1=ol.d1||{}, mal=ol.maliyet||{};
+  const buyuk=v=>v==null?'–':(v>=1e9?para(v/1e9)+' Mr$':(v>=1e6?para(v/1e6)+' M$':para(v)+'$'));
+  const uzak=(hedef,fiyat)=>(hedef==null||!fiyat)?'':' <span class="sonuk">('+isar((hedef/fiyat-1)*100)+n1((hedef/fiyat-1)*100)+'%)</span>';
+
   g.innerHTML =
-  '<section><h2>'+esc(d.sym)+' <span class="sonuk" style="font-weight:400">'+
-    (d.mcap?esc(d.mcap)+' piyasa değeri':'')+'</span> '+
-    '<button style="float:right" onclick="guvenlikYukle()">güvenlik kontrolü</button></h2>'+
-    '<div class="satir" style="margin-bottom:10px">'+
+  '<section><h2>'+esc(d.sym)+
+    '<span style="float:right;font-weight:400"><button onclick="guvenlikYukle()">güvenlik kontrolü</button></span></h2>'+
+    '<div class="kartlar">'+[
+      ['Fiyat', pi.fiyat!=null?pi.fiyat:'–', (pi.chg24!=null?'<span class="'+snf(pi.chg24)+'">'+isar(pi.chg24)+n1(pi.chg24)+'% (24s)</span>':''), null,null],
+      ['Piyasa değeri', buyuk(pi.mcap), 'dolaşımdaki arz × fiyat', 'mcap', null],
+      ['24 saat hacim', pi.hacim_musd!=null?para(pi.hacim_musd)+' M$':'–', 'vadeli işlem', null,null],
+      ['24s aralık', (pi.dusuk24!=null?pi.dusuk24+' – '+pi.yuksek24:'–'), 'en düşük – en yüksek', null,null],
+      ['Dolaşımdaki arz', buyuk(pi.dolasim).replace('$',''), 'toplam '+buyuk(pi.toplam_arz).replace('$',''), null,null],
+      ['Dolaşım oranı', pi.float_oran!=null?'%'+n1(pi.float_oran*100):'–', 'kilit açılma riski', 'float_oran', pi.float_oran]
+    ].map(k=>'<div class="kart"><div class="etiket">'+(k[3]?T(k[3],k[4],k[0]):k[0])+'</div>'+
+      '<div class="deger" style="font-size:17px">'+k[1]+'</div><div class="alt">'+k[2]+'</div></div>').join('')+'</div>'+
+
+    '<div class="satir" style="margin:14px 0 10px">'+
+      '<span class="sonuk" style="font-size:11px">ZAMAN DİLİMİ</span>'+
       Object.keys(TF_AD).map(t=>'<button onclick="coinTfSec(\''+t+'\')" '+
-        (t===coinTf?'style="border-color:var(--vurgu);color:var(--vurgu)"':'')+'>'+TF_AD[t]+'</button>').join('')+
+        (t===coinTf?'style="border-color:var(--vurgu);color:var(--vurgu);font-weight:600"':'')+'>'+TF_AD[t]+'</button>').join('')+
     '</div>'+
-    '<div id="gFiyat" style="height:300px"></div>'+
+    '<div id="gFiyat" style="height:320px"></div>'+
     '<div id="gHacim" style="height:80px;margin-top:2px"></div>'+
-    '<div id="gRsi" style="height:90px;margin-top:2px"></div>'+
+    '<div id="gRsi" style="height:95px;margin-top:2px"></div>'+
+    '<div class="legend" id="grafikLegend"></div>'+
     '<div class="not" id="grafikNot"></div>'+
   '</section>'+
 
-  '<section><h2>Botun gördükleri</h2>'+
+  '<section><h2>Botun ölçtükleri '+
+    '<span class="rozet">hepsi 1 SAATLİK mumdan</span></h2>'+
     '<div class="kartlar">'+[
       ['skor','Skor',n1(r.score),r.score],
       ['stage','Aşama',esc(r.stage),null],
       ['oi24','Açık pozisyon 24s',isar(r.oi24)+n1(r.oi24)+'%',r.oi24],
       ['oi3','Açık pozisyon 3s',isar(r.oi3)+n1(r.oi3)+'%',r.oi3],
-      ['funding','Fonlama',n2(r.funding)+'%',r.funding],
+      ['funding','Fonlama (8s)',n2(r.funding)+'%',r.funding],
       ['comp','Sıkışma',n2(r.comp),r.comp],
       ['vol_x','Hacim katsayısı',n1(r.vol_x)+'×',r.vol_x],
-      ['pos','Aralıktaki konum',n2(r.pos),r.pos],
+      ['pos','Konum (son 20 SAAT)',n2(r.pos),r.pos],
+      ['last1','Son 1 saat',isar(r.last1)+n1(r.last1)+'%',r.last1],
+      ['last3','Son 3 saat',isar(r.last3)+n1(r.last3)+'%',r.last3],
+      ['rel3','BTC\'ye göre 3s',isar(r.rel3)+n1(r.rel3)+'%',r.rel3],
       ['smart','Akıllı para',esc(p.smart||'–'),null],
       ['taker','Agresif alıcı',n2(p.taker),null],
       ['top_ls','Büyük hesap L/S',n2(p.top_ls),null],
-      ['float_oran','Dolaşım oranı',d.float_oran!=null?n2(d.float_oran):'–',d.float_oran]
+      ['glob_ls','Tüm hesaplar L/S',n2(p.glob_ls),null],
+      ['rsi','RSI (1 saatlik)',n1(d1.rsi14),d1.rsi14],
+      ['atr','ATR / fiyat',ol.atr14&&pi.fiyat?'%'+n2(ol.atr14/pi.fiyat*100):'–',null],
+      ['basis','Baz farkı',d1.basis_pct!=null?n2(d1.basis_pct)+'%':'–',null]
     ].map(k=>'<div class="kart"><div class="etiket">'+T(k[0],k[3],k[1])+'</div>'+
       '<div class="deger" style="font-size:17px">'+k[2]+'</div></div>').join('')+'</div>'+
     (r.dip_yakit?'<div class="not uyari">⚠ '+T('dip_yakit',null,'Dip yakıtı')+' işareti var — düşüşe devam uyarısı.</div>':'')+
+    '<div class="not"><b>Dikkat:</b> bu kutulardaki her şey <b>1 saatlik</b> mumlardan hesaplanıyor — '+
+    'yukarıdaki grafik hangi dilimde olursa olsun. Botun "son 20 mum" dediği yer '+
+    '<b>son 20 saat</b>. Grafikteki Bollinger/MA ise seçtiğin dilimin mumlarını kullanıyor.</div>'+
+  '</section>'+
+
+  '<section><h2>Seviyeler ve ölçüm '+
+    '<span class="sonuk" style="font-weight:400;font-size:12px">botun kullandığı 1 saatlik ölçüm</span></h2>'+
+    '<div class="tablo-sar"><table><thead><tr><th></th>'+
+      '<th class="sag">LONG</th><th class="sag">SHORT</th></tr></thead><tbody>'+
+      [['Giriş', oL.giris, ol.giris, false],
+       [T('stop',null,'Stop'), oL.stop, ol.stop, true],
+       [T('tp',null,'TP1'), oL.tp1, ol.tp1, true],
+       [T('tp',null,'TP2'), oL.tp2, ol.tp2, true],
+       ['Ödül/risk (brüt)', oL.rr_tp1, ol.rr_tp1, false],
+       [T('rr_net',null,'Ödül/risk (maliyet sonrası)'), oL.rr_tp1_net, ol.rr_tp1_net, false]
+      ].map(x=>'<tr><td>'+x[0]+'</td>'+
+        '<td class="sag">'+(x[1]!=null?x[1]:'–')+(x[3]?uzak(x[1],pi.fiyat):'')+'</td>'+
+        '<td class="sag">'+(x[2]!=null?x[2]:'–')+(x[3]?uzak(x[2],pi.fiyat):'')+'</td></tr>').join('')+
+      '<tr><td>'+T('destek_direnc',null,'Yapısal destek / direnç')+'</td>'+
+      '<td class="sag" colspan="2">'+(ol.yapisal_destek!=null?ol.yapisal_destek:'–')+
+        uzak(ol.yapisal_destek,pi.fiyat)+'  /  '+(ol.yapisal_direnc!=null?ol.yapisal_direnc:'–')+
+        uzak(ol.yapisal_direnc,pi.fiyat)+'</td></tr>'+
+      '</tbody></table></div>'+
+    '<div class="not">Botun net ödül/risk eşiği <b>2,0</b>. Bunun altındaysa '+
+      T('veto',null,'R/R vetosu')+' devreye girer ve bot girmez.</div>'+
+  '</section>'+
+
+  '<section><h2>Bu işlemin gizli maliyeti</h2>'+
+    tablo(['<th>Kalem</th><th class="sag">%</th><th>Ne demek</th>'],
+      [['Giriş komisyonu', mal.giris_fee_pct, 'pozisyon açarken'],
+       ['Çıkış komisyonu', mal.stop_fee_pct, 'stop/hedefte kapanırken'],
+       [T('spread',null,'Makas'), mal.spread_pct, 'alış-satış farkı, girer girmez ödenir'],
+       [T('slipaj',null,'Slipaj'), mal.slippage_pct, 'emrin kötü fiyattan dolması'],
+       [T('funding',null,'Fonlama (8 saatte bir)'), mal.funding_pct_8h, 'pozisyon açık kaldıkça'],
+       ['Tahmini tutma süresi', mal.tutma_saat, 'saat — fonlama bu süreye göre hesaplandı']
+      ].map(x=>'<tr><td>'+x[0]+'</td><td class="sag">'+(x[1]!=null?n2(x[1]):'–')+'</td>'+
+        '<td class="sonuk">'+x[2]+'</td></tr>'))+
+    '<div class="not">Bu kalemler yüzünden brüt ödül/risk <b>'+n2(ol.rr_tp1)+'</b> iken '+
+      'net <b>'+n2(ol.rr_tp1_net)+'</b> oluyor. Ölçücü kararını <b>net</b> üzerinden veriyor.</div>'+
   '</section>'+
 
   '<section><h2>Bot şu an baksaydı</h2>'+
@@ -907,10 +1010,28 @@ async function coinGrafikYukle(){
       [c1,c2,c3].forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} }); }); });
 
   const sonRsi=[...d.rsi].reverse().find(v=>v!=null);
-  $('#grafikNot').innerHTML = TF_AD[coinTf]+' · '+m.length+' mum · '+
-    T('rsi',sonRsi,'RSI '+n1(sonRsi))+' · '+T('bollinger',null,'gri bantlar Bollinger')+' · '+
-    T('ma50_200',null,'sarı MA50, mavi MA200')+' · '+
-    T('destek_direnc',null,'kesikli çizgiler destek/direnç')+' — botun stopu bunları kullanıyor';
+  const varMi=a=>a && a.some(v=>v!=null);
+  const oge=(renkV,ad,terim,deger,sinif)=>'<span class="oge">'+
+    '<i class="'+(sinif||'')+'" style="border-top-color:'+renkV+';'+
+    (sinif==='kutu'?'background:'+renkV+';':'')+'"></i>'+
+    (terim?T(terim,deger,ad):ad)+'</span>';
+  $('#grafikLegend').innerHTML =
+    oge(renk('--iyi'),'yükselen mum',null,null,'kutu')+
+    oge(renk('--kotu'),'düşen mum',null,null,'kutu')+
+    oge('#8888aa','Bollinger (20 mum ±2σ)','bollinger')+
+    (varMi(d.ma50)?oge(renk('--uyari'),'MA50 (50 mum ortalama)','ma50_200'):
+      '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA50 — yetersiz mum</span>')+
+    (varMi(d.ma200)?oge(renk('--vurgu'),'MA200 (200 mum ortalama)','ma50_200'):
+      '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA200 — bu dilimde 200 mum yok</span>')+
+    oge(renk('--kotu'),'direnç seviyeleri','destek_direnc',null,'kesik')+
+    oge(renk('--iyi'),'destek seviyeleri','destek_direnc',null,'kesik')+
+    oge(renk('--vurgu'),'RSI ('+n1(sonRsi)+')','rsi',sonRsi);
+  $('#grafikNot').innerHTML =
+    '<b>'+TF_AD[coinTf]+'</b> dilimi · '+m.length+' mum · '+
+    'Bollinger ve hareketli ortalamalar <b>bu dilimin</b> mumlarını kullanıyor — '+
+    'yani şu an "20 mum" = <b>20 × '+TF_AD[coinTf]+'</b>. '+
+    'Botun kendi hesapları ise her zaman <b>1 saatlik</b> mumdan (aşağıdaki kutular). '+
+    'Kesikli çizgiler '+T('destek_direnc',null,'yapısal destek/direnç')+' — botun stopu tam olarak bunları kullanıyor.';
 }
 
 /* ---- işlem formu: boyut, botun sizingiyle AYNI formülle önizlenir ---- */
