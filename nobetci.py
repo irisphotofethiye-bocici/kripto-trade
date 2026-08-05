@@ -51,8 +51,26 @@ def _cooldown_gecti(st, anahtar, cooldown_dk):
     return (datetime.datetime.now() - dt).total_seconds() / 60 >= cooldown_dk
 
 
+def _bildirim_acik(kanal):
+    """kripto-config.json -> "bildirim": {"acik":bool, "telegram":bool, "toast":bool}
+    Anahtar YOKSA varsayilan ACIK (eski davranis korunur).
+
+    [2026-08-03 KULLANICI KARARI: KAPALI — "ihtiyac olursa acariz".]
+    Kapaliyken alarm_yaz() LOG YAZMAYA DEVAM EDER; yalnizca GONDERIM durur
+    (veri kaybi yok, gecmis analiz edilebilir kalir).
+    GERI ACMA: kripto-config.json -> "bildirim": {"acik": true}
+    Tek kanal acmak icin: {"acik": true, "toast": false}  gibi.
+    Telegram token/chat_id SILINMEDI, oldugu yerde duruyor.
+
+    Bu kapi hem nobetci hem testbot'u kapsar (testbot bu iki fonksiyonu import eder)."""
+    b = evren.cfg().get("bildirim") or {}
+    return bool(b.get("acik", True)) and bool(b.get(kanal, True))
+
+
 def telegram_gonder(msg):
     """kripto-config.json -> telegram_bot_token/telegram_chat_id. Yoksa sessizce atla."""
+    if not _bildirim_acik("telegram"):
+        return False
     cfg = evren.cfg()
     tok, chat = cfg.get("telegram_bot_token", ""), cfg.get("telegram_chat_id", "")
     if not tok or not chat:
@@ -68,6 +86,8 @@ def telegram_gonder(msg):
 
 def toast_gonder(baslik, msg):
     """Windows toast, best-effort (WinRT). PowerShell yoksa/hata verirse sessizce gecilir."""
+    if not _bildirim_acik("toast"):
+        return False
     try:
         import subprocess
         ps = (
