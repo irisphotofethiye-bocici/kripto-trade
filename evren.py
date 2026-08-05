@@ -228,7 +228,142 @@ def btc_rejim():
     return {"rejim": rejim, **detay}
 
 
+def para_rejim_etiket(total_chg, btcd_chg, t3_chg):
+    """TOTAL-trendi × rotasyon -> (etiket, aciklama). Saf sinyal, I/O YOK (pure).
+    Katman-1 TOTAL trendi = kriptoya taze para giriyor mu; Katman-2 rotasyon = major mi alt mi.
+    Olu-bant %2 (f10_olu_bant mantigi): kucuk salinim 'taze giris' sayilmaz.
+    Panel (gosterge) + testbot para-kapisi ORTAK kaynagi (drift olmasin diye tek yerde)."""
+    if total_chg is None:
+        return (None, None)
+    if total_chg >= 2.0:
+        if btcd_chg is not None and btcd_chg < 0 and (t3_chg or 0) > 0:
+            return ("PARA GIRIYOR -> ALTLARA", "kriptoya taze para + alt-rotasyon (risk-on, boga-lehine)")
+        if btcd_chg is not None and btcd_chg > 0:
+            return ("PARA GIRIYOR -> MAJORLERE", "kriptoya taze para ama BTC/majore yigiliyor (BTC-onculu, erken)")
+        return ("PARA GIRIYOR -> dengeli", "kriptoya taze para, rotasyon net degil")
+    if total_chg <= -2.0:
+        return ("PARA CIKIYOR", "kriptodan cikis (risk-off); yukselisler zayif, fade-dostu")
+    return ("PARA DURGUN", "taze giris yok; pump'lar rotasyon/kaldirac -> fade-dostu")
+
+
+def para_rejim(geri=14):
+    """piyasa_yapisi_log'dan money-regime (2026-07-23, kullanici karari: giris-kapisina baglandi).
+    Panel gostergesi ile ayni tanim; testbot 'PARA CIKIYOR' iken long-veto uygular (LONG-kisitlayici,
+    opener DEGIL — F10 dersi: long-gevsetme=kayip). Log yok/az ise None (kapi devreye girmez, fail-open).
+    geri=14 ~ 7 gun (piyasa_yapisi ~2x/gun loglanir; panel 'gun': geri//2)."""
+    try:
+        logf = os.path.join(HERE, "piyasa_yapisi_log.jsonl")
+        lines = [json.loads(l) for l in open(logf, encoding="utf-8").read().splitlines() if l.strip()]
+    except Exception:
+        return None
+    if len(lines) < 2:
+        return None
+    son = lines[-1]
+    ilk = lines[-geri] if len(lines) >= geri else lines[0]
+    def yuzde(a, b): return round((a - b) / b * 100, 1) if b else 0.0
+    def t3(d): return d["total"] * (1 - d["btc_d"] / 100 - d.get("eth_d", 0) / 100)
+    try:
+        total_chg = yuzde(son["total"], ilk["total"])
+        btcd_chg = round(son["btc_d"] - ilk["btc_d"], 2)
+        t3_chg = yuzde(t3(son), t3(ilk))
+    except Exception:
+        return None
+    etiket, aciklama = para_rejim_etiket(total_chg, btcd_chg, t3_chg)
+    return {"rejim": etiket, "not": aciklama, "total_chg": total_chg,
+            "btcd_chg": btcd_chg, "t3_chg": t3_chg, "total_t": round(son["total"] / 1e12, 3)}
+
+
+# ---------------------------------------------------------------------------
+# BTC'nin RISK-VARLIK PAYI (stablecoin HARIC) — 2026-08-04, olculdu ve dogrulandi
+#
+# NEDEN AYRI BIR LOG: mevcut piyasa_yapisi_log.jsonl bu sinyali URETEMIYOR.
+#   Olculen seri (CoinGecko top-130, GUNLUK anlik goruntu) ile logdan hesaplanan
+#   3-gunluk degisim arasinda korelasyon -0.12, ISARET UYUSMASI %47 (yazi-tura).
+#   Sebep: log gunde ~2 kez DUZENSIZ saatlerde yaziyor; 3 gunluk fark bu gurultude
+#   kayboluyor. Logdan besleseydik olculen sinyali degil GURULTUYU baglamis olurduk.
+#   Bu yuzden ayri, GUNDE BIR, sabit yontemli anlik goruntu tutulur.
+# TUTARLILIK DOGRULANDI: canli coins/markets top-130 vs gecmis market_chart serisi ->
+#   TOTAL farki %+0.03, BTC_D_XS farki -0.062 puan (ayni olcek).
+# ---------------------------------------------------------------------------
+BTC_PAY_LOGF = os.path.join(HERE, "btc_pay_log.jsonl")
+_STABLE_ID = {"tether", "usd-coin", "dai", "first-digital-usd", "usds", "ethena-usde"}
+
+
+def btc_pay_guncelle():
+    """Gunde BIR kez CoinGecko top-130 mcap anlik goruntusu -> btc_pay_log.jsonl.
+    Ayni gun icin kayit varsa hicbir sey yapmaz (tekrar cagrilmasi zararsiz).
+    Hata halinde sessizce None doner — olcum katmani karar akisini durdurmaz."""
+    try:
+        bugun = datetime.datetime.now().strftime("%Y-%m-%d")
+        if os.path.exists(BTC_PAY_LOGF):
+            with open(BTC_PAY_LOGF, encoding="utf-8") as f:
+                for satir in f:
+                    if f'"gun": "{bugun}"' in satir or f'"gun":"{bugun}"' in satir:
+                        return None
+        k = cg_key()
+        u = ("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd"
+             "&order=market_cap_desc&per_page=130&page=1")
+        if k:
+            u += "&x_cg_demo_api_key=" + k
+        d = get(u, timeout=30)
+        top = sum(x.get("market_cap") or 0 for x in d)
+        stb = sum(x.get("market_cap") or 0 for x in d if x.get("id") in _STABLE_ID)
+        btc = next((x.get("market_cap") or 0 for x in d if x.get("id") == "bitcoin"), 0)
+        if top <= 0 or btc <= 0 or (top - stb) <= 0:
+            return None
+        kayit = {"gun": bugun, "ts": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),
+                 "total": top, "stable": stb, "btc": btc,
+                 "btc_d_xs": round(btc / (top - stb) * 100, 4), "kapsam": len(d)}
+        with open(BTC_PAY_LOGF, "a", encoding="utf-8") as f:
+            f.write(json.dumps(kayit, ensure_ascii=False) + "\n")
+        return kayit
+    except Exception:
+        return None
+
+
+def btc_pay_akisi(gun=3):
+    """BTC'nin risk-varlik payinin (stablecoin haric) son 'gun' gunluk PUAN degisimi.
+
+    Donus: {"xs":..., "degisim":..., "bant":"ALT"|"ORTA"|"UST", "gun_farki":N} | None
+    None = veri yetersiz -> KAPI DEVREYE GIRMEZ (fail-open, mevcut davranis korunur).
+
+    OLCUM (12 ay, 103 sembol, 37.271 gozlem, gercek holdout — PARA_SONUC.md):
+      BTC_D_XS 3g ALT ceyrek  -> SHORT R kesif +0.27 / sakli +0.16  (temel +0.06/+0.04)
+      BTC_D_XS 3g UST ceyrek  -> SHORT R kesif -0.02 / sakli -0.03
+      UST ceyrek + para durgun -> LONG R kesif +0.24 / sakli +0.16 (rastgele -0.07/-0.04)
+      Kesif 8 ay / sakli 4 ay ayrimi +0.45 vs +0.46, saklida dilimler mukemmel sirali.
+    SINIR: 12 ayin tamami DUSEN piyasa. Yukselen piyasada iliski tersine donebilir."""
+    try:
+        if not os.path.exists(BTC_PAY_LOGF):
+            return None
+        satirlar = [json.loads(l) for l in open(BTC_PAY_LOGF, encoding="utf-8") if l.strip()]
+    except Exception:
+        return None
+    if len(satirlar) < gun + 1:
+        return None
+    satirlar.sort(key=lambda r: r.get("gun", ""))
+    son = satirlar[-1]
+    hedef = (datetime.datetime.strptime(son["gun"], "%Y-%m-%d")
+             - datetime.timedelta(days=gun)).strftime("%Y-%m-%d")
+    onc = min(satirlar[:-1], key=lambda r: abs(
+        (datetime.datetime.strptime(r["gun"], "%Y-%m-%d")
+         - datetime.datetime.strptime(hedef, "%Y-%m-%d")).days))
+    fark_gun = abs((datetime.datetime.strptime(onc["gun"], "%Y-%m-%d")
+                    - datetime.datetime.strptime(hedef, "%Y-%m-%d")).days)
+    if fark_gun > 1:
+        return None                      # 3 gun oncesine +-1 gun icinde kayit yoksa kapi kapali
+    bayat = (datetime.datetime.now() - datetime.datetime.strptime(son["gun"], "%Y-%m-%d")).days
+    if bayat > 2:
+        return None                      # anlik goruntu bayatladi -> guvenme
+    d = son["btc_d_xs"] - onc["btc_d_xs"]
+    ust = esik("btcd_xs_ust", 0.287)
+    alt = esik("btcd_xs_alt", -0.318)
+    bant = "UST" if d >= ust else ("ALT" if d <= alt else "ORTA")
+    return {"xs": son["btc_d_xs"], "degisim": round(d, 4), "bant": bant,
+            "gun_farki": gun, "son_gun": son["gun"], "onceki_gun": onc["gun"]}
+
+
 if __name__ == "__main__":
-    print(json.dumps({"rejim": btc_rejim(),
+    print(json.dumps({"rejim": btc_rejim(), "btc_pay": btc_pay_akisi(),
                       "esik_ornek": {"funding_long_veto_pct": esik("funding_long_veto_pct", 0.03)}},
                      ensure_ascii=False, indent=2))
