@@ -32,12 +32,15 @@ if sys.stdout is None:
 
 def top_gainers(n, min_vol):
     rows = []
+    cryptos = evren.cg_universe()  # kripto-only (2026-07-23 bug-fix): tokenize-hisse (GOOGL/TSLA/SMCI...) eleme
     for x in evren.raw_tickers("fapi"):
         s = x.get("symbol", "")
         if not s.endswith("USDT") or any(s.endswith(b) for b in evren.BAD):
             continue
         sym = s[:-4]
         if sym in evren.STABLES or sym in evren.GOLD:
+            continue
+        if cryptos and sym not in cryptos:
             continue
         try:
             chg = float(x["priceChangePercent"]); qv = float(x["quoteVolume"])

@@ -27,8 +27,9 @@ def main():
     kacin_oi = evren.esik("kacin_oi24_pct", 80.0)
     blowoff_esik = evren.esik("blowoff_chg24_pct", 40.0)
 
-    # 1) Binance 24s likit havuz (stable/gold/kaldirac-token elenir; evren tek kaynak)
-    bpool = evren.binance_pool("spot", a.min_vol)
+    # 1) Binance 24s likit havuz (stable/gold/tokenize-hisse/kaldirac-token elenir; evren tek kaynak)
+    cryptos = evren.cg_universe()  # kripto-only (2026-07-23 bug-fix): tokenize-hisse (GOOGL/TSLA...) eleme
+    bpool = evren.binance_pool("spot", a.min_vol, cryptos=cryptos)
     bchg = {s: chg for s, _, chg in bpool}
 
     # 2) CoinGecko momentum: 24s VE 7g ayni yonde = gercek trend (iki yonde de)
