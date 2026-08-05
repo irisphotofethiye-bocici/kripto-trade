@@ -118,3 +118,383 @@ Kullanıcı gainers-yakalama motivasyonuyla 4 "hareket yakalama" fikri getirdi; 
 - (+ erken-tespit LONG N=298 medyan −2.62%, fade-boğa ham pump BOGA negatif — daha önce)
 
 **ORTAK DERS (sistemin kimliği):** Dört fikrin ortak yanı "hareketi KOVALA" (momentum/breakout/beta). Hepsi kripto'da fakeout/mean-reversion yüzünden kaybettiriyor. KAZANAN iki şey: (a) **fade** (aşırılığı tersine oyna — kanıtlı edge), (b) **para akışı + rejim** (durum oku — TOTAL2/3, F10). → **Sistem momentum-takipçisi DEĞİL, mean-reversion + rejim-okuyucu.** Yeni giriş fikri önerilirken bu kimlik hatırlanır: "yükseleni al" arketipleri (breakout/beta/anomali-long) ölçümde tekrar tekrar çöktü; enerji fade + rejim + (boğada) F1-pullback'e yönlendirilir. AYRIM: trend-BREAKOUT (kırılımı al, tepeden = çöktü) ≠ trend-PULLBACK (F1, geri-çekilmede al, destekten = HENÜZ AÇIK, gerçek boğa bekliyor). "Trend önemli" sezgisi ölmedi; "kırılımı kovala" versiyonu öldü.
+
+## F11. PARA-KAPISI — TOTAL mcap trendi long-kısıtlayıcı (2026-07-23, kullanıcı kararı, Madde 9)
+
+Kullanıcı: "kriptoya para girişi + o para nereye (alt mı majör mi) okunmalı; total 2.8T→3T ise boğa durumu var. Bunu giriş-kapısına bağla." **Onaylı tasarım değişikliği** (Madde 9 — eski kriter SİLİNMEDİ, üzerine bir long-kısıtı eklendi).
+- **Tanım (`evren.para_rejim`, panel göstergesiyle ORTAK kaynak):** piyasa_yapisi_log'dan TOTAL 7g değişimi (Katman-1: kriptoya taze para?) × rotasyon (Katman-2: BTC.D↑ majöre / BTC.D↓+TOTAL3↑ alta). Ölü-bant %2 (f10 mantığı). Etiketler: PARA GİRİYOR→ALTLARA / →MAJÖRLERE / DURGUN / ÇIKIYOR.
+- **Kapı (yalnız bir yön):** `PARA CIKIYOR` (TOTAL 7g ≤ −%2) iken **long-veto** (`karar_yon(..., para_cikis=True)` → mevcut long_veto zincirine eklenir). Etki gerçek olarak **BOGA-long + AYI-AAVE-istisna-long**'ta (NOTR-long zaten Faz-2'de kapalı). SHORT/fade tarafına **DOKUNULMAZ**.
+- **Neden opener DEĞİL (kritik):** Tüm F10 dersi "long-gevşetme = kayıp"tı (SXT/−$298). Para-akışının long AÇMASI o hatayı tekrarlardı. Bu yüzden para-kapısı **sadece kısıtlar** (risk-off'ta long kapatır), asla açmaz. Log yok/az → None → kapı kapalı (fail-open, mevcut davranış korunur).
+- **Ölçüm:** veto `long_veto` kategorisinde `detay="para-cikis..."` ile ayrışır; tur-2 sonunda "para-kapısı hangi long'ları önledi, fırsat-medyanı ne?" K3-tipi değerlendirilir. Canlı doğrulama: mock 3/3 (BOGA-long para_cikis'te None, SHORT dokunulmadı). **Not:** gerçek "PARA GİRİYOR→ALTLARA" long-teşviki HENÜZ YOK — o, opener olur, ayrı Madde-9 kararı + ölçüm ister.
+
+## F12. TARAMA EVRENİ: kripto-only fix + genişletme (2026-07-23, kullanıcı kararı)
+
+**Tetik:** "1 gündür poz açmıyor" → veto-forward analizi (veto_analiz.py, N=127 tur1+tur2): reddedilenlerin +24h medyanı TÜM kategoride negatif (long_veto −3.1% N=68, rr_veto −3.5% N=37, blowoff −7.8%) → **vetolar fırsat kaçırmıyor, koruyor; seçicilik sağlam.** Sonuç: aktivite artışı için doğru kaldıraç GEVŞETMEK değil, **evreni GENİŞLETMEK** (aynı bar, daha çok coin).
+- **BUG bulundu (Madde 8): testbot tarama kripto-only DEĞİLDİ.** `yeni_giris_ara` `binance_pool(..., None)` çağırıyordu → `cryptos=None`, tokenize-hisse filtresi kapalı. Tam havuz 141 enstrüman, sadece 71 kripto; 41-70 bandı çoğunlukla HİSSE (SKHY/SPCX/INTC/MSTR/IBM/NVDA...). **Tur-2'nin işlemleri hisseye açılmıştı** (SKHY=SK Hynix +$3.41; ve fix anında CL=ham petrol SHORT açıktı). radar/tarayıcı `cg_universe` ile eliyordu ama testbot'ta unutulmuştu.
+- **Uygulanan (kullanıcı "evet yap"):** `binance_pool("fapi", min_vol, cryptos=cg_universe)` → kripto-only (hisse elenir). Havuz config'e: `min_vol_musd` 15→**3** ($3M taban, düşük-mcap kripto anomalileri), `tarama_havuz_n` **70** (yeni anahtar; eski hardcoded [:40]). cg_universe başarısızsa o cycle kripto-only atlanır (degrade, nadir). Doğrulama: compile OK, yeni havuz kripto-only (hisse sızıntısı YOK), --durum OK.
+- **KISIT bulundu (ölçüldü): analyze() ~2.0s/coin (418 ban YOK, sıralı hacim).** 40→80s, 70→140s (güvenli), 100→200s, **150→~300s = 5-dk cycle'ı taşar → çakışır/atlanır.** Kullanıcı $3M (~150 coin) istedi ama sıralı mimari 150'yi süremiyor. **Kapak GÜVENLİ 70'e çekildi** (min_vol=3 kalır: havuz $3M-derin ama [:70] volume-rank ile bağlar → efektif ~$16M taban şimdilik). Bu, crypto-only 40→70 genişletmeyi ŞİMDİ verir.
+- **AÇIK (kullanıcı onayı bekliyor): düşük-mcap $3M derinliğine ulaşmak için UCUZ ÖN-FİLTRE gerekli** — 150 coini analyze() etmeden, bedava 24h ticker (chg24/hacim) ile hareket edenleri seç, sadece onları analyze() et (örn. top-volume çekirdek + top-|chg24| hareketliler). Böylece düşük-mcap pumpçıları görülür, ölü coinler atlanır, süre bütçesi korunur. Bu ayrı Madde-9 tasarım kararı (seçim mantığı değişir).
+
+## "AKIŞ YOK" OTURUMU — 10 ölçüm, hepsi negatif (2026-08-02, kullanıcı kararıyla deftere alındı)
+
+**Tetik:** Bot 1 haftadır işleme girmiyor. Sebep bulundu ve BUG DEĞİL: rejim 2026-07-26'da AYI→NOTR döndü. AYI dalı `smart != "LONG"` (izin verici, ~%20 geçer), NOTR dalı `smart == "SHORT"` (~%6, 30 günde SIFIR oluş) şartı koşuyor. Yani sessizlik tasarımın sonucu.
+
+> ### ⚠ ÖLÇÜM DAMGASI — bu bloğun TÜMÜ için geçerli
+> - **PENCERE-A (gölge ölçümler, 1-8):** 2026-07-03 → 08-02, 30 gün. **REJİM: yalnız TEPKI_RALLISI + DERIN_AYI.** Örneklemde **TAM_BOGA YOK.**
+> - **PENCERE-B (tam-döngü backtest, 9):** 2023-01 → 2026-08, ~1.100 gün. **575 gün boğa-ailesi / 101 gün ayı** (kullanıcının "son ayı piyasası" çerçevesi ÖLÇÜMLE DÜZELTİLDİ — pencere ağırlıklı BOĞA'dır).
+> - **GEÇERLİLİK:** PENCERE-B rejim kırılımı verdiği için TAM_BOGA hücresi VARDIR (N=26) ama küçüktür. **N<25-30 hücreler izlenimdir (Madde 110).**
+> - **YAPISAL SINIR — en önemlisi:** `top_ls` (smart) ve `taker` Binance'te **yalnız 30 gün** geriye var. PENCERE-B'de bu iki kapı **UYGULANAMADI**. Yani tam-döngü backtest **botun kendisini değil, kalabalık-filtresi ÖNCESİ huniyi** test eder. → **"Kapılar değer yaratıyor mu?" sorusu bu blokta CEVAPLANMADI.**
+> - `oi3` yok (günlük OI) → akışın ~%61'i. Spread/float_oran güncel (geçmişi yok). Hayatta-kalma yanlılığı var.
+
+**KALİBRASYON (yayın-öncesi zorunlu kapı, Madde 106 disiplini):** Motor önce gerçeğe karşı doğrulandı. Kısmi-bar dersi TEKRAR yakaladı: canlı `olcucu.measure` **oluşmakta olan barı görür**; backtest ne tam kapanmış barı alabilir (look-ahead) ne de barı atabilir (v2 hatası) → 1m veriden yeniden kurulmalı. Bu düzeltmeyle replay motoru gerçek stopları **%0.000** sapmayla üretti (PROM/DEXE), `radar_archive` yeniden-üretimi **%83** (ilk deneme %68 = `vol_x` bir-bar kayması, `kismi_bar()` ile düzeldi). Pillar alanları **alan-başına farklı ofset** ister (`top_ls` açık kovayı günceller, `taker` yalnız kapalıyı yayınlar) — ikisi de %98. **Kalibre edilmemiş replay sonucu yayımlanmaz.**
+
+**ÖLÇÜMLER (hepsi salt-okur, gerçek paraya/koda dokunmadan):**
+
+| # | Soru | Sonuç |
+|---|---|---|
+| 1 | Vetolananlara girilseydi? (gerçek SL/TP ile) | **−$1.356,59** (N=42; TP 18'inde çalıştı, kayıplar %5 risk tavanı) |
+| 2 | Radara takılıp değerlendirilmeyenler? | Negatif; risk-normalize edilince "kaçan büyük kazançlar" tezi **+$1,29**a indi |
+| 3 | NOTR kapısı gevşetilse? | N=20 +$415 **ama en-iyi-2-hariç −$427** → önceden yazılı kural: **DEĞİŞİKLİK YOK** |
+| 4 | `smart` kapısı gevşetilse? (127 bloklu aday) | Evren-filtreli akış N=5, +$91,93; **en-iyi-2-hariç −$361,76** → N<25, **YETERSİZ, değişiklik YOK** |
+| 5 | `taker_soguma` kaldırılsa? | Negatif |
+| 6 | Planlı giriş (veto fiyatından bekle)? | 34 ulaştı, **−$3.294,87**, 5/34 kazanan, piyasadan **−$1.318,80 daha kötü** |
+| 7 | Başka TF daha mı iyi? | **1h optimal** (41/107 @ RRbrüt 2,00; 15m 1,82; 4h 27/107) → `olcucu.mtf_scan` kullanılmıyor, HAKLI |
+| 8 | Hangi özellik kazananı önden haber verir? | `pos→RR` örneklem-dışı TUTTU (r +0,56→+0,53); **`skor` ÇÖKTÜ** (+0,59→+0,16). Ama `pos≥0.70` **boğada çöküyor** (TAM_BOGA kazanan kovası 0,45-0,70) |
+| 9 | **TAM DÖNGÜ, 1.100 gün, 437 aday** | **HER REJİMDE NEGATİF:** TAM_BOGA −$2.369 (9/26), TEPKI_RALLISI −$2.777 (11/42), DERIN_AYI −$4.085 (36/115). Toplam **−$9.905,54, %30 kazanan**, en-iyi-2-hariç −$12.181 |
+| 10 | Kalabalık filtresi eksik olan mı? (Coinalyze global L/S vekili) | **AYIRT ETMİYOR.** Kazanma oranı tüm varyantlarda düz: %30/%29/%30/%31/%29. Kazanan-kaybeden L/S medyan farkı **+0,128** ve **ters yönde** (kalabalık-long adaylar %31 vs kalabalık-short %25). Toplamların iyileşmesi filtreden değil **N küçülmesinden**. |
+
+**HÜKÜM — ne söylenebilir, ne söylenemez:**
+- **Söylenebilir:** Bu oturumda denenen **altı ayrı "gevşet/genişlet" varyantının ALTISI DA negatif.** Fade çekirdeği, elimizdeki hiçbir ölçümde — ne ayıda ne boğada — pozitif doğrulanmadı. **Edge'in VARLIĞINA dair pozitif kanıt yok; yokluğuna dair birikmiş işaret var.**
+- **Söylenemez:** "Sistem çöp" veya "`smart` kapısı işe yaramaz." Ölçülen huni **botun kendisi değil** (kapılar geçmişte uygulanamıyor). Madde-10'un vekili botun `top_ls`'i değil (r=0,665, günlük çözünürlük).
+- **Ders (Madde 120'yi güçlendirir):** Ölçüm ne zaman kapıyı gevşetmeye baksa negatif çıktı. Bu, "akış az" şikâyetinin çözümünün **gevşetme değil** olduğunu üçüncü kez söylüyor (F12 aynı sonuca evren-genişletmeyle varmıştı).
+
+**AÇIK KALAN TEK SORU — ve neden backtest'le kapanmaz:** Değeri yaratan `taker_soguma` olabilir (canlı hunide %13 eliyordu, hiç izole test edilmedi). Ama `taker` geçmişi 30 gün → **bu soru backtest'le CEVAPLANAMAZ, yalnız ileriye dönük biriktirmeyle.** Agentic katman tasarlanırsa görevi "daha çok işlem bulmak" değil, **bu belirsizliği kapatacak veriyi disiplinli biriktirmek** olmalıdır.
+
+**VERİ DUVARLARI (tekrar keşfedilmesin):** Binance klines →2021 · Binance `openInterestHist`/`topLongShortPositionRatio`/`takerlongshortRatio` = **30 gün** (400 hatası ~40 günde) · Coinalyze `1hour` ≈1 ay, `4hour` ≈11 ay, `daily` →2023-06 · Coinalyze `/long-short-ratio-history` = `globalLongShortAccountRatio` (botun metriğiyle r=0,665, birebir DEĞİL).
+
+**Araçlar (scratchpad, repoya taşınmadı — kullanıcı kararı):** `veto_replay3.py` (kalibre motor) · `rejim_gecmis.py` · `pillar_gecmis.py` · `rejim_golge.py` · `planli_giris.py` · `tf_karsilastir.py` · `hipotez_test.py` · `bt_veri.py` (veri katmanı) · **`bt_kalibre.py` (zorunlu kapı)** · `bt_kos.py` · `bt_rapor.py` · `bt_ls_filtre.py`. **Hiçbiri aksiyon almaz; kapı değişikliği ayrı kullanıcı kararıdır (Madde 9).**
+
+## ZEMİN ETÜDÜ — projenin ilk TARAFSIZ arayışı (2026-08-02, kullanıcı kararı: "tamam başla")
+
+**Neden farklı:** Bugüne kadarki ~15 ölçümün hepsi "mevcut tasarımın şu parçası haklı mı?" diye
+sordu — hepsi **denetimdi**. Bu ilk kez sistemden bağımsız soruyor: *"Bu piyasada, günler-haftalar
+ölçeğinde, herhangi bir şey herhangi bir şeyi öngörüyor mu?"* Ön-kayıt sonuca bakılmadan yazıldı
+(`scratchpad/ZEMIN_ETUDU_ONKAYIT.md`): 14 tahminci, 3 ufuk (7/14/30g), 5 kova, keşif|saklı zaman
+bölmesi, dört ölçütlü hüküm — **hepsi koşmadan önce donduruldu, sonradan değiştirilmedi.**
+
+> **ÖLÇÜM DAMGASI:** 507 Binance perp sembolü · günlük bar · 1.301 ölçüm günü (2023-01-01→2026-07-24)
+> · gün başına ort. 218 likit coin ($3M/30g medyan hacim kapısı, geçmişe dayalı) · **keşif 2023-01→2024-12
+> (ağırlıklı boğa) / saklı 2025-01→2026-08 (ağırlıklı ayı-kararsız)** · maliyet düşülmüş · piyasa-üstü.
+
+**KALİBRASYON (zorunlu kapı, geçti):** Sızdırılmış değişken (gelecek elimize verildi) → her iki
+yarıda **tekdüzelik +1,00**, yayılım +%53 / +%69. Sahte değişken (rastgele sayı) → **elendi**
+(tekdüze değil, işaret döndü, maliyetten sonra negatif). **"Aletimiz negatife mi meyilli?" sorusu
+doğrudan cevaplandı: HAYIR.** [Kayıt: ilk koşuda sahte kontrole ön-kayıtta OLMAYAN ayrı bir eşik
+uygulanmıştı; belgedeki tanıma (gerçek tahmincilerle BİREBİR aynı kapı) dönüldü — hedef kaydırma değil.]
+
+### BULGU 1 (en önemlisi): 10 tahmincinin 9'u İŞARET DEĞİŞTİRDİ
+h=30 piyasa-üstü yayılım, keşif → saklı: 30g güç −1,46→+0,22 · 90g güç −1,82→+0,22 ·
+**12ay tersine dönüş −1,81→+3,45** · oynaklık −2,22→+3,73 · 200g uzaklık −1,10→+0,61 ·
+30g açık-poz +0,06→−4,41 · hacim trendi +1,46→−2,75 · listelenme yaşı +3,95→−6,46 ·
+fonlama hasadı +0,36→−1,52.
+
+**12ay tersine dönüş kritik vaka:** keşifte **kusursuz tekdüze (−1,00)**, saklıda **kusursuz tekdüze
+TERS yönde (+1,00)**. Tek yarıya bakan "mükemmel edge buldum" der.
+
+> **DERS — projenin bütün geçmişini açıklar:** Piyasanın 2023-24 kesitsel yapısı, 2025-26'nın
+> aynasıdır. Beta-rotasyon, trend-kırılım, spot-öncülük, ham-fade... hepsi TEK pencerede ölçüldü.
+> "Ölçtük çalışıyordu, sonra çalışmadı" = kötü şans değil, **tek pencerede ölçüp genellemek.**
+> **Bundan sonra hiçbir kesitsel bulgu, zaman-bölmeli saklı-yarı teyidi olmadan bulgu sayılmaz.**
+
+### BULGU 2: tek hayatta kalan — 30g ortalama fonlama (ama şüpheli köşede)
+Dört ölçütü geçti (h=14: +0,71→+2,12 net +1,86 · h=30: +1,90→+4,91 net +4,65; tekdüze +0,90).
+Yön: **yüksek fonlama → yüksek ileri getiri** (fade tezinin TERSİ). Momentum kılığı DEĞİL
+(sıra korelasyonu mom30 −0,07, momentum üçte-birlerinin her birinde ayrı ayrı ayakta).
+**AMA sağlama (post-hoc, sadece düşürebilir) etkiyi tek köşede buldu:** yaş üçte-birleri
+keşif [+3,71 / −0,67 / −0,91], saklı [+5,33 / +0,43 / +0,02] → **etkinin tamamı EN GENÇ coinlerde**,
+olgunlarda sıfır; ayrıca yüksek oynaklıkta yoğun. Bu, hayatta-kalma yanlılığının en çok şişirdiği
+ve maliyet/kaymanın en yüksek olduğu köşe. → **Bulgu gerçek ama üzerine kural kurulmaz.**
+
+### BULGU 3 (yan ürün, aranmıyordu): BOT FONLAMANIN İŞARETİNİ ATIYOR — kurulum hatası
+`radar.py:110` `s_fund = clamp(abs(f)/0.05)*15 + squeeze_bonus` → **mutlak değer**: funding −0,05 ile
++0,05 aynı puanı alıyor. Üstüne `squeeze_bonus` (satır 109) **yalnız negatif** funding'e +8 veriyor.
+Toplam 23 puan (skor kapısı 45) → **bot sistematik olarak derin-negatif funding'e yöneliyor.**
+`dip_yakit` (satır 127) de derin-negatif funding'i "short-squeeze yakıtı" = LONG kurulumu sayıyor.
+**Ölçüm tersini söylüyor:** en negatif funding kovası **her iki yarıda da en kötü** (−1,00 ve −2,35).
+**Köken (git ile doğrulandı):** `d54ee05` 2026-07-07 "Faz 1-6 genişleme", asistan (Sonnet 5) tasarımı —
+kullanıcı kararı değil, kurulum anında short-squeeze arama önceliğinden gelen **tasarım hatası**.
+**Neden ileriye dönük teste GEREK YOK (kullanıcı tespiti, doğru):** Hayatta-kalma yanlılığı pozitif
+bulguları şişirir, negatifleri şişirmez. "Yüksek funding iyi" = pozitif yarı = şüpheli.
+"Derin-negatif funding kötü" = **negatif yarı = sağlam.** Yani `squeeze_bonus`/`dip_yakit`'in
+kaldırılması ŞİMDİ gerekçelidir; yüksek-funding'e YENİ kural kurmak gerekçeli DEĞİLDİR. (Madde 9 —
+uygulama ayrı kullanıcı kararı; eski kriter silinmez, tarihli not düşülür.)
+
+### BULGU 4: rejim/tahsis boyutu ÖLÇÜLEMEDİ (çürütülmedi de)
+B grubu (BTC 200g yapısı, piyasa geneli funding) saklı yarıda **boş kova** verdi — kova sınırları
+keşiften; saklı dönem o aralığı kapsamıyor. `genişlik` N=11. → **Hüküm verilemez.** Keşif yarısı
+ilginç (BTC 200g'nin çok üstündeyken ileri getiri DAHA DÜŞÜK, tekdüze −0,90; 2023 −22,7 / 2024 −6,7)
+ama teyitsiz. **Not: "bir ölçek yukarı çık, rejime göre tahsis" tezi (2026-08-02 asistan önerisi)
+BU ÇALIŞMAYLA DESTEKLENMEDİ — sezgiye dayanıyordu, kanıta değil. Açıkça kayda geçirilir.**
+
+### ÖN-KAYITLI HÜKÜM
+Ayakta kalan farklı tahminci: **1**. Kural: *"Etrafına TEK tahsis kuralı kurulur, başka hiçbir şey
+eklenmez, sanal çalışır."* Sağlama ışığında pratik karşılığı: **kural kurulmaz, bulgu ileriye dönük
+biriktirilir** (bulgunun tek zayıflığı hayatta-kalma yanlılığı ve o yanlılık ileri ölçümde yapısal
+olarak imkânsız). Bu, belgedeki "sanal çalışır" maddesinin uygulanmasıdır, gevşetilmesi değil.
+
+**Sınırlar:** hayatta-kalma yanlılığı (→ bu çalışmanın 9 negatifi SAĞLAM, 1 pozitifi ŞÜPHELİ) ·
+funding/OI 294/507 sembolde · dominans-TOTAL geçmişi yok (para-akışı boyutu ölçülmedi) ·
+günlük yeniden-dengeleme → ileri pencereler üst üste biniyor → t-değerleri şişkin (ölçüt olarak
+kullanılmadı; koruma saklı-yarı şartıdır) · tek borsa/tek para birimi · ilişki ölçümü, nedensellik değil.
+
+**Araçlar:** `scratchpad/ze_veri.py` · `ze_kos.py` · `ze_rapor.py` · `ze_saglama.py` ·
+`ze_sonuc.json` · `ZEMIN_ETUDU_ONKAYIT.md` · `ZEMIN_ETUDU_SONUC.md`. Repoya dokunulmadı.
+
+## TAŞIMA İŞLEMİ (delta-nötr fonlama hasadı) — "yapısal" sandığım şey yine MEVSİM çıktı (2026-08-03)
+
+**Tez (asistan, iddialı kuruldu):** "Vadeli piyasa kalıcı olarak long tarafta kalabalık (top_ls
+medyanı 1,58). Spot'tan al + aynı büyüklükte perp short → fiyat nötr, her 8 saatte kira topla.
+Bu mevsim değil balık; karşı tarafta kimin durduğunu ve neden ödemeyi kesemeyeceğini
+söyleyebildiğim TEK şey." **Ölçüm bu tezi ÇÜRÜTTÜ.**
+
+> **DAMGA:** 351 sembol · Binance'in **gerçek 8 saatlik fonlama ödeme kayıtları**
+> (`fapi/v1/fundingRate`; Coinalyze günlük yaklaşımı DEĞİL) + spot & perp günlük fiyat ·
+> 43 ay (2023-01→2026-07) · keşif 2023-01→2024-12 / saklı 2025-01→2026-08 ·
+> maliyet DEVİR bazlı %0,16 tek yön · ön-kayıt `scratchpad/TASIMA_ONKAYIT.md`.
+
+**HEDGE DOĞRULANDI (yayın şartıydı):** baz terimi yıllık **−0,07 / −0,16 / −0,02%** — ön-kayıt
+sınırı %3'tü. İki bacak gerçekten birbirini götürüyor → "fiyattan bağımsız" iddiası geçerli.
+
+| Varyant | Keşif | Saklı | Hüküm |
+|---|---|---|---|
+| V1 BTC+ETH (sürekli) | +9,84%/yıl | **+3,53%** | AYAKTA (kıl payı — aşağıya bak) |
+| V2 fonlaması en yüksek 10 (aylık) | +9,52% | **−8,41%** | DÜŞTÜ (+ devir maliyeti %2,82/yıl) |
+| V3 tüm uygunlar (sürekli) | +7,42% | **−13,61%** | DÜŞTÜ |
+
+### ASIL BULGU: fonlama taşıması REJİME BAĞIMLI
+Saklı dönemde geniş piyasada **ayların %89'unda fonlama NEGATİF** (V3). Yani ayı piyasasında
+kalabalık long değil SHORT tarafta → ödeme yönü tersine dönüyor, kira toplayan kira ÖDÜYOR.
+**"Perp piyasası yapısal net-long" iddiası altcoinler için YANLIŞ; boğa dönemi olgusu.**
+(Not: 1,58'lik top_ls ölçümü 30 günlük tek pencereydi — aynı hata, üçüncü kez.)
+
+### YAN BULGU (ileride işe yarayabilir): BTC/ETH ALTLARDAN AYRIŞIYOR
+Majörlerde fonlama saklı dönemde bile ayların **%84'ünde pozitif** kaldı (altlarda %11).
+Yorum: BTC/ETH'de altlarda olmayan kurumsal long talebi (baz işlemi, ETF hedge) var.
+**Ama getiri eriyor: %9,84 → %3,53 (sermaye payı düzeltilince %2,83)** — koyduğum %6 eşiği
+tam da borsa/karşı-taraf riskini karşılasın diyeydi; bugün ödediği o eşiğin yarısı.
+
+### ÖN-KAYIT TUTARSIZLIĞI (sonucu gördükten sonra fark edildi, saklanmıyor)
+Bu çalışmanın kuralı "toplam ≥%6 **ve** iki yarıda da pozitif" → V1 GEÇER.
+Zemin etüdünün kuralı "saklı yarı keşfin **en az yarısı** kadar" → V1 **DÜŞER** (3,53 < 4,92).
+**Cevap hangi standardı uyguladığına duyarlı → bu kadar kıl payı olan şey edge değildir.**
+Bundan sonra tek standart: **saklı ≥ keşfin yarısı** (daha sert olan).
+
+### DERS (üçüncü tekrar)
+Bu oturumda "yapısal/kalıcı" diye kurulan üçüncü iddia da mevsim çıktı (1: fade edge'i,
+2: kesitsel kalıplar, 3: fonlama taşıması). **Kural: "yapısal" kelimesi, iki farklı rejimde
+ölçülmeden kullanılmaz.** Tek pencerede ölçülen hiçbir şey "piyasanın doğası" diye anlatılmaz.
+
+**Araçlar:** `scratchpad/ze_tasima_veri.py` · `ze_tasima.py` · `ze_tasima_sonuc.json` ·
+`TASIMA_ONKAYIT.md`. Repoya dokunulmadı, commit yok.
+
+## YAPISAL ELEME ÖLÇÜMÜ — "hangi coin" sorusunun büyüklüğü ölçüldü (2026-08-03)
+
+**Bağlam:** Kullanıcı birinci-ilke sorularını sordu (coin neden yükselir, kurumsal/bireysel,
+para nerede kazanılır, işlevin fiyata etkisi). Buradan `SISTEM_TASARIM_v2.md` çıktı; kalbi
+**Katman-2 ELEME** olacaktı ("eleyen kural sağlam, seçen kural kırılgan" — pozitif bulgularımızın
+hepsi çöktü, negatiflerin hepsi ayakta kaldı). İki eleme kuralı ölçüldü.
+Ön-kayıt: `scratchpad/YAPI_ONKAYIT.md`. **Soru ortalama değil SOL KUYRUK'tu:** felaket kaybı olasılığı.
+
+> **DAMGA:** 507 perp sembolü · coin başına dönem başına TEK gözlem (ilk uygun günden **sabit
+> 365 gün** ileri, üst üste binme yok) · keşif 2023-01→2024-12 (N=172) / saklı 2025-01→2026-08
+> (N=376) · E1 = toplam/dolaşan arz (CoinGecko, BUGÜN) · E2 = yıllık ücret ≥ $1M
+> (DefiLlama; zincirler `/v2/chains` ile eklendi — bu düzeltme olmadan ETH/SOL/BTC "gelir yok"
+> damgası yiyordu) · felaket eşiği −%80, ön-kayıtta sabit.
+
+### ⭐ ASIL BULGU — FELAKETİN TEMEL ORANI (oturumun en büyük sayısı)
+
+| Dönem | 365g'de −%80 | −%50 | fiili ölüm (likiditeden düşme) |
+|---|---|---|---|
+| **2023-01→2024-12 (boğa)** | **%1** | %5 | %4 |
+| **2025-01→2026-08 (ayı)** | **%46** | %85 | %41 |
+
+**Boğada hiçbir şey ölmüyor; ayıda her iki coinden biri bir yılda %80 eriyor.**
+
+### E1 SEYRELTME — ÖLDÜ
+Fark **−4,2 puan** (yanlış yönde, sıfır). Sebep açıklayıcı: **memecoinlerin seyreltmesi 1,00**
+(hepsi zaten dolaşımda, kilit açılımı yok) ve %52'si öldü. **"Gelecek arz baskısı yok" hiçbir
+koruma sağlamıyor.** → Eleme kuralı olarak **sisteme GİRMEZ.**
+
+### E2 DEĞER YAKALAMA — VAR AMA EŞİĞİN ALTINDA, TEK PENCERE
+Geliri yok: P(−%80)=**%50**, medyan −%79,9 · Geliri var: **%32**, medyan −%72,5 → **17,8 puan.**
+Karıştırıcı testlerini büyük ölçüde geçti (yaş 21/18/11 · büyüklük 18/8/10 · oynaklık 20/16/15
+— her dilimde var, "sadece küçük/genç coin" değil). **Yine de GİRMEZ:** (1) ön-kayıt eşiği 20 puandı,
+(2) tek pencere — keşif yarısında ölçülemedi, (3) **geliri olanların da %32'si %80 kaybetti,
+medyanı −%72 → gelir koruma değil, sadece daha az felaket.**
+
+### KONTROL BENİM ÖN-KAYIT HATAMI BULDU (kayda geçer)
+Sızdırılmış kontrol keşif yarısında ayrıştıramadı — çünkü orada **ayrışacak sol kuyruk yok**
+(temel oran %1). Saklı yarıda %100 vs %0 ile kusursuz ayrıştırdı → **boru hattı sağlam.**
+Hata bendeydi: bir yarıda hiç gerçekleşmeyen bir olay için "her iki yarıda da ayrışsın" şartı
+koymuştum. Çalışma ön-kayıtlı haliyle **koşulamaz**; sonrası KEŞİFSEL etiketiyle raporlandı.
+
+### ⭐ TASARIM SONUCU — Katman-2 çöktü, Katman-1 büyüdü
+
+| Karar | Ölçülen değeri |
+|---|---|
+| **Ne zaman piyasada olduğun** (rejim) | %1 → %46 = **45 puan** |
+| **En iyi coin filtresi** (gelir) | %50 → %32 = **18 puan**, üstelik teyitsiz |
+
+> **Hangi coini tuttuğun, ne zaman tuttuğunun yanında önemsiz kalıyor.**
+> Mükemmel bir coin filtresi bile rejim kararının **üçte birini** ediyor.
+
+**SISTEM_TASARIM_v2'nin kalbi olarak önerilen ELEME katmanı, kendi ilk testinde büyük ölçüde
+çürüdü.** Ayakta kalan, zaten kanıtlı olan Katman-1'dir. Asistan tahmini ("E2 geçer, E1 sınırda")
+**iki maddede de iyimser yönde yanlış** çıktı — kayda geçer.
+
+**Araçlar:** `scratchpad/ze_yapi_veri.py` · `ze_yapi.py` · `ze_yapi_sonuc.json` ·
+`YAPI_ONKAYIT.md` · `SISTEM_TASARIM_v2.md`. Repoya dokunulmadı, commit yok.
+
+## SKOR OTOPSİSİ — "60+ skoru hangi parça üretti, o parça haklı mıydı?" (2026-08-03)
+
+**Kullanıcı sorusu:** *"Botun 60 ve üzeri skor gösterdiği coinleri tek tek incelesek, aslında
+gerçek skorun kaç olduğunu bulsak — neden o skoru verdi, nerede ölçüm mantığı yanlıştı."*
+Bu, 18 ölçümden **farklı bir soru**: "skor işe yarıyor mu" değil, **"skorun hangi parçası bozuk".**
+Teşhis, edge avı değil.
+
+> **DAMGA:** `radar_archive.jsonl` 101.926 kayıt · **41 gün (2026-06-24 → 08-03), YALNIZ AYI** ·
+> skor≥60 → 648 kayıt → **125 EPİZOT** (aynı sembolde 4 saat içi tek olay sayıldı; CFX tek başına
+> 30 kez görünüyordu) · ileri getiri 1h klines · **KALİBRASYON: skor arşiv alanlarından yeniden
+> üretildi, sapma medyan 0,000** → parçalama güvenilir.
+
+### BULGU 1 — Skor beş faktörlü bileşke DEĞİL, bir AÇIK-POZİSYON DEDEKTÖRÜ
+
+| Parça | Ort. katkı | Tasarım kapasitesi | Payı | Baskın olduğu epizot |
+|---|---|---|---|---|
+| **OI** | **30,8** | 35 | **%46** | **115/125 (%92)** |
+| HACIM | 16,3 | 20 | %24 | 3 (%2) |
+| FUND | 15,3 | 23 | %23 | 7 (%6) |
+| **SIKIŞMA** | **0,7** | 20 | **%1** | **0** |
+| KIRILIM | 3,7 | 15 | %5,5 | **0** |
+
+**Tasarımın üçte biri (sıkışma 20p + kırılım 15p) fiilen çalışmıyor** — 35 puanlık kapasiteden
+4,4 puan üretiyor. İkisi de **emeklilik adayı** (Madde 99: her ekleme bir çıkarma ister).
+**Ayrıca OI DOYUYOR:** epizotların %69'u oi24≥%20 kırpma eşiğinin üstünde → skor %20 ile %200'ü
+AYNI sayıyor. Halbuki oi24>60 grubu en iyi sonucu verdi (R=+0,86) → **kırpma bilgi çöpe atıyor.**
+
+### BULGU 2 — İşaret ters: skor "yükseliş öncüsü" diyor, ölçüm "düşüş" diyor
+
+| | +4h | +24h | +72h | +72h pozitif |
+|---|---|---|---|---|
+| **skor 60+** (N=125) | −0,85% | −3,57% | **−6,78%** | **%23** |
+| **KONTROL skor<45, aynı günler** (N=499) | −0,15% | −0,64% | −1,02% | %42 |
+
+Kontrol grubu şart: ayı piyasasındayız, "düştü" tek başına anlamsız. **Fark gerçek: 5,8 puan.**
+Skorda bilgi VAR, etiketi yanlış.
+
+### BULGU 3 ⭐ — BOT EN ZAYIF BANTTA ÇALIŞIYOR (en aksiyon alınabilir bulgu)
+
+> **⚠ DÜZELTME (2026-08-03, aynı gün, stop otopsisi sırasında yakalandı):** İlk yol testi
+> **yalnız KAPANIŞ** fiyatına bakıyordu. Stop mumun **FİTİLİYLE** tetiklenir — kapanışla ölçmek
+> stop oranını sistematik olarak **düşük** gösterir (%41,9 yerine gerçek %58,1). İlk raporlanan
+> R değerleri (+0,16 / +0,32 / +0,58) **FAZLA İYİMSERDİ, GEÇERSİZDİR.** Aşağıdaki tablo
+> fitil bazlı ve `olcucu`'nun GERÇEK stop yerleşimiyle yeniden koşuldu. **Ders: yol testi
+> her zaman high/low ile yapılır; kapanış-bazlı dokunma testi yayımlanmaz.**
+
+Yol testi (SHORT, `olcucu`'nun gerçek stopu, hedef=2×risk, 72 saat, **fitil bazlı**):
+
+| Bant | Hedefe | Stopa | Ort. R |
+|---|---|---|---|
+| kontrol <45 (N=1277) | %31,9 | %66,0 | **−0,02** |
+| **45-60 ← BOTUN KAPISI** (N=302) | %32,5 | %58,3 | **+0,10** |
+| **60+** (N=124) | %38,7 | %58,1 | **+0,20** |
+
+Sıralama tekdüze — skorda bilgi var, ama büyüklük ilk sandığımın **üçte biri**.
+Maliyet (~0,04R) düşülünce botun bandı **+0,06R** kalıyor: pozitif ama çok ince.
+**Not:** Botun canlı karnesi (6 işlem, ort R −0,67) bu ölçümü ÇÜRÜTMEZ — N=6 ile
++0,10'dan ayırt edilemez. İkisi çelişmiyor, canlı örneklem yok denecek kadar küçük.
+
+**60+'ta hedef stopu geçiyor; botun fiilen işlem yaptığı 45-60'ta stop hedefi geçiyor.**
+Skor çalışıyor ama kapı, bilginin en zayıf olduğu yere konmuş.
+**EŞİK YÜKSELTİLMEDİ** — 41 gün, tek rejim, bantlar tekdüze değil (45-50:+0,31, 50-55:+0,23,
+55-60:+0,47). Tek pencereye göre eşik oynatmak 18 kez yanıltan desendir. **Boğa verisi bekler.**
+
+### BULGU 4 — `squeeze_bonus`: KALDIRILDI, sonra GERİ ALINDI (asistan muhakeme hatası)
+Aynı gün içinde üç adım, hepsi kayıtlı:
+1. **Kaldırıldı** — gerekçe: premis ("negatif funding = yukarı squeeze yakıtı") iki ölçümle çürük.
+2. **Otopsi ölçtü** — 60+ bandında: bonus ALAN hedef %58,7 / stop %31,7 → **R=+0,89**;
+   ALMAYAN hedef %36,1 / stop %52,5 → R=+0,25. Botun bandında (45-60) fark NÖTR (+0,30 vs +0,32).
+3. **Geri alındı** (kullanıcı "evet al").
+
+> **DERS (asistan hatası, tekrarlanmasın):** *"Premis yanlış"* ile *"kural zararlı"* aynı şey DEĞİL.
+> Premis gerçekten yanlıştı (yukarı squeeze değil), ama kural **düşecek coinleri** işaretliyordu ve
+> **bot bu skoru SHORT için kullanıyor (6/6 işlem SHORT)** → "long için en kötü kova" =
+> "short için en iyi kova". **Bir kuralı kaldırmadan önce onun FİİLİ etkisi ölçülür, gerekçesi değil.**
+
+**Kalan düzeltme (doğru ve yerinde):** `dip_yakit` ve dokümantasyon artık "squeeze yakıtı = alım"
+demiyor, **UYARI** diyor. Etiketin hesabı korundu (arşiv sürekliliği).
+**SINIR:** hepsi 41 gün, yalnız AYI. Boğaya girildiğinde `squeeze_bonus` YENİDEN ölçülmeli — koda not düşüldü.
+
+### OTOPSİ-2: STOP YERLEŞİMİ (`olcucu.measure` SHORT dalı) — hipotezim ÇÜRÜDÜ
+Ön-kayıt: üç SABİT varyant, eşik araması yok. A=min(adaylar) **botun bugünü** (F9 2026-07-22
+"girişe en yakın") · B=medyan · C=max (~1,5×ATR, F9 öncesine yakın). Hedef=2×risk, R cinsinden.
+
+| Varyant | Stop mesafesi | skor 60+ | botun bandı 45-60 |
+|---|---|---|---|
+| **A = min (BOT)** | %2,80 | **+0,20** | **+0,10** |
+| B = medyan | %5,00 | +0,10 | +0,11 |
+| C = max (~1,5×ATR) | %7,71 | +0,08 | +0,07 |
+
+**"F9 stopu fazla daralttı" hipotezi REDDEDİLDİ** — genişletmek daha kötü. Mekanizma: geniş stopla
+daha az stop yeniyorsun (%39,5 vs %58,1) ama hedefe de hiç varamıyorsun (%15,3 vs %38,7).
+**Ek kontrol (post-hoc): akıllı yerleşim, aynı mesafedeki SABİT yüzdeyi 60+'ta yeniyor**
+(+0,20 vs +0,09), botun bandında berabere. → `olcucu`'nun yerleşim mantığı hakkını veriyor.
+A'da seçilen aday kaynağı: yapısal %39 · nbar %21 · ATR-fallback %40.
+
+### OTOPSİ-3: `stage` ETİKETİ — amiral gemisi etiket EN KÖTÜ hücre
+`radar_active`'in asıl kapısı hiç denetlenmemişti. Aynı fitil-bazlı yöntem:
+
+| stage | N | HEDEF | STOP | ort R |
+|---|---|---|---|---|
+| **BASLIYOR** (vol_x>2,5 & last1>2 & oi3>3) | 69 | %30,4 | %69,6 | **−0,09** |
+| **HAZIRLANIYOR** (comp<0,65 & \|last3\|<4 & oi24>8) | 162 | %37,0 | %56,8 | **+0,19** |
+| izle | 796 | %33,9 | %62,4 | +0,07 |
+
+**"Hareket başlıyor" etiketi, short için NEGATİF.** Mantıklı: taze pump'ın içine short atıyorsun,
+momentum stopu alıyor (TLM/MANTA dersinin simetriği). **"Hazırlanıyor" (sıkışmış + fiyat yatay +
+pozisyon birikiyor) en iyi hücre** ve skordan BAĞIMSIZ ayırt ediyor: skor<45 içinde bile
+HAZIRLANIYOR +0,22 vs izle +0,01 (N=116). Alt-bant kırılımları gürültülü (skor 60+ izle N=25
+R=+0,68 = küçük örneklem aykırısı, güvenilmez). **Aksiyon alınmadı** — 41 gün, tek rejim.
+
+### OTOPSİ-4 ⭐ — BOYUTLANDIRMA "RİSK-ÖNCE" DEĞİL, "MARJİN-ÖNCE" (en somut bulgu)
+Sistem kendini "risk-önce boyutlandırma" diye tanımlıyor. Kod öyle yapmıyor:
+```
+marjin   = equity × marjin_pct(skor)        # %8-12, stoptan BAĞIMSIZ
+notional = marjin × kaldirac(skor)          # 3-10x, stoptan BAĞIMSIZ
+risk_usdt = stop_frac × notional            # <- risk BURADA ORTAYA ÇIKIYOR
+if risk_usdt > equity×%5: kucult            # yalnız TAVAN kırpılıyor
+```
+**Risk hedeflenmiyor, sonuçta oluşuyor.** Gerçek risk-öncede `notional = hedef_risk / stop_frac`
+olurdu: geniş stop → KÜÇÜK pozisyon, dolar riski SABİT. Burada tersi: **geniş stop → BÜYÜK risk.**
+
+7 gerçek işlemden türetilen kanıt (risk = sonuc_usdt / r):
+
+| İşlem | Skor | Kald. | Türetilen stop | **Dolar riski** | Sonuç |
+|---|---|---|---|---|---|
+| PROM | 54,3 | 5 | %1,5 | **$70** | −$72 |
+| AKE | 48,2 | 6 | %2,3 | **$115** | −$118 |
+| DEXE | 46,5 | 3 | %7,2 | **$178** | −$179 |
+| **BLESS** | 72,3 | 9 | **%7,5** | **$483** | **−$488** |
+
+Hepsi R≈−1,0 — yani R muhasebesi tutarlı görünüyor **ama dolar etkisi 7 KAT değişiyor** ($70→$483).
+Ve farkı yaratan şey konviksiyon değil, **stop mesafesi** — ki o bir konviksiyon sinyali değil,
+mekanik bir çıktı. En büyük kayıp (BLESS −$488) en geniş stoplu işlemden geldi.
+**Bu bir tasarım-davranış çelişkisidir (Madde 8 adayı: belgelenmiş davranışı geri getiren onarım).**
+Düzeltme YAPILMADI — ayrı kullanıcı kararı; ama R/R≥2 kapısı ve %5 tavanı bu haliyle
+"her işlem eşit risk" garantisi VERMİYOR, bunu bilerek karar verilmeli.
+
+**Araçlar:** `scratchpad/sk_anatomi.py` · `sk_sonuc.py` · `sk_kontrol.py` · `sk_yol.py` · `sk_bant.py`
+· `st_otopsi.py` · `st_kontrol.py` · `sg_otopsi.py`.
+**Yöntem dersi:** Bu otopsi 41 günlük mevcut arşivden, yeni veri çekmeden, 18 backtest'ten daha
+fazla aksiyon alınabilir bulgu üretti. **Sebep: "yeni edge var mı" değil "elimizdeki alet ne yapıyor"
+diye sordu.** Bundan sonra yeni arayışa çıkmadan önce mevcut bileşenlerin otopsisi yapılır.
