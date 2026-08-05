@@ -4,24 +4,33 @@
   "ollama_url": "http://localhost:11434",
   "ollama_model": "gemma4:12b",
   "apify_token": "",
+  "coinalyze_api_key": "",
   "binance_spot_base": "https://api.binance.com",
   "binance_fapi_base": "https://fapi.binance.com",
   "telegram_bot_token": "",
   "telegram_chat_id": "",
   "ekstra_alarmlar": [
-    { "sym": "BTC", "op": ">=", "seviye": 0, "not": "ornek: BotFather token + chat_id girince nobetci.py bunu izler" }
+    {
+      "sym": "BTC",
+      "op": ">=",
+      "seviye": 0,
+      "not": "ornek: BotFather token + chat_id girince nobetci.py bunu izler"
+    }
   ],
   "testbot": {
     "_aciklama": "SANAL (paper) test botu — gercek para/emir DEGIL. Ayri kova, defter/gercek pozisyonlarla karismaz.",
-    "baslangic_bakiye": 1000.0,
+    "baslangic_bakiye": 10000.0,
     "sure_gun": 7,
     "min_equity_dur": 50,
     "maks_pozisyon": 4,
-    "islem_risk_pct": 5,
+    "islem_risk_pct": 3,
     "kaldirac_min": 3,
     "kaldirac_max": 10,
-    "min_vol_musd": 15,
-    "zaman_stop_saat": 48
+    "min_vol_musd": 3,
+    "tarama_havuz_n": 70,
+    "makro_kapi_aktif": true,
+    "zaman_stop_saat": 48,
+    "_islem_risk_pct_not": "2026-08-03 kullanici karari: 5 -> 3. Gerekce: risk-once boyutlandirma onarimindan sonra sistem hedefi GERCEKTEN tutmaya calisiyor; %5'te ortalama risk $176->$263 cikiyordu. %3'te tutarsizlik 9.6x->5.7x duser ve ortalama risk eski davranisa yakin kalir ($195). 4 acik pozisyonda toplam maruziyet %12."
   },
   "maliyet": {
     "_teyit": "Binance Fee-Rate sayfandan kendi degerlerini gir. Asagidakiler Regular+BNB tipik degerleri.",
@@ -29,7 +38,12 @@
     "taker_fee_pct": 0.045,
     "spot_fee_pct": 0.075,
     "funding_periyot": 6,
-    "tutma_saat_tf": { "15m": 4, "1h": 12, "4h": 48, "1d": 96 },
+    "tutma_saat_tf": {
+      "15m": 4,
+      "1h": 12,
+      "4h": 48,
+      "1d": 96
+    },
     "slippage_pct": 0.02
   },
   "esikler": {
@@ -48,6 +62,15 @@
     "radar_alert_skor": 40.0,
     "radar_short_skor": 45.0,
     "blowoff_chg24_pct": 40.0,
+    "ayi_short_chg24_max": 20.0,
+    "notr_long_acik": 1,
+    "btcd_xs_ust": 0.287,
+    "btcd_xs_alt": -0.318,
+    "btc_pay_short_freni": 1,
+    "btc_pay_ayi_long": 1,
+    "_btc_pay_not": "BTC risk-varlik payi (stablecoin haric) 3g degisimi; esikler 365 gunluk serinin ceyrekleri. UST bantta SHORT frenlenir, UST+para-durgun'da AYI long penceresi acilir (2026-08-04, 12 ay holdout ile olculdu). 0 yazarak her iki katman ayri ayri kapatilabilir. Veri: btc_pay_log.jsonl (gunluk, CoinGecko top-130).",
+    "_notr_long_acik_not": "1 = NOTR/BELIRSIZ rejimde temiz-aday LONG acilabilir (2026-08-04 kullanici karari). 0 = eski Faz-2 davranisi, tamamen kapali. Kalite filtreleri her iki halde de gecerli.",
+    "_ayi_short_chg24_max_not": "AYI rejiminde SHORT dali icin pump kapisi: 24s degisim bu esigi asarsa SHORT acilmaz (2026-08-04, olculdu). 999 = kapi etkisiz.",
     "trailing_r_esik": 1.0,
     "trailing_atr_kat": 2.0,
     "trailing_atr_kat_2r": 1.5,
@@ -70,5 +93,11 @@
     "saglik_fiyat_fark_pct": 0.5,
     "saglik_radar_bayat_dk": 25.0,
     "saglik_piyasa_bayat_saat": 14.0
+  },
+  "bildirim": {
+    "_not": "Alarm gonderimi. Anahtar YOKSA varsayilan ACIK. acik=false -> Telegram + Windows toast susar, alarm LOG'u yazilmaya devam eder. Kanal bazli: telegram / toast.",
+    "acik": true,
+    "telegram": true,
+    "toast": true
   }
 }

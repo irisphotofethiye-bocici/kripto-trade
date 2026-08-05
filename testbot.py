@@ -32,6 +32,7 @@ import json, os, sys, argparse, datetime, statistics, time, random
 import evren
 import radar
 import olcucu
+import makro
 from nobetci import telegram_gonder, toast_gonder
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -93,6 +94,24 @@ def _append_jsonl(path, obj):
         fh.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
+# --- IKINCI HESAP DESTEGI (2026-08-05, kullanici karari) --------------------
+# "benim" hesabi (benim.py) ayni kapatma/yonetme mantigini kullanir ama KENDI
+# defterine yazar. Imzalari degistirmek yerine TEK yonlendirme noktasi:
+# pozisyon_kapat / pozisyon_liq / pozisyon_kismi_tp1 artik _islem_defteri() yazar.
+#
+# _DEFTER None iken -> ISLEMLERF, yani BOTUN DAVRANISI BIREBIR AYNI.
+# benim.py bunu gecici olarak degistirir ve finally ile GERI ALIR.
+# NEDEN AYRI DEFTER: bu oturumdaki tum olcumler (skor otopsisi, stop otopsisi,
+# rejim dogrulamasi, btc_pay katmani) botun KENDI kararlarinin karnesine dayaniyor.
+# Elle acilan islemler ayni deftere karisirsa o olcumlerin hicbiri bir daha temiz
+# yapilamaz ve karisan veri geriye donuk AYRILAMAZ.
+_DEFTER = None
+
+
+def _islem_defteri():
+    return _DEFTER or ISLEMLERF
+
+
 def yeni_state():
     bakiye = float(_c("baslangic_bakiye", 1000.0))
     return {
@@ -144,6 +163,9 @@ def to_ms(iso_str):
 # ---------- boyutlandırma ----------
 
 def kaldirac_hesapla(skor, smart_hizali):
+    """[2026-08-03: BOYUTLANDIRMADA ARTIK KULLANILMIYOR — SILINMEDI (Madde 9).
+    Kaldirac skordan degil, risk hedefinden turetiliyor; gerekce yeni_giris_ac icindeki
+    'RISK-ONCE BOYUTLANDIRMA ONARIMI' blogunda. Geri donulurse referans olarak duruyor.]"""
     k = 3 + (skor - 45) * 7 / 30.0
     if smart_hizali:
         k += 2
@@ -205,11 +227,84 @@ def _veto_logla(st, sym, r, pillar, kategori, detay, olurdu_yon, rejim_ad):
     cd[anahtar] = now_iso()
 
 
-def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
+ADAY_ARSIV = os.path.join(HERE, "testbot_aday_arsiv.jsonl")
+
+
+def _aday_arsivle(aday_rows, rejim_ad, btc_chg3):
+    """TESTBOT'UN KENDI ADAY EVRENINI arsivler (2026-08-04, kullanici karari).
+
+    NEDEN: `radar_archive.jsonl` radar.py'nin evreni — gunluk hacmi 7-gun medyanina gore
+    PATLAYAN coinler. testbot ise MUTLAK hacimde en buyukleri tarar. Bunlar farkli
+    populasyonlar ve fark olculdu: 7 gercek islemin ikisi (GWEI skor 81.1, BLESS skor 72.3)
+    islem gununde radar_archive'da HIC YOK. Yani en yuksek skorlu iki islem — biri en buyuk
+    zarari veren — bugune kadarki her olcumun disinda kaldi.
+
+    AYRI DOSYA, bilincli: radar_archive'a karistirilirsa o dosyanin anlami bozulur ve
+    onunla yapilmis TUM eski olcumler geriye donuk gecersizlesir.
+
+    DAVRANISA ETKISI YOK — yalnizca gorunurluk. Yazma hatasi dongüyu durdurmaz.
+    Sema radar_archive.jsonl ile ayni tutuldu ki ayni cozumleme araclari calissin.
+    """
+    try:
+        ts0 = now_iso()[:16].replace("T", " ")
+        with open(ADAY_ARSIV, "a", encoding="utf-8") as af:
+            for r in aday_rows:
+                p = r.get("_pillar") or {}
+                kayit = {"ts": ts0, "sym": r.get("sym"), "score": r.get("score"),
+                         "stage": r.get("stage"), "price": r.get("price"),
+                         "comp": r.get("comp"), "vol_x": r.get("vol_x"),
+                         "oi24": r.get("oi24"), "oi3": r.get("oi3"),
+                         "funding": r.get("funding"), "pos": r.get("pos"),
+                         "last1": r.get("last1"), "last3": r.get("last3"),
+                         "chg24": r.get("chg24"), "mcap": r.get("mcap"),
+                         "dip_yakit": r.get("dip_yakit"), "ayrisma": r.get("ayrisma"),
+                         "rel3": r.get("rel3"), "btc_chg3": btc_chg3, "rejim": rejim_ad,
+                         "top_ls": p.get("top_ls"), "glob_ls": p.get("glob_ls"),
+                         "taker": p.get("taker"), "smart": p.get("smart"),
+                         "float_oran": r.get("_float_oran"), "dusuk_float": r.get("_dusuk_float"),
+                         "karar": r.get("_karar"), "kaynak": "testbot"}
+                af.write(json.dumps(kayit, ensure_ascii=False) + "\n")
+    except Exception:
+        pass  # olcum katmani asla karar akisini durdurmaz
+
+
+def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None, para_cikis=False,
+              btc_pay=None, para_durgun=False):
+    """BTC-PAY KATMANI SARMALAYICISI (2026-08-04, kullanici karari, Madde 9).
+
+    Ic mantik (_karar_yon_ham) BIREBIR KORUNDU; bu sarmalayici yalnizca iki sey yapar:
+      1) SHORT FRENI — BTC risk-varlik payi (stable haric) 3 gunde UST ceyrekteyse SHORT ACMAZ.
+      2) btc_pay/para_durgun'u ic mantiga gecirir (AYI long penceresi icin).
+
+    [OLCUM] 12 ay, 103 sembol, 37.271 gozlem, gercek holdout (kesif 8 ay / sakli 4 ay):
+        BTC_D_XS 3g ALT ceyrek -> SHORT R +0.27 / +0.16   (temel +0.06 / +0.04)
+        BTC_D_XS 3g UST ceyrek -> SHORT R -0.02 / -0.03   <-- frenlenen bant
+        Kesif/sakli ayrimi +0.45 vs +0.46; saklida dilimler MUKEMMEL sirali (mono +1.00).
+    [FREN LONG-NOTR] yalnizca SHORT'u kapatir, hicbir long ACMAZ.
+    [FAIL-OPEN] btc_pay None (veri yok/bayat) ise fren DEVREYE GIRMEZ, eski davranis surer.
+    [SINIR] Olcumun 12 ayinin tamami DUSEN piyasa; yukselen piyasada iliski donebilir.
+    GERI ALMA: kripto-config.json -> esikler.btc_pay_short_freni: 0
+    """
+    karar = _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out,
+                           para_cikis, btc_pay, para_durgun)
+    if (karar and karar[0] == "SHORT" and (btc_pay or {}).get("bant") == "UST"
+            and evren.esik("btc_pay_short_freni", 1) >= 1):
+        _veto_ekle(veto_out, "btc_pay_freni",
+                   f"BTC risk-payi UST ceyrek ({btc_pay.get('degisim'):+.2f} puan/3g) "
+                   f"-> SHORT frenlendi (olculdu: bu bantta SHORT R -0.02/-0.03)", "SHORT")
+        return None
+    return karar
+
+
+def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None, para_cikis=False,
+                   btc_pay=None, para_durgun=False):
     """r: radar.analyze() ciktisi. pillar: radar.pillar_d() ciktisi (top_ls/glob_ls/taker/smart).
     Donus: None | ("LONG"|"SHORT", "ANINDA"|"ONAY_BEKLE", sebep)
     veto_out: opsiyonel liste; verilirse adlandirilmis vetolar (long_veto/blowoff/taker_soguma)
-    kaydedilir (SADECE olcum, karar cikttisini DEGISTIRMEZ)."""
+    kaydedilir (SADECE olcum, karar cikttisini DEGISTIRMEZ).
+    para_cikis: TOTAL mcap 7g <= -%2 (evren.para_rejim 'PARA CIKIYOR'). True ise long-veto'ya
+    eklenir (2026-07-23 kullanici karari, Madde 9): kriptodan net cikis/risk-off'ta long kapali.
+    LONG-KISITLAYICI — long ACMAZ (opener degil); SHORT/fade tarafina DOKUNMAZ."""
     skor = r["score"]
     smart = pillar.get("smart")
     taker = pillar.get("taker")
@@ -219,6 +314,7 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
 
     # ortak guvenlik: dusuk-float + dip_yakit = yapisal neg-funding, dusen bicak (RE/FOGO)
     short_riskli_dip = bool(r.get("dip_yakit") and dusuk_float)
+    btc_pay_ust = ((btc_pay or {}).get("bant") == "UST")   # 2026-08-04: AYI long penceresi
 
     # BLOW-OFF filtresi (2026-07-03 TLM -%60 stop sonrasi eklendi — MANTA dersinin ihlali).
     # TLM: 48s'te +%126 pump'in ICINDEYKEN "BASLIYOR+smart-LONG+taker-alim" (AYI-istisnasi) tetiklendi,
@@ -239,6 +335,7 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
         pos < 0.25                              # range dibi = dusen bicak (RE 0.11, SLX 0.06, EPIC 0.04)
         or asiri_dusmus                         # 24s'te -%40+ cakilmis (kapitulasyon ortasi)
         or (chg24 < 0 and oi24 >= oi_esik * 3)  # fiyat dusarken OI hizli artiyor = guclu dusus (SLX: -30.6% & OI+33%)
+        or para_cikis                           # PARA CIKIYOR (2026-07-23): kriptodan net cikis 7g <= -%2 (risk-off) -> long kapali
     )
     # long_veto alt-tetik etiketi (olcum logu icin; karari etkilemez)
     if pos < 0.25:
@@ -247,6 +344,8 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
         long_veto_detay = f"asiri_dusmus (24s {chg24:+.0f}%)"
     elif chg24 < 0 and oi24 >= oi_esik * 3:
         long_veto_detay = f"fiyat-dusuk+OI-artis (chg24={chg24:+.1f}% oi24={oi24:+.0f}%)"
+    elif para_cikis:
+        long_veto_detay = "para-cikis (kriptodan net cikis 7g, risk-off)"
     else:
         long_veto_detay = ""
 
@@ -261,10 +360,67 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
                 _veto_ekle(veto_out, "long_veto", f"AYI-istisna: {long_veto_detay}", "LONG")
                 return None  # dip-bicak/kapitulasyon/fiyat-dusuk-OI-artis -> AAVE istisnasi bile gecersiz
             return ("LONG", "ANINDA", "AYI-istisna: BASLIYOR+smart-LONG+taker-alim (AAVE deseni)")
+        # --- BTC-PAY LONG PENCERESI (2026-08-04, KULLANICI KARARI, Madde 9) -----------
+        # [ESKI DAVRANIS] AYI'da LONG yalnizca AAVE-istisnasindan (yukarida, BASLIYOR+
+        #   smart-LONG+taker>=1.0) acilabiliyordu. Baska hicbir long yolu YOKTU.
+        # [OLCUM] 12 ay / 103 sembol / 37.271 gozlem / GERCEK holdout (PARA_SONUC.md, CIKIS_SONUC.md):
+        #   "BTC risk-varlik payi 3g UST ceyrek + para DURGUN" penceresinde
+        #     LONG R = kesif +0.24 / sakli +0.16   (rastgele kontrol -0.07 / -0.04)
+        #   Ayni olcumde KULLANICININ ilk onerdigi tetik (AYI + para GIRISI + coin yukari)
+        #   calismadi: -0.06 / +0.04, rastgeleden ayirt edilemedi. BTC/ETH sarti da katki
+        #   yapmadi (+0.01/+0.02). Yani acilan kapi, olcumun secdigi kapi.
+        # [PENCERE COIN SECMEZ] T-B piyasa-seviyesi bir IZIN penceresidir; hangi coin
+        #   sorusunu cevaplamaz. O yuzden coin-seviyesi TUM kalite filtreleri AYNEN gecerli:
+        #   long_veto (pos<0.25 / asiri_dusmus / fiyat-dusuk+OI-artis / para_cikis) ·
+        #   asiri_yukselmis (blowoff) · taker>=1.0. Hicbiri gevsetilmedi.
+        # [SINIR] Olcumun 12 ayinin TAMAMI dusen piyasa. Yukselen piyasada iliski donebilir.
+        # GERI ALMA: kripto-config.json -> esikler.btc_pay_ayi_long: 0
+        if (btc_pay_ust and para_durgun and evren.esik("btc_pay_ayi_long", 1) >= 1
+                and skor >= esik_uzun and smart != "SHORT" and r["stage"] != "izle"):
+            if asiri_yukselmis:
+                _veto_ekle(veto_out, "blowoff", f"AYI btc-pay-long tepe (24s {chg24:+.0f}%)", "LONG")
+            elif long_veto:
+                _veto_ekle(veto_out, "long_veto", f"AYI btc-pay-long: {long_veto_detay}", "LONG")
+            elif (taker or 0) < 1.0:
+                _veto_ekle(veto_out, "taker_soguma", f"AYI btc-pay-long taker<1.0 (taker={taker})", "LONG")
+            else:
+                return ("LONG", "ONAY_BEKLE",
+                        f"AYI btc-pay penceresi: BTC risk-payi UST ceyrek + para durgun "
+                        f"(skor={skor}) [2026-08-04, olculdu: +0.24/+0.16]")
         if skor >= esik_short and smart != "LONG" and not short_riskli_dip and r.get("pos", 0.5) >= 0.20:
             if asiri_dusmus and r.get("pos", 0.5) < 0.30:
                 _veto_ekle(veto_out, "blowoff", f"AYI-SHORT dusen-bicak (24s {chg24:+.0f}%, pos={r.get('pos',0.5):.2f})", "SHORT")
                 return None  # zaten cok dusmus + dipte -> dusen bicagi kovalama, SHORT girme (ders#4)
+            # --- PUMP KAPISI (2026-08-04, KULLANICI KARARI, Madde 9) --------------------
+            # [ESKI DAVRANIS] Bu dalda YALNIZ `asiri_dusmus` bakiliyordu; `asiri_yukselmis`
+            #   HIC kontrol edilmiyordu. Tasarim pump'i bir SHORT FIRSATI sayiyordu
+            #   (bkz. yukarida satir 265 blow-off redirect: LONG -> SHORT-tepki).
+            #   BLESS 2026-08-02: skor 72.3, chg24 +%73, smart NOTR, pos 0.83 -> dogrudan SHORT,
+            #   1.8 saatte stop, -$487.98 (tek islemde en buyuk zarar). Bot TASARLANDIGI GIBI calisti.
+            # [OLCUM] 362 sembol / 16.169 gozlem / 24sa izgara / ham fiyat (skor ve radar filtresi
+            #   KARISMADAN). SHORT, A-stop, 2R, 72sa, fitil tetikli. Sahte-kontrol gurultusu 0.01.
+            #     chg24 %-10..0 -> R +0.05 | %0..10 -> +0.04 | %10..20 -> +0.07
+            #     chg24 %20..35 -> R -0.14 | %35..50 -> -0.25 | %50..75 -> -0.14
+            #   >%20 grubu IKI YARIDA DA negatif (A -0.18 / B -0.16, N=258) ve en kotu 3 kayit
+            #   cikarilinca ayakta (-0.17 -> -0.16) => aykiri degerden gelmiyor.
+            #   MEKANIZMA (cifte ceza): pump -> ATR patlar -> stop medyani %0.97'den %8.57'ye
+            #   genisler VE buna ragmen stop orani %65 -> %74 cikar.
+            # [DURUSTLUK NOTU] On-kayitli karar kurali (fark >=0.15 IKI yarida da) GECILEMEDI:
+            #   B yarisinda fark +0.12. Takilma sebebi kalan grubun kendisinin de negatif olmasi
+            #   (-0.04) -> FARK kuculdu, SEVIYE degil. Esik gevsetilmedi; kullanici "duzelt" dedi.
+            # [ESIK] 40 (mevcut blowoff_chg24_pct) DEGIL 20 secildi: >%30'da B yarisi isaret
+            #   donduruyor (A -0.37 / B +0.05, N kucuk) -> yuksek esikler daha AZ kanitli.
+            # [KAPSAM] YALNIZ bu dal. Dokunulmayanlar (ayni kanit sinifi, AYRI karar ister):
+            #   * satir 265 AYI blow-off redirect: pump'ta LONG'u SHORT'a CEVIRIYOR (ayni tuzak)
+            #   * satir 317 NOTR-SHORT ve satir 285 BOGA-SHORT dallari
+            #   Olcum rejim-kosullu DEGILDI; kanit bu dallar icin de gecerli ama kullanici karari
+            #   AYI-SHORT icindi. Bunlar ayri oturumda teklif edilir.
+            # GERI ALMA: kripto-config.json -> esikler.ayi_short_chg24_max: 999 (kapi etkisiz kalir)
+            pump_esik = evren.esik("ayi_short_chg24_max", 20.0)
+            if chg24 >= pump_esik:
+                _veto_ekle(veto_out, "blowoff",
+                           f"AYI-SHORT pump-kapisi (24s {chg24:+.0f}% >= {pump_esik:.0f}%)", "SHORT")
+                return None
             return ("SHORT", "ONAY_BEKLE", f"AYI: skor={skor} short-aday, 1-cycle onay bekletme")
         return None
     if rejim_ad == "BOGA":
@@ -303,6 +459,31 @@ def karar_yon(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None):
                 # Gerekce: replay/erken-kusak — belirsizde anomali-long negatif; F1 trend-long
                 # gelince yalniz TAM_BOGA'da acilir. AYI-AAVE-istisnasi (kullanici karari) KORUNDU;
                 # NOTR-SHORT/fade tarafi acik (pump'lari fade'le yakala).
+                #
+                # --- ACILDI (2026-08-04, KULLANICI KARARI, Madde 9) --------------------------
+                # [ESKI DAVRANIS] Yukaridaki Faz 2 kurali: bu noktaya gelen "temiz aday" bile
+                #   yalnizca vetolanirdi. NOTR'de LONG donduren HICBIR kod yolu YOKTU.
+                #   veto_log 2026-07-23..08-03: bu tam metinle 13 aday elendi.
+                # [OLCUM] F10 etiketleri fiili getiriyle karsilastirildi (13.997 gozlem, 39 gun,
+                #   nokta-zamanli rejim yeniden kurma; kalibrasyon canli btc_rejim() ile birebir):
+                #     BELIRSIZ->NOTR  N=4662  LONG R -0.09 (A -0.40 / B +0.16)
+                #                             SHORT R +0.17 (A +0.39 / B -0.01)
+                #   Yani long'un YAPISAL olarak kapatildigi rejimde, son yarida kazanan taraf LONG.
+                # [DURUSTLUK NOTU — bu degisiklik OLCUMLE GEREKCELENMEDI]
+                #   On-kayitli kural (lehte yon, aleyhtekini IKI YARIDA DA >=0.15R gecmeli)
+                #   BU ETIKETTE DE GECILEMEDI: A +0.79 / B -0.17. Isaret yariyi donduruyor.
+                #   Bulgu TEK YARILIK. LONG karnesi hala 0W/4L (RE/O/SLX bicak-dibi girisleri).
+                #   Kapi, olcum kanitiyla degil KULLANICI KARARIYLA aciliyor; bu boyle kayda gecti.
+                # [KAPSAM] YALNIZ bu son "else" kolu acildi. Ustteki UC kalite filtresi AYNEN
+                #   duruyor ve LONG'u kapatmaya devam ediyor:
+                #     asiri_yukselmis (blowoff) · long_veto (pos<0.25 / asiri_dusmus /
+                #     fiyat-dusuk+OI-artis / para_cikis) · taker < 1.0
+                #   Bunlar olculmedi, dokunulmadi. AYI ve BOGA dallari da DEGISMEDI.
+                # GERI ALMA: kripto-config.json -> esikler.notr_long_acik: 0
+                if evren.esik("notr_long_acik", 0.0) >= 1:
+                    return ("LONG", "ONAY_BEKLE",
+                            f"NOTR-belirsiz: temiz-aday long (skor={skor}, smart-LONG, taker={taker}) "
+                            f"[2026-08-04 kullanici karari; olcumle gerekcelenmedi]")
                 _veto_ekle(veto_out, "long_veto", "NOTR-belirsiz: temiz-aday ama rejim-long kapali (fade acik)", "LONG")
         if smart == "SHORT" and not short_riskli_dip and not asiri_dusmus:
             return ("SHORT", "ANINDA", "NOTR: stage-aktif+smart-SHORT")
@@ -346,8 +527,10 @@ def pozisyon_kapat(st, pos, cikis_fiyat_piyasa, sebep):
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
+        # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
+        "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
     }
-    _append_jsonl(ISLEMLERF, kayit)
+    _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
     msg = f"[TESTBOT] KAPANDI {pos['sym']} {pos['yon']} {sebep} PnL={pnl_net:+.2f}$ (R={kayit['r']})"
     telegram_gonder(msg)
@@ -370,8 +553,10 @@ def pozisyon_liq(st, pos):
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
+        # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
+        "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
     }
-    _append_jsonl(ISLEMLERF, kayit)
+    _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
     msg = f"[TESTBOT] LIKIDASYON {pos['sym']} {pos['yon']} marjin kaybi ${pos['marjin']:.2f}"
     telegram_gonder(msg)
@@ -406,8 +591,10 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
+        # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
+        "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
     }
-    _append_jsonl(ISLEMLERF, kayit)
+    _append_jsonl(_islem_defteri(), kayit)
     telegram_gonder(f"[TESTBOT] TP1 {pos['sym']} {pos['yon']} yari kapatildi PnL={pnl_net:+.2f}$ (stop girise cekildi)")
 
 
@@ -573,39 +760,75 @@ def _cikar_havuzdan(pool_syms, st, cooldown_saat):
     return out
 
 
-def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None):
+def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
+                  olc_override=None, kaynak=None):
+    """olc_override / kaynak: 2026-08-05'te eklendi, IKISI DE None iken davranis BIREBIR AYNI.
+    olc_override: {"stop":..,"tp1":..,"tp2":..} — kullanici panelden stop/hedef duzenlerse.
+      GIRIS FIYATI ve RISK-ONCE BOYUTLANDIRMA aynen korunur (2026-08-03 onarimi bozulmaz);
+      yalnizca seviyeler degisir, boyut yeni stop mesafesine gore YENIDEN hesaplanir.
+    kaynak: pozisyona ve kapanan kayda yazilir ("elle"). Karne ayrimi bunun uzerinden."""
     skor = r["score"]
     smart_hiz = smart_hizali_mi(yon, pillar.get("smart"))
-    kaldirac0 = kaldirac_hesapla(skor, smart_hiz)
     try:
         olc = olcucu.measure(sym, yon.lower(), "1h", 100, spot=False)
     except Exception:
         return False
+    if olc_override:
+        for a in ("stop", "tp1", "tp2"):
+            if olc_override.get(a) is not None:
+                olc[a] = float(olc_override[a])
     if olc.get("VETO_rr_net") and not zorla:
         # 2026-07-10: bu ret onceden SESSIZDI ("bot neden girmedi" cevabinda kor nokta) -> olcum loguna eklendi
         _veto_logla(st, sym, r, pillar, "rr_veto",
                     f"NET R/R {olc.get('rr_tp1_net')} < 1:2 (Olcucu mekanik veto)", yon, rejim_ad or "BILINMIYOR")
         return False  # edge kanitlanmamis giris -> mekanik veto (Olcucu ile ayni disiplin)
     giris_piyasa, stop, tp1_yapisal, tp2 = olc["giris"], olc["stop"], olc["tp1"], olc["tp2"]
+    cst = _maliyet()
+    giris_ef = maliyet_uygula_giris(giris_piyasa, yon, cst)
+
+    # ================= RISK-ONCE BOYUTLANDIRMA ONARIMI (2026-08-03, Madde 8) =================
+    # [ESKI DAVRANIS — HATA]  marjin ve kaldirac YALNIZ SKORDAN belirleniyor, stop mesafesinden
+    #   bagimsizdi; risk sonucta OLUSUYOR, sadece TAVANI kirpiliyordu:
+    #       kaldirac0 = kaldirac_hesapla(skor, smart);  marjin = equity*marjin_pct(skor)
+    #       notional  = marjin*kaldirac;  risk = stop_frac*notional;  if risk>%5: kucult
+    #   Bu, sistemin kendi "risk-once boyutlandirma" tanimiyla CELISIYORDU.
+    # [OLCULDU — 7 gercek islem, risk = sonuc_usdt/r ile turetildi]
+    #   PROM stop%1.5 -> risk $70  | AKE %2.3 -> $115 | DEXE %7.2 -> $178 | BLESS %7.5 -> $483
+    #   Yani dolar riski 7 KAT degisiyordu ve farki yaratan KONVIKSIYON DEGIL STOP MESAFESIYDI
+    #   (genis stop -> BUYUK risk; gercek risk-oncede tam TERSI olmali). En buyuk kayip
+    #   (BLESS -$487.98) en genis stoplu islemden geldi, en iyi kurulumdan degil.
+    # [ONARIM]  Risk artik HEDEFLENIR:  notional = hedef_risk / stop_frac
+    #   Kaldirac bir GIRDI degil, bu notional'a ulasmanin ARACI (risk-once tanimi budur).
+    #   Konviksiyon HALA etkili: skor -> marjin_pct (%8-12) ile SERMAYE TAHSISI surur
+    #   (kullanicinin 2026-07-03 kurulum karari "skora gore degisken boyut" KORUNDU).
+    # [KORUNANLAR]  kaldirac_guvenlik_kirp (stop likidasyondan ONCE) · kaldirac_min/max ·
+    #   %5 tavani (artik hedef; kemer-aski olarak da duruyor) · smart-karsi yarim boyut.
+    # [DEGISEN INCELIK]  smart karsi yonde artik MARJIN degil HEDEF RISK yarilanir. Sebep:
+    #   kaldirac serbest kalinca marjini yarilamak riski dusurmuyordu (kaldirac telafi ederdi).
+    # [SINIR]  Cok dar stoplarda hedef riske kaldirac_max yuzunden ULASILAMAZ -> risk hedefin
+    #   ALTINDA kalir. Bu guvenli yondur; asla hedefin USTUNE cikilmaz.
+    stop_frac = abs(giris_ef - stop) / giris_ef if giris_ef else 0.0
+    if stop_frac <= 0:
+        return False
+    hedef_risk = st["equity"] * float(_c("islem_risk_pct", 5)) / 100.0
+    if not smart_hiz and pillar.get("smart") not in (None, "NOTR"):
+        hedef_risk /= 2.0                      # smart karsi yonde -> RISK yari
+    marjin = st["equity"] * marjin_pct_hesapla(skor)
+    kmin, kmax = float(_c("kaldirac_min", 3)), float(_c("kaldirac_max", 10))
+    kald_gerekli = ((hedef_risk / stop_frac) / marjin) if marjin > 0 else kmin
+    kaldirac0 = int(round(max(kmin, min(kmax, kald_gerekli))))
     kaldirac = kaldirac_guvenlik_kirp(giris_piyasa, stop, yon, kaldirac0)
     if kaldirac is None:
         kaldirac = 2 if zorla else None
         if kaldirac is None:
             return False  # stop cok genis -> hicbir kaldiracta guvenli degil
-    if not smart_hiz and pillar.get("smart") not in (None, "NOTR"):
-        marjin_pct = marjin_pct_hesapla(skor) / 2  # smart karsi yonde -> boyut yarı
-    else:
-        marjin_pct = marjin_pct_hesapla(skor)
-    marjin = st["equity"] * marjin_pct
-    cst = _maliyet()
-    giris_ef = maliyet_uygula_giris(giris_piyasa, yon, cst)
     notional = marjin * kaldirac
     miktar = notional / giris_ef
-    risk_usdt = abs(giris_ef - stop) / giris_ef * notional
-    maks_risk = st["equity"] * float(_c("islem_risk_pct", 5)) / 100.0
-    if risk_usdt > maks_risk and risk_usdt > 0:
-        kucult = maks_risk / risk_usdt
-        marjin *= kucult; notional *= kucult; miktar *= kucult; risk_usdt = maks_risk
+    risk_usdt = stop_frac * notional
+    if risk_usdt > hedef_risk and risk_usdt > 0:   # hedefin USTUNE asla cikma
+        kucult = hedef_risk / risk_usdt
+        marjin *= kucult; notional *= kucult; miktar *= kucult; risk_usdt = hedef_risk
+    # ==========================================================================================
     liq = likidasyon_fiyati(giris_ef, yon, kaldirac)
     taker = float(cst.get("taker_fee_pct", 0.045)) / 100.0
     st["equity"] -= notional * taker  # giris ucreti
@@ -624,6 +847,10 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None):
         "stop_orijinal": round(stop, 6), "atr_giriste": olc.get("atr14"),
         "en_iyi_fiyat": giris_ef, "trailing_aktif": False,
     }
+    if kaynak:                      # 2026-08-05: "elle" -> karne ayrimi bunun uzerinden
+        pos["kaynak"] = kaynak
+    if olc_override:
+        pos["stop_elle"] = True
     st["sonraki_id"] += 1
     st["acik_pozisyonlar"].append(pos)
     telegram_gonder(f"[TESTBOT] GIRIS {sym} {yon} {kaldirac}x marjin=${marjin:.2f} "
@@ -636,14 +863,35 @@ def yeni_giris_ara(st, rejim):
     maks_poz = int(_c("maks_pozisyon", 4))
     if len(st["acik_pozisyonlar"]) >= maks_poz:
         return
-    min_vol = float(_c("min_vol_musd", 15))
-    pool = evren.binance_pool("fapi", min_vol, None)[:40]
+    # MAKRO GUVENLIK-KAPISI (2026-07-23, KURTİ/SISTEM.md odunc — olculmus edge DEGIL, RISK azaltir):
+    # FOMC <=48s iken YENI GIRIS YOK (bilinen yuksek-etkili olaya fade girip squeeze yeme riski). Acik
+    # pozlar ETKILENMEZ (cycle'da bu fonksiyon ONCESI yonet_acik_pozisyonlar kostu). SADECE makro.takvim()
+    # = yerel dosya, NETWORK YOK, deterministik (DXY/ETF network'une girmez). Yon/skor DEGISTIRMEZ,
+    # sadece "simdi acma". Hata -> fail-open (bot calisir; kapi kritik-altyapi degil). config: makro_kapi_aktif.
+    if bool(_c("makro_kapi_aktif", True)):
+        try:
+            tk = makro.takvim()
+            if tk.get("veto_fomc_48s"):
+                fk = (tk.get("fomc") or {}).get("kalan_gun")
+                print(f"[{now_iso()}] MAKRO-KAPI: FOMC {fk}g icinde -> yeni giris YOK (acik pozlar yonetiliyor)")
+                return
+        except Exception as e:
+            print(f"[{now_iso()}] makro-kapi kontrol hatasi (giris devam, fail-open): {e}")
+    min_vol = float(_c("min_vol_musd", 3))
+    havuz_n = int(_c("tarama_havuz_n", 150))
+    # KRIPTO-ONLY + genisletilmis evren (2026-07-23 kullanici karari, Madde 9). ESKIDEN:
+    # binance_pool(..., None)[:40] -> cryptos=None tokenize-hisse (SKHY/SPCX/INTC/MSTR...) ELEMIYORDU
+    # + kapak 40'ta. SIMDI: cg_universe ile kripto-only (hisse elenir) + kapak havuz_n + taban $3M
+    # (dusuk-mcap kripto anomalilerini de tara; sanal para, slipaj kullanici karariyla goz ardi).
+    # cg_universe basarisizsa kripto-only o cycle atlanir (degrade, nadir; hisse geri sizabilir).
+    cryptos_cache = evren.cg_universe()
+    pool = evren.binance_pool("fapi", min_vol,
+                              cryptos=(set(cryptos_cache.keys()) if cryptos_cache else None))[:havuz_n]
     chg24_harita = {s: chg for s, _, chg in pool}  # 24s % degisim -> blow-off filtresi icin (karar_yon)
     syms = _cikar_havuzdan([s for s, _, _ in pool], st, cooldown_saat=4)
     if not syms:
         return
-    btc_chg3, _ = radar.btc_ref()
-    cryptos_cache = None
+    btc_chg3, _ = radar.btc_ref()  # cryptos_cache yukarida cg_universe ile dolduruldu (kripto-only + float_oran)
     aday_rows = []
     for sym in syms:
         try:
@@ -664,6 +912,24 @@ def yeni_giris_ara(st, rejim):
             if bekleyenler[sym]["cycle_sayaci"] > 6:  # ~30dk gecti, aday soguladi -> iptal
                 del bekleyenler[sym]
 
+    # Para-kapisi (2026-07-23 kullanici karari, Madde 9): TOTAL mcap 7g net cikista (risk-off,
+    # <=-%2) long kapali. Dongu basina 1 kez (log okumasi); log yok/az -> None -> kapi KAPALI
+    # (fail-open, mevcut davranis korunur). LONG-kisitlayici — SHORT/fade'e dokunmaz.
+    _pr = evren.para_rejim()
+    para_cikis = bool(_pr and _pr.get("rejim") == "PARA CIKIYOR")
+    if para_cikis:
+        print(f"[{now_iso()}] PARA-KAPISI aktif: PARA CIKIYOR (TOTAL 7g {_pr['total_chg']:+.1f}%) -> long-veto")
+
+    # BTC-PAY katmani (2026-08-04): gunluk anlik goruntu tazelenir, sonra bant okunur.
+    # guncelle() ayni gun icin ikinci kez cagrilirsa hicbir sey yapmaz (ucuz).
+    evren.btc_pay_guncelle()
+    btc_pay = evren.btc_pay_akisi()
+    para_durgun = bool(_pr and _pr.get("rejim") == "PARA DURGUN")
+    if btc_pay:
+        print(f"[{now_iso()}] BTC-PAY: {btc_pay['degisim']:+.2f} puan/3g -> bant={btc_pay['bant']}"
+              f"{'  (SHORT freni AKTIF)' if btc_pay['bant']=='UST' else ''}"
+              f"{'  (AYI long penceresi ACIK)' if btc_pay['bant']=='UST' and para_durgun else ''}")
+
     for r in aday_rows:
         if len(st["acik_pozisyonlar"]) >= maks_poz:
             break
@@ -672,6 +938,7 @@ def yeni_giris_ara(st, rejim):
             pillar = radar.pillar_d(sym)
         except Exception:
             pillar = {"top_ls": None, "glob_ls": None, "taker": None, "smart": None}
+        r["_pillar"] = pillar          # aday arsivi icin (2026-08-04, olcum; karari etkilemez)
 
         dusuk_float = False
         if r.get("dip_yakit"):
@@ -680,9 +947,14 @@ def yeni_giris_ara(st, rejim):
             fo = (cryptos_cache.get(sym) or {}).get("float_oran")
             esik_fo = evren.esik("dusuk_float_oran", 0.25)
             dusuk_float = bool(fo is not None and fo < esik_fo)
+            r["_float_oran"] = fo
+        r["_dusuk_float"] = dusuk_float
 
         vlist = []
-        karar = karar_yon(rejim.get("rejim"), r, pillar, dusuk_float, veto_out=vlist)
+        karar = karar_yon(rejim.get("rejim"), r, pillar, dusuk_float, veto_out=vlist,
+                          para_cikis=para_cikis, btc_pay=btc_pay, para_durgun=para_durgun)
+        r["_karar"] = (f"{karar[0]}/{karar[1]}" if karar
+                       else (f"VETO:{vlist[0]['kategori']}" if vlist else "karar-yok"))
         if not karar:
             for v in vlist:  # reddedilen aday -> olcum logu (davranis degismedi, sadece kaydediliyor)
                 _veto_logla(st, sym, r, pillar, v["kategori"], v["detay"], v["olurdu_yon"], rejim.get("rejim"))
@@ -714,6 +986,10 @@ def yeni_giris_ara(st, rejim):
                             f"SHORT onay bekletildi: taker={taker_onay} >= {taker_esigi} (pump ivmesi surer)", "SHORT", rejim.get("rejim"))
         else:
             bekleyenler[sym] = {"yon": yon, "skor": r["score"], "ilk_gorulme_ts": now_iso(), "cycle_sayaci": 0}
+
+    # Aday evreni arsivi (2026-08-04) — dongü BITTIKTEN sonra, tek yazim. maks_poz'da break
+    # olduysa geri kalan adaylarda pillar/karar null kalir; bu bilincli ve durustce bos yazilir.
+    _aday_arsivle(aday_rows, rejim.get("rejim"), btc_chg3)
 
 
 # ---------- ana döngü ----------
@@ -804,6 +1080,18 @@ def _cycle_ic():
     print(f"[{now_iso()}] durum={st['durum']} equity=${st['equity']:.2f} acik={len(st['acik_pozisyonlar'])} "
           f"gun={gun_gecti:.1f}/{sure_gun}")
 
+    # --- IKINCI HESAP ("ben") — 2026-08-05, kullanici karari -----------------
+    # Kullanicinin panelden actigi SANAL pozisyonlar ayri kasada durur ama AYNI
+    # kurallarla yonetilir (stop/TP1/iz-suren/zaman-stopu/fonlama) — boylece iki
+    # sistem arasindaki fark yalnizca GIRIS KARARINDAN gelir, cikis kurallarindan degil.
+    # Tembel import: benim.py yoksa veya coker ise BOT ETKILENMEZ (fail-safe).
+    # Yeni giris ARAMAZ; girisler yalnizca panelden gelir (karar verici insan).
+    try:
+        import benim
+        benim.tur()
+    except Exception as e:
+        print(f"[{now_iso()}] 'ben' hesabi turu atlandi (bot etkilenmedi): {e}")
+
 
 # ---------- CLI yardımcıları ----------
 
@@ -863,11 +1151,21 @@ def durum_yazdir():
 
 
 def reset():
-    st = _load_state()
-    if st and st["acik_pozisyonlar"]:
-        print(f"UYARI: {len(st['acik_pozisyonlar'])} acik pozisyon var, reset onlari SILER (sanal — gercek para etkilenmez).");
-    _save_state(yeni_state())
-    print("Yeni test haftasi baslatildi (islem/equity gecmisi dosyalarda kalir, state sifirlandi).")
+    # KILIT (2026-07-23 bug-fix, Madde 8): reset eskiden kilit ALMIYORDU -> reset aninda calisan bir
+    # cycle eski state'i bellekte tutup reset'in ustune kaydediyordu (10k reset ezildi vakasi). Artik
+    # reset de cycle kilidini alir; alamazsa (cycle calisyor) EZMEK yerine reddeder (kullanici retry/gorev-durdur).
+    if not _kilit_al():
+        print("REDDEDILDI: bir cycle su an calisiyor (kilit tutuluyor). Birkac saniye sonra tekrar dene "
+              "VEYA once zamanlayici gorevini (KriptoTestBot) durdur, sonra reset yap.")
+        return
+    try:
+        st = _load_state()
+        if st and st["acik_pozisyonlar"]:
+            print(f"UYARI: {len(st['acik_pozisyonlar'])} acik pozisyon var, reset onlari SILER (sanal — gercek para etkilenmez).")
+        _save_state(yeni_state())
+        print("Yeni test haftasi baslatildi (islem/equity gecmisi dosyalarda kalir, state sifirlandi).")
+    finally:
+        _kilit_birak()
 
 
 def dur_devam(yeni_durum):
