@@ -3,480 +3,1184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TestBot — Sanal Paper Trading</title>
+<title>Kontrol Paneli</title>
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
 <style>
-  :root {
-    --surface-1:      #1a1a19;
-    --page-plane:     #0d0d0d;
-    --text-primary:   #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted:     #898781;
-    --gridline:       #2c2c2a;
-    --baseline:       #383835;
-    --border:         rgba(255,255,255,0.10);
-    --series-1:       #3987e5;  /* equity: sequential blue */
-    --good:           #0ca30c; /* LONG / kazanan / up-candle */
-    --critical:       #d03b3b; /* SHORT / kaybeden / down-candle */
-    --warning:        #fab219;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--page-plane); color: var(--text-primary);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    padding: 20px 28px 60px;
-  }
-  h1 { font-size: 18px; font-weight: 600; margin: 0 0 2px; }
-  .sub { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
-  .badge {
-    display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
-    border: 1px solid var(--border);
-  }
-  .badge.aktif { color: var(--good); border-color: var(--good); }
-  .badge.durdu { color: var(--warning); border-color: var(--warning); }
-  .badge.long { color: var(--good); }
-  .badge.short { color: var(--critical); }
-  .grid-cards {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;
-  }
-  .card {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-    padding: 14px 16px;
-  }
-  .card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-  .card .value { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .card .value.good { color: var(--good); }
-  .card .value.critical { color: var(--critical); }
-  section {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-    padding: 16px 18px; margin-bottom: 20px;
-  }
-  section h2 { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: var(--text-secondary); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  th { text-align: left; color: var(--text-muted); font-weight: 500; padding: 6px 10px; border-bottom: 1px solid var(--gridline); }
-  td { padding: 7px 10px; border-bottom: 1px solid var(--gridline); font-variant-numeric: tabular-nums; }
-  tr.clickable { cursor: pointer; }
-  tr.clickable:hover { background: rgba(255,255,255,0.04); }
-  tr.selected { background: rgba(57,135,229,0.12); }
-  .pnl-pos { color: var(--good); }
-  .pnl-neg { color: var(--critical); }
-  .chart-box { height: 340px; }
-  .sym-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .sym-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--text-secondary);
-    padding: 4px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;
-  }
-  .sym-btn.active { border-color: var(--series-1); color: var(--text-primary); }
-  .empty { color: var(--text-muted); font-size: 13px; padding: 8px 0; }
-  .sayac-serit {
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
-    padding: 10px 16px; margin-bottom: 16px; display: flex; gap: 18px; align-items: center;
-    font-size: 13px; flex-wrap: wrap;
-  }
-  .sayac-serit b { font-variant-numeric: tabular-nums; }
-  .veto-sayac { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-  .veto-sayac .vk {
-    border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px;
-    color: var(--text-secondary);
-  }
-  .veto-sayac .vk b { color: var(--text-primary); font-size: 15px; margin-left: 6px; }
-  .not-satir { color: var(--text-muted); font-size: 11px; margin-top: 8px; }
+:root{
+  --zemin:#0d0d0d; --yuzey:#1a1a19; --yuzey2:#222220; --kenar:#2e2e2c;
+  --yazi:#e8e8e6; --yazi2:#a8a8a4; --yazi3:#6f6f6b;
+  --iyi:#2fb344; --kotu:#e05252; --uyari:#e3a008; --vurgu:#3987e5; --izgara:#242422;
+}
+:root[data-tema="acik"]{
+  --zemin:#f6f6f4; --yuzey:#ffffff; --yuzey2:#f0f0ed; --kenar:#dcdcd6;
+  --yazi:#1a1a19; --yazi2:#55554f; --yazi3:#8a8a83;
+  --iyi:#1a7f2e; --kotu:#c02d2d; --uyari:#a97400; --vurgu:#1b63b8; --izgara:#e6e6e1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--zemin);color:var(--yazi);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+h1{font-size:17px;margin:0;font-weight:600}
+h2{font-size:14px;margin:0 0 10px;font-weight:600;color:var(--yazi)}
+h3{font-size:12px;margin:16px 0 8px;font-weight:600;color:var(--yazi2);
+  text-transform:uppercase;letter-spacing:.06em}
+
+.ust{position:sticky;top:0;z-index:40;background:var(--yuzey);border-bottom:1px solid var(--kenar);
+  padding:10px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.ust .bosluk{flex:1}
+.rozet{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:600;
+  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi2)}
+.rozet.iyi{color:var(--iyi);border-color:var(--iyi)}
+.rozet.kotu{color:var(--kotu);border-color:var(--kotu)}
+.rozet.uyari{color:var(--uyari);border-color:var(--uyari)}
+button{font:inherit;font-size:12px;padding:5px 11px;border-radius:7px;cursor:pointer;
+  border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi)}
+button:hover{border-color:var(--vurgu)}
+
+.sekmeler{position:sticky;top:45px;z-index:39;display:flex;gap:2px;padding:0 18px;
+  background:var(--zemin);border-bottom:1px solid var(--kenar);overflow-x:auto}
+.sekme{padding:9px 14px;font-size:13px;cursor:pointer;border:none;background:none;
+  color:var(--yazi3);border-bottom:2px solid transparent;border-radius:0;white-space:nowrap}
+.sekme:hover{color:var(--yazi2)}
+.sekme.aktif{color:var(--yazi);border-bottom-color:var(--vurgu);font-weight:600}
+.sekme .kisayol{font-size:10px;color:var(--yazi3);margin-left:5px}
+
+main{padding:18px 18px 70px;max-width:1500px}
+.panel{display:none}
+.panel.aktif{display:block}
+section{background:var(--yuzey);border:1px solid var(--kenar);border-radius:11px;
+  padding:14px 16px;margin-bottom:14px}
+.kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px}
+.kart{background:var(--yuzey);border:1px solid var(--kenar);border-radius:11px;padding:12px 14px}
+.kart .etiket{font-size:11px;color:var(--yazi3);margin-bottom:5px}
+.kart .deger{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}
+.kart .alt{font-size:11px;color:var(--yazi3);margin-top:3px}
+
+.tablo-sar{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+th{text-align:left;color:var(--yazi3);font-weight:500;font-size:11px;padding:6px 9px;
+  border-bottom:1px solid var(--kenar);white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+td{padding:6px 9px;border-bottom:1px solid var(--izgara);white-space:nowrap}
+tbody tr:hover{background:var(--yuzey2)}
+td.sag,th.sag{text-align:right}
+.bos{color:var(--yazi3);font-size:12.5px;padding:14px 2px}
+
+.iyi{color:var(--iyi)} .kotu{color:var(--kotu)} .uyari{color:var(--uyari)} .sonuk{color:var(--yazi3)}
+
+.anlati p{margin:0 0 9px;font-size:14.5px;line-height:1.65;max-width:74ch}
+.anlati p:last-child{margin-bottom:0}
+.maddeler{list-style:none;padding:0;margin:12px 0 0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:5px 18px}
+.maddeler li{font-size:13px;display:flex;align-items:center;gap:8px}
+.nokta{width:8px;height:8px;border-radius:99px;flex:none;background:var(--yazi3)}
+.nokta.iyi{background:var(--iyi)} .nokta.kotu{background:var(--kotu)} .nokta.uyari{background:var(--uyari)}
+
+[data-terim]{border-bottom:1px dotted var(--yazi3);cursor:help}
+#ipucu{position:fixed;z-index:100;max-width:340px;background:var(--yuzey2);color:var(--yazi);
+  border:1px solid var(--kenar);border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.5;
+  box-shadow:0 8px 26px rgba(0,0,0,.45);display:none;pointer-events:none}
+#ipucu .ad{font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--vurgu);margin-bottom:5px}
+#ipucu .yorum{margin-top:7px;padding-top:7px;border-top:1px solid var(--kenar);color:var(--yazi2)}
+
+.grafik{height:210px}
+.satir{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.cubuk{height:9px;background:var(--vurgu);border-radius:3px;min-width:2px}
+.not{font-size:11.5px;color:var(--yazi3);margin-top:9px;line-height:1.55}
+.zaman{border-left:2px solid var(--kenar);padding-left:16px;margin-left:5px}
+.olay{margin-bottom:14px;position:relative}
+.olay::before{content:"";position:absolute;left:-21px;top:6px;width:8px;height:8px;
+  border-radius:99px;background:var(--kenar)}
+.olay.d2::before{background:var(--vurgu);width:10px;height:10px;left:-22px}
+.olay .bas{font-weight:600;font-size:13px}
+.olay .gov{font-size:12px;color:var(--yazi2);margin-top:3px}
+.ayar{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+  padding:10px 0;border-bottom:1px solid var(--izgara)}
+.ayar .ad{font-size:13px;font-weight:500}
+.ayar .ack{font-size:11.5px;color:var(--yazi3);margin-top:2px;max-width:72ch}
+.ayar input{width:105px;font:inherit;font-size:13px;padding:5px 8px;border-radius:6px;
+  border:1px solid var(--kenar);background:var(--zemin);color:var(--yazi);text-align:right}
+#tost{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:200;
+  background:var(--yuzey2);border:1px solid var(--kenar);border-radius:9px;padding:10px 18px;
+  font-size:13px;display:none;box-shadow:0 8px 26px rgba(0,0,0,.45);max-width:80vw}
 </style>
 </head>
 <body>
-  <h1>TestBot — Sanal Paper Trading <span id="durum-badge" class="badge">-</span></h1>
-  <div class="sub" id="sub-line">Yükleniyor...</div>
 
-  <div id="sayac-serit" class="sayac-serit" style="display:none;">
-    <span id="sayac-kalan">-</span>
-    <span id="sayac-k1">-</span>
-    <span class="sub" style="margin:0;font-size:11px;">K1 kesin değil — 21 Tem'de kapanan-R ve rejim-hücre kriterleriyle birlikte bakılır</span>
-  </div>
+<div class="ust">
+  <h1>Kontrol Paneli</h1>
+  <span id="botDurum" class="rozet">…</span>
+  <span id="ustOzet" class="sonuk" style="font-size:12px"></span>
+  <span class="bosluk"></span>
+  <span id="yenilendi" class="sonuk" style="font-size:11px"></span>
+  <button onclick="hepsiniYenile()">Yenile <span class="sonuk">R</span></button>
+  <button onclick="temaDegis()">Tema</button>
+</div>
 
-  <div id="para-serit" class="sayac-serit" style="display:none;">
-    <span style="font-weight:600;">Para Akışı (7g):</span>
-    <span id="para-total">-</span>
-    <span id="para-btc">-</span>
-    <span id="para-usdt">-</span>
-    <span id="para-alt">-</span>
-    <span id="para-breadth">-</span>
-    <span id="para-donus"></span>
-    <span class="sub" style="margin:0;font-size:11px;">gösterge, kapı değil — para altlara akıyorsa poz güveni artar (CEO bağlamı)</span>
-  </div>
-
-  <div class="grid-cards">
-    <div class="card"><div class="label">Bakiye (sanal)</div><div class="value" id="c-equity">-</div></div>
-    <div class="card"><div class="label">Serbest Bakiye</div><div class="value" id="c-serbest">-</div></div>
-    <div class="card"><div class="label">Kullanılan Marjin</div><div class="value" id="c-marjin">-</div></div>
-    <div class="card"><div class="label">Açık PnL</div><div class="value" id="c-acikpnl">-</div></div>
-  </div>
-  <div class="grid-cards">
-    <div class="card"><div class="label">Toplam İşlem</div><div class="value" id="c-islem">-</div></div>
-    <div class="card"><div class="label">Win-rate</div><div class="value" id="c-winrate">-</div></div>
-    <div class="card"><div class="label">Ortalama R</div><div class="value" id="c-ortr">-</div></div>
-    <div class="card"><div class="label">Toplam PnL</div><div class="value" id="c-toplampnl">-</div><div class="sub" id="c-toplampnl-sub" style="margin:4px 0 0;font-size:11px;"></div></div>
-  </div>
-
-  <section>
-    <h2>Equity Eğrisi</h2>
-    <div id="equity-chart" class="chart-box"></div>
-  </section>
-
-  <section>
-    <h2>Açık Pozisyonlar</h2>
-    <div id="acik-poz-empty" class="empty" style="display:none;">Açık pozisyon yok.</div>
-    <table id="acik-poz-table" style="display:none;">
-      <thead><tr>
-        <th>Coin</th><th>Yön</th><th>Kaldıraç</th><th>Marjin</th><th>Notional</th><th>Giriş</th><th>Anlık</th><th>PnL</th>
-        <th>Stop</th><th>TP1</th><th>TP2</th><th>Likidasyon</th><th>Skor</th>
-      </tr></thead>
-      <tbody id="acik-poz-body"></tbody>
-    </table>
-  </section>
-
-  <section>
-    <h2>Mum Grafiği <span id="mum-sym-label" class="sub" style="margin:0;"></span></h2>
-    <div class="sym-picker" id="sym-picker"></div>
-    <div id="candle-chart" class="chart-box"></div>
-  </section>
-
-  <section>
-    <h2>Kapanan İşlemler (son 50)</h2>
-    <div id="islem-empty" class="empty" style="display:none;">Henüz kapanan işlem yok.</div>
-    <table id="islem-table" style="display:none;">
-      <thead><tr>
-        <th>Zaman</th><th>Coin</th><th>Yön</th><th>Sebep</th><th>Kaldıraç</th><th>PnL</th><th>R</th><th>Tutma (sa)</th>
-      </tr></thead>
-      <tbody id="islem-body"></tbody>
-    </table>
-  </section>
-
-  <section>
-    <h2>Gerçek Pozisyonlar (senin defterin)</h2>
-    <div id="gercek-empty" class="empty" style="display:none;">Açık gerçek pozisyon yok.</div>
-    <table id="gercek-table" style="display:none;">
-      <thead><tr>
-        <th>Coin</th><th>Yön</th><th>Tarih</th><th>Kaldıraç</th><th>Marjin</th><th>Giriş</th><th>Anlık</th>
-        <th>PnL %</th><th>PnL $</th><th>Stop</th><th>Stopa Uzaklık</th><th>TP1</th><th>Risk $</th>
-      </tr></thead>
-      <tbody id="gercek-body"></tbody>
-    </table>
-  </section>
-
-  <section>
-    <h2>Rejim × Yön Karnesi (hem-ayı-hem-boğa ölçümü)</h2>
-    <div id="rejim-empty" class="empty" style="display:none;">Henüz etiketli işlem yok.</div>
-    <table id="rejim-table" style="display:none;">
-      <thead><tr>
-        <th>Rejim</th><th>LONG (N / W / PnL)</th><th>SHORT (N / W / PnL)</th>
-      </tr></thead>
-      <tbody id="rejim-body"></tbody>
-    </table>
-    <div class="not-satir">Eski işlemler BİLİNMİYOR etiketli (07-08 öncesi). N&lt;25-30 = izlenim, kanıt değil.</div>
-  </section>
-
-  <section>
-    <h2>Bot'un Reddettikleri (Veto)</h2>
-    <div class="veto-sayac" id="veto-sayac"></div>
-    <div id="veto-empty" class="empty" style="display:none;">Henüz veto kaydı yok.</div>
-    <table id="veto-table" style="display:none;">
-      <thead><tr>
-        <th>Zaman</th><th>Coin</th><th>Fiyat</th><th>Kategori</th><th>Olurdu</th><th>Skor</th><th>Rejim</th><th>Sebep</th>
-      </tr></thead>
-      <tbody id="veto-body"></tbody>
-    </table>
-    <div class="not-satir">Koruma mı fırsat maliyeti mi → 21 Tem'de <code>veto_analiz.py</code> forward-return ile ölçülür.</div>
-  </section>
-
-  <section>
-    <h2>Erken Kuşak — Hacmi Uyananlar</h2>
-    <div id="erken-empty" class="empty" style="display:none;">Şu an erken-kuşak adayı yok.</div>
-    <table id="erken-table" style="display:none;">
-      <thead><tr>
-        <th>Coin</th><th>Skor</th><th>Hacim ×gün</th><th>24s %</th><th>Fiyat</th><th>Taker</th><th>Smart</th><th>Aşama</th>
-      </tr></thead>
-      <tbody id="erken-body"></tbody>
-    </table>
-    <div class="not-satir">KAPI DEĞİL — gözlem katmanı. Skor≥40 nöbetçi [ERKEN] alarmı üretir; giriş kararı değildir.</div>
-  </section>
+<div class="sekmeler" id="sekmeler"></div>
+<main id="govde"></main>
+<div id="ipucu"></div>
+<div id="tost"></div>
 
 <script>
-const fmt2 = (x) => (x === null || x === undefined) ? '-' : Number(x).toFixed(2);
-const pnlClass = (x) => (x > 0 ? 'pnl-pos' : (x < 0 ? 'pnl-neg' : ''));
-const pnlSign = (x) => (x > 0 ? '+' : '');
+/* =========================================================================
+   TERİM SÖZLÜĞÜ — panelin her yerinde data-terim="x" ile kullanılır.
+   Üstüne gelince: ne demek + (varsa) o anki değerin ne anlama geldiği.
+   Tanımlar koddaki hesaplama yerlerinden çıkarıldı (radar.py / olcucu.py /
+   testbot.py / evren.py) ve bu projede yapılan ölçümlerin sonuçlarını içerir.
+   ========================================================================= */
+const TERIMLER = {
+  funding:{ad:"Fonlama oranı",
+    ack:"Vadeli işlemde 8 saatte bir taraflardan birinin diğerine ödediği ücret. Artı = long'lar short'lara ödüyor (kalabalık long tarafında). Eksi = tersi.",
+    yorum:v=>v==null?null:(v<-0.01?"Eksi: kalabalık short tarafında. Tek başına yön vermiyor — ölçüldü.":(v>0.03?"Belirgin artı: kalabalık long tarafında, aşırılık işareti.":"Normal aralıkta."))},
+  oi:{ad:"Açık pozisyon (OI)",
+    ack:"O coinde açık duran toplam vadeli sözleşme miktarı. Artması yeni para girdiğini, azalması pozisyonların kapandığını gösterir. Fiyattan bağımsız bir 'ilgi' ölçüsü."},
+  oi24:{ad:"Açık pozisyon değişimi (24 saat)",
+    ack:"Son 24 saatte açık pozisyonun yüzde değişimi. Botun skorunun EN AĞIR bileşeni — skor otopsisinde çıktı ki skor pratikte ağırlıklı olarak bunu ölçüyor.",
+    yorum:v=>v==null?null:(v>20?"Çok hızlı artış — skoru büyük ölçüde bu şişiriyor.":(v<0?"Azalıyor: pozisyonlar kapanıyor.":"Ilımlı artış."))},
+  oi3:{ad:"Açık pozisyon değişimi (3 saat)",
+    ack:"Son 3 saatteki açık pozisyon değişimi. Ani ilgi patlamasını yakalamak için."},
+  comp:{ad:"Sıkışma",
+    ack:"Son 6 mumun oynaklığı / 14 mumluk ortalama oynaklık. 1'in altı = fiyat daralıyor ('yay geriliyor').",
+    yorum:v=>v==null?null:(v<0.65?"Belirgin sıkışma. NOT: 14.000 gözlemde ölçüldü — sessizlik patlama habercisi DEĞİL, sessiz sessiz kalıyor.":"Normal oynaklık.")},
+  vol_x:{ad:"Hacim katsayısı",
+    ack:"Son mumun işlem hacmi / son 24 mumun ortanca hacmi. 3 = normalin üç katı hacim.",
+    yorum:v=>v==null?null:(v>3?"Hacim patlaması.":(v>1.5?"Hacim normalin üstünde.":"Sıradan hacim."))},
+  pos:{ad:"Aralıktaki konum",
+    ack:"Son 20 mumun en yüksek–en düşük aralığında fiyatın yeri. 1 = tepe, 0 = dip.",
+    yorum:v=>v==null?null:(v>0.8?"Aralığın tepesinde. Ölçüm: buradan short açmak geometrik olarak dezavantajlı — stop çok dar kalıyor.":(v<0.2?"Aralığın dibinde — düşen bıçak riski.":"Orta bölge."))},
+  last1:{ad:"Son 1 saat değişimi", ack:"Fiyatın son bir saatteki yüzde değişimi."},
+  last3:{ad:"Son 3 saat değişimi",
+    ack:"Fiyatın son üç saatteki yüzde değişimi.",
+    yorum:v=>v==null?null:(v>4?"Belirgin yükseliş. Ölçüm: çok yükselmiş coini short'lamak iki yarıda da kötü çıktı.":null)},
+  skor:{ad:"Radar skoru (0–100)",
+    ack:"Beş bileşenin toplamı: açık pozisyon (35), fonlama (23), sıkışma (20), hacim (20), kırılım (15). Otopside çıktı ki sıkışma ve kırılım neredeyse hiç puan üretmiyor — skor fiilen bir açık pozisyon dedektörü.",
+    yorum:v=>v==null?null:(v>=60?"Yüksek. Ama ölçüm: yüksek skor daha iyi işlem demek değil — skorun ateşlediği an, o coin için ölçülen anlar arasında en kötülerinden biri.":(v>=45?"Botun işlem eşiğinin üstünde.":"Eşik altı, sadece izleniyor."))},
+  stage:{ad:"Aşama",
+    ack:"BAŞLIYOR = hacim, ivme ve açık pozisyon birlikte sıçradı. HAZIRLANIYOR = sıkışmış ama henüz kıpırdamamış. izle = ikisi de değil. Ölçüm: BAŞLIYOR aslında EN KÖTÜ hücre (ort. R −0,09), HAZIRLANIYOR en iyisi (+0,19)."},
+  smart:{ad:"Akıllı para etiketi",
+    ack:"Büyük yatırımcıların long/short pozisyon oranından türetilir. 1,2 üstü LONG, 0,83 altı SHORT, arası NÖTR. Bir tahmin değil — sadece kalabalığın nerede durduğunun etiketi."},
+  taker:{ad:"Agresif alıcı oranı",
+    ack:"Piyasa emriyle ALAN / SATAN oranı. 1 üstü = alıcılar sabırsız, bekleyemeyip piyasadan alıyor. Bot short açmadan önce bunun soğumasını (1,05 altına inmesini) bekler."},
+  top_ls:{ad:"Büyük hesapların long/short oranı",
+    ack:"Borsanın en büyük pozisyon sahiplerinin long/short dengesi. 1'in üstü long ağırlıklı."},
+  glob_ls:{ad:"Tüm hesapların long/short oranı",
+    ack:"Bütün kullanıcıların long/short dengesi — perakende göstergesi. Büyük hesaplarla ayrıştığında dikkat çekici."},
+  float_oran:{ad:"Dolaşım oranı",
+    ack:"Piyasada dolaşan arz / toplam arz. Düşük olması ileride büyük miktarda kilit açılacağı (satış baskısı) anlamına gelir.",
+    yorum:v=>v==null?null:(v<0.25?"Düşük dolaşım — kilit açılma riski taşıyor.":"Normal.")},
+  dip_yakit:{ad:"Dip yakıtı (UYARI)",
+    ack:"Çok negatif fonlama + dipte fiyat. ESKİDEN 'yukarı sıçrama yakıtı' diye okunuyordu; 2026-08-03'te ölçüldü ve anlamı TERSİNE döndü: bu bir düşüşe devam uyarısı. Hesap aynı bırakıldı, sadece okuması değişti."},
+  rel3:{ad:"BTC'ye göre güç (3 saat)",
+    ack:"Coinin 3 saatlik değişimi eksi BTC'nin 3 saatlik değişimi. Artı = BTC'den iyi performans.",
+    yorum:v=>v==null?null:(v>3?"BTC'yi belirgin geçmiş. Ölçüm: bu grup short için kötü — iki yarıda da.":null)},
+  ayrisma:{ad:"Ayrışma",
+    ack:"Coin yükselirken BTC yatay/düşüyorsa işaretlenir. Deneysel etiket, kapı değil — ayı rejiminde negatif çıktı."},
+  atr:{ad:"ATR (ortalama gerçek aralık)",
+    ack:"Fiyatın 'normal' oynama miktarı. Stop mesafesi ve pozisyon boyutu bunun üstüne kurulur: yüksek ATR = geniş stop = küçük pozisyon."},
+  r:{ad:"R (risk birimi)",
+    ack:"1R = giriş ile stop arasındaki mesafe, yani o işlemde göze alınan para. +2R = riskin iki katı kazanç. Farklı büyüklükteki işlemleri adil kıyaslamanın tek yolu.",
+    yorum:v=>v==null?null:(v>0?"Ortalama pozitif: risk birimi başına kazanıyor.":"Ortalama negatif: risk birimi başına kaybediyor.")},
+  stop:{ad:"Stop",
+    ack:"Zarar kesme fiyatı. Üç adaydan (yapısal dip/tepe, son 10 mumun ucu, 1,5×ATR) girişe EN YAKIN olanı seçilir. 12 aylık ölçümde bu 'en dar' tercih doğrulandı — geniş stop edge üretmiyor, sadece dönemin yönünü büyütüyor."},
+  tp:{ad:"TP1 / TP2 (kâr alma)",
+    ack:"TP1'de pozisyonun bir kısmı kapatılır, kalanı TP2'ye bırakılır. TP1 = en yakın yapısal direnç ile 1,5R'nin yakın olanı; TP2 = TP1 + 1,5R."},
+  trailing:{ad:"İz süren stop",
+    ack:"Pozisyon 1R kâra geçince stop yukarı çekilmeye başlar, asla başabaşın altına inmez. NOT: girişten itibaren iz süren stop ölçümde çok kötü çıktı (%100 stop yeme); buradaki kâra geçtikten SONRA devreye giren sürüm farklı."},
+  notional:{ad:"Pozisyon büyüklüğü",
+    ack:"Teminat × kaldıraç. Piyasada fiilen tuttuğun toplam değer."},
+  marjin:{ad:"Teminat",
+    ack:"Pozisyon için ayrılan para. Kaybedilebilecek üst sınır bu değil — asıl sınır stop mesafesiyle belirlenen risk."},
+  kaldirac:{ad:"Kaldıraç",
+    ack:"Artık bir GİRDİ değil SONUÇ: önce 'kaç dolar riske gireceğim' belirlenir, stop mesafesine bölünür, çıkan pozisyon büyüklüğü için gereken kaldıraç hesaplanır. 2026-08-03 onarımı — öncesinde geniş stoplu işlemler en büyük riski alıyordu."},
+  likidasyon:{ad:"Likidasyon fiyatı",
+    ack:"Teminatın tamamen silineceği fiyat. Sistem stopun her zaman bundan ÖNCE tetiklenmesini garanti eder."},
+  risk_usdt:{ad:"İşlem riski",
+    ack:"Stop yenirse kaybedilecek dolar. Hedef, bakiyenin sabit bir yüzdesi — hangi coin olursa olsun aynı."},
+  slipaj:{ad:"Slipaj",
+    ack:"Emrin istediğin fiyattan değil biraz kötüsünden gerçekleşmesi. Hesaplara %0,02 katılıyor; düşük hacimli coinlerde gerçekte daha fazladır."},
+  spread:{ad:"Makas",
+    ack:"En iyi alış ile en iyi satış fiyatı arasındaki fark. Girer girmez ödenen gizli maliyet."},
+  basis:{ad:"Baz farkı",
+    ack:"Vadeli fiyat ile spot fiyat arasındaki fark. Spot mu vadeli mi önde gidiyor sorusunun ölçüsü."},
+  equity:{ad:"Bakiye",
+    ack:"Sanal hesabın toplam değeri: gerçekleşen kâr/zarar + ödenen ücretler + fonlama dahil. Bu yüzden işlem listesindeki toplamdan farklı olabilir."},
+  drawdown:{ad:"Zirveden düşüş",
+    ack:"Bakiyenin gördüğü en yüksek noktadan yüzde kaç geri çekildiği. En kötü değeri, sistemin sana yaşattığı en zor an."},
+  winrate:{ad:"Kazanma oranı",
+    ack:"Kazanan işlem / toplam işlem. TEK BAŞINA anlamsız: %30 ile kâr edilebilir, %70 ile batılabilir. Ortalama R ile birlikte okunmalı."},
+  rejim:{ad:"Rejim (F10)",
+    ack:"İki katmanın kesişimi. MEVSİM: BTC'nin haftalık kapanışı son 20 haftanın ortalamasının üstünde mi (yavaş). HAVA: günlük 20 ortalamaya göre, %2 ölü bant ve 3 gün gecikmeyle (hızlı). Kesişimler: tam boğa / tepki rallisi / derin ayı / boğa düzeltmesi / belirsiz."},
+  sezon:{ad:"Mevsim",
+    ack:"BTC'nin haftalık kapanışı son 20 haftanın ortalamasının üstünde mi ve eğim yukarı mı. Yavaş değişir — bilerek. Kısa vadeli sahte dönüşleri görmemek için tasarlandı."},
+  hava:{ad:"Hava",
+    ack:"Günlük 20 ortalamaya göre hızlı katman. %2'lik ölü bant ve 3 günlük gecikme, kıl payı sinyallerin savrulmasını engelliyor."},
+  btcd:{ad:"BTC hakimiyeti",
+    ack:"BTC'nin piyasa değeri / tüm kriptonun piyasa değeri. Düşmesi paranın altcoinlere geçtiği anlamına gelir — ama düşüş bir çöküşte de olur, tek başına boğa işareti değil."},
+  btcd_xs:{ad:"BTC risk-payı (stablecoin hariç)",
+    ack:"BTC'nin, stablecoin'ler çıkarılmış piyasadaki payı. 3 günlük değişimi, 12 aylık GERÇEK out-of-sample testten geçen tek sinyal: pay kaybediyorsa short iyi çalışıyor (+0,27/+0,16), pay kazanıyorsa çalışmıyor (−0,02/−0,03).",
+    yorum:v=>v==null?null:(v>=0.287?"ÜST bant: short freni devrede — bu bantta short ölçümde kaybettiriyordu.":(v<=-0.318?"ALT bant: short için en elverişli bölge.":"Orta bant: özel bir avantaj yok."))},
+  total:{ad:"TOTAL / TOTAL2 / TOTAL3",
+    ack:"TOTAL = tüm kriptonun piyasa değeri. TOTAL2 = BTC hariç. TOTAL3 = BTC ve ETH hariç (saf altcoin)."},
+  usdtd:{ad:"Stablecoin hakimiyeti",
+    ack:"Paranın ne kadarının kenarda beklediği. Düşmesi = kenardaki para coinlere geçiyor. Son bir yılda %6,7'den %12,3'e çıktı; stablecoin arzı neredeyse sabit kaldı, yani stable büyümedi — etrafındaki her şey küçüldü."},
+  breadth:{ad:"Piyasa genişliği",
+    ack:"Son 7 günde yükselen coinlerin yüzdesi. %50 üstü, yükselişin geniş tabanlı olduğunu gösterir."},
+  para_rejim:{ad:"Para rejimi",
+    ack:"Kriptoya taze para giriyor mu çıkıyor mu (TOTAL'in 7 günlük değişimi, ±%2 ölü bantla). 12 aylık testte doğrulandı: para çıkarken long kötü (−0,24), short iyi (+0,16). Sistemin ölçümle doğrulanan ilk bileşeni."},
+  veto:{ad:"Veto",
+    ack:"Botun bir adayı reddetme gerekçesi. Beş tür: long vetosu (dip/kapitülasyon/para çıkışı), taker soğuma (alıcı hâlâ agresif), blow-off (aşırı yükselmiş), R/R vetosu (maliyet sonrası ödül/risk 2'nin altında), BTC-payı freni (2026-08-04'te eklendi)."},
+  zaman_stop:{ad:"Zaman stopu",
+    ack:"Belirlenen süre boyunca hiçbir yere gitmeyen pozisyonun kapatılması. Para orada boşuna bekliyorsa çıkar."},
+  cooldown:{ad:"Bekleme süresi",
+    ack:"Bir sembolde işlem kapandıktan sonra aynı sembole yeniden girmeden önce beklenen süre. Aynı hatayı üst üste yapmayı engeller."},
+  bekleyenler:{ad:"Onay bekleyenler",
+    ack:"Koşulları tutan ama 'bir tur bekle' kuralına takılan adaylar. Sonraki turda hâlâ uygunsa ve ivme kırıldıysa açılır."},
 
-function parseTs(s) {
-  const [d, t] = s.split(' ');
-  const [Y, M, D] = d.split('-').map(Number);
-  const [h, mi, se] = t.split(':').map(Number);
-  return Math.floor(new Date(Y, M - 1, D, h, mi, se).getTime() / 1000);
-}
-
-const chartOpts = {
-  layout: { background: { color: '#1a1a19' }, textColor: '#c3c2b7', fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif' },
-  grid: { vertLines: { color: '#2c2c2a' }, horzLines: { color: '#2c2c2a' } },
-  rightPriceScale: { borderColor: '#383835' },
-  timeScale: { borderColor: '#383835', timeVisible: true, secondsVisible: false },
-  crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+  /* --- coin sayfası terimleri (2026-08-05) --- */
+  bollinger:{ad:"Bollinger bandı",
+    ack:"Ortadaki çizgi son 20 mumun ortalaması; üst ve alt bantlar ondan ±2 standart sapma uzakta. Bantlar daralınca oynaklık düşmüş, genişleyince artmış demektir. Fiyatın banda değmesi 'dönecek' anlamına GELMEZ — güçlü trendde fiyat bant boyunca yürür."},
+  rsi:{ad:"RSI (göreli güç)",
+    ack:"Son 14 mumdaki yükselişlerin düşüşlere oranı, 0-100 arası. 70 üstü 'aşırı alım', 30 altı 'aşırı satım' diye anılır ama bu bir giriş sinyali değildir: güçlü trendde RSI günlerce 70'in üstünde kalabilir.",
+    yorum:v=>v==null?null:(v>70?"70 üstü — alıcılar baskın. Trend güçlüyse burada kalmaya devam edebilir.":(v<30?"30 altı — satıcılar baskın.":"Orta bölge, aşırılık yok."))},
+  hacim:{ad:"Hacim",
+    ack:"O mumda el değiştiren miktar. Hareketin arkasında hacim yoksa katılım zayıf demektir. Botun skorundaki 'hacim katsayısı' bunun 24 mumluk ortancaya oranı."},
+  destek_direnc:{ad:"Destek / direnç",
+    ack:"Fiyatın daha önce dönüş yaptığı tepe ve dip noktaları. Grafikteki yatay çizgiler bunlar. ÖNEMLİ: botun stopu tam olarak bu seviyeleri kullanıyor — yani burada gördüğün çizgiler, botun stop koyacağı yerler."},
+  ma50_200:{ad:"MA50 / MA200",
+    ack:"Son 50 ve 200 mumun ortalaması. Uzun vadeli eğilimin kaba göstergesi. Fiyatın MA200 üstünde olması 'yapısal olarak yukarı' diye okunur."},
+  golden_cross:{ad:"Altın / ölüm kesişimi",
+    ack:"MA50'nin MA200'ü yukarı kesmesi 'altın kesişim', aşağı kesmesi 'ölüm kesişimi'. Çok gecikmeli göstergelerdir — olduğunda hareketin çoğu bitmiştir."},
+  bal_tuzagi:{ad:"Bal tuzağı (honeypot)",
+    ack:"Alabildiğin ama SATAMADIĞIN kontrat. Kontrat kodu satışı engelliyor veya imkânsız hale getiriyor. Küçük-cap coinlerde en yaygın dolandırıcılık biçimi."},
+  alim_satim_vergisi:{ad:"Alım/satım vergisi",
+    ack:"Bazı kontratlar her alım veya satımdan yüzde kesiyor. %10 üstü ciddi uyarı, %20 üstü fiilen tuzak — girdiğin paranın beşte birini kapıda bırakırsın."},
+  dex_likidite:{ad:"DEX havuz derinliği",
+    ack:"Merkeziyetsiz borsadaki en derin havuzun büyüklüğü. 'Satabilir miyim' değil 'NE KADAR satabilirim' sorusunun cevabı. Sığ havuzda çıkarken fiyatı kendin kırarsın."},
+  rr_net:{ad:"Ödül/risk (maliyet sonrası)",
+    ack:"Hedefe kadar kazanç / stopa kadar kayıp oranı — komisyon, makas, slipaj ve fonlama düşüldükten SONRA. Botun kuralı: 2'nin altındaysa girme. Brüt oran iyi görünüp net oran kötü olabilir.",
+    yorum:v=>v==null?null:(v>=2?"Botun eşiğini geçiyor.":"Botun 2,0 eşiğinin altında — bot bu yüzden reddeder.")},
+  tez:{ad:"Giriş tezi",
+    ack:"Neden girdiğini, ne beklediğini ve hangi koşulun seni yanılttığını kabul edeceğini yazdığın not. Sonradan 'hangi tür düşünce çalışıyor' diye gruplanabilmesi için şart — hatırlamaya güvenilmez."},
+  karsi_olgu:{ad:"Karşı olgu",
+    ack:"'Yapmasaydım ne olurdu' hesabı. Bota rağmen açtığın işlemlerde: botu dinleseydin bu kâr/zarar hiç olmayacaktı. Bir kararın gerçek bedelini ancak alternatifiyle kıyaslayınca görürsün."},
+  bota_ragmen:{ad:"Bota rağmen",
+    ack:"Botun 'açmazdım' dediği hâlde senin açtığın işlemler. Bunların ayrı karnesi, 'botu dinlemek işime yarıyor mu' sorusunun doğrudan cevabı. Az sayıda işlemde çıkan fark tesadüf olabilir — 25-30 işleme kadar izlenimdir."}
 };
 
-const equityChart = LightweightCharts.createChart(document.getElementById('equity-chart'), chartOpts);
-const equitySeries = equityChart.addLineSeries({ color: '#3987e5', lineWidth: 2 });
+/* ---- ipucu motoru (hover; klavye için focus da destekli) ---- */
+const ipucu = document.getElementById('ipucu');
+function ipucuGoster(el){
+  const t = TERIMLER[el.dataset.terim]; if(!t) return;
+  let h = '<div class="ad">'+t.ad+'</div><div>'+t.ack+'</div>';
+  if(t.yorum && el.dataset.deger!==undefined && el.dataset.deger!=='' && el.dataset.deger!=='null'){
+    const y = t.yorum(parseFloat(el.dataset.deger));
+    if(y) h += '<div class="yorum"><b>Şu an:</b> '+y+'</div>';
+  }
+  ipucu.innerHTML = h; ipucu.style.display='block';
+  const r = el.getBoundingClientRect(), k = ipucu.getBoundingClientRect();
+  let x = r.left, y = r.bottom + 7;
+  if(x + k.width > innerWidth - 12) x = innerWidth - k.width - 12;
+  if(y + k.height > innerHeight - 12) y = r.top - k.height - 7;
+  ipucu.style.left = Math.max(8,x)+'px'; ipucu.style.top = Math.max(8,y)+'px';
+}
+function ipucuGizle(){ ipucu.style.display='none'; }
+document.addEventListener('mouseover', e=>{ const el=e.target.closest('[data-terim]'); if(el) ipucuGoster(el); });
+document.addEventListener('mouseout',  e=>{ if(e.target.closest('[data-terim]')) ipucuGizle(); });
+document.addEventListener('focusin',   e=>{ const el=e.target.closest('[data-terim]'); if(el) ipucuGoster(el); });
+document.addEventListener('focusout',  ipucuGizle);
+document.addEventListener('scroll', ipucuGizle, true);
 
-const candleChart = LightweightCharts.createChart(document.getElementById('candle-chart'), chartOpts);
-const candleSeries = candleChart.addCandlestickSeries({
-  upColor: '#0ca30c', downColor: '#d03b3b', borderVisible: false,
-  wickUpColor: '#0ca30c', wickDownColor: '#d03b3b',
+/* ---- yardımcılar ---- */
+const $ = s => document.querySelector(s);
+const n2 = v => (v==null||v===''||isNaN(v)) ? '–' : (+v).toFixed(2);
+const n1 = v => (v==null||v===''||isNaN(v)) ? '–' : (+v).toFixed(1);
+const para = v => (v==null||isNaN(v)) ? '–' : (+v).toLocaleString('tr-TR',{maximumFractionDigits:2});
+const isar = v => (v==null||isNaN(v)) ? '' : (v>0?'+':'');
+const snf  = v => (v==null||isNaN(v)) ? 'sonuk' : (v>0?'iyi':(v<0?'kotu':''));
+const esc  = s => String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));
+const T    = (k,v,metin)=>'<span data-terim="'+k+'"'+(v!=null?' data-deger="'+v+'"':'')+'>'+metin+'</span>';
+const zam  = t => Math.floor(new Date(String(t).replace(' ','T')).getTime()/1000);
+function tost(m,iyi){ const t=$('#tost'); t.textContent=m;
+  t.style.borderColor = iyi?'var(--iyi)':'var(--kotu)'; t.style.display='block';
+  clearTimeout(t._z); t._z=setTimeout(()=>t.style.display='none', 4500); }
+function tablo(basliklar, satirlar, bosMesaj){
+  if(!satirlar.length) return '<div class="bos">'+(bosMesaj||'Kayıt yok.')+'</div>';
+  return '<div class="tablo-sar"><table><thead><tr>'+basliklar.join('')+'</tr></thead><tbody>'
+    + satirlar.join('') + '</tbody></table></div>';
+}
+async function al(yol){ const r = await fetch(yol); return r.json(); }
+async function gonder(yol, govde){
+  const r = await fetch(yol,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(govde)});
+  return r.json();
+}
+function seriHazirla(dizi, zamanAlan, degerAlan){
+  return dizi.map(x=>({time: zam(x[zamanAlan]), value: x[degerAlan]}))
+    .filter(x=>!isNaN(x.time) && x.value!=null)
+    .sort((a,b)=>a.time-b.time)
+    .filter((x,i,a)=> i===0 || x.time!==a[i-1].time);
+}
+
+/* ---- tema ---- */
+function renk(ad){ return getComputedStyle(document.documentElement).getPropertyValue(ad).trim(); }
+function temaUygula(t){ document.documentElement.dataset.tema = t; localStorage.setItem('tema', t);
+  Object.values(grafikler).forEach(g=>{ try{ g.c.applyOptions(grafikSecenek()); }catch(e){} }); }
+function temaDegis(){ temaUygula(document.documentElement.dataset.tema==='acik'?'koyu':'acik'); }
+function grafikSecenek(){ return {
+  layout:{background:{color:'transparent'},textColor:renk('--yazi3'),fontSize:11},
+  grid:{vertLines:{color:renk('--izgara')},horzLines:{color:renk('--izgara')}},
+  rightPriceScale:{borderColor:renk('--kenar')},
+  timeScale:{borderColor:renk('--kenar'),timeVisible:true},
+  crosshair:{mode:0} }; }
+const grafikler = {};
+function cizgiGrafik(ad, hedef, veri, c){
+  const el = document.getElementById(hedef); if(!el || !veri.length) return;
+  if(grafikler[ad]){ try{ grafikler[ad].c.remove(); }catch(e){} }
+  const g = LightweightCharts.createChart(el, Object.assign(grafikSecenek(),
+    {width:el.clientWidth, height:el.clientHeight}));
+  const s = g.addAreaSeries({lineColor:c, topColor:c+'44', bottomColor:c+'05', lineWidth:2});
+  s.setData(veri); g.timeScale().fitContent(); grafikler[ad]={c:g,s:s};
+  new ResizeObserver(()=>{ try{ g.applyOptions({width:el.clientWidth,height:el.clientHeight}); }catch(e){} }).observe(el);
+}
+temaUygula(localStorage.getItem('tema') || (matchMedia('(prefers-color-scheme: light)').matches ? 'acik' : 'koyu'));
+
+/* =========================================================================
+   SEKMELER
+   ========================================================================= */
+const SEKMELER = [
+  {id:'ozet',    ad:'Özet',          yukle:ozetYukle,   sure:30},
+  {id:'kafa',    ad:"Bot'un Kafası", yukle:kafaYukle,   sure:60},
+  {id:'gecmis',  ad:'Geçmiş',        yukle:gecmisYukle, sure:180},
+  {id:'piyasa',  ad:'Piyasa',        yukle:piyasaYukle, sure:180},
+  {id:'defter',  ad:'Defterim',      yukle:defterYukle, sure:180},
+  {id:'coin',    ad:'Coin Ara',      yukle:coinYukle,   sure:0},
+  {id:'kars',    ad:'Bot vs Ben',    yukle:karsYukle,   sure:120},
+  {id:'gunluk',  ad:'Günlük',        yukle:gunlukYukle, sure:0},
+  {id:'ayarlar', ad:'Ayarlar',       yukle:ayarYukle,   sure:0}
+];
+let aktifSekme = location.hash.slice(1) || 'ozet';
+if(!SEKMELER.some(s=>s.id===aktifSekme)) aktifSekme='ozet';
+
+$('#sekmeler').innerHTML = SEKMELER.map((s,i)=>
+  '<button class="sekme" data-id="'+s.id+'" onclick="sekmeAc(\''+s.id+'\')">'+s.ad+
+  '<span class="kisayol">'+(i+1)+'</span></button>').join('');
+$('#govde').innerHTML = SEKMELER.map(s=>'<div class="panel" id="p-'+s.id+'"></div>').join('');
+
+function sekmeAc(id){
+  aktifSekme = id; location.hash = id;
+  document.querySelectorAll('.sekme').forEach(b=>b.classList.toggle('aktif', b.dataset.id===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('aktif', p.id==='p-'+id));
+  const s = SEKMELER.find(x=>x.id===id);
+  if(!s._son || (s.sure && Date.now()-s._son > s.sure*1000)) yenile(s);
+}
+async function yenile(s){
+  const el = $('#p-'+s.id);
+  if(!s._son) el.innerHTML = '<div class="bos">Yükleniyor…</div>';
+  try{
+    await s.yukle(el); s._son = Date.now();
+    $('#yenilendi').textContent = 'son yenileme ' + new Date().toLocaleTimeString('tr-TR');
+  }catch(e){ el.innerHTML = '<section><div class="bos kotu">Yüklenemedi: '+esc(e.message)+'</div></section>'; }
+}
+function hepsiniYenile(){ SEKMELER.forEach(s=>s._son=0); ustBar(); sekmeAc(aktifSekme); }
+addEventListener('keydown', e=>{
+  if(e.target.tagName==='INPUT') return;
+  const i = parseInt(e.key,10);
+  if(i>=1 && i<=SEKMELER.length) sekmeAc(SEKMELER[i-1].id);
+  if(e.key==='r') hepsiniYenile();
 });
-let priceLines = [];
-let selectedSym = null;
 
-new ResizeObserver(() => {
-  equityChart.applyOptions({ width: document.getElementById('equity-chart').clientWidth });
-  candleChart.applyOptions({ width: document.getElementById('candle-chart').clientWidth });
-}).observe(document.body);
-
-async function loadMumlar(sym) {
-  selectedSym = sym;
-  document.getElementById('mum-sym-label').textContent = '— ' + sym;
-  document.querySelectorAll('.sym-btn').forEach(b => b.classList.toggle('active', b.dataset.sym === sym));
-  document.querySelectorAll('#acik-poz-body tr').forEach(r => r.classList.toggle('selected', r.dataset.sym === sym));
-  priceLines.forEach(pl => candleSeries.removePriceLine(pl));
-  priceLines = [];
-  try {
-    const res = await fetch(`/api/mumlar?sym=${sym}&interval=15m&limit=200`);
-    const data = await res.json();
-    if (Array.isArray(data)) candleSeries.setData(data);
-  } catch (e) {}
+async function ustBar(){
+  try{
+    const d = await al('/api/durum');
+    const b = $('#botDurum');
+    if(!d.basladi){ b.textContent='BAŞLAMADI'; b.className='rozet'; return; }
+    b.textContent = d.durum;
+    b.className = 'rozet ' + (d.durum==='AKTIF' ? 'iyi' : 'uyari');
+    const fark = d.equity - d.baslangic_bakiye;
+    $('#ustOzet').innerHTML = para(d.equity)+'$ <span class="'+snf(fark)+'">('+isar(fark)+
+      n1(fark/d.baslangic_bakiye*100)+'%)</span> · '+d.acik_pozisyonlar.length+' açık pozisyon';
+  }catch(e){}
 }
 
-function drawPriceLines(pos) {
-  if (!pos) return;
-  const lines = [
-    { price: pos.giris, color: '#c3c2b7', title: 'giriş' },
-    { price: pos.stop, color: '#d03b3b', title: 'stop' },
-    { price: pos.tp1, color: '#0ca30c', title: 'tp1' },
-    { price: pos.tp2, color: '#0ca30c', title: 'tp2' },
-    { price: pos.likidasyon, color: '#fab219', title: 'liq' },
+/* =========================================================================
+   1) ÖZET
+   ========================================================================= */
+async function ozetYukle(el){
+  const r = await Promise.all([al('/api/ozet'), al('/api/durum')]);
+  const o = r[0], d = r[1];
+  if(!d.basladi){ el.innerHTML='<section><div class="bos">Bot henüz başlamamış.</div></section>'; return; }
+  const k = d.karne || {}, fark = d.equity - d.baslangic_bakiye;
+
+  const kartlar = [
+    ['Bakiye','equity','<span class="'+snf(fark)+'">'+para(d.equity)+'$</span>',
+      'başlangıç '+para(d.baslangic_bakiye)+'$ · '+isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
+    ['Serbest para','marjin', para(d.serbest_bakiye)+'$', para(d.kullanilan_marjin)+'$ teminatta kilitli'],
+    ['Açık kâr/zarar',null,'<span class="'+snf(d.acik_pnl_toplam)+'">'+isar(d.acik_pnl_toplam)+para(d.acik_pnl_toplam)+'$</span>',
+      d.acik_pozisyonlar.length+' pozisyon'],
+    ['Kapanan işlem',null, (k.toplam_islem||0), (k.kazanan||0)+' tanesi kazandı'],
+    ['Kazanma oranı','winrate', (k.win_rate!=null?'%'+k.win_rate:'–'), 'tek başına yeterli değil'],
+    ['Ortalama','r','<span class="'+snf(k.ort_r)+'">'+(k.ort_r!=null?k.ort_r+' R':'–')+'</span>','risk birimi başına'],
+    ['Toplam kâr/zarar',null,'<span class="'+snf(k.toplam_pnl)+'">'+isar(k.toplam_pnl)+para(k.toplam_pnl)+'$</span>',
+      'fonlama '+isar(k.kumulatif_funding)+n2(k.kumulatif_funding)+'$ · ücret '+n2(k.kumulatif_giris_ucret)+'$']
   ];
-  lines.forEach(l => {
-    priceLines.push(candleSeries.createPriceLine({
-      price: l.price, color: l.color, lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, title: l.title,
-    }));
+
+  el.innerHTML =
+  '<section><h2>Şu an ne oluyor?</h2>'+
+    '<div class="anlati">'+(o.anlati||[]).map(p=>'<p>'+p+'</p>').join('')+'</div>'+
+    '<ul class="maddeler">'+(o.maddeler||[]).map(m=>
+      '<li><span class="nokta '+m.renk+'"></span>'+esc(m.metin)+'</li>').join('')+'</ul></section>'+
+  '<div class="kartlar">'+kartlar.map(c=>
+    '<div class="kart"><div class="etiket">'+(c[1]?T(c[1],null,c[0]):c[0])+'</div>'+
+    '<div class="deger">'+c[2]+'</div><div class="alt">'+c[3]+'</div></div>').join('')+'</div>'+
+  '<section><h2>'+T('equity',null,'Bakiye eğrisi')+'</h2><div class="grafik" id="g-equity"></div></section>'+
+  '<section><h2>Açık pozisyonlar</h2><div id="acikPoz"></div></section>'+
+  '<section><h2>Fiyat grafiği <span class="sonuk" id="mumBaslik" style="font-weight:400"></span></h2>'+
+    '<div class="grafik" id="g-mum" style="height:260px"></div></section>';
+
+  cizgiGrafik('equity','g-equity', seriHazirla(d.equity_serisi||[], 'ts','equity'), renk('--vurgu'));
+
+  const bas = ['<th>Coin</th><th>Yön</th><th class="sag">'+T('kaldirac',null,'Kald.')+'</th>',
+    '<th class="sag">'+T('marjin',null,'Teminat')+'</th><th class="sag">'+T('notional',null,'Büyüklük')+'</th>',
+    '<th class="sag">Giriş</th><th class="sag">Anlık</th><th class="sag">Kâr/Zarar</th>',
+    '<th class="sag">'+T('stop',null,'Stop')+'</th><th class="sag">'+T('tp',null,'TP1')+'</th>',
+    '<th class="sag">'+T('likidasyon',null,'Likidasyon')+'</th>',
+    '<th class="sag">'+T('skor',null,'Skor')+'</th><th></th><th></th>'];
+  const sat = (d.acik_pozisyonlar||[]).map(p=>'<tr>'+
+    '<td><b>'+esc(p.sym)+'</b></td><td class="'+(p.yon==='LONG'?'iyi':'kotu')+'">'+p.yon+'</td>'+
+    '<td class="sag">'+p.kaldirac+'x</td><td class="sag">'+para(p.marjin)+'$</td>'+
+    '<td class="sag">'+para(p.notional)+'$</td><td class="sag">'+p.giris+'</td>'+
+    '<td class="sag">'+p.anlik_fiyat+'</td>'+
+    '<td class="sag '+snf(p.acik_pnl)+'">'+isar(p.acik_pnl)+para(p.acik_pnl)+'$</td>'+
+    '<td class="sag">'+p.stop+'</td><td class="sag">'+p.tp1+'</td>'+
+    '<td class="sag sonuk">'+n2(p.likidasyon)+'</td>'+
+    '<td class="sag" data-terim="skor" data-deger="'+p.skor_giriste+'">'+(p.skor_giriste!=null?p.skor_giriste:'–')+'</td>'+
+    '<td><button onclick="mumGoster(\''+p.sym+'\')">grafik</button></td>'+
+    '<td><button onclick="pozKapat(\''+p.sym+'\')">kapat</button></td></tr>');
+  $('#acikPoz').innerHTML = tablo(bas, sat, 'Şu an açık pozisyon yok.');
+  mumGoster((d.acik_pozisyonlar[0]||{}).sym || 'BTC');
+}
+
+async function mumGoster(sym){
+  const b = $('#mumBaslik'); if(b) b.textContent = '— '+sym;
+  const d = await al('/api/mumlar?sym='+sym+'&interval=15m&limit=200');
+  if(d.error || !d.length) return;
+  const el = document.getElementById('g-mum'); if(!el) return;
+  if(grafikler.mum){ try{ grafikler.mum.c.remove(); }catch(e){} }
+  const g = LightweightCharts.createChart(el, Object.assign(grafikSecenek(),
+    {width:el.clientWidth, height:el.clientHeight}));
+  const s = g.addCandlestickSeries({upColor:renk('--iyi'),downColor:renk('--kotu'),
+    borderVisible:false, wickUpColor:renk('--iyi'), wickDownColor:renk('--kotu')});
+  s.setData(d); g.timeScale().fitContent(); grafikler.mum={c:g,s:s};
+  new ResizeObserver(()=>{ try{ g.applyOptions({width:el.clientWidth,height:el.clientHeight}); }catch(e){} }).observe(el);
+}
+async function pozKapat(sym){
+  if(!confirm(sym+' pozisyonu ŞU ANKİ piyasa fiyatından kapatılsın mı?\n\nBu geri alınamaz.')) return;
+  const r = await gonder('/api/kontrol',{eylem:'pozisyon_kapat', arg:sym});
+  tost(r.mesaj, r.ok); if(r.ok) hepsiniYenile();
+}
+
+/* =========================================================================
+   2) BOT'UN KAFASI
+   ========================================================================= */
+const VETO_AD = {long_veto:'Long vetosu', taker_soguma:'Alıcı hâlâ agresif',
+  blowoff:'Aşırı yükselmiş', rr_veto:'Ödül/risk yetersiz', btc_pay_freni:'BTC payı freni'};
+async function kafaYukle(el){
+  const k = await al('/api/kafa');
+  const kd = Object.entries(k.karar_dagilim||{}).sort((a,b)=>b[1]-a[1]);
+  const enb = Math.max.apply(null,[1].concat(kd.map(x=>x[1])));
+  const vk = Object.entries(k.veto_kirilim||{}).sort((a,b)=>b[1].n-a[1].n);
+
+  el.innerHTML =
+  '<section><h2>Bot neden işlem açmıyor?</h2>'+
+    '<p class="sonuk" style="margin:0 0 12px">Son taramada <b>'+k.son_tur_aday+'</b> aday incelendi. '+
+    'Şu an <b>'+k.acik_sayisi+'/'+k.maks_pozisyon+'</b> pozisyon açık. '+
+    'Aşağıdaki döküm son '+k.aday_toplam+' aday kaydından.</p>'+
+    kd.map(x=>'<div class="satir" style="margin-bottom:5px">'+
+      '<div style="width:200px;font-size:12.5px">'+esc(x[0])+'</div>'+
+      '<div class="cubuk" style="width:'+Math.max(2,x[1]/enb*260)+'px"></div>'+
+      '<div class="sonuk" style="font-size:12px">'+x[1]+'</div></div>').join('')+
+    '<div class="not">“karar-yok” = adayın koşulları hiç tutmadı. “VETO:x” = tuttu ama bir kapıya takıldı. '+
+    'Yön/mod (örn. SHORT/ONAY_BEKLE) = uygun bulundu, açılış sırasında.</div></section>'+
+
+  '<section><h2>'+T('veto',null,'Reddetme gerekçeleri')+'</h2>'+
+    '<div class="kartlar">'+(vk.length? vk.map(x=>
+      '<div class="kart"><div class="etiket">'+esc(VETO_AD[x[0]]||x[0])+'</div>'+
+      '<div class="deger">'+x[1].n+'</div>'+
+      '<div class="alt">'+x[1].ornekler.map(o=>esc(o.sym)).join(', ')+'</div></div>').join('')
+      : '<div class="bos">Veto kaydı yok.</div>')+'</div>'+
+    tablo(['<th>Zaman</th><th>Coin</th><th>Tür</th><th>Ne oldu</th><th>Olurdu</th>'],
+      (k.veto_son||[]).map(v=>'<tr><td class="sonuk">'+esc((v.ts||'').slice(5,16))+'</td>'+
+        '<td><b>'+esc(v.sym)+'</b></td><td>'+esc(VETO_AD[v.kategori]||v.kategori)+'</td>'+
+        '<td class="sonuk" style="white-space:normal">'+esc(v.detay)+'</td>'+
+        '<td class="'+(v.olurdu_yon==='LONG'?'iyi':'kotu')+'">'+esc(v.olurdu_yon||'')+'</td></tr>'))+
+    '</section>'+
+
+  '<section><h2>'+T('bekleyenler',null,'Onay bekleyenler')+' · '+T('cooldown',null,'bekleme süresindekiler')+'</h2>'+
+    '<div class="satir" style="align-items:flex-start;gap:26px">'+
+      '<div style="flex:1;min-width:240px"><h3>Onay bekleyen</h3>'+
+        tablo(['<th>Coin</th><th>Yön</th><th class="sag">Kaç tur</th>'],
+          (k.bekleyenler||[]).map(b=>'<tr><td><b>'+esc(b.sym)+'</b></td>'+
+            '<td class="'+(b.yon==='LONG'?'iyi':'kotu')+'">'+esc(b.yon||'')+'</td>'+
+            '<td class="sag">'+(b.cycle_sayaci||0)+'</td></tr>'), 'Bekleyen aday yok.')+'</div>'+
+      '<div style="flex:1;min-width:240px"><h3>Bekleme süresinde</h3>'+
+        tablo(['<th>Coin</th><th class="sag">Kalan</th>'],
+          (k.cooldown||[]).map(c=>'<tr><td><b>'+esc(c.sym)+'</b></td>'+
+            '<td class="sag">'+n1(c.kalan_saat)+' saat</td></tr>'), 'Bekleyen sembol yok.')+'</div>'+
+    '</div></section>'+
+
+  '<section><h2>Botun gördüğü son adaylar</h2>'+
+    tablo(['<th>Zaman</th><th>Coin</th><th class="sag">'+T('skor',null,'Skor')+'</th>',
+      '<th>'+T('stage',null,'Aşama')+'</th><th class="sag">'+T('oi24',null,'OI 24s')+'</th>',
+      '<th class="sag">'+T('funding',null,'Fonlama')+'</th><th class="sag">'+T('vol_x',null,'Hacim×')+'</th>',
+      '<th class="sag">'+T('pos',null,'Konum')+'</th><th>'+T('smart',null,'Akıllı para')+'</th>',
+      '<th class="sag">'+T('taker',null,'Alıcı')+'</th><th>Karar</th>'],
+      (k.adaylar||[]).map(a=>'<tr>'+
+        '<td class="sonuk">'+esc((a.ts||'').slice(5,16))+'</td><td><b>'+esc(a.sym)+'</b></td>'+
+        '<td class="sag" data-terim="skor" data-deger="'+a.score+'">'+n1(a.score)+'</td>'+
+        '<td>'+esc(a.stage)+'</td>'+
+        '<td class="sag '+snf(a.oi24)+'" data-terim="oi24" data-deger="'+a.oi24+'">'+isar(a.oi24)+n1(a.oi24)+'%</td>'+
+        '<td class="sag" data-terim="funding" data-deger="'+a.funding+'">'+n2(a.funding)+'%</td>'+
+        '<td class="sag">'+n1(a.vol_x)+'</td>'+
+        '<td class="sag" data-terim="pos" data-deger="'+a.pos+'">'+n2(a.pos)+'</td>'+
+        '<td class="sonuk">'+esc(a.smart||'')+'</td><td class="sag">'+n2(a.taker)+'</td>'+
+        '<td class="sonuk">'+esc(a.karar||'')+'</td></tr>'))+
+    '<div class="not">Bu tablo botun KENDİ tarama havuzundan geliyor, radar arşivinden değil. '+
+    '2026-08-04\'te ölçüldü: ikisi farklı evrenler — en yüksek skorlu iki işlem radar arşivinde hiç yoktu.</div>'+
+  '</section>';
+}
+
+/* =========================================================================
+   3) GEÇMİŞ
+   ========================================================================= */
+async function gecmisYukle(el){
+  const g = await al('/api/gecmis');
+  function kirTablo(baslik, obj, terim){
+    const sat = Object.entries(obj||{}).sort((a,b)=>b[1].pnl-a[1].pnl).map(x=>{
+      const k=x[0], v=x[1];
+      return '<tr><td><b>'+esc(k)+'</b></td><td class="sag">'+v.n+'</td><td class="sag">'+v.kazanan+'</td>'+
+        '<td class="sag">%'+n1(v.kazanan/v.n*100)+'</td>'+
+        '<td class="sag '+snf(v.pnl)+'">'+isar(v.pnl)+para(v.pnl)+'$</td>'+
+        '<td class="sag '+snf(v.ort_r)+'">'+(v.ort_r!=null?v.ort_r:'–')+'</td></tr>';});
+    return '<h3>'+(terim?T(terim,null,baslik):baslik)+'</h3>'+ tablo(
+      ['<th></th><th class="sag">İşlem</th><th class="sag">Kazanan</th><th class="sag">Oran</th>',
+       '<th class="sag">Kâr/Zarar</th><th class="sag">'+T('r',null,'Ort. R')+'</th>'], sat);
+  }
+  const enbR = Math.max.apply(null,[1].concat((g.r_histogram||[]).map(x=>x.n)));
+
+  el.innerHTML =
+  '<section><h2>Test turları</h2>'+
+    tablo(['<th>Tur</th><th class="sag">İşlem</th><th class="sag">Kazanan</th><th class="sag">Oran</th>',
+      '<th class="sag">Kâr/Zarar</th><th class="sag">'+T('r',null,'Ort. R')+'</th>'],
+      (g.turlar||[]).map(t=>'<tr><td><b>'+esc(t.tur)+'</b></td><td class="sag">'+t.n+'</td>'+
+        '<td class="sag">'+t.kazanan+'</td><td class="sag">%'+n1(t.win_rate)+'</td>'+
+        '<td class="sag '+snf(t.pnl)+'">'+isar(t.pnl)+para(t.pnl)+'$</td>'+
+        '<td class="sag '+snf(t.ort_r)+'">'+(t.ort_r!=null?t.ort_r:'–')+'</td></tr>'))+
+    '<div class="not">Her tur ayrı bir test dönemi. Aynı şema, aynı ölçüler — doğrudan kıyaslanabilir.</div></section>'+
+
+  '<section><h2>'+T('drawdown',null,'Zirveden düşüş')+
+    ' <span class="kotu" style="font-size:13px">en kötü %'+n1(g.maks_drawdown)+'</span></h2>'+
+    '<div class="grafik" id="g-dd"></div></section>'+
+
+  '<section><h2>'+T('r',null,'Sonuçların dağılımı')+'</h2>'+
+    (g.r_histogram||[]).map(h=>'<div class="satir" style="margin-bottom:4px">'+
+      '<div style="width:100px;font-size:12px" class="sonuk">'+esc(h.aralik)+' R</div>'+
+      '<div class="cubuk" style="width:'+Math.max(2,h.n/enbR*260)+'px;background:'+
+        (h.aralik.trim().startsWith('-')?'var(--kotu)':'var(--iyi)')+'"></div>'+
+      '<div style="font-size:12px">'+h.n+'</div></div>').join('')+
+    '<div class="not">Sol taraf kaybeden, sağ taraf kazanan işlemler. Sağlıklı bir sistemde soldakiler '+
+    '−1R\'de toplanır (stop çalışıyor demektir), sağdakiler uzağa yayılır.</div></section>'+
+
+  '<section><h2>En iyi ve en kötü işlemler</h2>'+
+    tablo(['<th>Coin</th><th>Yön</th><th>Zaman</th><th class="sag">Kâr/Zarar</th><th class="sag">R</th><th>Sebep</th>'],
+      (g.en_iyi||[]).concat(g.en_kotu||[]).map(t=>'<tr><td><b>'+esc(t.sym)+'</b></td>'+
+        '<td class="'+(t.yon==='LONG'?'iyi':'kotu')+'">'+t.yon+'</td>'+
+        '<td class="sonuk">'+esc((t.ts||'').slice(0,16))+'</td>'+
+        '<td class="sag '+snf(t.sonuc_usdt)+'">'+isar(t.sonuc_usdt)+para(t.sonuc_usdt)+'$</td>'+
+        '<td class="sag '+snf(t.r)+'">'+(t.r!=null?t.r:'–')+'</td>'+
+        '<td class="sonuk">'+esc(t.sebep)+'</td></tr>'))+'</section>'+
+
+  '<section><h2>Kırılımlar</h2>'+
+    kirTablo('Sembole göre', g.kirilim_sembol)+
+    kirTablo('Çıkış sebebine göre', g.kirilim_sebep)+
+    kirTablo('Rejime göre', g.kirilim_rejim, 'rejim')+
+    kirTablo('Aşamaya göre', g.kirilim_stage, 'stage')+
+    kirTablo('Yöne göre', g.kirilim_yon)+'</section>'+
+
+  '<section><h2>Tüm işlemler</h2>'+
+    tablo(['<th>Zaman</th><th>Coin</th><th>Yön</th><th>Sebep</th><th class="sag">'+T('kaldirac',null,'Kald.')+'</th>',
+      '<th class="sag">Kâr/Zarar</th><th class="sag">'+T('r',null,'R')+'</th><th class="sag">Süre</th>',
+      '<th class="sag">'+T('skor',null,'Skor')+'</th><th>'+T('rejim',null,'Rejim')+'</th>'],
+      (g.islemler||[]).map(t=>'<tr>'+
+        '<td class="sonuk">'+esc((t.ts||'').slice(0,16))+'</td><td><b>'+esc(t.sym)+'</b></td>'+
+        '<td class="'+(t.yon==='LONG'?'iyi':'kotu')+'">'+t.yon+'</td>'+
+        '<td class="sonuk">'+esc(t.sebep)+(t.kismi?' <span class="uyari">(kısmi)</span>':'')+'</td>'+
+        '<td class="sag">'+t.kaldirac+'x</td>'+
+        '<td class="sag '+snf(t.sonuc_usdt)+'">'+isar(t.sonuc_usdt)+para(t.sonuc_usdt)+'$</td>'+
+        '<td class="sag '+snf(t.r)+'">'+(t.r!=null?t.r:'–')+'</td>'+
+        '<td class="sag sonuk">'+n1(t.tutma_saat)+' sa</td>'+
+        '<td class="sag" data-terim="skor" data-deger="'+t.skor_giriste+'">'+(t.skor_giriste!=null?t.skor_giriste:'–')+'</td>'+
+        '<td class="sonuk">'+esc(t.rejim_giriste||'')+'</td></tr>'))+'</section>';
+
+  cizgiGrafik('dd','g-dd', seriHazirla(g.drawdown||[], 'ts','dd'), renk('--kotu'));
+}
+
+/* =========================================================================
+   4) PİYASA
+   ========================================================================= */
+async function piyasaYukle(el){
+  const p = await al('/api/piyasa');
+  const r = p.rejim||{}, pa = p.para||{}, bp = p.btc_pay||{}, akis = p.para_akisi||{}, es = p.esikler||{};
+  const F10 = {TAM_BOGA:'Tam boğa', TEPKI_RALLISI:'Ayı içinde tepki rallisi',
+    DERIN_AYI:'Derin ayı', BOGA_DUZELTME:'Boğa içinde düzeltme', BELIRSIZ:'Belirsiz'};
+  const bant = ({UST:['ÜST','uyari'], ORTA:['ORTA','sonuk'], ALT:['ALT','iyi']})[bp.bant] || ['–','sonuk'];
+
+  el.innerHTML =
+  '<div class="kartlar">'+
+    '<div class="kart"><div class="etiket">'+T('rejim',null,'Rejim')+'</div>'+
+      '<div class="deger" style="font-size:15px">'+esc(F10[r.f10]||r.f10||'–')+'</div>'+
+      '<div class="alt">'+T('sezon',null,'mevsim')+' '+esc(r.sezon||'–')+' × '+T('hava',null,'hava')+' '+esc(r.hava||'–')+'</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('para_rejim',null,'Para rejimi')+'</div>'+
+      '<div class="deger" style="font-size:15px">'+esc(pa.rejim||'–')+'</div>'+
+      '<div class="alt">TOTAL 7 günde '+isar(pa.total_chg)+n1(pa.total_chg)+'%</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('btcd_xs',bp.degisim,'BTC risk-payı (3 gün)')+'</div>'+
+      '<div class="deger '+bant[1]+'" style="font-size:15px">'+bant[0]+' bant</div>'+
+      '<div class="alt">'+isar(bp.degisim)+n2(bp.degisim)+' puan</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('btcd',null,'BTC hakimiyeti')+'</div>'+
+      '<div class="deger">'+n1(akis.btcd)+'%</div>'+
+      '<div class="alt">55 seviyesine '+n1(akis.btcd_55_uzaklik)+' puan</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('usdtd',null,'Stablecoin payı')+'</div>'+
+      '<div class="deger">'+n2(akis.usdtd)+'%</div><div class="alt">'+esc(akis.usdt_yon||'')+'</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('breadth',null,'Piyasa genişliği')+'</div>'+
+      '<div class="deger">'+(akis.breadth!=null?'%'+n1(akis.breadth):'–')+'</div>'+
+      '<div class="alt">7 günde yükselen coin oranı</div></div>'+
+  '</div>'+
+
+  '<section><h2>'+T('btcd_xs',bp.degisim,'BTC risk-payı — son 1 yıl')+'</h2>'+
+    '<div class="grafik" id="g-bp"></div>'+
+    '<div class="not">Bu, 12 aylık gerçek out-of-sample testten geçen tek sinyal. 3 günlük değişimi '+
+    '<b>üst çeyrekte</b> (≥'+n2(es.btcd_xs_ust)+' puan) ise bot short açmıyor; '+
+    '<b>alt çeyrekte</b> (≤'+n2(es.btcd_xs_alt)+') short en iyi çalıştığı bölgede.</div></section>'+
+
+  '<section><h2>Para nereye gidiyor?</h2>'+
+    tablo(['<th>Ölçü</th><th class="sag">Son 7 gün</th><th>Ne diyor</th>'], [
+      [T('total',null,'TOTAL (tüm kripto)'), isar(akis.total_chg)+n1(akis.total_chg)+'%', akis.para_rejim||''],
+      [T('total',null,'TOTAL3 (BTC+ETH hariç)'), isar(akis.total3_chg)+n1(akis.total3_chg)+'%',
+        'altcoinlere para '+String(akis.alt_yon||'').toLowerCase()],
+      [T('btcd',null,'BTC hakimiyeti'), isar(akis.btcd_chg)+n2(akis.btcd_chg)+' puan', akis.btc_yon||''],
+      [T('usdtd',null,'Stablecoin payı'), isar(akis.usdtd_chg)+n2(akis.usdtd_chg)+' puan', akis.usdt_yon||'']
+    ].map(x=>'<tr><td>'+x[0]+'</td><td class="sag">'+x[1]+'</td><td class="sonuk">'+esc(x[2])+'</td></tr>'))+
+    '<div class="not">'+esc(akis.para_rejim_not||'')+'</div></section>'+
+
+  '<section><h2>Yaklaşan makro günler</h2>'+
+    tablo(['<th>Tür</th><th>Tarih</th><th>Kalan</th>'],
+      (p.makro||[]).map(m=>{ const gg=Math.round((new Date(m.gun)-new Date())/864e5);
+        return '<tr><td><b>'+esc(m.tur)+'</b></td><td>'+esc(m.gun)+'</td>'+
+          '<td class="'+(gg<=1?'uyari':'sonuk')+'">'+(gg<=0?'bugün':gg+' gün')+'</td></tr>';}))+
+    '<div class="not">Bu günlerde bot yeni giriş açmaz (makro kapısı). Haber öncesi oynaklık edge değil, gürültüdür.</div></section>';
+
+  cizgiGrafik('bp','g-bp', seriHazirla(p.btc_pay_seri||[], 'gun','xs'), renk('--vurgu'));
+}
+
+/* =========================================================================
+   5) DEFTERİM
+   ========================================================================= */
+async function defterYukle(el){
+  const d = await al('/api/defter');
+  const maliyet = (d.spot||[]).reduce((a,s)=>a+(parseFloat(s.maliyet)||0),0);
+  el.innerHTML =
+  '<div class="kartlar">'+
+    '<div class="kart"><div class="etiket">Spot pozisyon</div><div class="deger">'+(d.spot||[]).length+'</div>'+
+      '<div class="alt">toplam maliyet '+para(maliyet)+'$</div></div>'+
+    '<div class="kart"><div class="etiket">Açık tahmin</div><div class="deger">'+(d.tahminler||[]).length+'</div>'+
+      '<div class="alt">defterindeki senaryolar</div></div>'+
+    '<div class="kart"><div class="etiket">Tahmin isabeti</div>'+
+      '<div class="deger">'+(d.isabet?('%'+d.isabet.oran):'–')+'</div>'+
+      '<div class="alt">'+(d.isabet?(d.isabet.tutan+'/'+d.isabet.n+' kapanan'):'kapanan tahmin yok')+'</div></div>'+
+    '<div class="kart"><div class="etiket">Yazılı ders</div><div class="deger">'+(d.dersler||[]).length+'</div>'+
+      '<div class="alt">kendi kurallarım</div></div>'+
+  '</div>'+
+
+  '<section><h2>Spot pozisyonlar (gerçek para)</h2>'+
+    tablo(['<th>Coin</th><th class="sag">Miktar</th><th class="sag">Maliyet</th>',
+      '<th class="sag">Anlık fiyat</th><th class="sag">Kayıtlı K/Z</th><th>Durum</th><th>Not</th>'],
+      (d.spot||[]).map(s=>'<tr><td><b>'+esc(s.sym)+'</b></td>'+
+        '<td class="sag">'+(s.miktar!=null?s.miktar:'–')+'</td><td class="sag">'+para(s.maliyet)+'$</td>'+
+        '<td class="sag">'+(s.anlik!=null?s.anlik:'–')+'</td>'+
+        '<td class="sag '+snf(s.pnl_pct_kayitli)+'">'+isar(s.pnl_pct_kayitli)+n1(s.pnl_pct_kayitli)+'%</td>'+
+        '<td class="sonuk">'+esc(s.durum||'')+'</td>'+
+        '<td class="sonuk" style="white-space:normal">'+esc(s.not||'')+'</td></tr>'))+
+    '<div class="not">Kâr/zarar sütunu defterine kayıtlı değer; anlık fiyat canlı çekiliyor.</div></section>'+
+
+  '<section><h2>Açık tahminler</h2>'+
+    tablo(['<th>#</th><th>Tarih</th><th>Coin</th><th>Yön</th><th class="sag">Giriş</th>',
+      '<th class="sag">'+T('stop',null,'Stop')+'</th><th class="sag">'+T('tp',null,'TP1')+'</th>',
+      '<th>Senaryo</th><th>Durum</th>'],
+      (d.tahminler||[]).map(t=>'<tr><td class="sonuk">'+esc(t.no)+'</td><td class="sonuk">'+esc(t.tarih)+'</td>'+
+        '<td><b>'+esc(t.token)+'</b></td><td class="'+(t.yon==='LONG'?'iyi':'kotu')+'">'+esc(t.yon)+'</td>'+
+        '<td class="sag">'+esc(t.giris)+'</td><td class="sag">'+esc(t.stop)+'</td><td class="sag">'+esc(t.tp1)+'</td>'+
+        '<td class="sonuk" style="white-space:normal">'+esc(t.senaryo)+'</td>'+
+        '<td class="sonuk">'+esc(t.emir_durumu||t.sonuc_durum||'')+'</td></tr>'))+'</section>'+
+
+  '<section><h2>Kapanan tahminler</h2>'+
+    tablo(['<th>#</th><th>Tarih</th><th>Coin</th><th>Yön</th><th>Sonuç</th><th>Senaryo</th>'],
+      (d.kapanan_tahminler||[]).map(t=>'<tr><td class="sonuk">'+esc(t.no)+'</td>'+
+        '<td class="sonuk">'+esc(t.tarih)+'</td><td><b>'+esc(t.token)+'</b></td>'+
+        '<td class="'+(t.yon==='LONG'?'iyi':'kotu')+'">'+esc(t.yon)+'</td>'+
+        '<td>'+esc(t.sonuc)+'</td>'+
+        '<td class="sonuk" style="white-space:normal">'+esc(t.senaryo)+'</td></tr>'))+'</section>'+
+
+  '<section><h2>Kendi derslerim</h2>'+
+    ((d.dersler||[]).length ? '<ol style="margin:0;padding-left:20px;font-size:13px;line-height:1.8">'+
+      (d.dersler||[]).map(x=>'<li>'+esc(x.kural||x)+'</li>').join('')+'</ol>'
+      : '<div class="bos">Ders kaydı yok.</div>')+'</section>'+
+
+  '<section><h2>İzleme listesi</h2>'+
+    tablo(['<th>Coin</th><th>Not</th>'], (d.izleme||[]).map(x=>
+      (typeof x==='string') ? '<tr><td><b>'+esc(x)+'</b></td><td></td></tr>'
+      : '<tr><td><b>'+esc(x.sembol||x.token||'')+'</b></td>'+
+        '<td class="sonuk" style="white-space:normal">'+esc(x.not||x.neden||'')+'</td></tr>'))+'</section>';
+}
+
+/* =========================================================================
+   COİN ARA — arama · 3 panelli grafik · botun gördükleri · sanal işlem
+   ========================================================================= */
+const TF_AD = {'1m':'1d','5m':'5d','15m':'15d','1h':'1s','4h':'4s','1d':'1g','1w':'1h'};
+let coinSec = null, coinTf = '1h', coinVeri = null, sembolListe = null;
+
+function coinRota(){
+  const p = (location.hash.slice(1)||'').split('/');
+  if(p[0]==='coin'){ if(p[1]) coinSec=p[1].toUpperCase(); if(p[2]) coinTf=p[2]; }
+}
+async function coinYukle(el){
+  coinRota();
+  if(!sembolListe){
+    try{ sembolListe = (await al('/api/semboller')).semboller || []; }catch(e){ sembolListe=[]; }
+  }
+  const son = JSON.parse(localStorage.getItem('sonCoinler')||'[]');
+  el.innerHTML =
+  '<section><h2>Coin ara</h2>'+
+    '<input id="coinArama" placeholder="sembol yaz (örn. GRVT, SOL, LINK)…" autocomplete="off" '+
+      'style="width:100%;max-width:420px;font:inherit;font-size:14px;padding:8px 12px;border-radius:8px;'+
+      'border:1px solid var(--kenar);background:var(--zemin);color:var(--yazi)">'+
+    '<div id="coinSonuc" style="margin-top:8px"></div>'+
+    (son.length?'<div class="not">Son bakılanlar: '+son.map(s=>
+      '<a href="#coin/'+s+'/1h" onclick="coinAc(\''+s+'\')" style="cursor:pointer">'+s+'</a>').join(' · ')+'</div>':'')+
+    '<div class="not">'+sembolListe.length+' vadeli işlem sembolü — botun tarayabildiği evren. '+
+    'Tokenleştirilmiş hisseler ve stablecoin\'ler elenmiş.</div></section>'+
+  '<div id="coinGovde"></div>';
+
+  const kutu = $('#coinArama');
+  kutu.addEventListener('input', ()=>coinFiltre(kutu.value));
+  kutu.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ const ilk=document.querySelector('#coinSonuc .sonucSatir');
+      if(ilk) coinAc(ilk.dataset.sym); }
   });
+  if(coinSec) coinDetayYukle();
 }
-
-function symBtn(sym) {
-  const b = document.createElement('button');
-  b.className = 'sym-btn'; b.textContent = sym; b.dataset.sym = sym;
-  b.onclick = () => loadMumlar(sym);
-  return b;
+function coinFiltre(q){
+  q = (q||'').toUpperCase().trim();
+  if(!q){ $('#coinSonuc').innerHTML=''; return; }
+  const v = sembolListe.filter(s=>s.sym.includes(q))
+    .sort((a,b)=>(a.sym===q?-1:b.sym===q?1:a.sym.indexOf(q)-b.sym.indexOf(q)||b.hacim_musd-a.hacim_musd))
+    .slice(0,12);
+  $('#coinSonuc').innerHTML = v.length ? '<div class="tablo-sar"><table><tbody>'+v.map(s=>
+    '<tr class="sonucSatir" data-sym="'+s.sym+'" style="cursor:pointer" onclick="coinAc(\''+s.sym+'\')">'+
+    '<td><b>'+s.sym+'</b></td><td class="sag '+snf(s.chg24)+'">'+isar(s.chg24)+n1(s.chg24)+'%</td>'+
+    '<td class="sag sonuk">'+n1(s.hacim_musd)+'M$ hacim</td></tr>').join('')+'</tbody></table></div>'
+    : '<div class="bos">Eşleşen sembol yok. (Yalnız vadeli işlemi olan coinler aranabilir.)</div>';
 }
+function coinAc(sym){
+  coinSec = sym; location.hash = 'coin/'+sym+'/'+coinTf;
+  const son = JSON.parse(localStorage.getItem('sonCoinler')||'[]').filter(s=>s!==sym);
+  son.unshift(sym); localStorage.setItem('sonCoinler', JSON.stringify(son.slice(0,5)));
+  $('#coinArama').value=''; $('#coinSonuc').innerHTML='';
+  coinDetayYukle();
+}
+function coinTfSec(tf){ coinTf=tf; location.hash='coin/'+coinSec+'/'+tf; coinGrafikYukle(); }
 
-async function tick() {
+async function coinDetayYukle(){
+  const g = $('#coinGovde');
+  g.innerHTML = '<section><div class="bos">'+coinSec+' yükleniyor… '+
+    '<span class="sonuk">(botun tüm verisi çekiliyor, ilk açılış 10-15 sn sürebilir)</span></div></section>';
   let d;
-  try {
-    d = await (await fetch('/api/durum')).json();
-  } catch (e) { return; }
+  try{ d = await al('/api/coin?sym='+coinSec); }
+  catch(e){ g.innerHTML='<section><div class="bos kotu">Yüklenemedi.</div></section>'; return; }
+  if(d.hata){ g.innerHTML='<section><div class="bos kotu">'+esc(d.hata)+'</div></section>'; return; }
+  coinVeri = d;
+  const r=d.radar||{}, p=d.pillar||{}, bg=d.bot_gorusu||{};
 
-  if (!d.basladi) {
-    document.getElementById('sub-line').textContent = 'Bot henüz başlamadı (KriptoTestBot görevi ilk çalıştığında başlar).';
-    return;
-  }
+  g.innerHTML =
+  '<section><h2>'+esc(d.sym)+' <span class="sonuk" style="font-weight:400">'+
+    (d.mcap?esc(d.mcap)+' piyasa değeri':'')+'</span> '+
+    '<button style="float:right" onclick="guvenlikYukle()">güvenlik kontrolü</button></h2>'+
+    '<div class="satir" style="margin-bottom:10px">'+
+      Object.keys(TF_AD).map(t=>'<button onclick="coinTfSec(\''+t+'\')" '+
+        (t===coinTf?'style="border-color:var(--vurgu);color:var(--vurgu)"':'')+'>'+TF_AD[t]+'</button>').join('')+
+    '</div>'+
+    '<div id="gFiyat" style="height:300px"></div>'+
+    '<div id="gHacim" style="height:80px;margin-top:2px"></div>'+
+    '<div id="gRsi" style="height:90px;margin-top:2px"></div>'+
+    '<div class="not" id="grafikNot"></div>'+
+  '</section>'+
 
-  const badge = document.getElementById('durum-badge');
-  badge.textContent = d.durum;
-  badge.className = 'badge ' + (d.durum === 'AKTIF' ? 'aktif' : 'durdu');
-  const gunGecti = ((Date.now() - parseTs(d.baslangic_ts) * 1000) / 86400000).toFixed(1);
-  document.getElementById('sub-line').textContent =
-    `Başlangıç: ${d.baslangic_ts} · Sanal bütçe: $${d.baslangic_bakiye} · ${gunGecti}. gün`;
+  '<section><h2>Botun gördükleri</h2>'+
+    '<div class="kartlar">'+[
+      ['skor','Skor',n1(r.score),r.score],
+      ['stage','Aşama',esc(r.stage),null],
+      ['oi24','Açık pozisyon 24s',isar(r.oi24)+n1(r.oi24)+'%',r.oi24],
+      ['oi3','Açık pozisyon 3s',isar(r.oi3)+n1(r.oi3)+'%',r.oi3],
+      ['funding','Fonlama',n2(r.funding)+'%',r.funding],
+      ['comp','Sıkışma',n2(r.comp),r.comp],
+      ['vol_x','Hacim katsayısı',n1(r.vol_x)+'×',r.vol_x],
+      ['pos','Aralıktaki konum',n2(r.pos),r.pos],
+      ['smart','Akıllı para',esc(p.smart||'–'),null],
+      ['taker','Agresif alıcı',n2(p.taker),null],
+      ['top_ls','Büyük hesap L/S',n2(p.top_ls),null],
+      ['float_oran','Dolaşım oranı',d.float_oran!=null?n2(d.float_oran):'–',d.float_oran]
+    ].map(k=>'<div class="kart"><div class="etiket">'+T(k[0],k[3],k[1])+'</div>'+
+      '<div class="deger" style="font-size:17px">'+k[2]+'</div></div>').join('')+'</div>'+
+    (r.dip_yakit?'<div class="not uyari">⚠ '+T('dip_yakit',null,'Dip yakıtı')+' işareti var — düşüşe devam uyarısı.</div>':'')+
+  '</section>'+
 
-  document.getElementById('c-equity').textContent = '$' + fmt2(d.equity);
-  document.getElementById('c-serbest').textContent = '$' + fmt2(d.serbest_bakiye);
-  document.getElementById('c-marjin').textContent = '$' + fmt2(d.kullanilan_marjin);
-  const ap = d.acik_pnl_toplam;
-  const apEl = document.getElementById('c-acikpnl');
-  apEl.textContent = pnlSign(ap) + fmt2(ap) + '$'; apEl.className = 'value ' + pnlClass(ap);
-  document.getElementById('c-islem').textContent = d.karne.toplam_islem;
-  document.getElementById('c-winrate').textContent = d.karne.win_rate !== null ? d.karne.win_rate + '%' : '-';
-  document.getElementById('c-ortr').textContent = d.karne.ort_r !== null ? d.karne.ort_r : '-';
-  const tp = d.karne.toplam_pnl;
-  const tpEl = document.getElementById('c-toplampnl');
-  tpEl.textContent = pnlSign(tp) + fmt2(tp) + '$'; tpEl.className = 'value ' + pnlClass(tp);
-  const kf = d.karne.kumulatif_funding, ku = d.karne.kumulatif_giris_ucret;
-  document.getElementById('c-toplampnl-sub').textContent =
-    `funding ${pnlSign(kf)}${fmt2(kf)}$ / ücret ${fmt2(-ku)}$ (equity'de var, bu PnL'de yok)`;
+  '<section><h2>Bot şu an baksaydı</h2>'+
+    (bg.karar
+      ? '<div class="satir"><span class="rozet iyi">'+esc(bg.karar)+'</span>'+
+        '<span class="sonuk">bot bu coine girerdi</span></div>'
+      : '<div class="satir"><span class="rozet uyari">AÇMAZDI</span>'+
+        '<span class="sonuk">bot şu an bu coine girmezdi</span></div>')+
+    ((bg.vetolar||[]).length
+      ? '<div style="margin-top:9px">'+(bg.vetolar||[]).map(v=>
+          '<div class="not" style="margin:3px 0">• <b>'+esc(VETO_AD[v.kategori]||v.kategori)+'</b>: '+
+          esc(v.detay)+'</div>').join('')+'</div>'
+      : '<div class="not">Kayda değer bir engel bulunmadı.</div>')+
+    '<div class="not">Rejim '+esc(bg.f10||'–')+' · para '+esc(bg.para_rejim||'–')+
+      ' · '+T('btcd_xs',bg.btc_pay_degisim,'BTC payı')+' '+esc(bg.btc_pay_bant||'–')+' bant</div>'+
+  '</section>'+
 
-  // rejim x yon karnesi
-  const ry = d.karne.rejim_yon || {};
-  const rbody = document.getElementById('rejim-body');
-  rbody.innerHTML = '';
-  const rejimler = ['AYI', 'NOTR', 'BOGA', 'BILINMIYOR'].filter(rj => ry[rj + '_LONG'] || ry[rj + '_SHORT']);
-  document.getElementById('rejim-empty').style.display = rejimler.length ? 'none' : 'block';
-  document.getElementById('rejim-table').style.display = rejimler.length ? 'table' : 'none';
-  const hucre = (h) => h
-    ? `${h.n} / ${h.kazanan} / <span class="${pnlClass(h.pnl)}">${pnlSign(h.pnl)}${fmt2(h.pnl)}$</span>`
-    : '<span style="color:var(--text-muted)">—</span>';
-  rejimler.forEach(rj => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${rj}</td><td>${hucre(ry[rj + '_LONG'])}</td><td>${hucre(ry[rj + '_SHORT'])}</td>`;
-    rbody.appendChild(tr);
-  });
+  '<section><h2>Sanal işlem aç <span class="rozet uyari">SANAL</span></h2><div id="islemForm"></div></section>'+
+  '<section><h2>Bu coinin geçmişi</h2><div id="coinGecmis"><div class="bos">yükleniyor…</div></div></section>'+
+  '<section id="guvBolum" style="display:none"><h2>Kontrat güvenliği</h2><div id="guvIcerik"></div></section>';
 
-  // equity curve
-  const eqData = d.equity_serisi.map(e => ({ time: parseTs(e.ts), value: e.equity }));
-  if (eqData.length) equitySeries.setData(eqData);
-
-  // acik pozisyonlar tablosu + sembol secici
-  const body = document.getElementById('acik-poz-body');
-  const picker = document.getElementById('sym-picker');
-  body.innerHTML = ''; picker.innerHTML = '';
-  document.getElementById('acik-poz-empty').style.display = d.acik_pozisyonlar.length ? 'none' : 'block';
-  document.getElementById('acik-poz-table').style.display = d.acik_pozisyonlar.length ? 'table' : 'none';
-  d.acik_pozisyonlar.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.className = 'clickable'; tr.dataset.sym = p.sym;
-    tr.onclick = () => loadMumlar(p.sym);
-    tr.innerHTML = `<td>${p.sym}</td><td><span class="badge ${p.yon === 'LONG' ? 'long' : 'short'}">${p.yon}</span></td>
-      <td>${p.kaldirac}x</td><td>$${fmt2(p.marjin)}</td><td>$${fmt2(p.notional)}</td>
-      <td>${p.giris}</td><td>${p.anlik_fiyat}</td>
-      <td class="${pnlClass(p.acik_pnl)}">${pnlSign(p.acik_pnl)}${fmt2(p.acik_pnl)}$</td>
-      <td>${p.stop}</td><td>${p.tp1}</td><td>${p.tp2}</td><td>${p.likidasyon}</td><td>${p.skor_giriste}</td>`;
-    body.appendChild(tr);
-    picker.appendChild(symBtn(p.sym));
-  });
-  if (!selectedSym && d.acik_pozisyonlar.length) {
-    await loadMumlar(d.acik_pozisyonlar[0].sym);
-  }
-  if (selectedSym) {
-    document.querySelectorAll('#acik-poz-body tr').forEach(r => r.classList.toggle('selected', r.dataset.sym === selectedSym));
-    priceLines.forEach(pl => candleSeries.removePriceLine(pl)); priceLines = [];
-    const pos = d.acik_pozisyonlar.find(p => p.sym === selectedSym);
-    if (pos) drawPriceLines(pos);
-  }
-  if (!picker.children.length && selectedSym) picker.appendChild(symBtn(selectedSym));
-
-  // kapanan islemler
-  const ibody = document.getElementById('islem-body');
-  ibody.innerHTML = '';
-  const closed = d.son_islemler.slice().reverse();
-  document.getElementById('islem-empty').style.display = closed.length ? 'none' : 'block';
-  document.getElementById('islem-table').style.display = closed.length ? 'table' : 'none';
-  closed.forEach(t => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.ts}</td><td>${t.sym}</td><td><span class="badge ${t.yon === 'LONG' ? 'long' : 'short'}">${t.yon}</span></td>
-      <td>${t.sebep}</td><td>${t.kaldirac}x</td>
-      <td class="${pnlClass(t.sonuc_usdt)}">${pnlSign(t.sonuc_usdt)}${fmt2(t.sonuc_usdt)}$</td>
-      <td>${t.r ?? '-'}</td><td>${t.tutma_saat ?? '-'}</td>`;
-    ibody.appendChild(tr);
-  });
+  islemFormCiz();
+  coinGrafikYukle();
+  al('/api/coin_gecmis?sym='+coinSec).then(gecmisCiz).catch(()=>{});
 }
 
-const VETO_AD = { long_veto: 'Long veto', taker_soguma: 'Taker soğuma', blowoff: 'Blow-off', rr_veto: 'R/R veto' };
-
-async function tickSistem() {
+/* ---- 3 panelli grafik (fiyat+BB+MA / hacim / RSI), zaman ekseni senkron ---- */
+async function coinGrafikYukle(){
+  ['gFiyat','gHacim','gRsi'].forEach(id=>{ if(grafikler[id]){ try{grafikler[id].c.remove();}catch(e){} delete grafikler[id]; }});
   let d;
-  try {
-    d = await (await fetch('/api/sistem')).json();
-  } catch (e) { return; }
+  try{ d = await al('/api/coin_mum?sym='+coinSec+'&tf='+coinTf+'&limit=300'); }catch(e){ return; }
+  if(d.hata || !d.mumlar || !d.mumlar.length){ $('#grafikNot').textContent='Mum verisi alınamadı.'; return; }
+  const m=d.mumlar, sv=d.seviyeler||{};
+  const yap = (id,h)=>{ const el=document.getElementById(id);
+    const c=LightweightCharts.createChart(el, Object.assign(grafikSecenek(),
+      {width:el.clientWidth, height:el.clientHeight}));
+    grafikler[id]={c:c,el:el};
+    new ResizeObserver(()=>{ try{c.applyOptions({width:el.clientWidth,height:el.clientHeight});}catch(e){} }).observe(el);
+    return c; };
 
-  // 21 Tem sayaci
-  if (d.sayac) {
-    const s = d.sayac;
-    document.getElementById('sayac-serit').style.display = 'flex';
-    document.getElementById('sayac-kalan').innerHTML =
-      `Test bitişi: <b>${s.bitis_ts}</b> · kalan <b>${s.kalan_gun}</b> gün`;
-    const dEq = s.equity - s.baslangic_bakiye;
-    document.getElementById('sayac-k1').innerHTML =
-      `K1 equity ön-izleme: <b class="${pnlClass(dEq)}">$${fmt2(s.equity)} (${pnlSign(dEq)}${fmt2(dEq)}$) ${s.k1_equity_ok ? '✓' : '✗'}</b>`;
-  }
+  const c1=yap('gFiyat'), c2=yap('gHacim'), c3=yap('gRsi');
+  const mum=c1.addCandlestickSeries({upColor:renk('--iyi'),downColor:renk('--kotu'),
+    borderVisible:false,wickUpColor:renk('--iyi'),wickDownColor:renk('--kotu')});
+  mum.setData(m.map(x=>({time:x.time,open:x.open,high:x.high,low:x.low,close:x.close})));
+  const cizgi=(c,veri,color,w)=>{ const s=c.addLineSeries({color:color,lineWidth:w||1,
+    priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
+    s.setData(veri.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null)); return s; };
+  cizgi(c1,d.bollinger.ust,'#8888aa'); cizgi(c1,d.bollinger.orta,'#8888aa');
+  cizgi(c1,d.bollinger.alt,'#8888aa');
+  cizgi(c1,d.ma50,renk('--uyari'),2); cizgi(c1,d.ma200,renk('--vurgu'),2);
+  (sv.direncler||[]).forEach(v=>mum.createPriceLine({price:v,color:renk('--kotu'),
+    lineWidth:1,lineStyle:2,axisLabelVisible:false}));
+  (sv.destekler||[]).forEach(v=>mum.createPriceLine({price:v,color:renk('--iyi'),
+    lineWidth:1,lineStyle:2,axisLabelVisible:false}));
 
-  // para akisi (TOTAL2/3 gostergesi)
-  const pa = d.para_akisi;
-  if (pa) {
-    document.getElementById('para-serit').style.display = 'flex';
-    document.getElementById('para-total').innerHTML =
-      `Kripto: <b class="${pnlClass(pa.total_chg)}">${pnlSign(pa.total_chg)}${pa.total_chg}%</b> ($${pa.total_t}T)`;
-    document.getElementById('para-btc').innerHTML =
-      `BTC.D: <b>${pa.btcd}%</b> (${pnlSign(pa.btcd_chg)}${pa.btcd_chg}) <span class="sub" style="margin:0;font-size:11px;">${pa.btc_yon}</span>`;
-    const altCls = pa.total3_chg > 0 ? 'pnl-pos' : 'pnl-neg';
-    document.getElementById('para-alt').innerHTML =
-      `Altlar (TOTAL3): <b class="${altCls}">${pnlSign(pa.total3_chg)}${pa.total3_chg}% ${pa.alt_yon}</b>`;
-    const usdtCls = pa.usdtd_chg < 0 ? 'pnl-pos' : (pa.usdtd_chg > 0 ? 'pnl-neg' : '');
-    document.getElementById('para-usdt').innerHTML =
-      `USDT.D: <b>${pa.usdtd}%</b> (${pnlSign(pa.usdtd_chg)}${pa.usdtd_chg}) <span class="sub ${usdtCls}" style="margin:0;font-size:11px;">${pa.usdt_yon}</span>`;
-    document.getElementById('para-breadth').innerHTML =
-      `Breadth: <b class="${(pa.breadth || 0) >= 50 ? 'pnl-pos' : 'pnl-neg'}">${pa.breadth}%</b>` +
-      ` · BTC.D 55'e <b class="${pa.btcd_55_uzaklik <= 0 ? 'pnl-pos' : 'pnl-neg'}">${pa.btcd_55_uzaklik > 0 ? pa.btcd_55_uzaklik + ' puan' : 'KIRDI'}</b>`;
-    document.getElementById('para-donus').innerHTML = pa.alt_boga
-      ? `<b class="pnl-pos">🚀 ALT-BOĞA (BTC.D<55 + TOTAL3↑ + breadth≥50 + BTC sağlıklı)</b>`
-      : (pa.donus_teyit
-        ? `<b class="pnl-pos">↑ alt-rotasyon başlıyor (BTC.D 55 kırılımı bekleniyor)</b>`
-        : `<span class="sub" style="margin:0;font-size:11px;">alt-boğa yok — tetik: BTC.D 55 altı + TOTAL3↑ + breadth≥50 + SEZON boğa</span>`);
-  }
+  const hac=c2.addHistogramSeries({priceLineVisible:false});
+  hac.setData(m.map(x=>({time:x.time,value:x.volume,
+    color:(x.close>=x.open?renk('--iyi'):renk('--kotu'))+'99'})));
+  const rs=c3.addLineSeries({color:renk('--vurgu'),lineWidth:2,priceLineVisible:false});
+  rs.setData(d.rsi.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null));
+  [30,70].forEach(v=>rs.createPriceLine({price:v,color:renk('--yazi3'),lineWidth:1,
+    lineStyle:2,axisLabelVisible:true,title:String(v)}));
 
-  // gercek pozisyonlar
-  const gp = d.gercek_pozisyonlar || [];
-  const gbody = document.getElementById('gercek-body');
-  gbody.innerHTML = '';
-  document.getElementById('gercek-empty').style.display = gp.length ? 'none' : 'block';
-  document.getElementById('gercek-table').style.display = gp.length ? 'table' : 'none';
-  gp.forEach(p => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${p.sym}</td><td><span class="badge ${p.yon === 'LONG' ? 'long' : 'short'}">${p.yon}</span></td>
-      <td>${p.tarih ?? '-'}</td><td>${p.kaldirac ?? '-'}x</td><td>$${fmt2(p.marjin)}</td>
-      <td>${p.giris}</td><td>${p.anlik ?? '-'}</td>
-      <td class="${pnlClass(p.pnl_pct)}">${p.pnl_pct === null ? '-' : pnlSign(p.pnl_pct) + fmt2(p.pnl_pct) + '%'}</td>
-      <td class="${pnlClass(p.pnl_usdt)}">${p.pnl_usdt === null ? '-' : pnlSign(p.pnl_usdt) + fmt2(p.pnl_usdt) + '$'}</td>
-      <td>${p.stop || '-'}</td>
-      <td>${p.stop_uzaklik_pct === null ? '-' : fmt2(p.stop_uzaklik_pct) + '%'}</td>
-      <td>${p.tp1 ?? '-'}</td><td>$${fmt2(p.risk_usdt)}</td>`;
-    gbody.appendChild(tr);
-  });
+  [c1,c2,c3].forEach(c=>{ c.timeScale().fitContent();
+    c.timeScale().subscribeVisibleLogicalRangeChange(rg=>{ if(!rg) return;
+      [c1,c2,c3].forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} }); }); });
 
-  // veto
-  const v = d.veto || { sayac: {}, son: [] };
-  const vs = document.getElementById('veto-sayac');
-  vs.innerHTML = '';
-  Object.entries(VETO_AD).forEach(([k, ad]) => {
-    const el = document.createElement('div');
-    el.className = 'vk';
-    el.innerHTML = `${ad}<b>${v.sayac[k] ?? 0}</b>`;
-    vs.appendChild(el);
-  });
-  const vbody = document.getElementById('veto-body');
-  vbody.innerHTML = '';
-  const son = v.son || [];
-  document.getElementById('veto-empty').style.display = son.length ? 'none' : 'block';
-  document.getElementById('veto-table').style.display = son.length ? 'table' : 'none';
-  son.forEach(o => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${o.ts ?? '-'}</td><td>${o.sym ?? '-'}</td><td>${o.price ?? '-'}</td>
-      <td>${VETO_AD[o.kategori] ?? o.kategori}</td>
-      <td><span class="badge ${o.olurdu_yon === 'LONG' ? 'long' : 'short'}">${o.olurdu_yon ?? '-'}</span></td>
-      <td>${o.skor ?? '-'}</td><td>${o.rejim ?? '-'}</td><td>${o.detay ?? '-'}</td>`;
-    vbody.appendChild(tr);
-  });
-
-  // erken kusak
-  const ek = d.erken_kusak || [];
-  const ebody = document.getElementById('erken-body');
-  ebody.innerHTML = '';
-  document.getElementById('erken-empty').style.display = ek.length ? 'none' : 'block';
-  document.getElementById('erken-table').style.display = ek.length ? 'table' : 'none';
-  ek.forEach(s => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${s.sym}</td><td>${s.score ?? '-'}</td><td>${s.vol_x_gun ?? '-'}</td>
-      <td class="${pnlClass(s.chg24)}">${s.chg24 === null || s.chg24 === undefined ? '-' : pnlSign(s.chg24) + fmt2(s.chg24) + '%'}</td>
-      <td>${s.price ?? '-'}</td><td>${s.taker ?? '-'}</td><td>${s.smart ?? '-'}</td><td>${s.stage ?? '-'}</td>`;
-    ebody.appendChild(tr);
-  });
+  const sonRsi=[...d.rsi].reverse().find(v=>v!=null);
+  $('#grafikNot').innerHTML = TF_AD[coinTf]+' · '+m.length+' mum · '+
+    T('rsi',sonRsi,'RSI '+n1(sonRsi))+' · '+T('bollinger',null,'gri bantlar Bollinger')+' · '+
+    T('ma50_200',null,'sarı MA50, mavi MA200')+' · '+
+    T('destek_direnc',null,'kesikli çizgiler destek/direnç')+' — botun stopu bunları kullanıyor';
 }
 
-tick();
-tickSistem();
-setInterval(tick, 30000);
-setInterval(tickSistem, 60000);
+/* ---- işlem formu: boyut, botun sizingiyle AYNI formülle önizlenir ---- */
+function islemFormCiz(yon){
+  const d=coinVeri; if(!d) return;
+  yon = yon || (d.bot_gorusu||{}).karar_yon_secili || 'SHORT';
+  const olc=(d.olcucu||{})[yon.toLowerCase()]||{};
+  const eq=d.equity_benim!=null?d.equity_benim:10000;
+  $('#islemForm').innerHTML =
+  '<div class="satir" style="margin-bottom:10px">'+
+    '<button onclick="islemFormCiz(\'LONG\')" '+(yon==='LONG'?'style="border-color:var(--iyi);color:var(--iyi)"':'')+'>LONG</button>'+
+    '<button onclick="islemFormCiz(\'SHORT\')" '+(yon==='SHORT'?'style="border-color:var(--kotu);color:var(--kotu)"':'')+'>SHORT</button>'+
+    '<span class="sonuk">bakiyem '+para(eq)+'$</span></div>'+
+  (olc.hata?'<div class="bos kotu">Ölçücü bu yön için seviye üretemedi: '+esc(olc.hata)+'</div>':
+  '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px">'+
+    ['giris|Giriş|'+ (olc.giris||''),'stop|'+'Stop|'+(olc.stop||''),
+     'tp1|TP1|'+(olc.tp1||''),'tp2|TP2|'+(olc.tp2||'')].map(x=>{const a=x.split('|');
+      return '<div><div class="etiket sonuk" style="font-size:11px">'+a[1]+'</div>'+
+      '<input id="if-'+a[0]+'" type="number" step="any" value="'+a[2]+'" '+
+      (a[0]==='giris'?'disabled ':'')+'oninput="boyutHesapla()" '+
+      'style="width:100%;font:inherit;font-size:13px;padding:5px 8px;border-radius:6px;'+
+      'border:1px solid var(--kenar);background:var(--zemin);color:var(--yazi)"></div>';}).join('')+
+  '</div>'+
+  '<div style="margin-bottom:10px"><div class="etiket sonuk" style="font-size:11px">'+
+    T('tez',null,'Giriş tezim')+' — neden giriyorum, neyi bekliyorum, ne beni yanıltır</div>'+
+    '<textarea id="if-tez" rows="2" placeholder="örn. BTC payı düşüyor, altlar geri kalmış, 0.34 direncinden dönüş bekliyorum; 0.35 üstü kapanış tezi çürütür" '+
+    'style="width:100%;font:inherit;font-size:13px;padding:6px 9px;border-radius:6px;'+
+    'border:1px solid var(--kenar);background:var(--zemin);color:var(--yazi);resize:vertical"></textarea></div>'+
+  '<div id="boyutOnizleme" class="not"></div>'+
+  '<div class="satir" style="margin-top:10px">'+
+    '<button onclick="islemAc(\''+yon+'\')" style="border-color:var(--vurgu);padding:8px 18px">SANAL İŞLEM AÇ</button>'+
+    '<span class="sonuk">gerçek borsa emri değil — kâğıt üstü</span></div>');
+  if(!olc.hata) boyutHesapla();
+}
+function boyutHesapla(){
+  const d=coinVeri; if(!d) return;
+  const giris=parseFloat($('#if-giris').value), stop=parseFloat($('#if-stop').value),
+        tp1=parseFloat($('#if-tp1').value);
+  const eq=d.equity_benim!=null?d.equity_benim:10000;
+  if(!giris||!stop||giris===stop){ $('#boyutOnizleme').textContent='Giriş ve stop gerekli.'; return; }
+  const sf=Math.abs(giris-stop)/giris;
+  const hedefRisk=eq*d.islem_risk_pct/100;
+  const marjin=eq*d.marjin_pct;
+  let kald=Math.round(Math.max(d.kaldirac_min, Math.min(d.kaldirac_max, (hedefRisk/sf)/marjin)));
+  let notional=marjin*kald, risk=sf*notional, m2=marjin;
+  if(risk>hedefRisk){ const k=hedefRisk/risk; notional*=k; m2*=k; risk=hedefRisk; }
+  const rr = tp1 ? Math.abs(tp1-giris)/Math.abs(giris-stop) : null;
+  $('#boyutOnizleme').innerHTML =
+    'Bot hesapladı: hedef risk <b>'+para(hedefRisk)+'$</b> (%'+d.islem_risk_pct+') · stop mesafesi <b>%'+
+    n2(sf*100)+'</b> → büyüklük <b>'+para(notional)+'$</b> · teminat <b>'+para(m2)+'$</b> · kaldıraç <b>'+kald+'x</b>'+
+    ' · gerçek risk <b>'+para(risk)+'$</b>'+
+    (rr!=null?' · '+T('rr_net',null,'ödül/risk')+' <b class="'+(rr>=2?'iyi':'uyari')+'">'+n2(rr)+
+      '</b>'+(rr<2?' ⚠ botun 2,0 eşiğinin altında':''):'');
+}
+async function islemAc(yon){
+  const d=coinVeri;
+  const stop=parseFloat($('#if-stop').value), tp1=parseFloat($('#if-tp1').value), tp2=parseFloat($('#if-tp2').value);
+  const tez=$('#if-tez').value.trim();
+  const olc=(d.olcucu||{})[yon.toLowerCase()]||{};
+  const elle = (stop!==olc.stop || tp1!==olc.tp1 || tp2!==olc.tp2);
+  const bg=d.bot_gorusu||{};
+  const atlanan=(bg.vetolar||[]).map(v=>'• '+(VETO_AD[v.kategori]||v.kategori)).join('\n');
+  let soru = d.sym+' '+yon+' — SANAL işlem açılsın mı?\n\n'+$('#boyutOnizleme').textContent.replace(/ · /g,'\n');
+  if(!bg.karar || !bg.ayni_yonde) soru += '\n\n⚠ BOT BU İŞLEMİ AÇMAZDI.';
+  if(atlanan) soru += '\nGörmezden gelinen kapılar:\n'+atlanan;
+  if(elle) soru += '\n\nStop/hedef ölçücünün önerdiğinden farklı — elle değiştirildi olarak kaydedilecek.';
+  if(!tez) soru += '\n\nGiriş tezi boş. Sonradan "neden girmiştim" sorusunu cevaplayamazsın.';
+  if(!confirm(soru)) return;
+  const r = await gonder('/api/benim_islem', {sym:d.sym, yon:yon, tez:tez,
+    stop:elle?stop:null, tp1:elle?tp1:null, tp2:elle?tp2:null});
+  tost(r.mesaj, r.ok);
+  if(r.ok){ SEKMELER.forEach(s=>s._son=0); coinDetayYukle(); ustBar(); }
+}
+
+function gecmisCiz(g){
+  const el=$('#coinGecmis'); if(!el) return;
+  if(!g || g.hata){ el.innerHTML='<div class="bos">Geçmiş kaydı yok.</div>'; return; }
+  el.innerHTML =
+    '<div class="kartlar">'+[
+      ['Radar kaydı', g.radar_toplam],
+      ['Botun aday listesinde', g.aday_toplam],
+      ['En yüksek '+'skor', g.skor_max!=null?n1(g.skor_max):'–'],
+      ['45 üstü görülme', g.kez_45_ustu],
+      ['60 üstü görülme', g.kez_60_ustu]
+    ].map(k=>'<div class="kart"><div class="etiket">'+k[0]+'</div><div class="deger">'+k[1]+'</div></div>').join('')+'</div>'+
+    tablo(['<th>Zaman</th><th class="sag">'+T('skor',null,'Skor')+'</th><th>'+T('stage',null,'Aşama')+'</th>',
+      '<th class="sag">Fiyat</th><th>Botun kararı</th>'],
+      (g.aday||[]).slice(-30).reverse().map(a=>'<tr><td class="sonuk">'+esc((a.ts||'').slice(5,16))+'</td>'+
+        '<td class="sag" data-terim="skor" data-deger="'+a.score+'">'+n1(a.score)+'</td>'+
+        '<td>'+esc(a.stage)+'</td><td class="sag sonuk">'+(a.price!=null?a.price:'–')+'</td>'+
+        '<td class="sonuk">'+esc(a.karar||'')+'</td></tr>'),
+      'Bot bu coini kendi tarama havuzunda hiç görmedi.')+
+    '<div class="not">Radar kaydı = radar.py bu coini kaç kez taradı. Aday listesi = testbot\'un kendi '+
+    'havuzuna kaç kez girdi (ikisi farklı evrenler).</div>';
+}
+async function guvenlikYukle(){
+  $('#guvBolum').style.display='block';
+  $('#guvIcerik').innerHTML='<div class="bos">kontrol ediliyor… (3-4 dış sorgu, biraz sürebilir)</div>';
+  let g; try{ g = await al('/api/coin_guvenlik?sym='+coinSec); }catch(e){ g={hata:'ulaşılamadı'}; }
+  if(g.hata||g.error){ $('#guvIcerik').innerHTML='<div class="bos">'+esc(g.hata||g.error)+'</div>'; return; }
+  const b=g.bekci||{}, x=g.dex_likidite||{};
+  const rz=s=>({GECER:'iyi',UYARI:'uyari',RED:'kotu'})[s]||'';
+  $('#guvIcerik').innerHTML =
+    '<div class="kartlar">'+
+    '<div class="kart"><div class="etiket">'+T('bal_tuzagi',null,'Kontrat bekçisi')+'</div>'+
+      '<div class="deger '+rz(b.durum)+'" style="font-size:16px">'+esc(b.durum||'–')+'</div>'+
+      '<div class="alt">'+esc((b.sebep||[]).join(' · ')).slice(0,90)+'</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('alim_satim_vergisi',null,'Alım/satım vergisi')+'</div>'+
+      '<div class="deger" style="font-size:16px">'+n1(b.buy_tax_pct)+'% / '+n1(b.sell_tax_pct)+'%</div></div>'+
+    '<div class="kart"><div class="etiket">'+T('dex_likidite',null,'DEX havuz derinliği')+'</div>'+
+      '<div class="deger '+rz(x.durum)+'" style="font-size:16px">'+esc(x.durum||'–')+'</div>'+
+      '<div class="alt">'+(x.en_derin_havuz_usd?para(x.en_derin_havuz_usd/1000)+'k$':'–')+'</div></div>'+
+    '<div class="kart"><div class="etiket">Piyasa değeri kapısı</div>'+
+      '<div class="deger" style="font-size:14px">'+esc(g.mcap_kapisi||'–')+'</div></div>'+
+    '</div><div class="not">'+esc(g.rejim_uyarisi||'')+'</div>';
+}
+
+/* =========================================================================
+   BOT vs BEN
+   ========================================================================= */
+async function karsYukle(el){
+  const r = await Promise.all([al('/api/karsilastirma'), al('/api/benim')]);
+  const k=r[0], ben=r[1];
+  const b=k.bot||{}, n=k.ben||{};
+  const sut=(ad,x)=>'<td class="sag">'+x+'</td>';
+  el.innerHTML =
+  (ben.var
+    ? '<section><h2>Açık pozisyonlarım <span class="rozet uyari">SANAL</span></h2>'+
+      tablo(['<th>Coin</th><th>Yön</th><th class="sag">'+T('kaldirac',null,'Kald.')+'</th>',
+        '<th class="sag">'+T('marjin',null,'Teminat')+'</th><th class="sag">Giriş</th>',
+        '<th class="sag">Anlık</th><th class="sag">Kâr/Zarar</th><th class="sag">'+T('stop',null,'Stop')+'</th>',
+        '<th>Bot ne demişti</th><th>'+T('tez',null,'Tezim')+'</th><th></th>'],
+        (ben.acik_pozisyonlar||[]).map(p=>{ const bg=p.bot_gorusu||{};
+          return '<tr><td><b>'+esc(p.sym)+'</b></td>'+
+          '<td class="'+(p.yon==='LONG'?'iyi':'kotu')+'">'+p.yon+'</td>'+
+          '<td class="sag">'+p.kaldirac+'x</td><td class="sag">'+para(p.marjin)+'$</td>'+
+          '<td class="sag">'+p.giris+'</td><td class="sag">'+p.anlik_fiyat+'</td>'+
+          '<td class="sag '+snf(p.acik_pnl)+'">'+isar(p.acik_pnl)+para(p.acik_pnl)+'$</td>'+
+          '<td class="sag">'+p.stop+'</td>'+
+          '<td class="'+(bg.ayni_yonde?'sonuk':'uyari')+'">'+(bg.ayni_yonde?'onaylardı':'AÇMAZDI')+'</td>'+
+          '<td class="sonuk" style="white-space:normal;max-width:280px">'+esc(p.tez||'—')+'</td>'+
+          '<td><button onclick="benimKapat(\''+p.sym+'\')">kapat</button></td></tr>';}),
+        'Açık pozisyonun yok. Coin Ara sekmesinden açabilirsin.')+
+      '<div class="not">Bu pozisyonlar botun turuyla, <b>botla aynı kurallarla</b> yönetiliyor '+
+      '(stop, TP1 kısmi, iz süren stop, zaman stopu, fonlama) — panel kapalıyken de.</div></section>'
+    : '<section><div class="bos">Kendi hesabın henüz açılmadı. '+
+      '<b>Coin Ara</b> sekmesinden ilk sanal işlemini açtığında oluşur.</div></section>')+
+  '<section><h2>İki sistem yan yana</h2>'+
+    tablo(['<th></th><th class="sag">BOT (otomatik)</th><th class="sag">BEN (elle)</th>'],
+      [['Bakiye', b.equity!=null?para(b.equity)+'$':'–', n.equity!=null?para(n.equity)+'$':'–'],
+       ['Kapanan işlem', b.n, n.n],
+       ['Kazanan', b.kazanan+(b.win_rate!=null?' (%'+b.win_rate+')':''), n.kazanan+(n.win_rate!=null?' (%'+n.win_rate+')':'')],
+       ['Toplam kâr/zarar', isar(b.pnl)+para(b.pnl)+'$', isar(n.pnl)+para(n.pnl)+'$'],
+       ['Ortalama R', b.ort_r!=null?b.ort_r:'–', n.ort_r!=null?n.ort_r:'–'],
+       ['En kötü düşüş', '%'+n1(b.maks_dusus), '%'+n1(n.maks_dusus)]
+      ].map(r=>'<tr><td>'+r[0]+'</td>'+sut(0,r[1])+sut(0,r[2])+'</tr>'))+
+    '<div class="grafik" id="g-kars" style="margin-top:12px"></div>'+
+    '<div class="not">İki kasa tamamen ayrı. Çıkış kuralları (stop, TP, iz süren, zaman stopu) '+
+    '<b>aynı</b> — yani aradaki fark yalnızca <b>giriş kararından</b> geliyor.</div></section>'+
+
+  '<section><h2>'+T('bota_ragmen',null,'Botu dinlemek işe yarıyor mu?')+'</h2>'+
+    tablo(['<th></th><th class="sag">İşlem</th><th class="sag">Kazanan</th><th class="sag">Kâr/Zarar</th><th class="sag">Ort. R</th>'],
+      [['Bot da aynı yönü söylediğinde', k.bot_onayladi],
+       ['Bota rağmen girdiğimde', k.bota_ragmen]
+      ].map(r=>'<tr><td>'+r[0]+'</td><td class="sag">'+r[1].n+'</td>'+
+        '<td class="sag">'+r[1].kazanan+'</td>'+
+        '<td class="sag '+snf(r[1].pnl)+'">'+isar(r[1].pnl)+para(r[1].pnl)+'$</td>'+
+        '<td class="sag '+snf(r[1].ort_r)+'">'+(r[1].ort_r!=null?r[1].ort_r:'–')+'</td></tr>'))+
+    '<div class="not">'+T('karsi_olgu',null,'Karşı olgu')+': bota rağmen açtığın '+
+      k.karsi_olgu_1.n+' işlem toplam <b class="'+snf(k.karsi_olgu_1.toplam)+'">'+
+      isar(k.karsi_olgu_1.toplam)+para(k.karsi_olgu_1.toplam)+'$</b> yaptı — '+
+      'botu dinleseydin bu tutar hiç oluşmayacaktı.<br>'+
+      'Bot bu dönemde '+k.karsi_olgu_2.bot_islem+' işlem açtı, sen '+k.karsi_olgu_2.benim_islem+' işlem açtın.</div>'+
+    (k.yeterli_mi ? '' :
+      '<div class="not uyari" style="margin-top:10px">⚠ Henüz <b>'+(k.ben.n||0)+'</b> kapanan işlem var. '+
+      'Bu sayılar 25-30 işleme kadar <b>izlenimdir, kanıt değil</b> — bu projede tek pencereden '+
+      'çıkarılan sonuçların defalarca çürüdüğü ölçüldü.</div>')+
+  '</section>';
+
+  const bs=seriHazirla(k.bot_equity_serisi||[],'ts','equity');
+  const ns=seriHazirla(k.ben_equity_serisi||[],'ts','equity');
+  const el2=document.getElementById('g-kars');
+  if(el2 && bs.length){
+    if(grafikler.kars){ try{grafikler.kars.c.remove();}catch(e){} }
+    const c=LightweightCharts.createChart(el2, Object.assign(grafikSecenek(),
+      {width:el2.clientWidth,height:el2.clientHeight}));
+    const s1=c.addLineSeries({color:renk('--yazi3'),lineWidth:2,title:'BOT'}); s1.setData(bs);
+    if(ns.length){ const s2=c.addLineSeries({color:renk('--vurgu'),lineWidth:2,title:'BEN'}); s2.setData(ns); }
+    c.timeScale().fitContent(); grafikler.kars={c:c};
+    new ResizeObserver(()=>{ try{c.applyOptions({width:el2.clientWidth,height:el2.clientHeight});}catch(e){} }).observe(el2);
+  }
+}
+
+async function benimKapat(sym){
+  if(!confirm(sym+' pozisyonu ŞU ANKİ piyasa fiyatından kapatılsın mı?\n\nBu geri alınamaz.')) return;
+  const r = await gonder('/api/benim_kapat',{sym:sym});
+  tost(r.mesaj, r.ok);
+  if(r.ok){ SEKMELER.forEach(s=>s._son=0); sekmeAc('kars'); ustBar(); }
+}
+
+/* =========================================================================
+   6) GÜNLÜK
+   ========================================================================= */
+const DURUM_RENK = {'ÖLDÜ':'kotu','ÇÜRÜDÜ':'kotu','ELENDİ':'kotu','GERİ ALINDI':'uyari',
+  'RAFTA':'','KAPIYA BAĞLI':'uyari','KOŞULSUZ':'iyi','DOĞRULANDI':'iyi',
+  'GEREKÇELENDİ':'iyi','AYAKTA':'iyi'};
+async function gunlukYukle(el){
+  const g = await al('/api/gunluk');
+  el.innerHTML = '<section><h2>Karar günlüğü '+
+    '<span class="sonuk" style="font-size:12px;font-weight:400">'+g.toplam+' başlık · fikir-defteri.md</span></h2>'+
+    '<div class="zaman">'+(g.kartlar||[]).map(k=>
+      '<div class="olay '+(k.seviye===2?'d2':'')+'">'+
+      '<div class="bas">'+esc(k.baslik)+
+        (k.durum?' <span class="rozet '+(DURUM_RENK[k.durum]||'')+'">'+esc(k.durum)+'</span>':'')+
+        (k.tarih?' <span class="sonuk" style="font-weight:400;font-size:11px">'+esc(k.tarih)+'</span>':'')+
+      '</div><div class="gov">'+(k.govde||[]).slice(0,3).map(esc).join('<br>')+'</div></div>').join('')+
+    '</div><div class="not">Bu defter salt okunur; panel ona yazmaz. '+
+    'Rozetler başlık ve gövdedeki durum etiketlerinden okunuyor.</div></section>';
+}
+
+/* =========================================================================
+   7) AYARLAR
+   ========================================================================= */
+async function ayarYukle(el){
+  const a = await al('/api/ayarlar');
+  el.innerHTML =
+  '<section><h2>Bot kontrolü</h2><div class="satir">'+
+    '<button onclick="kontrol(\'bot_durdur\',\'Bot DURDURULSUN mu?\\n\\nAçık pozisyonlar açık kalır, yeni giriş yapılmaz.\')">Botu durdur</button>'+
+    '<button onclick="kontrol(\'bot_devam\',\'Bot yeniden ÇALIŞSIN mı?\')">Devam ettir</button>'+
+    '<span style="width:18px"></span>'+
+    '<button onclick="kontrol(\'bildirim_ac\',\'Bildirimler AÇILSIN mı? (Telegram + masaüstü)\')">Bildirimleri aç</button>'+
+    '<button onclick="kontrol(\'bildirim_kapa\',\'Bildirimler KAPATILSIN mı?\')">Bildirimleri kapat</button>'+
+    '<span class="rozet '+(a.bildirim_acik?'iyi':'')+'">'+(a.bildirim_acik?'bildirim açık':'bildirim kapalı')+'</span>'+
+  '</div><div class="not">Bot ayrı bir süreç olarak tur tur çalışıyor; değişiklik bir sonraki turda geçerli olur.</div></section>'+
+
+  '<section><h2>Eşikler</h2>'+
+    '<div class="not" style="margin:0 0 14px">Yalnızca aşağıdaki ayarlar panelden değiştirilebilir. '+
+    'API anahtarları ve Telegram bilgileri panele hiç okunmuyor. '+
+    'Her değişiklik <b>panel_islem_log.jsonl</b> dosyasına yazılır.</div>'+
+    (a.ayarlar||[]).map(x=>'<div class="ayar">'+
+      '<div><div class="ad">'+esc(x.ad)+'</div><div class="ack">'+esc(x.aciklama)+'</div></div>'+
+      '<input id="ay-'+x.anahtar.replace(/\./g,'_')+'" type="number" step="any" value="'+
+        (x.deger!=null?x.deger:'')+'">'+
+      '<button onclick="ayarKaydet(\''+x.anahtar+'\')">Kaydet</button></div>').join('')+
+  '</section>'+
+
+  '<section><h2>Panelden yapılan değişiklikler</h2>'+
+    tablo(['<th>Zaman</th><th>Ne</th><th>Eski</th><th>Yeni</th>'],
+      (a.iz||[]).map(i=>'<tr><td class="sonuk">'+esc((i.ts||'').slice(0,16))+'</td>'+
+        '<td>'+esc(i.anahtar||i.eylem)+'</td><td class="sonuk">'+esc(i.eski)+'</td>'+
+        '<td><b>'+esc(i.yeni)+'</b></td></tr>'), 'Henüz panelden değişiklik yapılmadı.')+'</section>';
+}
+async function kontrol(eylem, soru){
+  if(!confirm(soru)) return;
+  const r = await gonder('/api/kontrol',{eylem:eylem});
+  tost(r.mesaj, r.ok);
+  if(r.ok) hepsiniYenile();
+}
+async function ayarKaydet(anahtar){
+  const el = document.getElementById('ay-'+anahtar.replace(/\./g,'_'));
+  if(!confirm('Bu ayar '+el.value+' olarak kaydedilsin mi?\n\nBotun davranışını bir sonraki turdan itibaren değiştirir.')) return;
+  const r = await gonder('/api/ayar',{anahtar:anahtar, deger:el.value});
+  tost(r.mesaj, r.ok);
+  const s = SEKMELER.find(x=>x.id==='ayarlar'); s._son=0; ayarYukle($('#p-ayarlar'));
+}
+
+/* ---- başlat ---- */
+ustBar(); sekmeAc(aktifSekme);
+setInterval(ustBar, 30000);
+setInterval(function(){ const s=SEKMELER.find(x=>x.id===aktifSekme); if(s && s.sure) yenile(s); }, 30000);
 </script>
 </body>
 </html>

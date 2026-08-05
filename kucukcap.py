@@ -150,15 +150,13 @@ def cg_id_coz(sembol_veya_id, key):
     except Exception as e:
         return None, None, f"CoinGecko coins/{secilen['id']} hatasi: {e}"
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--id", required=True, help="CoinGecko coin id VEYA sembol (orn. pendle, PENDLE) - sembolse otomatik cozulur")
-    a = ap.parse_args()
-    cfg = json.load(open(CFG, encoding="utf-8"))
-    key = cfg.get("coingecko_demo_key", "")
-    cid, c, hata = cg_id_coz(a.id, key)
+def rapor(sembol_veya_id, key):
+    """Sembol/id -> {mcap kapisi, kontrat bekcisi, DEX likiditesi, rejim}.
+    2026-08-05: mantik main() icinden BURAYA tasindi ki panel de cagirabilsin.
+    main() artik bunu cagirip basiyor — CIKTI SOZLUGU BIREBIR AYNI."""
+    cid, c, hata = cg_id_coz(sembol_veya_id, key)
     if hata:
-        print(json.dumps({"error": hata}, ensure_ascii=False)); return
+        return {"error": hata}
     md = c.get("market_data", {})
     mcap = (md.get("market_cap") or {}).get("usd")
     price = (md.get("current_price") or {}).get("usd")
@@ -223,12 +221,22 @@ def main():
                 durum = "GECER"; sebep = f"Yeterli DEX likidite (en derin havuz ${d_usd/1e3:.0f}k)"
             dex = {"durum": durum, "sebep": [sebep], **lik}
 
-    out = {"id": cid, "girilen": a.id, "price_usd": price, "market_cap_usd": mcap, "vol24_usd": vol,
+    out = {"id": cid, "girilen": sembol_veya_id, "price_usd": price, "market_cap_usd": mcap, "vol24_usd": vol,
            "mcap_kapisi": mcap_kapi, "bekci": bekci, "dex_likidite": dex,
            "rejim": rejim.get("rejim"), "rejim_uyarisi": rejim_uyarisi,
            "not": "Kucuk-cap: Binance perp YOK -> D2 turev sinirli. Bekci RED -> giris YOK; UYARI -> CEO ekstra dikkat + pozisyon kucult. "
                   "dex_likidite RED -> giris YOK (Bekci RED ile ayni disiplin); UYARI -> pozisyon kucult."}
-    print(json.dumps(out, ensure_ascii=False, indent=2))
+    return out
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--id", required=True, help="CoinGecko coin id VEYA sembol (orn. pendle, PENDLE) - sembolse otomatik cozulur")
+    a = ap.parse_args()
+    cfg = json.load(open(CFG, encoding="utf-8"))
+    key = cfg.get("coingecko_demo_key", "")
+    print(json.dumps(rapor(a.id, key), ensure_ascii=False, indent=2))
+
 
 if __name__ == "__main__":
     main()
