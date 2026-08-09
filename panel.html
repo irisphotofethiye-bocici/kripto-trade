@@ -275,7 +275,9 @@ const TERIMLER = {
   hacim:{ad:"Hacim",
     ack:"O mumda el değiştiren miktar. Hareketin arkasında hacim yoksa katılım zayıf demektir. Botun skorundaki 'hacim katsayısı' bunun 24 mumluk ortancaya oranı."},
   destek_direnc:{ad:"Destek / direnç",
-    ack:"Fiyatın daha önce dönüş yaptığı tepe ve dip noktaları. Grafikteki yatay çizgiler bunlar. ÖNEMLİ: botun stopu tam olarak bu seviyeleri kullanıyor — yani burada gördüğün çizgiler, botun stop koyacağı yerler."},
+    ack:"Fiyatın daha önce dönüş yaptığı BÖLGELER. Tek bir tepe değil: birbirine yakın dönüş noktaları tek bir bölgeye toplanır, kaç tanesi toplandıysa o seviyenin 'dokunuş' sayısıdır. Çok dokunulan seviye daha güçlü. Grafikte yalnız en yakın direnç ve destek çizili; kalanlar aşağıdaki listede. NOT: botun kendi stopu bu bölgeleri değil, 1 saatlik en yakın TEK dönüş noktasını kullanır — listenin altında ayrıca yazıyor."},
+  dokunus:{ad:"Dokunuş",
+    ack:"Fiyatın o seviyeden kaç kez dönmüş olduğu. 1 kez = tesadüf olabilir, tek bir mumun ucu. 3+ kez = piyasa orayı gerçekten dikkate alıyor; kırılırsa anlamlı olur."},
   ma50_200:{ad:"MA50 / MA200",
     ack:"Son 50 ve 200 mumun ortalaması. Uzun vadeli eğilimin kaba göstergesi. Fiyatın MA200 üstünde olması 'yapısal olarak yukarı' diye okunur."},
   golden_cross:{ad:"Altın / ölüm kesişimi",
@@ -398,7 +400,9 @@ const SEKMELER = [
   {id:'gunluk',  ad:'Günlük',        yukle:gunlukYukle, sure:0},
   {id:'ayarlar', ad:'Ayarlar',       yukle:ayarYukle,   sure:0}
 ];
-let aktifSekme = location.hash.slice(1) || 'ozet';
+/* 2026-08-05 HATA: hash'in TAMAMI sekme adi saniliyordu; "#coin/SOL/1h" gibi
+   derin baglantilar hicbir sekmeye uymayip Ozet'e dusuyordu. Ilk bolum alinir. */
+let aktifSekme = (location.hash.slice(1) || 'ozet').split('/')[0];
 if(!SEKMELER.some(s=>s.id===aktifSekme)) aktifSekme='ozet';
 
 $('#sekmeler').innerHTML = SEKMELER.map((s,i)=>
@@ -407,7 +411,10 @@ $('#sekmeler').innerHTML = SEKMELER.map((s,i)=>
 $('#govde').innerHTML = SEKMELER.map(s=>'<div class="panel" id="p-'+s.id+'"></div>').join('');
 
 function sekmeAc(id){
-  aktifSekme = id; location.hash = id;
+  aktifSekme = id;
+  // Derin baglanti korunur: "#coin/SOL/1h" ile acilirken hash'i "#coin"e indirgeme,
+  // yoksa coinRota() sembolu okuyamaz ve bos coin sayfasi acilir.
+  if((location.hash.slice(1)||'').split('/')[0] !== id) location.hash = id;
   document.querySelectorAll('.sekme').forEach(b=>b.classList.toggle('aktif', b.dataset.id===id));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('aktif', p.id==='p-'+id));
   const s = SEKMELER.find(x=>x.id===id);
@@ -836,9 +843,26 @@ function coinAc(sym){
   $('#coinArama').value=''; $('#coinSonuc').innerHTML='';
   coinDetayYukle();
 }
-function coinTfSec(tf){ coinTf=tf; location.hash='coin/'+coinSec+'/'+tf; coinGrafikYukle(); }
+/* Dilim dugmeleri AYRI cizilir: eskiden coinDetayYukle icinde tek sefer basiliyordu,
+   dilim degisince secili dugme eski yerde kaliyor ve "hicbir sey olmadi" gibi gorunuyordu. */
+function tfDugmeCiz(){
+  const el=$('#tfDugmeler'); if(!el) return;
+  el.innerHTML='<span class="sonuk" style="font-size:11px">ZAMAN DİLİMİ</span>'+
+    Object.keys(TF_AD).map(t=>'<button onclick="coinTfSec(\''+t+'\')"'+
+      (t===coinTf?' style="border-color:var(--vurgu);color:var(--vurgu);font-weight:600"':'')+
+      '>'+TF_AD[t]+'</button>').join('');
+}
+function coinTfSec(tf){
+  if(tf===coinTf) return;
+  coinTf=tf; location.hash='coin/'+coinSec+'/'+tf;
+  tfDugmeCiz();
+  const n=$('#grafikNot'); if(n) n.innerHTML='<span class="sonuk">'+TF_AD[tf]+' yükleniyor…</span>';
+  coinGrafikYukle();
+}
 
 async function coinDetayYukle(){
+  grafikJeton++;              // DOM bastan cizilecek: ucusta olan grafik istegi gecersiz
+  coinGrafikTemizle();
   const g = $('#coinGovde');
   g.innerHTML = '<section><div class="bos">'+coinSec+' yükleniyor… '+
     '<span class="sonuk">(botun tüm verisi çekiliyor, ilk açılış 10-15 sn sürebilir)</span></div></section>';
@@ -867,11 +891,7 @@ async function coinDetayYukle(){
     ].map(k=>'<div class="kart"><div class="etiket">'+(k[3]?T(k[3],k[4],k[0]):k[0])+'</div>'+
       '<div class="deger" style="font-size:17px">'+k[1]+'</div><div class="alt">'+k[2]+'</div></div>').join('')+'</div>'+
 
-    '<div class="satir" style="margin:14px 0 6px">'+
-      '<span class="sonuk" style="font-size:11px">ZAMAN DİLİMİ</span>'+
-      Object.keys(TF_AD).map(t=>'<button onclick="coinTfSec(\''+t+'\')" '+
-        (t===coinTf?'style="border-color:var(--vurgu);color:var(--vurgu);font-weight:600"':'')+'>'+TF_AD[t]+'</button>').join('')+
-    '</div>'+
+    '<div class="satir" id="tfDugmeler" style="margin:14px 0 6px"></div>'+
     '<div class="satir" id="katmanlar" style="margin:0 0 10px"></div>'+
     '<div id="gFiyat" style="height:320px"></div>'+
     '<div id="gHacim" style="height:80px;margin-top:2px"></div>'+
@@ -967,6 +987,7 @@ async function coinDetayYukle(){
   '<section id="guvBolum" style="display:none"><h2>Kontrat güvenliği</h2><div id="guvIcerik"></div></section>';
 
   islemFormCiz();
+  tfDugmeCiz();
   coinGrafikYukle();
   al('/api/coin_gecmis?sym='+coinSec).then(gecmisCiz).catch(()=>{});
 }
@@ -986,10 +1007,30 @@ function katmanDegis(k){
 const KATMAN_AD = {bb:'Bollinger', ma:'MA50/200', sr:'Destek/direnç',
                    hacim:'Hacim', rsi:'RSI'};
 
+/* 2026-08-05 HATA (kullanici: "buyuk grafik degismiyor, altta kucuk olan aciliyor"):
+   coinGrafikYukle ASENKRON. Temizlik await'ten ONCE yapiliyordu; zaman dilimi
+   degistirilince ikinci cagri temizlik yapip beklemeye giriyor, sonra BIRINCI
+   cagri donuyor ve grafigini ayni kutuya ciziyordu. Iki grafik ust uste biniyor:
+   ustteki eski (degismemis gibi gorunen), yenisi altta kutudan tasarak aciliyor.
+   Cozum: (1) jeton — sadece EN SON istek cizer, (2) temizlik cizimden hemen once,
+   (3) kutu ayrica bosaltilir, (4) ResizeObserver'lar kapatilir. */
+let grafikJeton = 0;
+function coinGrafikTemizle(){
+  ['gFiyat','gHacim','gRsi'].forEach(id=>{
+    const g = grafikler[id];
+    if(g){ try{ g.go && g.go.disconnect(); }catch(e){}
+           try{ g.c.remove(); }catch(e){}
+           delete grafikler[id]; }
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = '';        // remove() basarisiz olursa artik tuval kalmasin
+  });
+}
 async function coinGrafikYukle(){
-  ['gFiyat','gHacim','gRsi'].forEach(id=>{ if(grafikler[id]){ try{grafikler[id].c.remove();}catch(e){} delete grafikler[id]; }});
+  const jeton = ++grafikJeton;
   let d;
   try{ d = await al('/api/coin_mum?sym='+coinSec+'&tf='+coinTf+'&limit=300'); }catch(e){ return; }
+  if(jeton !== grafikJeton) return;   // bu arada daha yeni bir dilim secilmis — cizme
+  coinGrafikTemizle();
   if(d.hata || !d.mumlar || !d.mumlar.length){ $('#grafikNot').textContent='Mum verisi alınamadı.'; return; }
   const m=d.mumlar, sv=d.seviyeler||{};
   const varMi=a=>a && a.some(v=>v!=null);
@@ -1008,11 +1049,13 @@ async function coinGrafikYukle(){
   document.getElementById('gRsi').style.display   = katman.rsi?'block':'none';
 
   const yap = id=>{ const el=document.getElementById(id);
-    if(el.style.display==='none') return null;
+    if(!el || el.style.display==='none') return null;
     const c=LightweightCharts.createChart(el, Object.assign(grafikSecenek(),
       {width:el.clientWidth, height:el.clientHeight}));
-    grafikler[id]={c:c,el:el};
-    new ResizeObserver(()=>{ try{c.applyOptions({width:el.clientWidth,height:el.clientHeight});}catch(e){} }).observe(el);
+    // gozlemci saklanir; bir sonraki cizimde disconnect edilir (yoksa birikir)
+    const go=new ResizeObserver(()=>{ try{c.applyOptions({width:el.clientWidth,height:el.clientHeight});}catch(e){} });
+    go.observe(el);
+    grafikler[id]={c:c,el:el,go:go};
     return c; };
 
   const c1=yap('gFiyat'), c2=yap('gHacim'), c3=yap('gRsi');
@@ -1020,9 +1063,12 @@ async function coinGrafikYukle(){
     borderVisible:false,wickUpColor:renk('--iyi'),wickDownColor:renk('--kotu')});
   mum.setData(m.map(x=>({time:x.time,open:x.open,high:x.high,low:x.low,close:x.close})));
 
+  // Eksik degerler ATILMAZ, "bos nokta" olarak birakilir ({time} — deger yok).
+  // Atilirsa serinin mum sayisi fiyat grafiginden az olur ve paneller kayik hizalanir.
+  const nokta=(v,i)=>v==null?{time:m[i].time}:{time:m[i].time,value:v};
   const cizgi=(c,veri,color,w,stil)=>{ const s=c.addLineSeries({color:color,lineWidth:w||1,
     lineStyle:stil||0, priceLineVisible:false,lastValueVisible:false,crosshairMarkerVisible:false});
-    s.setData(veri.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null)); return s; };
+    s.setData(veri.map(nokta)); return s; };
 
   if(katman.bb){
     cizgi(c1,d.bollinger.ust,'#7b7ba8',1);
@@ -1035,24 +1081,35 @@ async function coinGrafikYukle(){
   }
   if(katman.sr){
     // YALNIZ en yakin bir direnc + bir destek (etiketli). Fazlasi grafigi bogar.
-    if(sv.en_yakin_direnc!=null) mum.createPriceLine({price:sv.en_yakin_direnc,
-      color:renk('--kotu'),lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'direnç'});
-    if(sv.en_yakin_destek!=null) mum.createPriceLine({price:sv.en_yakin_destek,
-      color:renk('--iyi'),lineWidth:1,lineStyle:2,axisLabelVisible:true,title:'destek'});
+    // Etikete dokunus sayisi yazilir: "direnç ×4" = fiyat oradan 4 kez donmus.
+    const dr=(sv.direncler||[])[0], ds0=(sv.destekler||[])[0];
+    if(dr) mum.createPriceLine({price:dr.fiyat,color:renk('--kotu'),lineWidth:1,
+      lineStyle:2,axisLabelVisible:true,title:'direnç ×'+dr.dokunus});
+    if(ds0) mum.createPriceLine({price:ds0.fiyat,color:renk('--iyi'),lineWidth:1,
+      lineStyle:2,axisLabelVisible:true,title:'destek ×'+ds0.dokunus});
   }
 
   if(c2){ const hac=c2.addHistogramSeries({priceLineVisible:false});
     hac.setData(m.map(x=>({time:x.time,value:x.volume,
       color:(x.close>=x.open?renk('--iyi'):renk('--kotu'))+'88'}))); }
   if(c3){ const rs=c3.addLineSeries({color:renk('--vurgu'),lineWidth:2,priceLineVisible:false});
-    rs.setData(d.rsi.map((v,i)=>({time:m[i].time,value:v})).filter(x=>x.value!=null));
+    rs.setData(d.rsi.map(nokta));
     [30,70].forEach(v=>rs.createPriceLine({price:v,color:renk('--yazi3'),lineWidth:1,
       lineStyle:2,axisLabelVisible:true,title:String(v)})); }
 
+  // Once hepsini oturt, sonra FIYAT grafiginin araligini olcut alarak esitle.
+  // 'esitleniyor' bayragi olmazsa geri bildirim dongusune girip birbirlerini iterler.
   const hepsi=[c1,c2,c3].filter(Boolean);
-  hepsi.forEach(c=>{ c.timeScale().fitContent();
-    c.timeScale().subscribeVisibleLogicalRangeChange(rg=>{ if(!rg) return;
-      hepsi.forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} }); }); });
+  hepsi.forEach(c=>c.timeScale().fitContent());
+  const ana=c1.timeScale().getVisibleLogicalRange();
+  if(ana) hepsi.forEach(o=>{ if(o!==c1) try{o.timeScale().setVisibleLogicalRange(ana);}catch(e){} });
+  let esitleniyor=false;
+  hepsi.forEach(c=>{
+    c.timeScale().subscribeVisibleLogicalRangeChange(rg=>{
+      if(!rg || esitleniyor) return;
+      esitleniyor=true;
+      hepsi.forEach(o=>{ if(o!==c) try{o.timeScale().setVisibleLogicalRange(rg);}catch(e){} });
+      esitleniyor=false; }); });
 
   const sonRsi=[...d.rsi].reverse().find(v=>v!=null);
   const oge=(renkV,ad,terim,deger,sinif)=>'<span class="oge">'+
@@ -1066,8 +1123,11 @@ async function coinGrafikYukle(){
     if(varMi(d.ma200)) lg += oge(renk('--vurgu'),'MA200','ma50_200');
     else lg += '<span class="oge sonuk"><i style="border-top-color:var(--yazi3)"></i>MA200 — bu dilimde 200 mum yok</span>';
   }
-  if(katman.sr) lg += oge(renk('--kotu'),'en yakın direnç '+(sv.en_yakin_direnc!=null?sv.en_yakin_direnc:'–'),'destek_direnc',null,'kesik')+
-                      oge(renk('--iyi'),'en yakın destek '+(sv.en_yakin_destek!=null?sv.en_yakin_destek:'–'),'destek_direnc',null,'kesik');
+  if(katman.sr){
+    const dr=(sv.direncler||[])[0], ds0=(sv.destekler||[])[0];
+    lg += oge(renk('--kotu'),'direnç '+(dr?dr.fiyat+' (×'+dr.dokunus+')':'– yok'),'destek_direnc',null,'kesik')+
+          oge(renk('--iyi'),'destek '+(ds0?ds0.fiyat+' (×'+ds0.dokunus+')':'– yok'),'destek_direnc',null,'kesik');
+  }
   if(katman.rsi) lg += oge(renk('--vurgu'),'RSI ('+n1(sonRsi)+')','rsi',sonRsi);
   $('#grafikLegend').innerHTML = lg;
 
@@ -1083,16 +1143,23 @@ async function coinGrafikYukle(){
   // grafikte cizilmeyen seviyeler tabloda gorunsun
   const sl=$('#seviyeListe');
   if(sl){
-    const fy=m[m.length-1].close;
     const sat=(sv.direncler||[]).map(v=>['direnç',v]).concat((sv.destekler||[]).map(v=>['destek',v]))
-      .sort((a,b)=>b[1]-a[1])
+      .sort((a,b)=>b[1].fiyat-a[1].fiyat)
       .map(x=>'<tr><td class="'+(x[0]==='direnç'?'kotu':'iyi')+'">'+x[0]+'</td>'+
-        '<td class="sag">'+x[1]+'</td>'+
-        '<td class="sag '+snf((x[1]/fy-1)*100)+'">'+isar((x[1]/fy-1)*100)+n1((x[1]/fy-1)*100)+'%</td></tr>');
-    sl.innerHTML = tablo(['<th>Tür</th><th class="sag">Seviye</th><th class="sag">Fiyata uzaklık</th>'],
+        '<td class="sag">'+x[1].fiyat+'</td>'+
+        '<td class="sag">'+(x[1].dokunus>1?'<b>'+x[1].dokunus+' kez</b>':'1 kez')+'</td>'+
+        '<td class="sag sonuk">'+isar(x[1].uzaklik_pct)+n1(x[1].uzaklik_pct)+'%</td></tr>');
+    sl.innerHTML = tablo(['<th>Tür</th><th class="sag">Seviye</th>'+
+      '<th class="sag">'+T('dokunus',null,'Dokunuş')+'</th><th class="sag">Fiyata uzaklık</th>'],
       sat, 'Bu dilimde yapısal seviye bulunamadı.')+
-      '<div class="not">'+TF_AD[coinTf]+' mumlarından, fiyata en yakın 3\'er tane. '+
-      'Botun kendi stopu <b>1 saatlik</b> seviyeleri kullanır (yukarıdaki tablo).</div>';
+      '<div class="not">'+TF_AD[coinTf]+' mumlarının dönüş noktaları, '+
+      (sv.bant!=null?'<b>±'+sv.bant+'</b> genişliğinde ':'')+'bölgelere toplanır; '+
+      'her satır bir bölge, "dokunuş" o bölgeden kaç kez dönüldüğü. '+
+      'Çok dokunulan seviye daha güçlüdür.'+
+      (sv.bot_direnc!=null||sv.bot_destek!=null ?
+        '<br>Botun stopu bunları değil, <b>1 saatlik tek en yakın dönüş noktasını</b> kullanır'+
+        ' (bu dilimde: direnç '+(sv.bot_direnc!=null?sv.bot_direnc:'–')+
+        ' / destek '+(sv.bot_destek!=null?sv.bot_destek:'–')+').' : '')+'</div>';
   }
 }
 

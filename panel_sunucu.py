@@ -499,23 +499,99 @@ def _ohlcv(sym, interval, limit, ttl=30.0):
     return _tut(f"ohlcv:{sym}:{interval}:{limit}", ttl, uret)
 
 
-def _seviyeler(mumlar, fiyat, adet=3):
-    """olcucu.swings + nearest — botun stopunun kullandigi YAPISAL seviyeler.
+def _pivotlar(bars, left=3, right=3):
+    """olcucu.swings ile AYNI pivot tanimi; tek farki INDEKSI de dondurmesi.
+    Kumeleme icin 'kacinci barda dokunuldu' bilgisi gerekiyor, swings onu atiyor."""
+    out = []
+    for i in range(left, len(bars) - right):
+        win = bars[i-left:i+right+1]
+        if bars[i]["h"] == max(b["h"] for b in win):
+            out.append((i, bars[i]["h"]))
+        if bars[i]["l"] == min(b["l"] for b in win):
+            out.append((i, bars[i]["l"]))
+    return out
 
-    2026-08-05 DUZELTME: onceden en YUKSEK 6 direnc ve en DUSUK 6 destek
-    donuyordu (uc noktalar). 1 gunluk grafikte fiyat 74 iken direncler 146-211
-    cikiyor, grafik olcegi oraya kadar aciliyor ve gercek fiyat hareketi
-    okunamaz hale geliyordu. Artik FIYATA EN YAKIN olanlar donuyor."""
+
+def _kumele(noktalar, tol):
+    """Birbirine tol'dan yakin pivotlari TEK seviyede birlestir.
+    Zincirleme kaymayi onlemek icin mesafe kumenin ILK elemanina gore olculur.
+    -> [{"fiyat", "dokunus", "son_idx"}]"""
+    if not noktalar:
+        return []
+    gruplar, g = [], []
+    for idx, px in sorted(noktalar, key=lambda t: t[1]):
+        if g and px - g[0][1] > tol:
+            gruplar.append(g); g = []
+        g.append((idx, px))
+    if g:
+        gruplar.append(g)
+    return [{"fiyat": _ist.mean([p for _, p in gr]), "dokunus": len(gr),
+             "son_idx": max(i for i, _ in gr)} for gr in gruplar]
+
+
+def _basamak(fiyat):
+    """Kume ortalamasi 74.9366666667 gibi cikiyor; fiyatin buyuklugune gore
+    anlamli basamaga yuvarlanir (5 anlamli hane)."""
+    import math
+    if not fiyat or fiyat <= 0:
+        return 4
+    return max(0, min(8, 5 - int(math.floor(math.log10(abs(fiyat)))) - 1))
+
+
+def _seviyeler(mumlar, fiyat, adet=3):
+    """Grafikte gosterilecek YAPISAL destek/direnc seviyeleri.
+
+    2026-08-05 DUZELTME-1: onceden en YUKSEK 6 direnc / en DUSUK 6 destek
+    donuyordu (uc noktalar): 1g grafikte fiyat 74 iken direncler 146-211,
+    olcek oraya aciliyor ve mumlar okunmaz oluyordu. "En yakin"a cevrildi.
+
+    2026-08-05 DUZELTME-2 (kullanici: "destek direnc dogru vermiyor"):
+    "en yakin pivot" destek/direnc DEGIL. SOL 1s'te fiyat 74.47 iken donen
+    3 direnc 74.50 / 74.51 / 74.55 idi — birbirinin ustunde, %0.04 uzakta,
+    3-barlik mikro tepecikler. Gercek seviye = fiyatin DEFALARCA donduugu bolge.
+    Artik pivotlar ATR tabanli bir bantla KUMELENIYOR; kume = seviye, kume
+    buyuklugu = dokunus sayisi. Once fiyata yakin havuz alinir, icinden EN COK
+    DOKUNULANLAR secilir. Fiyata yapisik (yarim bant icindeki) kumeler elenir.
+
+    NOT: bu GORUNTULEME katmanidir. Botun stopu hala olcucu.nearest'in tek
+    pivotunu kullanir — o degismedi, karsilastirilabilsin diye bot_* alanlarinda
+    ayrica donuyor."""
     bars = [{"o": m["open"], "h": m["high"], "l": m["low"], "c": m["close"]} for m in mumlar]
+    bos = {"direncler": [], "destekler": [], "en_yakin_direnc": None,
+           "en_yakin_destek": None, "bot_direnc": None, "bot_destek": None, "bant": None}
+    if len(bars) < 10 or not fiyat:
+        return bos
     try:
         hi, lo = olcucu.swings(bars)
-        res, sup = olcucu.nearest(fiyat, hi, lo)
-        ust = sorted({round(x, 10) for x in hi if x > fiyat}, key=lambda v: v - fiyat)[:adet]
-        alt = sorted({round(x, 10) for x in lo if x < fiyat}, key=lambda v: fiyat - v)[:adet]
+        bot_res, bot_sup = olcucu.nearest(fiyat, hi, lo)
+        # Kume bandi: yariım ATR, ama en az fiyatin binde 1.5'i (cok sakin dilimlerde
+        # ATR sifira yaklasip her pivot ayri seviye sayilmasin diye taban var).
+        tol = max(olcucu.atr(bars) * 0.5, fiyat * 0.0015)
+        n = len(bars)
+        bs = _basamak(fiyat)
+        kumeler = _kumele(_pivotlar(bars), tol)
+        for k in kumeler:
+            k["tazelik"] = round(k["son_idx"] / max(n - 1, 1), 3)
+            k["guc"] = k["dokunus"] + k["tazelik"]      # dokunus baskin, tazelik esitlik bozar
+            k["uzaklik_pct"] = round((k["fiyat"] / fiyat - 1) * 100, 2)
+            k["fiyat"] = round(k["fiyat"], bs)
+            k.pop("son_idx", None)
+
+        def sec(liste):
+            liste.sort(key=lambda k: abs(k["fiyat"] - fiyat))
+            havuz = liste[:adet * 3]                                  # once yakinlik
+            gucluler = sorted(havuz, key=lambda k: -k["guc"])[:adet]   # icinden en guclu
+            return sorted(gucluler, key=lambda k: abs(k["fiyat"] - fiyat))
+
+        ust = sec([k for k in kumeler if k["fiyat"] > fiyat + tol * 0.5])
+        alt = sec([k for k in kumeler if k["fiyat"] < fiyat - tol * 0.5])
         return {"direncler": ust, "destekler": alt,
-                "en_yakin_direnc": res, "en_yakin_destek": sup}
+                "en_yakin_direnc": (ust[0]["fiyat"] if ust else None),
+                "en_yakin_destek": (alt[0]["fiyat"] if alt else None),
+                "bot_direnc": bot_res, "bot_destek": bot_sup,
+                "bant": round(tol, bs)}
     except Exception:
-        return {"direncler": [], "destekler": [], "en_yakin_direnc": None, "en_yakin_destek": None}
+        return bos
 
 
 def _sembol_listesi():

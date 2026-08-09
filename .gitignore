@@ -44,6 +44,8 @@ coinalyze_liq_log.jsonl
 
 # Panel sunucu runtime (lokal log)
 panel_out.log
+panel_sunucu.log
+panel_sunucu.log.err
 
 # TestBot mutex kilidi (runtime, race-condition korumasi)
 testbot.lock

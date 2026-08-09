@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(exit 1)",
+      "Bash(mkdir -p arsiv)",
+      "Bash(mv likidasyon.py arsiv/)",
+      "Bash(mv coinalyze.py arsiv/)",
+      "Bash(mv coinalyze_liq_log.jsonl arsiv/)",
+      "Edit(/.claude/skills/kripto/**)",
+      "Bash(git check-ignore *)",
+      "Bash(python -c ' *)",
+      "Bash(python makro.py)",
+      "Bash(python fng.py)",
+      "Bash(python apify_liq.py --symbol XRP --interval 24h)",
+      "Bash(python x_sentiment.py --symbol XRP --min_eng 10 --max 30)",
+      "Bash(python olcucu.py --symbol XRP --side short --tf 4h --entry 1.112)",
+      "Bash(python olcucu.py --symbol DOGE --side short --tf 4h --entry 0.0726)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d.get\\(k\\) for k in \\('giris','stop','tp1','tp2','yapisal_destek','yapisal_direnc','rr_tp1','rr_tp1_net','VETO_rr_net'\\)},indent=1\\)\\); print\\('d1:',d.get\\('d1'\\)\\)\")",
+      "Bash(python olcucu.py --symbol DOGE --side short --tf 1d)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d.get\\(k\\) for k in \\('fiyat_anlik','giris','stop','tp1','tp2','yapisal_destek','yapisal_direnc','rr_tp1','rr_tp1_net','VETO_rr_net','atr14'\\)},indent=1\\)\\); print\\('d1:',d.get\\('d1'\\)\\)\")",
+      "Bash(python olcucu.py --symbol ASTER --mtf)",
+      "Bash(python olcucu.py --symbol ASTER --side long --tf 1d)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\({k:d.get\\(k\\) for k in \\('fiyat_anlik','yapisal_destek','yapisal_direnc','atr14'\\)},indent=1\\)\\); print\\('d1:',d.get\\('d1'\\)\\)\")",
+      "Bash(netstat -ano)",
+      "Bash(start http://127.0.0.1:8787)",
+      "Bash(cmd.exe /c start http://127.0.0.1:8787)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(curl -s --max-time 8 http://127.0.0.1:8787/api/durum)",
+      "Bash(tasklist)",
+      "Bash(tasklist //FI \"IMAGENAME eq python.exe\")",
+      "Bash(tasklist //FI \"PID eq 1396\")",
+      "Bash(schtasks /query /fo LIST /v)",
+      "Bash(schtasks /query /fo TABLE)",
+      "Bash(schtasks /query)",
+      "Bash(schtasks //query //fo TABLE)",
+      "Bash(cmd.exe /c \"start /min \\\\\"\\\\\" python panel_sunucu.py\")",
+      "Bash(timeout 5 python panel_sunucu.py)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(python panel_sunucu.py)",
+      "Bash(curl -s --max-time 6 http://127.0.0.1:8787/api/durum)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\alper\\.claude"
+    ]
+  }
+}
