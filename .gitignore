@@ -56,3 +56,7 @@ arsiv/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# Olcum scriptlerinin mum onbellegi (buyuk, yeniden uretilebilir)
+scratchpad/klines_cache/
+scratchpad/*.json

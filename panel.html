@@ -276,6 +276,8 @@ const TERIMLER = {
     ack:"O mumda el değiştiren miktar. Hareketin arkasında hacim yoksa katılım zayıf demektir. Botun skorundaki 'hacim katsayısı' bunun 24 mumluk ortancaya oranı."},
   destek_direnc:{ad:"Destek / direnç",
     ack:"Fiyatın daha önce dönüş yaptığı BÖLGELER. Tek bir tepe değil: birbirine yakın dönüş noktaları tek bir bölgeye toplanır, kaç tanesi toplandıysa o seviyenin 'dokunuş' sayısıdır. Çok dokunulan seviye daha güçlü. Grafikte yalnız en yakın direnç ve destek çizili; kalanlar aşağıdaki listede. NOT: botun kendi stopu bu bölgeleri değil, 1 saatlik en yakın TEK dönüş noktasını kullanır — listenin altında ayrıca yazıyor."},
+  alt_btc:{ad:"alt/BTC paritesi",
+    ack:"Coinin BTC'ye KARŞI getirisi. Bir coin dolarda yeşil olabilir ama sadece BTC yükseldiği için — o zaman elinde BTC tutmak daha iyiydi. Gerçek güç (alfa) coinin BTC'yi GEÇMESİDİR. 7 ve 30 günün İKİSİ birden artıysa sürdürülebilir liderlik; 7g eksi ama USD artıysa 'BTC-betası tuzağı'. ÖNEMLİ: bu bir ÖLÇÜMDÜR, botun hiçbir kapısına bağlı değil — eski 3 SAATLİK 'ayrışma' etiketi ölçüldü ve negatif çıktığı için kısa pencere bilerek konmadı."},
   dokunus:{ad:"Dokunuş",
     ack:"Fiyatın o seviyeden kaç kez dönmüş olduğu. 1 kez = tesadüf olabilir, tek bir mumun ucu. 3+ kez = piyasa orayı gerçekten dikkate alıyor; kırılırsa anlamlı olur."},
   ma50_200:{ad:"MA50 / MA200",
@@ -860,6 +862,24 @@ function coinTfSec(tf){
   coinGrafikYukle();
 }
 
+/* ALT/BTC PARITESI (2026-08-10) — kullanicinin kendi teknigi, panele olcum olarak girdi.
+   Neden ayri bir serit: coinin USD getirisi ile BTC'ye GORE getirisi farkli seylerdir;
+   ayni kart dizisine karisirsa tam da acmak istedigi tuzak ("USD'de yesil") gizlenir. */
+function altBtcCiz(a){
+  if(!a || a.r7==null) return '';
+  const guclu = a.r7>0 && (a.r30||0)>0;
+  const tuzak = a.r7<=0 && !((a.r30||0)>0) && (a.usd7||0)>0;   // 30g hala onde ise 'tuzak' degil, soguma
+  const renk = guclu?'var(--iyi)':(tuzak?'var(--kotu)':'var(--sonuk)');
+  const h=(v,ad)=>'<span style="margin-right:14px">'+ad+' <b class="'+snf(v)+'">'+
+    (v==null?'–':isar(v)+n1(v)+'%')+'</b></span>';
+  return '<div class="satir" style="margin:12px 0 2px;padding:8px 10px;border:1px solid var(--cizgi);'+
+    'border-left:3px solid '+renk+';border-radius:6px;display:block">'+
+    '<div style="font-size:11px;margin-bottom:4px">'+T('alt_btc',null,'BTC\'YE KARŞI (alt/BTC paritesi)')+'</div>'+
+    h(a.r24,'24s')+h(a.r7,'7g')+h(a.r30,'30g')+
+    '<span class="sonuk" style="margin-right:14px">USD 7g '+(a.usd7==null?'–':isar(a.usd7)+n1(a.usd7)+'%')+'</span>'+
+    '<span style="color:'+renk+'">'+esc(a.yorum||'')+'</span></div>';
+}
+
 async function coinDetayYukle(){
   grafikJeton++;              // DOM bastan cizilecek: ucusta olan grafik istegi gecersiz
   coinGrafikTemizle();
@@ -891,6 +911,7 @@ async function coinDetayYukle(){
     ].map(k=>'<div class="kart"><div class="etiket">'+(k[3]?T(k[3],k[4],k[0]):k[0])+'</div>'+
       '<div class="deger" style="font-size:17px">'+k[1]+'</div><div class="alt">'+k[2]+'</div></div>').join('')+'</div>'+
 
+    altBtcCiz(d.alt_btc)+
     '<div class="satir" id="tfDugmeler" style="margin:14px 0 6px"></div>'+
     '<div class="satir" id="katmanlar" style="margin:0 0 10px"></div>'+
     '<div id="gFiyat" style="height:320px"></div>'+

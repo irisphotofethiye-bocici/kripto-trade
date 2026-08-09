@@ -21,6 +21,7 @@
 - **Neden:** Long'un eksik arketipi bu. ZEC vakası kanıt. Bot şu an sadece hacim-top-40 + anomali görüyor; sağlıklı trend coinleri hiç göremiyor.
 - **Ön-koşul:** 21 Tem sonrası + BOGA rejimi gelmeden gerçek testi yapılamaz (K6 simetriği: "gerçek BOĞA görülmeden long karnesi yargılanamaz").
 - **Overfit koruması:** Yeni eşik yok; mevcut kapılar + tarayıcının mevcut Tier mantığı. Önce sanal.
+- **SONUÇ (2026-08-10, KOŞULDU — ÖN-KAYITLI ÖLÇÜTÜ GEÇEMEDİ):** Geçmiş boğalarda test edildi (aşağıda "BOĞA BACAĞI ÖLÇÜMÜ" bölümü, N=410). Kural kontrol grubunu geçmedi (+0.046R vs kontrol +0.062R). Tek savunulabilir hücre TAM_BOGA (+0.130 vs kontrol +0.005) ama istatistiksel anlamlı değil. **F1 "kanıtlı arketip" statüsüne YÜKSELMEDİ; gerçek boğa gelmeden canlıya alınmaz.**
 
 > **ÖLÇÜM GÜNCELLEMESİ (2026-07-15, patern araştırması N=14 pump + 15 kontrol, İZLENİM):** F2 kanıtı GÜÇLENDİ (kısa-ivme 9/14 pump vs 1/15 kontrol, öncülük 2-4h; 8/14 vaka arşiv kapsaması DIŞIYDI → F2 ancak TÜM-sembol olursa işler). F3 öncül iddiası ÇÜRÜDÜ (0/14; derin-neg funding hep T0 SONRASI = devam-teyidi, önden-görme değil). F4 0/4, F6 sadece KORU (FLOCK/RAVE yeni-listing DEĞİLDİ, hacim-eşiği-altı kapsama sorunuydu). OI-önbirikimi/smart-önyerleşimi ayrıştırmadı (3/14vs3/15, 5/6vs6/8) — kapı yapılmaz.
 
@@ -490,11 +491,132 @@ Hepsi R≈−1,0 — yani R muhasebesi tutarlı görünüyor **ama dolar etkisi 
 Ve farkı yaratan şey konviksiyon değil, **stop mesafesi** — ki o bir konviksiyon sinyali değil,
 mekanik bir çıktı. En büyük kayıp (BLESS −$488) en geniş stoplu işlemden geldi.
 **Bu bir tasarım-davranış çelişkisidir (Madde 8 adayı: belgelenmiş davranışı geri getiren onarım).**
-Düzeltme YAPILMADI — ayrı kullanıcı kararı; ama R/R≥2 kapısı ve %5 tavanı bu haliyle
+~~Düzeltme YAPILMADI — ayrı kullanıcı kararı~~ ama R/R≥2 kapısı ve %5 tavanı bu haliyle
 "her işlem eşit risk" garantisi VERMİYOR, bunu bilerek karar verilmeli.
+
+> **DURUM GÜNCELLEMESİ (2026-08-10): ONARIM YAPILDI ve DOĞRULANDI.** Yukarıdaki "düzeltme
+> yapılmadı" satırı ESKİDİ: onarım aynı gün (2026-08-05, commit `efa8785`) koda girdi —
+> `notional = hedef_risk / stop_frac`, kaldıraç artık girdi değil ARAÇ. `benim.py` de aynı
+> fonksiyonu çağırdığı için ikinci kasa da otomatik kapsandı.
+>
+> **DOĞRULAMA (replay, 10 kapanan gerçek işlem, `scratchpad/o4_dogrulama.py`):** iki formül
+> aynı girdilerle yeniden hesaplandı. Replay ESKİ formülü birebir yeniden üretti (PROM $70,
+> AKE $115, DEXE $178, BLESS $483 → **6,9×** yayılma; defterdeki "7 KAT" ifadesiyle tutarlı,
+> yani replay güvenilir). YENİ formülle yayılma **3,5×**'e indi.
+>
+> **KALAN YAYILMA TAMAMEN GÜVENLİ YÖNDE ve sebebi ÖLÇÜLDÜ:** maksimum notional =
+> equity × marjin_pct(≤%12) × kaldıraç_max(10) = **1,2 × equity**. Yani %5 hedef riske
+> ulaşmak için stop ≥ **%4,17** olmalı; daha DAR stoplu işlemler hedefin altında kalıyor
+> (PROM %1,48 → $139 = %1,4 risk; GRVT %1,37 → $151). Eski hatanın yönü (geniş stop → BÜYÜK
+> risk) TERSİNE döndü: artık geniş stop tam hedefte tavanlanıyor, dar stop hedefin altında.
+> **AÇIK KARAR (kullanıcıya):** dar stoplarda hedefe ulaşmak için `marjin_pct` yükseltilsin mi?
+> Öneri: HAYIR — %5/işlem zaten agresif, eksik-risk güvenli yön, ve bu yeni bir kural eklemek
+> olur (Karmaşıklık Bütçesi). Kayda geçsin diye yazıldı, kendiliğinden uygulanmayacak.
 
 **Araçlar:** `scratchpad/sk_anatomi.py` · `sk_sonuc.py` · `sk_kontrol.py` · `sk_yol.py` · `sk_bant.py`
 · `st_otopsi.py` · `st_kontrol.py` · `sg_otopsi.py`.
 **Yöntem dersi:** Bu otopsi 41 günlük mevcut arşivden, yeni veri çekmeden, 18 backtest'ten daha
 fazla aksiyon alınabilir bulgu üretti. **Sebep: "yeni edge var mı" değil "elimizdeki alet ne yapıyor"
 diye sordu.** Bundan sonra yeni arayışa çıkmadan önce mevcut bileşenlerin otopsisi yapılır.
+
+## ⭐ BOĞA BACAĞI ÖLÇÜMÜ — F1 trend-pullback, gerçek boğalarda test edildi (2026-08-10)
+
+**Neden:** `kazanan-bot-arastirma-raporu.md` §8 adım 1. Sistemin tek elenmemiş long arketipi F1'di
+("kurulu trendde geri çekilme alımı"); breakout/beta/anomali-long zaten ölçümde çökmüştü. Elimizde
+gerçek boğa verisi olmadığı için (K6 boşluğu) tek doldurma yolu geçmiş boğalarda test.
+
+**ÖN-KAYIT (sonuca bakmadan yazıldı, tek varyant, eşik taraması yok):**
+Trend = kapanış>MA200 **ve** MA50>MA200 · Tetik = günün düşüğü ≤ MA50 **ve** kapanış > MA50 ·
+Giriş = ERTESİ günün açılışı · Stop = son 5 günün dibi − 0.25×ATR14 (F9 mantığı) · Hedef = 2×risk
+(botun R/R≥2 kapısı) · Süre ≤30 gün · aynı gün stop+hedef → **STOP** sayılır (muhafazakâr) ·
+Maliyet: %0.09 gidiş-dönüş + %0.03/gün funding vekili. Evren: 25 büyük alt + BTC, 2019→bugün.
+**Hipotez:** boğada net ort R > +0.20 **ve** kontrolü belirgin geçer; ayı/nötrde edge kaybolur.
+**Kontrol grubu:** her sinyal için aynı sembolde ±60 gün içinde rastgele bir gün, aynı mekanik.
+
+| Dönem | N | kazanma | F1 ort R_net | **KONTROL ort R_net** |
+|---|---|---|---|---|
+| 2020-21 BOĞA | 132 | %45 | +0.299 ±0.122 | **+0.260** |
+| 2022 AYI | 31 | %39 | +0.072 ±0.244 | **+0.127** |
+| 2023-24 BOĞA | 170 | %39 | +0.071 ±0.102 | **+0.120** |
+| 2025-26 (şimdi) | 62 | %16 | **−0.531** ±0.135 | −0.468 |
+| **TOPLAM** | **410** | %37 | **+0.046 ±0.067** | **+0.062** |
+
+### ⭐ HÜKÜM: HİPOTEZ REDDEDİLDİ — F1 kontrolü GEÇEMEDİ
+Dört dönemin **üçünde kontrol F1'e eşit ya da ÜSTÜN**. Toplamda rastgele giriş (+0.062) kuralı
+(+0.046) yeniyor. **Boğa dönemlerindeki artı R, kuralın seçiciliğinden değil DÖNEMİN kendisinden
+geliyor** — yani ölçtüğümüz şey edge değil **beta**. 2020-21'de +0.299 gibi "iyi" bir sayı çıkması
+tam da kontrolün neden zorunlu olduğunu gösteriyor: kontrol olmasaydı bu tablo "F1 boğada çalışıyor"
+diye okunur ve gerçek paraya girerdi.
+
+**Rejim kırılımı (F10 etiketi, giriş günü — kontrol de aynı etiketle bölündü):**
+
+| F10 hücresi | F1 (N) | F1 ort R_net | kontrol (N) | kontrol ort R_net |
+|---|---|---|---|---|
+| **TAM_BOGA** | 186 | **+0.130** ±0.099 | 169 | **+0.005** ±0.103 |
+| BOGA_DUZELTME | 78 | +0.032 | 73 | **+0.280** |
+| TEPKI_RALLISI | 11 | +0.744 | 14 | +1.411 |
+| DERIN_AYI | 23 | −0.221 | 23 | −0.441 |
+| BELIRSIZ | 112 | −0.098 | 131 | −0.043 |
+
+**Tek savunulabilir hücre TAM_BOGA** — F1 kontrolü +0.125R geçiyor. AMA birleşik standart hata
+≈0.14 → t≈0.9, **istatistiksel olarak anlamlı DEĞİL**. Dürüst ifade: *işaret doğru yönde, kanıt yok.*
+BOGA_DUZELTME'de F1 kontrolden BELİRGİN kötü (+0.032 vs +0.280) — "düzeltmede pullback al" fikri
+bu veriyle desteklenmiyor. F10'un long'u yalnız TAM_BOGA'da açma tasarımı bu tabloyla TUTARLI
+(DERIN_AYI ve BELIRSIZ negatif), ama F10'u long tarafında haklı çıkaran şey F1 değil, F1'in
+DIŞINDAKİ hücrelerin kötülüğü.
+
+**YAN BULGU (kayda değer):** TAM_BOGA'da rastgele girişin ortalaması +0.005R, yani ~sıfır — buna
+karşılık 2020-21 boğasının TAMAMINDA rastgele giriş +0.260R. Demek ki "boğada her giriş kazanır"
+da doğru değil; kazandıran şey 2R hedef + dar stop mekaniğinin o dönemki trend yapısına denk
+gelmesi. **Boğa bacağının cazip görünen "sadece beta al" versiyonu bile ölçülmeden alınamaz.**
+
+**Şu anki dönem (2025-26) her iki grupta da sert negatif (−0.53 / −0.47)** → mevcut piyasada
+long tarafı sistematik olarak cezalandırıyor; sistemin fade kimliğiyle tutarlı.
+
+**SINIRLAR (dürüstlük, hükümle birlikte okunur):**
+1. **Hayatta kalma yanlılığı:** evren bugün yaşayan büyük altlardan seçildi → long lehine YUKARI yanlı.
+   Yanlılık F1'in *lehine* olduğu halde F1 yine de kontrolü geçemedi — bu, hükmü ZAYIFLATMAZ, güçlendirir.
+2. Spot mumlar; funding gerçek geçmiş değil, muhafazakâr vekil (%0.01/8s).
+3. Botun kapıları (radar skoru, Pillar D, taker) geçmişte YOK → bu test **saf arketipi** ölçer,
+   botun seçiciliğini değil. "Seçili F1 boğada ne yapar" hâlâ bilinmiyor (skor otopsisinin
+   "edge HAM sinyalde değil SEÇİMDE" dersinin long simetriği — açık boşluk).
+4. Parametre araması yapılmadı (MA50/MA200/ATR14/2R hepsi konvansiyonel, önceden sabit) →
+   optimize edilecek şey olmadığı için klasik walk-forward anlamsız; onun yerine tüm dönemler
+   ayrı raporlandı, yani her dönem zaten örnek-dışı. Overfit kanalı kapalı.
+
+**Script:** `scratchpad/boga_bacagi_test.py` (ön-kayıt dosyanın başında, mum önbelleği diske).
+
+**NE DEĞİŞTİ / NE DEĞİŞMEDİ:** Koda HİÇBİR ŞEY girmedi. F1 rafta kalmaya devam ediyor,
+"kanıtlı" statüsüne yükselmedi. Araştırma raporunun A/B yol haritası (fade+trend portföyü)
+**bu ölçümle askıya alındı**: trend bacağı için elimizde hâlâ kanıtlanmış bir kural YOK.
+Rapor §8 adım 2 ("kazanıyorsa birleştir") koşulu SAĞLANMADI.
+
+**DERS (beşinci tekrar, artık desen):** Mantıklı görünen giriş arketipi + iyi görünen boğa
+sayısı + kontrol grubu = fikir ölür. Kontrolsüz aynı tablo canlıya girerdi. Kontrol grubu bu
+projede en ucuz ve en çok para kurtaran alet.
+
+## ALT/BTC PARİTESİ ÖLÇÜM KATMANI — sisteme girdi (2026-08-10, kullanıcı tekniği)
+
+**Ne:** `evren.alt_btc(sym)` — coinin BTC'ye karşı 24s/7g/30g getirisi + yorum etiketi
+("GERÇEK GÜÇ" / "liderlik soğuyor" / "BTC-BETASI TUZAĞI" / "zayıf"). Panelde coin sayfasında
+ayrı bir şerit olarak görünür; `piyasa_yapisi.py` artık **breadth_30g** ve **lider_30g** listesini
+de loglar (sürdürülebilir liderliğin ileriye dönük getirisi ancak seri birikirse ölçülebilir).
+
+**Neden burada:** Kullanıcının deneyimle doğrulanmış çerçevesi (2026-06-25): "USD'de yeşil ama
+BTC'ye karşı kırmızı" tuzağı — USD kazancı sadece BTC betası olabilir; gerçek alfa altın BTC'yi
+GEÇMESİDİR. Dominans tarafı (BTC.D/USDT.D/breadth/altseason kontrol listesi) zaten sistemdeydi
+(`piyasa_yapisi.py` + panel para-akışı + F11 para kapısı); eksik olan tek-coin parite ölçümüydü.
+
+**KAPI DEĞİL — bilinçli:** hiçbir karar fonksiyonu okumaz. Kısa pencere (3 saatlik göreli güç =
+eski AYRIŞMA etiketi) ölçüldü ve **negatif-edge** çıktı; bu yüzden kasıtlı olarak yalnız 7-30 gün
+var. Kapı tartışması ancak 25-30 olayda forward-return biriktikten sonra açılır (erken-kuşak modeli).
+
+**Sadeleştirme yan etkisi:** `daily`/`rel` formülleri `piyasa_yapisi.py` içinde kopyaydı; panel de
+aynı ölçümü göstereceği için `evren.py`'ye taşındı (bu projenin tekrarlayan hatası: kopyalanan
+formül drift eder — evren.py'nin varlık sebebi zaten buydu).
+
+> **ÖLÇÜM SCRIPTLERİ ARTIK REPODA (2026-08-10):** Defterdeki eski `scratchpad/*.py` atıfları
+> (f10_replay, fade_boga_test, beta_backtest, sk_*/st_*/sg_* otopsileri) **geçici oturum
+> klasöründe kalıp KAYBOLDU** — yani o ölçümler bugün yeniden koşulamıyor, yalnız sonuçları
+> kayıtlı. Bu oturumdan itibaren ölçüm scriptleri projedeki `scratchpad/` klasörüne yazılır ve
+> commit edilir (mum önbelleği gitignore'da). Ön-kayıt scriptin başında durur; sonuç defterde.

@@ -69,20 +69,10 @@ def universe(key, min_vol, n):
     return evren.binance_pool("spot", min_vol, None, cryptos)[:n], cryptos
 
 
-def daily(sym, n=31):
-    try:
-        d = get(f"{SP}/api/v3/klines?symbol={sym}USDT&interval=1d&limit={n}")
-        return [float(k[4]) for k in d]
-    except Exception:
-        return None
-
-
-def rel(ac, bc, k):
-    """alt/BTC oran degisimi son k bar (yuzde)."""
-    if len(ac) <= k or len(bc) <= k or bc[-1-k] == 0 or ac[-1-k] == 0:
-        return None
-    rn = ac[-1] / bc[-1]; rp = ac[-1-k] / bc[-1-k]
-    return (rn / rp - 1) * 100 if rp else None
+# 2026-08-10: daily/rel buradan evren'e TASINDI (panel de ayni olcumu gosterecek;
+# formul iki dosyada kopyalanirsa drift eder — projenin tekrarlayan hatasi).
+daily = evren.gunluk_kapanis
+rel = evren.oran_degisim
 
 
 def main():
@@ -135,6 +125,11 @@ def main():
 
     # --- TREND LOGU (append-only) + onceki ile delta ---
     breadth = (sum(1 for r in rows if (r[rk] or 0) > 0) / len(rows) * 100) if rows else 0
+    # 2026-08-10: 30g breadth de loglanir. Sebep: "surdurulebilir alt/BTC liderligi
+    # ileriye donuk getiri veriyor mu" sorusu ancak GECMIS bir seri birikirse
+    # olculebilir; 7g tek basina o soruyu cevaplamiyor. SADECE VERI — kapi degil.
+    r30lu = [r for r in rows if r.get("r30") is not None]
+    breadth30 = (sum(1 for r in r30lu if r["r30"] > 0) / len(r30lu) * 100) if r30lu else None
     logf = os.path.join(HERE, "piyasa_yapisi_log.jsonl")
     prev = None
     try:
@@ -145,12 +140,18 @@ def main():
     except Exception:
         pass
     if dom:
+        # DIKKAT: panel_sunucu._para_akisi breadth'i "breadth ile baslayan ILK anahtar"
+        # diye okuyor -> secili tf'in breadth'i ILK sirada kalmali (asagidaki sira onemli).
+        kayit = {"ts": ts, "btc_d": round(dom["btc_d"], 2), "eth_d": round(dom["eth_d"], 2),
+                 "usdt_d": round(dom["usdt_d"], 2), "stable_d": round(dom["stable_d"], 2),
+                 "others": round(dom["others"], 2), "breadth_%s" % ksel: round(breadth, 1)}
+        if breadth30 is not None:
+            kayit.setdefault("breadth_30g", round(breadth30, 1))   # ksel=30g ise ustune yazma
+        kayit["lider_30g"] = [r["sym"] for r in sorted(r30lu, key=lambda x: -x["r30"])[:10]]
+        kayit["total"] = dom["total"]
         try:
             with open(logf, "a", encoding="utf-8") as f:
-                f.write(json.dumps({"ts": ts, "btc_d": round(dom["btc_d"], 2), "eth_d": round(dom["eth_d"], 2),
-                                    "usdt_d": round(dom["usdt_d"], 2), "stable_d": round(dom["stable_d"], 2),
-                                    "others": round(dom["others"], 2), "breadth_%s" % ksel: round(breadth, 1),
-                                    "total": dom["total"]}, ensure_ascii=False) + "\n")
+                f.write(json.dumps(kayit, ensure_ascii=False) + "\n")
         except Exception:
             pass
 

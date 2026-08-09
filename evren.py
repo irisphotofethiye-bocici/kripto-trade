@@ -149,6 +149,60 @@ def binance_pool(kaynak="fapi", min_vol_musd=8.0, chg_max=None, cryptos=None, ti
     return pool
 
 
+def gunluk_kapanis(sym, n=31, quote="USDT"):
+    """Gunluk kapanis serisi (Binance spot). Hata/veri yok -> None."""
+    try:
+        d = get(f"{SPOT}/api/v3/klines?symbol={sym}{quote}&interval=1d&limit={n}")
+        return [float(k[4]) for k in d]
+    except Exception:
+        return None
+
+
+def oran_degisim(ac, bc, k):
+    """alt/BTC oraninin son k bardaki yuzde degisimi. ac/bc = gunluk kapanis serileri."""
+    if not ac or not bc or len(ac) <= k or len(bc) <= k:
+        return None
+    if bc[-1] == 0 or bc[-1-k] == 0 or ac[-1-k] == 0:
+        return None
+    rn, rp = ac[-1] / bc[-1], ac[-1-k] / bc[-1-k]
+    return round((rn / rp - 1) * 100, 2) if rp else None
+
+
+def alt_btc(sym, btc_kapanis=None):
+    """ALT/BTC PARITESI — 'USD'de yesil ama BTC'ye karsi kirmizi' tuzaginin olcumu.
+    (kullanici teknigi 2026-06-25; piyasa_yapisi.py'nin tek-coin ve PAYLASILAN hali —
+    formul iki yerde kopyalanmasin diye buraya tasindi, 2026-08-10.)
+
+    ONEMLI AYRIM: SURDURULEBILIR (7-30g) alt/BTC trendi = gercek liderlik/alfa.
+    3-SAATLIK goreli guc (eski AYRISMA etiketi) BASKA bir seydi ve olcumde
+    negatif-edge cikti -> burada kisa pencere KASITLI OLARAK YOK.
+
+    KAPI DEGIL, OLCUMDUR: hicbir karar fonksiyonu bunu okumaz; panelde gosterilir,
+    ileride forward-return biriktirilip (25-30 olay) ancak o zaman kapi tartisilir."""
+    if sym.upper() == "BTC":
+        return None
+    bc = btc_kapanis or gunluk_kapanis("BTC")
+    ac = gunluk_kapanis(sym)
+    if not ac or not bc:
+        return None
+    r24, r7, r30 = (oran_degisim(ac, bc, 1), oran_degisim(ac, bc, 7), oran_degisim(ac, bc, 30))
+    usd7 = round((ac[-1] / ac[-8] - 1) * 100, 2) if len(ac) >= 8 else None
+    # Yorum: USD yonu ile BTC-goreli yonu AYRISTIR (tuzagin adi konsun)
+    if r7 is None:
+        yorum = None
+    elif r7 > 0 and r30 is not None and r30 > 0:
+        yorum = "GERCEK GUC (BTC'yi surdurulebilir geciyor)"
+    elif r7 > 0:
+        yorum = "kisa vadede BTC'yi geciyor (30g henuz teyit degil)"
+    elif r30 is not None and r30 > 0:
+        yorum = "liderlik SOGUYOR (30g hala BTC ustunde, 7g dondu)"
+    elif (usd7 or 0) > 0:
+        yorum = "BTC-BETASI TUZAGI (USD'de yesil, BTC'ye karsi geride)"
+    else:
+        yorum = "hem USD hem BTC'ye karsi zayif"
+    return {"r24": r24, "r7": r7, "r30": r30, "usd7": usd7, "yorum": yorum}
+
+
 def btc_rejim():
     """Rejim tespiti — F10 SEZON×HAVA katmanlama (2026-07-22, tur-2 Faz 1).
     Eski tek-katman (1d SMA20+egim) kil-payi farki bile kesin BOGA/AYI diyordu -> 2026 boyunca

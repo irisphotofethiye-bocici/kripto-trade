@@ -673,8 +673,14 @@ def _coin(sym):
               "yuksek24": f("highPrice"), "dusuk24": f("lowPrice"),
               "mcap": cg.get("mcap"), "dolasim": cg.get("circ"), "toplam_arz": cg.get("total"),
               "float_oran": cg.get("float_oran")}
+    # ALT/BTC paritesi (2026-08-10): kullanicinin kendi teknigi — "USD'de yesil ama
+    # BTC'ye karsi kirmizi" tuzagi. OLCUM katmani, hicbir kapiya baglanmadi.
+    try:
+        altbtc = _tut(f"altbtc:{sym}", 600.0, lambda: evren.alt_btc(sym))
+    except Exception:
+        altbtc = None
     st = testbot._load_state() or {}
-    return {"sym": sym, "radar": r, "pillar": pillar, "olcucu": olc,
+    return {"sym": sym, "radar": r, "pillar": pillar, "olcucu": olc, "alt_btc": altbtc,
             "bot_gorusu": gorus, "rejim": rejim_ad, "piyasa": piyasa,
             "mcap": cg.get("mcap"), "float_oran": cg.get("float_oran"),
             "equity_bot": st.get("equity"),
