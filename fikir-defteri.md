@@ -1474,3 +1474,87 @@ geçmiyor, hiçbiri pozitif değil. En iyisi `chg_6h ≥ %3` SHORT −0.04% (kon
 > **Hareket öncesi örüntü dosyası KAPANDI.** Yapı var (tetik olasılığını 3,4 katına çıkarıyor,
 > iki yarıda kararlı) ama ne LONG ne SHORT tarafında paraya çevrilebiliyor. Sebep yukarıda
 > ölçülmüş mekanizma: yön söylemeyen bir sinyal, stop mesafesini isabetten daha hızlı büyütür.
+
+## ⭐⭐⭐⭐ YÖN AVI — ikinci SHORT kapısı bulundu, LONG hâlâ yok (2026-08-10)
+
+**Talep:** *"yönü bulmaya çalışalım eldeki veriyle, yönü diğer verilerle karşılaştırmalı test et
+ve yön sinyali ara."*
+
+**Neden yeni bir ölçüm tasarımı:** bu oturumun bulgusu — yön söylemeyen sinyal değersiz, çünkü
+stop mesafesi hareketle büyür. Ama stop/hedef mekaniği **yönü de gizliyor**. O yüzden burada
+**stop yok, hedef yok**; sadece ham ileri getiri. Ve asıl ölçü:
+**`rel24` = coin 24s getirisi − BTC 24s getirisi.** Ayı piyasasında her şey düşer; "daha az düşen"
+yön sinyali değildir. **Yön = piyasadan ayrışma.**
+6.790 olay · taban rel24 medyan **−0.46%**. Araçlar: `scratchpad/yon_avi.py` · `yon_dogrula.py`.
+
+### ⚠️ ÖNCE YAKALANAN HATA (kayda geçer)
+İlk turda "taker alış payı" güçlü bir yön sinyali göründü (−1.57). **Birim hatasıydı:**
+`tbv` (taker buy **BASE** volume, kline[9]) `qv` (**QUOTE** volume, kline[7]) ile bölünmüştü →
+sonuç ≈ `taker_oranı ÷ fiyat`, yani pratikte **1/fiyat**. Yani ölçtüğüm şey taker davranışı değil,
+**fiyat seviyesiydi**. Düzeltildi (`tbv/v`, ikisi de base):
+**gerçek taker oranı yön gücü −0.07 (A +0.10 / B −0.25) = RASTGELE.**
+Fiyat seviyesi ise ayrı bir ölçü olarak bırakıldı ve gerçek bir sinyal çıktı.
+
+### 1) KARARLI YÖN ÖLÇÜLERİ (rel24, üst dilim − alt dilim, iki yarıda da aynı işaret)
+
+| Ölçü | alt dilim | üst dilim | YÖN GÜCÜ | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| MA50 mesafesi % | −0.35 | −2.10 | **−1.76** | −1.70 | −1.87 |
+| **fiyat seviyesi (log10)** | −1.57 | +0.00 | **+1.57** | +2.18 | +1.03 |
+| radar skoru | −0.13 | −1.68 | −1.55 | −1.94 | −1.27 |
+| son 24 saat % | −0.72 | −2.16 | −1.44 | −1.31 | −1.65 |
+| MA200 mesafesi % | −0.40 | −1.83 | −1.43 | −1.64 | −1.14 |
+| açık pozisyon 24s % | −0.77 | −1.68 | −0.91 | −1.13 | −0.73 |
+| piyasa değeri | −0.14 | −0.65 | −0.51 | −0.57 | −0.32 |
+
+**Hepsi aynı yöne bakıyor: MA'ların üstünde, yükselmiş, pozisyon birikmiş, ucuz coin →
+BTC'nin ALTINDA performans.** Yani yön sinyalinin tamamı SHORT tarafında.
+
+**RASTGELE ÇIKANLAR:** gerçek taker oranı (−0.07) · sıkışma (−0.17) · hacim katı (+0.03) ·
+son 3 saat (−0.01) · BTC 3s (−0.04) · range konumu (+0.16). Funding tek başına kararsız
+(A +1.35 / B +0.14) — **A+B'nin gücü funding'den değil, funding × oi24 kesişiminden geliyor.**
+
+### 2) ⭐ TİCARET MEKANİĞİNDE (hedef %10 / 72 saat, A-stop, maliyet %0.09)
+
+| Hücre | N | net % | isabet | başabaş | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|
+| **SHORT: A+B (canlıdaki kapı)** | 197 | **+2.14** | %37.6 | %28.7 | +2.38 | +1.90 |
+| **SHORT: MA50 yüksek + fiyat düşük** | **460** | **+0.84** | %29.8 | %25.9 | **+0.99** | **+0.72** |
+| SHORT: A+B + fiyat düşük | 113 | +1.61 | %33.6 | %29.3 | +2.31 | +0.67 |
+| SHORT: fiyat düşük (tek) | 1359 | +0.20 | %21.0 | %22.1 | +0.58 | −0.08 |
+| LONG: MA50 düşük + fiyat yüksek | 120 | +0.27 | %9.2 | %8.9 | **−0.09** | +0.86 |
+| LONG: fiyat yüksek + chg24 düşük | 113 | +0.22 | %8.0 | %8.8 | **−0.47** | +1.16 |
+| KONTROL SHORT | 6790 | −0.05 | %12.0 | %12.7 | −0.11 | +0.01 |
+| KONTROL LONG | 6790 | −0.35 | %11.2 | %11.8 | −0.43 | −0.27 |
+
+### 3) BULUNAN: ikinci SHORT kapısı — **MA50 yüksek + fiyat düşük**
+- N=**460** (A+B'nin 2,3 katı olay) · net **+0.84%** · **iki yarıda da pozitif** (+0.99 / +0.72)
+- Türkçesi: *ucuz bir coin MA50'nin belirgin üstüne çıkmışsa* → aşağı.
+- **Yalnız 1 saatlik mumdan hesaplanır** — funding/OI/Pillar D gerekmiyor, ek API çağrısı yok.
+
+**Örtüşme ve birleşik katkı** (hedef %10/72s, toplam = N × net%):
+
+| Küme | N | net % | toplam |
+|---|---|---|---|
+| A+B | 197 | +2.14 | +422 |
+| MA50+fiyat | 460 | +0.84 | +390 |
+| kesişim | 65 | **+2.53** | +165 |
+| yalnız A+B | 132 | +1.95 | +257 |
+| **yalnız MA50+fiyat** | **407** | **+0.55** | +226 |
+| **BİRLEŞİM** | **604** | +1.07 | **+648** |
+
+İkinci kapıyı eklemek toplam katkıyı **+422 → +648 (%54 artış)** yapıyor; bedeli işlem başı
+beklentinin +2.14'ten +1.07'ye düşmesi. **Kesişim en güçlü hücre (+2.53, isabet %44.6).**
+
+### 4) LONG — hâlâ kararlı hücre YOK
+İki LONG hücresi toplamda pozitif ama **ilk yarıda negatif** (−0.09 ve −0.47), gücün tamamı
+ikinci yarıdan geliyor. Tek dönemlik = kural yapılamaz. Yön avında da LONG tarafı yalnızca
+"fiyat seviyesi yüksek" (major coinler) üzerinden ve o da rel24 +0.00 (başabaş).
+
+> **HÜKÜM:** Yön sinyali **var** ve tamamı SHORT tarafında. Yeni kapı adayı bulundu
+> (MA50 yüksek + fiyat düşük, N=460, iki yarıda da pozitif, ek veri gerektirmiyor).
+> LONG için 46 günlük ayı/nötr veride kararlı hiçbir hücre yok — LONG'un sınavı hâlâ boğada.
+
+**AKSİYON ALINMADI** — ikinci kapı kullanıcı kararı bekliyor.
+**SINIR:** tek rejim · fiyat seviyesi bir *coin-tipi* göstergesi (ucuz coin = genelde yeni/spekülatif),
+rejim değişince ilişki dönebilir · kesişim hücresi N=65 (izlenim).
