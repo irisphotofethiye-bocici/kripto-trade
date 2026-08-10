@@ -755,6 +755,11 @@ def trailing_guncelle(pos, bar):
     pos.setdefault("atr_canli", None)
     pos.setdefault("en_iyi_fiyat", pos["giris"])
     pos.setdefault("trailing_aktif", False)
+    # 2026-08-10: A+B pozisyonlarinda trailing DEVRE DISI — olcum, sabit %10 hedefin
+    # trailing'li cikisi %62 gectigini gosterdi (+2.01% vs +1.24%). Stop orijinal yerinde
+    # kalir; kazanci kesen mekanizma kapatilir. Gerekce yeni_giris_ac'taki blokta.
+    if pos.get("cikis_modu") == "sabit_hedef":
+        return
     if not pos["atr_giriste"]:
         return
     atr_canli = pos.get("atr_canli")
@@ -1009,6 +1014,32 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     }
     if kaynak:                      # 2026-08-05: "elle" -> karne ayrimi bunun uzerinden
         pos["kaynak"] = kaynak
+
+    # ---- A+B GIRISLERINE SABIT HEDEF (2026-08-10, KULLANICI KARARI, Madde 9) --------------
+    # [NEDEN] A+B edge'i HEDEF BUYUDUKCE ARTIYOR — isabet, basabasi hedef buyudukce daha cok
+    #   geciyor (N=206): %2.5 -> +0.47 | %5 -> +1.33 | %10 -> +2.19 | %15 isabet basabasin ALTINA.
+    #   Ayni 206 giriste cikis kurallari karsilastirildi:
+    #     MEVCUT (kismi %50 @1.5R + ATR trailing)  +1.24%  kazanan %66  (A +1.22 / B +1.25)
+    #     sabit %10 hedef, trailing yok            +2.01%  kazanan %50  (A +1.95 / B +2.08)
+    #   -> %62 daha fazla beklenti, iki yarida da ayni siralama. Bedeli: kazanma orani %66->%50.
+    # [KURAL] Kotu giriste siki cikis KAYBI keser; iyi giriste siki cikis KAZANCI keser.
+    #   Bu yuzden degisiklik GIRIS-KOSULLU: yalniz A+B pozisyonlari. Diger dallar (AYI-SHORT,
+    #   smart-SHORT, AAVE-istisnasi...) mevcut kismi+trailing ile KALIR — onlarin girisi icin
+    #   siki cikis hala en iyisiydi (10 gercek islemde olculmustu).
+    # [NASIL] tp2 = giris ±%10 · tp1_alindi=True (kismi kar DEVRE DISI) · trailing DEVRE DISI
+    #   (trailing_guncelle bu modda erken doner) · stop ORIJINAL A-stop'ta kalir ·
+    #   48 saat zaman stopu AYNEN gecerli.
+    # [SINIR] Olcum 1 SAATLIK mumla; bot 1 DAKIKALIK ile yonetiyor -> gercek MEVCUT biraz daha
+    #   iyi olabilir. Funding maliyeti eklenmedi (uzun tutusta artar, MEVCUT lehine duzeltme).
+    # GERI ALMA: kripto-config.json -> esikler.ab_sabit_hedef_pct: 0
+    ab_hedef = evren.esik("ab_sabit_hedef_pct", 10.0)
+    if ab_hedef > 0 and str(sebep).startswith("A+B"):
+        pos["cikis_modu"] = "sabit_hedef"
+        pos["tp1_alindi"] = True                     # kismi kar yolu kapali
+        pos["tp2"] = round(giris_ef * (1 - ab_hedef / 100) if yon == "SHORT"
+                           else giris_ef * (1 + ab_hedef / 100), 6)
+        pos["tp1"] = pos["tp2"]
+        pos["sabit_hedef_pct"] = ab_hedef
     if olc_override:
         pos["stop_elle"] = True
     st["sonraki_id"] += 1
