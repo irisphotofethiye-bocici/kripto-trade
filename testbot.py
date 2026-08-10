@@ -1138,6 +1138,22 @@ def yeni_giris_ara(st, rejim):
             r["_float_oran"] = fo
         r["_dusuk_float"] = dusuk_float
 
+        # --- GOLGE-LONG: "pump'a binme" tezi CANLI olcumu (2026-08-10, kullanici istegi) ----
+        # Kullanici LONG istiyor; arsiv olcumu her hucrede negatif verdi (tum evren 570 sembol,
+        # 3 tetik esigi, 5 giris zamanlamasi, 2 ufuk, %10 hedef -> hicbiri pozitif degil).
+        # Cozum: tez GERCEK deftere DOKUNMADAN golgede canli test edilir. Bot bu satirdan
+        # etkilenmez — golge ayri kasa, ayri dosya, hata durumunda sessizce atlanir.
+        # Tetik: pump olusuyor (chg24 >= %10 ve hacim patlamasi) -> golgede LONG acilir.
+        # GERI ALMA: kripto-config.json -> esikler.golge_long_pump: 0
+        try:
+            if (evren.esik("golge_long_pump", 1) >= 1
+                    and (r.get("chg24") or 0) >= 10 and (r.get("vol_x") or 0) >= 2.0):
+                _golge(sym, "LONG", r, pillar, "pump_long_tezi",
+                       f"chg24 {r.get('chg24'):+.0f}% vol_x {r.get('vol_x'):.1f}x",
+                       rejim.get("rejim"))
+        except Exception:
+            pass
+
         vlist = []
         karar = karar_yon(rejim.get("rejim"), r, pillar, dusuk_float, veto_out=vlist,
                           para_cikis=para_cikis, btc_pay=btc_pay, para_durgun=para_durgun)

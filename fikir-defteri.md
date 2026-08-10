@@ -1097,3 +1097,88 @@ Botun kendi aday evreninde A+B **günde ~6,4 bağımsız olay** üretiyordu (6,2
 ### GERİ ALMA (tek satır)
 `ab_kapisi_acik: 0` · `rr_kapisi_r: 1.5` (ya da 2.0 = 08-10 öncesi) · `notr_fade_acik: 1`.
 Config yedeği: `kripto-config.json.yedek-2026-08-10b`.
+
+## ⭐⭐ %10 HEDEF ÖLÇÜMÜ · LONG ARAYIŞI · AŞAMA ÖRTÜŞMESİ (2026-08-10, kullanıcı kararı)
+
+**Talep:** *"long işlemde açsın sadece short değil · long işlem ara, gainers'da önemli olan bu ·
+kazananların gösterdiği özellikler hangi AŞAMADA örtüşüyor bunu bul · yüzde 10 kazanç hedefle,
+ona göre ölç · aynı anda aynı sinyalleri üretmesi önemli · pumplara bakalım"*
+
+**Ne değişti:** tüm önceki ölçümler **2R hedefliydi**. Bu ölçüm sabit **%10 hedefli** — ödeme
+profili tamamen farklı. Stop medyanı %1,4-5 → %10 hedef 2-7R uzakta; isabet oranı düşer ama
+tek kazanç büyür. Başabaş = `stop% ÷ (10 + stop%)`. Maliyet %0,09 (gidiş-dönüş taker) düşüldü.
+Araçlar: `scratchpad/hedef10.py` · `pump10.py`.
+
+### BULGU 1 ⭐⭐ — CANLIDAKİ A+B KAPISI %10 HEDEFİYLE DAHA DA İYİ DOĞRULANDI
+
+| Küme | N | SHORT net % | isabet | başabaş | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|
+| tüm olaylar | 7118 | −0.06% | %12.0 | %12.8 | −0.15 | +0.03 |
+| **A+B (canlıdaki kapı)** | 206 | **+2.19%** | %37.9 | %29.4 | **+2.05** | **+2.36** |
+| **A+B + pump kapısı** | 201 | **+2.30%** | %37.8 | %28.9 | **+2.27** | **+2.33** |
+| **A+B ∩ HAZIRLANIYOR** | 32 | **+4.63%** | **%56.2** | %32.9 | +3.67 | +5.38 |
+| A+B ∩ izle | 170 | +1.75% | %34.1 | %28.5 | +1.75 | +1.75 |
+| HAZIRLANIYOR (tek) | 113 | +1.91% | %29.2 | %19.0 | +1.75 | +2.05 |
+| skor ≥ 45 | 275 | +1.53% | %32.7 | %25.6 | +1.52 | +1.53 |
+
+A+B'nin iki zaman yarısı **+2.27 / +2.33** — neredeyse aynı. Bu, 2R ölçümündeki
+(+0.277 / +0.528) dalgalanmadan daha kararlı: **%10 hedefi bu edge'e daha uygun.**
+
+### BULGU 2 ⭐⭐ — "HANGİ AŞAMADA ÖRTÜŞÜYOR": **HAZIRLANIYOR**
+
+| Aşama | N | LONG net % | SHORT net % | SHORT isabet |
+|---|---|---|---|---|
+| **HAZIRLANIYOR** | 113 | −0.08% | **+1.91%** | %29.2 |
+| BASLIYOR | 24 | −0.11% | +0.64% | %29.2 |
+| izle | 6981 | −0.37% | −0.10% | %11.7 |
+
+Ve kesişim: **A+B ∩ HAZIRLANIYOR → +4.63%, isabet %56,2** — A+B'nin tek başına iki katı.
+HAZIRLANIYOR = `comp<0.65` (sıkışmış) + `|last3|<%4` (fiyat yatay) + `oi24>%8` (pozisyon
+birikiyor) = **pump ÖNCESİ hal**. Yani kazananların özellikleri tam da harekete geçmeden
+önceki sıkışma anında örtüşüyor. N=32 → **izlenim, kural yapılmadı** (iki yarıda da pozitif
+olması umut verici: +3.67 / +5.38).
+
+### BULGU 3 — LONG: her yere bakıldı, pozitif hücre YOK
+**Pump'lar, tüm evren (570 sembol, radar filtresi YOK), %10 hedef:**
+
+| Tetik | giriş | LONG net % | SHORT net % |
+|---|---|---|---|
+| 24h > %10 (N=2690) | hemen | −0.36% | −0.15% |
+| | +6 saat | −0.56% | −0.00% |
+| | +24 saat | −0.25% | +0.06% |
+| 24h > %15 (N=1411) | hemen | −0.46% | −0.04% |
+| | +6 saat | −0.88% | **+0.18%** |
+| 24h > %25 (N=614) | hemen | −1.03% | +0.05% |
+| | +6 saat | −0.56% | **+0.55%** |
+| | +12 saat | −0.14% | +0.08% |
+
+**3 tetik eşiği × 5 giriş zamanlaması × 2 ufuk (72/168 saat) = 30 hücre. LONG hiçbirinde
+pozitif değil.** Hareket büyüdükçe LONG kötüleşiyor (%25-40 → −1.29%, %40-70 → −2.27%).
+
+**Uzanım kırılımı (20-bar tepesinden ATR uzaklığı) — en keskin ayrım:**
+
+| Uzanım | N | LONG net % | SHORT net % | SHORT isabet |
+|---|---|---|---|---|
+| 0–0.5 ATR | 703 | −0.31% | −0.01% | %13 |
+| 0.5–1.5 ATR | 513 | −0.56% | −0.23% | %21 |
+| 1.5–3.0 ATR | 139 | −0.04% | −0.40% | %29 |
+| **3.0+ ATR (çok uzamış)** | 34 | **−3.56%** | **+3.73%** | **%56** |
+
+Radar arşivinde LONG'un en iyi hücresi: `funding ≥ +0.05` (longlar kalabalık) → **+0.69%**,
+isabet %38,0 / başabaş %36,8 — **kıl payı** ve yarılar dağılıyor (A +1.84 / B +0.14). Edge değil.
+
+### KARAR: LONG gerçek deftere AÇILMADI, GÖLGEDE canlı test ediliyor
+Kullanıcı LONG istedi; ölçüm hiçbir yerde destek vermedi. Tezi çöpe atmak yerine **risksiz
+canlı teste** aldık: `golge_long_pump = 1` → `chg24 ≥ %10` **ve** `vol_x ≥ 2.0` olan her adayda
+**gölge defterde LONG açılır**, botun AYNI çıkış kurallarıyla (stop / 1.5R kısmi / trailing)
+izlenir. Gerçek defter, equity, kararlar **etkilenmez**. İlk kayıt aynı gün oluştu
+(SIREN LONG, `kapi=pump_long_tezi`). 25-30 olay biriktiğinde gerçek karar verilir.
+
+**Gerçek deftere LONG açmak isteniyorsa** tek satır: `notr_long_acik` zaten 1 (NOTR'de
+smart-LONG + üç kalite filtresi). Ölçüm bunu desteklemiyor — kayda geçer.
+
+### SINIRLAR
+1. 46 günün tamamı AYI/NOTR. **Boğa hücresi yok** — LONG'un asıl sınavı orada, elimizde değil.
+2. A+B ∩ HAZIRLANIYOR N=32 → izlenim. Kural yapılmadı.
+3. Uzanım 3.0+ ATR hücresi N=34 → izlenim, ama işaret A+B ile aynı yönde (aşırı uzamışı fade).
+4. Slipaj yok sayıldı; %10 hedefli işlemler daha uzun tutulur, funding maliyeti de eklenmedi.
