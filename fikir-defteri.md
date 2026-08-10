@@ -1369,3 +1369,79 @@ tarih aralığı, aynı sonuç. Bu, "hareketi kovalama tuzağı" bulgusunun en g
 
 **SINIR:** tek rejim (46 gün AYI/NOTR) · funding/OI yok (tam evren için mevcut değil) ·
 tetik anı seçildiği için "önceden görülebilirlik" bu ölçümün konusu değil.
+
+## ⭐⭐⭐⭐ HAREKET ÖNCESİ ÖRÜNTÜ — sinyal VAR, ama neden işe yaramadığı ÇÖZÜLDÜ (2026-08-10)
+
+**Kalan tek soru:** tetik anında örüntü tanımlayıcıydı; ya hareketin **öncesi**?
+225.056 bar tarandı, 570 sembol, 46 gün. Araçlar: `scratchpad/oncesi_oruntu.py` · `oncesi_getiri.py`.
+
+### A) GERİYE BAKIŞ — yükselenlerin öncesi ayrışıyor mu? (rastgele = %25)
+
+| Ölçü | −1s | −3s | −6s | −12s | −24s |
+|---|---|---|---|---|---|
+| chg_24h | 90.0 | 72.4 | 54.4 | 33.7 | 42.5 |
+| pos20 | 78.7 | 66.4 | 62.0 | 44.8 | 44.3 |
+| chg_6h | 76.0 | 59.1 | 52.9 | 48.3 | 45.1 |
+| **hacim_kat_1h** | **63.6** | 49.5 | 39.7 | 31.3 | 33.6 |
+| atr_patlama | 56.4 | 46.8 | 36.7 | 29.5 | 26.2 |
+| sikisma | 51.2 | 42.5 | 39.3 | 27.0 | 27.4 |
+| **taker_alis_pay** | **25.6** | **25.2** | **25.6** | **25.7** | **26.0** |
+
+Ayrışma **−1 saatte güçlü, −6 saatte yarılanmış, −24 saatte gürültü.** Yani "önceden görme
+penceresi" pratikte 1-3 saat. Taker alış payı **beş mesafede de tam rastgele** — kayda değer.
+
+### B) İLERİYE BAKIŞ — bu özelliğe sahip barların kaçı tetiğe yol açtı?
+**Taban oran %5.68** (rastgele bir bardan sonraki 24 saatte +%10 tetiği olma olasılığı):
+
+| Koşul | N | tetik % | **KAT** | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| **chg_6h ≥ %3** | 16.420 | **19.29%** | **3.40** | 19.47 | 19.09 |
+| hacim≥3 & chg_6h≥3 | 5.490 | 18.93% | 3.33 | 18.97 | 18.87 |
+| hacim≥6 & pos20≥0.85 | 1.419 | 16.35% | 2.88 | 16.57 | 16.15 |
+| chg_24h %3-8 (usulca) | 26.604 | 12.50% | 2.20 | 12.30 | 12.73 |
+| pos20 ≥ 0.85 | 20.536 | 11.61% | 2.05 | 12.72 | 10.57 |
+| hacim_kat_1h ≥ 6 | 6.015 | 11.27% | 1.99 | 11.56 | 10.96 |
+| **sikisma < 0.65** | 11.575 | **5.33%** | **0.94** | 5.68 | 4.93 |
+| pos20 ≤ 0.15 | 33.967 | 3.49% | 0.61 | 3.66 | 3.33 |
+
+**Tahmin edici yapı GERÇEKTEN VAR:** `chg_6h ≥ %3` tetik olasılığını **3,4 katına** çıkarıyor,
+iki zaman yarısında da neredeyse aynı (19.47 / 19.09). Bu bir tarama artığı değil.
+**Sıkışma (HAZIRLANIYOR'un çekirdeği) hiçbir şey söylemiyor: KAT 0.94.**
+
+### C) ⭐ AMA PARA KAZANDIRMIYOR — ve nedeni tam olarak ölçüldü
+Aynı sinyallerde LONG açılsaydı (botun A-stopu, maliyet %0,09):
+
+| Sinyal | hedef %2.5 net | isabet | başabaş | ham +24s medyan | pozitif |
+|---|---|---|---|---|---|
+| chg_6h ≥ %3 | **−0.27%** | %39.8 | %44.3 | −1.03% | %40 |
+| hacim≥3 & chg_6h≥3 | −0.22% | %43.0 | %46.1 | −1.50% | %36 |
+| hacim≥6 & pos20≥0.85 | −0.28% | %40.1 | %45.7 | −1.67% | %36 |
+| pos20 ≥ 0.85 | −0.14% | %31.6 | %34.4 | −0.45% | %43 |
+| **KONTROL (rastgele)** | **−0.13%** | %27.8 | %28.6 | **−0.24%** | **%46** |
+
+**Her sinyal kontrolden DAHA KÖTÜ.** Ve %10 hedefte de aynı (hepsi −0.15…−0.31, kontrol −0.26).
+
+### ⭐⭐ MEKANİZMA — "hareket kovalama tuzağı"nın matematiksel açıklaması
+Sinyal isabeti **gerçekten artırıyor**: kontrol %27.8 → chg_6h≥3 ile %39.8 (**+%43**).
+Ama aynı sinyal **stop mesafesini daha çok genişletiyor**: kontrol %1.00 → sinyalde %1.99 (**+%99**).
+Başabaş oranı stop mesafesiyle birlikte yükseldiği için (%28.6 → %44.3), artan isabet
+yetmiyor — net kötüleşiyor.
+
+> **GENELLENEBİLİR KURAL:** *Yön değil sadece HAREKET öngören her sinyal değersizdir,
+> çünkü stop mesafesi hareketle birlikte büyür ve fazladan isabeti fazlasıyla yer.*
+> Bir sinyalin işe yaraması için isabeti, stop genişlemesinden **daha hızlı** artırması gerekir.
+> A+B tam da bunu yapıyor (isabet %37.9 / başabaş %29.4, hedef %10) — çünkü yönü de söylüyor.
+
+Bu, projedeki tüm "kovalama" ölçümlerinin (erken-kuşak, beta-rotasyon, breakout, F1,
+gainer'a binme) ortak sebebini tek cümlede topluyor. 225.056 barla ölçüldü.
+
+### HÜKÜM
+1. Hareket öncesi tahmin edici yapı **var** (3,4 kat) ve **kararlı** — ama yalnızca hareketin
+   *olacağını* söylüyor, *yönünü* değil.
+2. Bu yapıyla LONG açmak kontrolden kötü. **Kod değişikliği YOK.**
+3. Sıkışma tabanlı "pump öncesi" sezgisi (HAZIRLANIYOR'un çekirdeği) tetik tahmininde
+   **hiçbir şey** katmıyor (KAT 0.94) — ama A+B ∩ HAZIRLANIYOR hücresi SHORT tarafında güçlü
+   (+4.63%), yani değeri "pump öncesi" olmasından değil **fade kurulumu** olmasından geliyor.
+
+**SINIR:** tek rejim (46 gün AYI/NOTR) · funding/OI tam evrende yok · yalnız LONG denendi
+(sinyal yön söylemediği için SHORT'u da ayrıca ölçmek gerekirdi; A+B zaten o işi yapıyor).
