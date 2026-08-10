@@ -761,18 +761,29 @@ def _cikar_havuzdan(pool_syms, st, cooldown_saat):
 
 
 def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
-                  olc_override=None, kaynak=None):
+                  olc_override=None, kaynak=None, red_out=None):
     """olc_override / kaynak: 2026-08-05'te eklendi, IKISI DE None iken davranis BIREBIR AYNI.
     olc_override: {"stop":..,"tp1":..,"tp2":..} — kullanici panelden stop/hedef duzenlerse.
       GIRIS FIYATI ve RISK-ONCE BOYUTLANDIRMA aynen korunur (2026-08-03 onarimi bozulmaz);
       yalnizca seviyeler degisir, boyut yeni stop mesafesine gore YENIDEN hesaplanir.
-    kaynak: pozisyona ve kapanan kayda yazilir ("elle"). Karne ayrimi bunun uzerinden."""
+    kaynak: pozisyona ve kapanan kayda yazilir ("elle"). Karne ayrimi bunun uzerinden.
+
+    red_out: 2026-08-10 — bu fonksiyonun retleri SESSIZDI (rr_veto haric). Karar_yon "SHORT"
+      dedigi halde islem acilmiyordu ve hicbir yerde sebebi yazmiyordu: 08-08'de KMNO 19 kez
+      SHORT karari aldi, 19'u da burada oldu, panelde "SHORT/ANINDA" gorunuyordu.
+      Liste verilirse red sebebi {"kapi","detay","yon","olc"} olarak eklenir. Verilmezse
+      davranis BIREBIR AYNI (mevcut cagiranlar degismedi)."""
+    def _red(kapi, detay, olc=None):
+        if red_out is not None:
+            red_out.append({"kapi": kapi, "detay": detay, "yon": yon, "olc": olc})
+        return False
+
     skor = r["score"]
     smart_hiz = smart_hizali_mi(yon, pillar.get("smart"))
     try:
         olc = olcucu.measure(sym, yon.lower(), "1h", 100, spot=False)
-    except Exception:
-        return False
+    except Exception as e:
+        return _red("olcum_hatasi", f"olcucu.measure patladi: {str(e)[:80]}")
     if olc_override:
         for a in ("stop", "tp1", "tp2"):
             if olc_override.get(a) is not None:
@@ -781,7 +792,8 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
         # 2026-07-10: bu ret onceden SESSIZDI ("bot neden girmedi" cevabinda kor nokta) -> olcum loguna eklendi
         _veto_logla(st, sym, r, pillar, "rr_veto",
                     f"NET R/R {olc.get('rr_tp1_net')} < 1:2 (Olcucu mekanik veto)", yon, rejim_ad or "BILINMIYOR")
-        return False  # edge kanitlanmamis giris -> mekanik veto (Olcucu ile ayni disiplin)
+        # edge kanitlanmamis giris -> mekanik veto (Olcucu ile ayni disiplin)
+        return _red("rr_veto", f"NET R/R {olc.get('rr_tp1_net')} < 1:2", olc)
     giris_piyasa, stop, tp1_yapisal, tp2 = olc["giris"], olc["stop"], olc["tp1"], olc["tp2"]
     cst = _maliyet()
     giris_ef = maliyet_uygula_giris(giris_piyasa, yon, cst)
@@ -809,7 +821,7 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     #   ALTINDA kalir. Bu guvenli yondur; asla hedefin USTUNE cikilmaz.
     stop_frac = abs(giris_ef - stop) / giris_ef if giris_ef else 0.0
     if stop_frac <= 0:
-        return False
+        return _red("stop_gecersiz", f"stop_frac={stop_frac} (giris={giris_ef} stop={stop})", olc)
     hedef_risk = st["equity"] * float(_c("islem_risk_pct", 5)) / 100.0
     if not smart_hiz and pillar.get("smart") not in (None, "NOTR"):
         hedef_risk /= 2.0                      # smart karsi yonde -> RISK yari
@@ -821,7 +833,8 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     if kaldirac is None:
         kaldirac = 2 if zorla else None
         if kaldirac is None:
-            return False  # stop cok genis -> hicbir kaldiracta guvenli degil
+            # stop cok genis -> hicbir kaldiracta guvenli degil (stop likidasyondan SONRA kalirdi)
+            return _red("kaldirac_guvenlik", f"stop %{stop_frac*100:.1f} -> guvenli kaldirac yok", olc)
     notional = marjin * kaldirac
     miktar = notional / giris_ef
     risk_usdt = stop_frac * notional
@@ -857,6 +870,19 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
                      f"giris={giris_ef:.6g} stop={stop:.6g} tp1={tp1:.6g} skor={skor} — {sebep}")
     toast_gonder("TestBot GIRIS", f"{sym} {yon} {kaldirac}x skor={skor}")
     return True
+
+
+def _golge(sym, yon, r, pillar, kapi, detay="", rejim_ad=None):
+    """Reddedilen girisi GOLGE deftere yaz (2026-08-10). FAIL-SAFE: golge.py yoksa,
+    coker veya yavaslarsa BOT ETKILENMEZ — olcum katmani hicbir zaman karar
+    katmanini durduramaz. Karar/veto mantigina HICBIR dokunus yok; bu cagri yalnizca
+    'reddedilen giris ne yapardi' sorusunu olculebilir kilar."""
+    try:
+        import golge
+        return golge.ac(sym, yon, r, pillar, kapi, detay, rejim_ad)
+    except Exception as e:
+        print(f"[{now_iso()}] golge kaydi atlandi (bot etkilenmedi): {str(e)[:90]}")
+        return False
 
 
 def yeni_giris_ara(st, rejim):
@@ -958,13 +984,23 @@ def yeni_giris_ara(st, rejim):
         if not karar:
             for v in vlist:  # reddedilen aday -> olcum logu (davranis degismedi, sadece kaydediliyor)
                 _veto_logla(st, sym, r, pillar, v["kategori"], v["detay"], v["olurdu_yon"], rejim.get("rejim"))
+            if vlist and vlist[0].get("olurdu_yon"):   # ilk veto = karari kesen kapi
+                _golge(sym, vlist[0]["olurdu_yon"], r, pillar, vlist[0]["kategori"],
+                       vlist[0].get("detay", ""), rejim.get("rejim"))
             bekleyenler.pop(sym, None)
             continue
         yon, mod, sebep = karar
 
         if mod == "ANINDA":
             bekleyenler.pop(sym, None)
-            yeni_giris_ac(st, sym, yon, r, pillar, sebep, rejim_ad=rejim.get("rejim"))
+            red = []
+            if not yeni_giris_ac(st, sym, yon, r, pillar, sebep,
+                                 rejim_ad=rejim.get("rejim"), red_out=red):
+                # Karar VERILDI ama giris kapisinda oldu (rr_veto / kaldirac_guvenlik / ...).
+                # 08-08 KMNO: 19 kez buraya dustu ve hicbir yerde gorunmedi.
+                if red:
+                    print(f"[{now_iso()}] GIRIS-KAPISI {sym} {yon}: {red[0]['kapi']} — {red[0]['detay']}")
+                    _golge(sym, yon, r, pillar, red[0]["kapi"], red[0]["detay"], rejim.get("rejim"))
             continue
 
         # ONAY_BEKLE: bu adayi ilk kez mi goruyoruz?
@@ -980,12 +1016,20 @@ def yeni_giris_ara(st, rejim):
             soguma_ok = (yon != "SHORT") or (taker_onay is None) or (taker_onay < taker_esigi)
             if onceki["cycle_sayaci"] >= 1 and soguma_ok:  # 1 tam cycle (5dk) gecti + ivme kirildi -> onayla
                 del bekleyenler[sym]
-                yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)", rejim_ad=rejim.get("rejim"))
+                red = []
+                if not yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)",
+                                     rejim_ad=rejim.get("rejim"), red_out=red) and red:
+                    print(f"[{now_iso()}] GIRIS-KAPISI {sym} {yon}: {red[0]['kapi']} — {red[0]['detay']}")
+                    _golge(sym, yon, r, pillar, red[0]["kapi"], red[0]["detay"], rejim.get("rejim"))
             elif onceki["cycle_sayaci"] >= 1 and not soguma_ok:  # onaya hazir ama taker sogumadi -> bekletiliyor (olcum)
                 _veto_logla(st, sym, r, pillar, "taker_soguma",
                             f"SHORT onay bekletildi: taker={taker_onay} >= {taker_esigi} (pump ivmesi surer)", "SHORT", rejim.get("rejim"))
         else:
             bekleyenler[sym] = {"yon": yon, "skor": r["score"], "ilk_gorulme_ts": now_iso(), "cycle_sayaci": 0}
+            # ONAY_BEKLE'nin kendisi de bir KAPI: son 7 gunde 33 aday burada bekledi, hicbiri
+            # onaylanmadi (aday ilk-10'dan dusunce iptal). "Beklemek para kazandiriyor mu yoksa
+            # firsati mi kaciriyor" sorusu ancak beklemeden girilen hali olculurse cevaplanir.
+            _golge(sym, yon, r, pillar, "onay_bekle", sebep, rejim.get("rejim"))
 
     # Aday evreni arsivi (2026-08-04) — dongü BITTIKTEN sonra, tek yazim. maks_poz'da break
     # olduysa geri kalan adaylarda pillar/karar null kalir; bu bilincli ve durustce bos yazilir.
@@ -1091,6 +1135,16 @@ def _cycle_ic():
         benim.tur()
     except Exception as e:
         print(f"[{now_iso()}] 'ben' hesabi turu atlandi (bot etkilenmedi): {e}")
+
+    # --- GOLGE DEFTER — 2026-08-10, kullanici karari ------------------------
+    # Botun REDDETTIGI girisler burada sanal olarak acildi; cikislari da BOTLA AYNI
+    # kurallarla yonetilmeli ki fark yalnizca "kapi acti mi kapatti mi"dan gelsin.
+    # Yeni giris ARAMAZ (girisler yalnizca yeni_giris_ara'daki red kancalarindan gelir).
+    try:
+        import golge
+        golge.tur()
+    except Exception as e:
+        print(f"[{now_iso()}] golge turu atlandi (bot etkilenmedi): {e}")
 
 
 # ---------- CLI yardımcıları ----------

@@ -901,7 +901,40 @@ def _kafa():
         "cooldown": cooldown,
         "acik_sayisi": len(st.get("acik_pozisyonlar") or []),
         "maks_pozisyon": testbot._c("maks_pozisyon", 4),
+        # GOLGE DEFTER (2026-08-10): reddedilen girislerin sanal karnesi. Bu sayfanin adi
+        # "Bot neden islem acmiyor?" — asil eksik cevap "peki acsaydi ne olurdu" idi.
+        "golge": _golge_ozet(),
+        # Sure: SURE_DOLDU'ya girince YENI GIRIS HIC olmaz; "bot girmiyor"un sessiz sebebi
+        # bu olabilir, o yuzden sayfada gorunur.
+        "sure": _sure_durumu(st),
     }
+
+
+def _golge_ozet():
+    """golge.py karnesi + acik golge pozisyon sayisi. Golge yoksa None (panel bozulmaz)."""
+    try:
+        import golge
+        gst = golge.yukle()
+        if not gst:
+            return None
+        return {"karne": golge.karne(), "acik": len(gst.get("acik_pozisyonlar") or []),
+                "equity": round(gst.get("equity", 0), 2),
+                "baslangic_bakiye": gst.get("baslangic_bakiye"),
+                "baslangic_ts": gst.get("baslangic_ts")}
+    except Exception:
+        return None
+
+
+def _sure_durumu(st):
+    """Testin kac gunu doldu — SURE_DOLDU yeni girisi TAMAMEN kapatir."""
+    try:
+        gecen = (testbot.now_dt() - testbot.parse_iso(st["baslangic_ts"])).total_seconds() / 86400
+        sure = float(testbot._c("sure_gun", 7))
+        return {"gecen_gun": round(gecen, 1), "sure_gun": sure,
+                "kalan_gun": round(max(0.0, sure - gecen), 1),
+                "durum": st.get("durum")}
+    except Exception:
+        return None
 
 
 def _gecmis():

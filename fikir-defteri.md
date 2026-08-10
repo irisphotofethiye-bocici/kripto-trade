@@ -506,7 +506,9 @@ mekanik bir çıktı. En büyük kayıp (BLESS −$488) en geniş stoplu işlemd
 >
 > **KALAN YAYILMA TAMAMEN GÜVENLİ YÖNDE ve sebebi ÖLÇÜLDÜ:** maksimum notional =
 > equity × marjin_pct(≤%12) × kaldıraç_max(10) = **1,2 × equity**. Yani %5 hedef riske
-> ulaşmak için stop ≥ **%4,17** olmalı; daha DAR stoplu işlemler hedefin altında kalıyor
+> ulaşmak için stop ≥ **%4,17** olmalı (replay o dönemin `islem_risk_pct`=5 ayarıyla
+> koşuldu; config bugün **3** → eşik **%2,5**'e iner, mekanizma aynı kalır);
+> daha DAR stoplu işlemler hedefin altında kalıyor
 > (PROM %1,48 → $139 = %1,4 risk; GRVT %1,37 → $151). Eski hatanın yönü (geniş stop → BÜYÜK
 > risk) TERSİNE döndü: artık geniş stop tam hedefte tavanlanıyor, dar stop hedefin altında.
 > **AÇIK KARAR (kullanıcıya):** dar stoplarda hedefe ulaşmak için `marjin_pct` yükseltilsin mi?
@@ -620,3 +622,66 @@ formül drift eder — evren.py'nin varlık sebebi zaten buydu).
 > klasöründe kalıp KAYBOLDU** — yani o ölçümler bugün yeniden koşulamıyor, yalnız sonuçları
 > kayıtlı. Bu oturumdan itibaren ölçüm scriptleri projedeki `scratchpad/` klasörüne yazılır ve
 > commit edilir (mum önbelleği gitignore'da). Ön-kayıt scriptin başında durur; sonuç defterde.
+
+## ⭐ GÖLGE DEFTER — "bot girmediği sürece ölçemeyiz" sorununun çözümü (2026-08-10, kullanıcı kararı)
+
+**TEŞHİS (kullanıcı sorusu "bot neden işleme girmiyor"):** Bot çalışıyordu — 7 günde 1141 tur,
+234 yön kararı/veto — ama **3 gündür hiç işlem açmamıştı** (son giriş KGEN LONG, 07 Ağu 19:30).
+
+Huni (2026-08-03 → 08-10, 6754 aday kaydı): blowoff 65 · taker_soguma 46 · btc_pay_freni 43 ·
+long_veto 26 · **LONG/ONAY_BEKLE 33 (hiçbiri onaylanmadı)** · **SHORT/ANINDA 21 (hiçbiri açılmadı)**.
+
+**İKİ AYRI KÖR NOKTA BULUNDU:**
+
+1. **`yeni_giris_ac`'ın retleri SESSİZDİ** (rr_veto hariç). 08-08'de KMNO **19 kez** SHORT kararı
+   aldı, 19'u da giriş kapısında öldü; panelde "SHORT/ANINDA" yazıyordu, sanki girmiş gibi.
+   Gerçek sebep: NET R/R 0.19 < 1:2. Üstelik veto logunun 12 saatlik tekrar-yazma engeli yüzünden
+   19 redden yalnız **1'i** loga düştü → hem sebep hem sıklık görünmezdi.
+   **Onarım:** `yeni_giris_ac(..., red_out=[])` — ret sebebi `{kapı, detay, yön, ölçüm}` olarak
+   döner (`olcum_hatasi` / `rr_veto` / `stop_gecersiz` / `kaldirac_guvenlik`), cycle logu da yazar.
+   Liste verilmezse davranış **birebir aynı** (mevcut çağıranlar değişmedi).
+
+2. **Kapıların haklı olup olmadığı ölçülemiyordu.** Bir kapının değeri "neyi engellediği"yle
+   ölçülür; engellenen işlem hiç açılmadığı için sonucu hiç bilinmiyordu. `veto_analiz.py` vardı
+   ama (a) dedup'lu logdan besleniyor, (b) sabit %8 stop-vekili kullanıyor — botun gerçek
+   ATR-stop'u/TP1'i değil. Yani yaklaşık, ve az sayıda olayla.
+
+### ÇÖZÜM: `golge.py` — reddedilen her girişin sanal karnesi
+Bot bir girişi reddettiğinde **aynı giriş gölgede açılır**: ölçücünün AYNI giriş/stop/tp1/tp2
+seviyeleri, botun AYNI çıkış kuralları (`testbot.yonet_acik_pozisyonlar` doğrudan çağrılır,
+mantık kopyalanmaz — `benim.py` deseni), AYNI risk-önce boyutlandırma. Ayrı kasa/dosyalar.
+Pozisyon `kapi` etiketiyle işaretlenir → kapı bazında karne:
+
+> ort R **negatif** → kapı HAKLI (zarardan korudu, dokunma)
+> ort R **pozitif** → kapı para yakıyor OLABİLİR → N≥25-30 + çoklu rejim şartıyla tartışılır
+
+**Kapsanan kapılar:** karar_yon vetoları (blowoff / taker_soguma / long_veto / btc_pay_freni) ·
+giriş kapıları (rr_veto / kaldirac_guvenlik / stop_gecersiz) · **onay_bekle** (beklemenin kendisi
+de bir kapı: 33 aday burada öldü — "beklemek kazandırıyor mu, fırsat mı kaçırıyor" ancak
+beklemeden girilen hali ölçülürse cevaplanır).
+
+**NEDEN KAPI GEVŞETMEK DEĞİL DE BU (kararın gerekçesi):** Kapıyı gevşetip sonuca bakmak,
+hipotezi sermayeyle test etmektir; gölge defterde hipotez **bedava** test edilir. Ayrıca
+[[giris-mekanizmasi-mukemmel]] dersi: onay gevşetilmez, risk başka pilarlarla yönetilir.
+**Karar kapılarında HİÇBİR değişiklik yapılmadı.** Ölçüm N'i haftada ~2'den ~30'a çıkar.
+
+**Fail-safe:** tüm `_golge` çağrıları try/except içinde; gölge çöker/yavaşlarsa bot etkilenmez
+(ölçüm katmanı hiçbir zaman karar katmanını durduramaz). Gölge girişleri Telegram/toast
+GÖNDERMEZ (alarm maliyeti dürüstlüğü, Karmaşıklık Bütçesi md.4).
+
+**Tekrar-sayım koruması:** sembol başına 4 saatte bir gölge (KMNO'nun 19 kaydı = 1 olayın 19 kez
+sayılması = sahte N). Botun kendi cooldown'uyla aynı büyüklük.
+
+**Panel:** "Bot neden işlem açmıyor?" sayfasına gölge karnesi tablosu eklendi + tıkla-aç açıklama.
+
+### YAN BULGU — testin süresi doluyor (sessiz üçüncü sebep)
+`sure_gun=19`, başlangıç 07-23 19:07 → **11 Ağustos 19:07'de SURE_DOLDU**. O andan itibaren bot
+açık pozisyonları yönetmeye devam eder ama **yeni giriş HİÇ aramaz**. "Bot girmiyor"un yakında
+gelecek en büyük sebebi bu olacaktı ve hiçbir yerde görünmüyordu → panele süre uyarısı eklendi
+(kalan ≤2 gün veya durum≠AKTİF ise kırmızı şerit). **Uzatma kararı kullanıcıya ait, otomatik
+uzatılmadı.**
+
+**SINIR (dürüstlük):** kancalar canlı turda henüz TETİKLENMEDİ — değişiklikten bu yana hiçbir
+aday reddedilmedi (piyasa sakin, hepsi "karar-yok"). Kablo testi elle doğrulandı (`testbot._golge`
+→ gölge pozisyon açıldı, `kapi`/`kaynak` etiketleri doğru), test artıkları silinip defter temiz
+bırakıldı. İlk gerçek kayıt ilk redde oluşacak.

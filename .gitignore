@@ -60,3 +60,8 @@ Thumbs.db
 # Olcum scriptlerinin mum onbellegi (buyuk, yeniden uretilebilir)
 scratchpad/klines_cache/
 scratchpad/*.json
+
+# Golge defter runtime (reddedilen girislerin sanal karnesi, 2026-08-10)
+golge_state.json
+golge_islemler.jsonl
+golge_equity.jsonl
