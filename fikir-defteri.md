@@ -786,3 +786,129 @@ dip-bıçak koruması, taker≥1.0 aynen duruyor). Tahmini bant: 7 günde 97 →
 bundan BÜYÜK olacak, çünkü HAZIRLANIYOR sıra bonusunun kısa listeye sokacağı adaylar bu simülasyonda
 görünmüyor (arşiv yalnız top-10'a girmişleri taşıyor).
 Config yedeği: `kripto-config.json.yedek-2026-08-10` (anahtar içerir, gitignore'da).
+
+## ⭐⭐⭐ ÖRÜNTÜ ANALİZİ — 46 günlük radar arşivi + 10 gerçek işlem (2026-08-10, kullanıcı kararı)
+
+**Talep:** "botun işlem açtığı ve kâr ettiği bütün varsayımları nasıl sağladı, her eşik ve ölçme
+birimini detaylı araştırıp bir örüntü üret · elinde 2 aya yakın radar verisi ve bota takılanlar var."
+
+**Veri:** `radar_archive.jsonl` 121.620 kayıt / 384 sembol / 46 gün (06-24 → 08-10) → sembol başına
+6 saat dedup ile **7.119 bağımsız olay**. Her olay botun GERÇEK mekaniğiyle ileri oynatıldı:
+giriş = kaydın ertesi 1h barının açılışı · stop = ölçücünün A-varyantı (yapısal ±0.25ATR / son 10
+barın ucu ±0.25ATR / 1.5ATR yedeği arasından **girişe en yakın**) · hedef 2R · ufuk 72s · **fitil
+bazlı** · aynı barda ikisi de → STOP · maliyet 0.04R.
+Araçlar: `scratchpad/oruntu_analiz.py` · `oruntu_rapor.py` · `oruntu_bilesik.py` · `cikis_karsilastirma.py`.
+Grafikli rapor: artifact (bkz. oturum notu).
+
+### BULGU 1 ⭐ — Ödül/risk asimetrisi: kayıplar TAM, kazançlar KIRPIK
+10 pozisyonun **10'u da STOP ile kapandı. TP2'ye bir kez bile ulaşılmadı.**
+Gerçekleşen R: kaybedenler ort **−1.03** (aralık −1.01…−1.05), kazananlar ort **+0.62**
+(+0.01 / +0.05 / +0.76 / +1.65). Bu ödül profiliyle başabaş kazanma oranı **%62**; fiili **%40**.
+
+**Kâr tek işlemden:** GRVT +$446 = toplam kârın **%89'u**. Diğer üç kazanan pratikte sıfır.
+→ "Kazanan profili" dört gözlemlik, pratikte **bir** işlemlik. Popülasyon sınaması bu yüzden zorunluydu.
+
+### BULGU 2 — Çıkış mekaniği SUÇLU DEĞİL (hipotezim çürüdü)
+Aynı 10 giriş, üç çıkış kuralıyla yeniden oynatıldı (`cikis_karsilastirma.py`):
+
+| Çıkış kuralı | ort R | kazanma |
+|---|---|---|
+| SAF 2R (trailing yok, kısmi yok) | −0.400 | %20 |
+| SAF 1.5R | −0.500 | %20 |
+| **GERÇEK (trailing + kısmi TP1)** | **−0.368** | **%40** |
+
+Trailing + kısmi kâr, iki işlemi −1.00R'den +0.76R ve +0.01R'ye çevirdi. **Çıkış katmanı üçünün
+en iyisi.** Sorun GİRİŞ SEÇİMİNDE: 10 girişin 8'i herhangi bir hedefe varmadan stopu gördü.
+
+### BULGU 3 ⭐⭐ — Kazananların ortak özelliği ÇÜRÜDÜ (işaret olarak TERS)
+Dört kazananın tek ortak yanı: hepsi 20-bar aralığın tepesinde (**pos ≥ 0.86**, popülasyonun
+%91-98'inin üstünde). Ön-kayıtlı profil (SHORT · pos≥0.85 · 0<chg24<40) 7.119 olayda sınandı:
+
+| | N | ort R |
+|---|---|---|
+| PROFİL | 638 | **−0.090** |
+| KONTROL (profil dışı) | 6481 | −0.018 |
+
+**Profil kontrolden DAHA KÖTÜ**, ve iki zaman yarısında da öyle (A −0.118 / B −0.060).
+SHORT için pos bandı tablosu tam ters yönde: 0-0.25 → **+0.017** · 0.25-0.5 → −0.013 ·
+0.5-0.7 → −0.031 · 0.7-0.85 → **−0.090** · 0.85+ → **−0.071**.
+**Range tepesinden SHORT en kötü bant; range dibinden SHORT tek pozitif bant.**
+
+> **DERS (altıncı tekrar):** Dört gözlemden örüntü çıkarmak, o dört gözlemin ortak yanını
+> "sebep" sanmaktır. Dördü de tepedeydi ama tepede olmak kazandırmadı — piyasa o dönem
+> tepeleri fazlasıyla cezalandırdı, kazananlar oraya rağmen çıktı. Kontrol grubu olmasaydı
+> bu profil koda girerdi.
+
+### BULGU 4 ⭐⭐⭐ — GERÇEK ÖRÜNTÜ (dört koşul, hepsi iki zaman yarısında da pozitif)
+Eşikler **icat edilmedi**, hepsi sistemin zaten taşıdığı config değerleri:
+
+| | Koşul | N | ort R | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| **A** | `funding ≤ −0.05` (%/8s) | 508 | **+0.259** ±0.063 | +0.250 | +0.269 |
+| **B** | `oi24 ≥ %10` | 803 | **+0.189** ±0.050 | +0.151 | +0.228 |
+| **C** | `skor ≥ 40` | 405 | **+0.200** ±0.070 | +0.097 | +0.312 |
+| **D** | `stage = HAZIRLANIYOR` | 114 | **+0.247** ±0.133 | +0.113 | +0.352 |
+| X | `pos ≥ 0.85` (kazananların profili) | 715 | **−0.071** ±0.052 | −0.091 | −0.049 |
+
+**Kesişimler:**
+
+| Kombinasyon | N | ort R | A | B |
+|---|---|---|---|---|
+| **A + B** | **206** | **+0.375** ±0.098 | +0.253 | +0.510 |
+| A + C | 211 | +0.366 ±0.097 | +0.194 | +0.553 |
+| A + B + C | 192 | +0.369 ±0.101 | +0.199 | +0.566 |
+| B + C | 354 | +0.212 ±0.074 | +0.118 | +0.317 |
+| A + D | 33 | +0.740 ±0.232 | +0.334 | +1.039 |
+
+Kontrol grubu her satırda ≈ **−0.03**. **A+B en savunulabilir hücre**: N=206, ~3,8 SE,
+iki yarıda da pozitif. A+D daha yüksek ama N=33 → izlenim.
+
+> **ÖRÜNTÜ (tek cümle):** *Shortlar kalabalık (funding ≤ −0.05) ve pozisyon birikiyor
+> (oi24 ≥ %10) iken SHORT; aşama HAZIRLANIYOR ve skor ≥ 40 ise daha güçlü; range konumu
+> DÜŞÜK olmalı, yüksek değil.*
+
+**Mekanizma:** kalabalık short + biriken açık pozisyon = "squeeze yakıtı" DEĞİL **dağıtım**
+işareti. Fiyat henüz yatayken (HAZIRLANIYOR: sıkışmış + |last3|<%4) pozisyon birikiyorsa hareket
+aşağı çözülüyor. **Bot bunun tersini yapıyordu:** hareket başladıktan SONRA (BASLIYOR, R −0.04)
+ve tepeden (pos≥0.85, R −0.07) giriyordu.
+
+**SİMETRİ KONTROLÜ (örüntünün gürültü olmadığının en güçlü kanıtı):** aynı koşullar LONG
+tarafında simetrik NEGATİF — A −0.337 · B −0.278 · C −0.286 · D −0.134. Koşullar sadece
+"oynaklık" işaretlemiyor, **yön taşıyorlar**.
+
+**ÜÇÜNCÜ BAĞIMSIZ DOĞRULAMA:** derin negatif funding bulgusu, projenin daha önce iki ayrı
+ölçümle (zemin etüdü + skor otopsisi `squeeze_bonus`) vardığı sonuca üçüncü kez ulaşıyor:
+derin negatif funding "yukarı squeeze yakıtı" değil, **düşüşe devam işareti**.
+
+### BULGU 5 — Skor monoton, ama YALNIZ short tarafında
+skor 0-30 → −0.046 · 30-40 → +0.093 · 40-45 → +0.167 · **45-60 → +0.205 (botun kapısı)** ·
+60-80 → +0.234 · 80+ → +0.460 (N=4, izlenim). Tekdüze artıyor → **skorda gerçek bilgi var.**
+Aynı skor LONG tarafında **−0.286**. Sebebi skorun yapısında: 113 puanın **35'i** açık pozisyon
+değişiminden, 20'si hacimden geliyor → yüksek skor "pozisyon birikmiş" demek, "yükselecek" değil.
+Bu, SKOR OTOPSİSİ BULGU 1-2'nin (dedektör + ters işaret) bağımsız doğrulaması.
+
+### BULGU 6 ⚠️ — BUGÜN AÇTIĞIM İKİ KURAL ÖLÇÜMLE ÇELİŞİYOR
+Tur-3'te (aynı gün, ölçümden ÖNCE) açılan NOTR-fade dalı, ölçümün **en kötü iki hücresine** giriyor:
+
+| Ayar | Değer | Ölçülen R | N | Hüküm |
+|---|---|---|---|---|
+| `notr_fade_pos_ust` | 0.75 → SHORT | −0.090 / −0.071 | 1741 | ✕ **ters yönde** |
+| `notr_fade_pos_alt` | 0.40 → LONG | −0.155 / −0.165 | 3979 | ✕ **ters yönde** |
+| `radar_short_skor` | 45 | +0.205 | 201 | ✓ doğru |
+| `hazirlaniyor_sira_bonus` | 8.0 | +0.247 | 114 | ✓ doğrulandı |
+| `ayi_short_chg24_max` | 20 | −0.119 (chg24 20-40) | 45 | ✓ doğru |
+| `funding_derin_neg_pct` | −0.05 (kapıda kullanılmıyor) | **+0.259** | 508 | ◆ kapı adayı |
+| `oi_hizli_degisim_pct` | 5 (yalnız veto) | **+0.189** (≥10) | 803 | ◆ kapı adayı |
+
+**AKSİYON ALINMADI — kullanıcı kararı bekliyor.** Önerim: `notr_fade_acik: 0` ile kapat
+(dal ölçümsüz açılmıştı, artık ölçüm var ve karşı çıkıyor), yerine **A+B'yi ÖLÇÜM KATMANI**
+olarak ekle (kapı değil): koşul sağlanınca aday "A+B" etiketiyle işaretlensin, 25-30 canlı
+olay biriktikten sonra kapı tartışması açılsın — erken-kuşak modelinin aynısı.
+
+### SINIRLAR (hükümle birlikte okunur)
+1. **46 günün tamamı AYI/NOTR — boğa hücresi YOK.** Örüntü tek rejimde doğrulandı.
+2. Pillar D (smart / taker) radar arşivinde yok → o iki kapı bu ölçümde sınanamadı.
+3. Ölçüm 2R hedefli; botun fiili çıkışı 1.5R kısmi + trailing → **gerçekte elde edilecek R
+   bu tablodan KÜÇÜK olur** (BULGU 1: sistem 2R'ye hiç ulaşmadı).
+4. Slipaj yok sayıldı; düşük hacimli sembollerde iyimser.
+5. A+D (+0.740) cazip ama N=33 — karar için yetersiz, eşik oynatmaya davetiye.

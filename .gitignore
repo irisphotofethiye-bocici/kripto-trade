@@ -68,3 +68,7 @@ golge_equity.jsonl
 
 # Config yedekleri — ANAHTAR ICERIR, asla commit edilmez
 kripto-config.json.yedek-*
+
+# Olcum scriptlerinin ara ciktilari (buyuk, yeniden uretilebilir)
+scratchpad/oruntu_olaylar.json
+scratchpad/klines_1h/
