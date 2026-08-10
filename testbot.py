@@ -262,6 +262,9 @@ def _aday_arsivle(aday_rows, rejim_ad, btc_chg3):
                          "top_ls": p.get("top_ls"), "glob_ls": p.get("glob_ls"),
                          "taker": p.get("taker"), "smart": p.get("smart"),
                          "float_oran": r.get("_float_oran"), "dusuk_float": r.get("_dusuk_float"),
+                         # 2026-08-11: MA50+ucuz kapisinin iki girdisi de arsive gecer ki
+                         # kapinin karnesi geriye donuk cozumlenebilsin (fiyat zaten 'price').
+                         "ma50_mesafe": r.get("ma50_mesafe"),
                          "karar": r.get("_karar"),
                          # 2026-08-10: karar_yon "SHORT/ANINDA" dese bile giris kapisi (rr_veto /
                          # kaldirac_guvenlik) oldurebiliyordu ve arsivde bu GORUNMUYORDU —
@@ -398,6 +401,46 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
         return ("SHORT", "ANINDA",
                 f"A+B: funding {r['funding']:.3f} (short kalabalik) + oi24 {oi24:+.0f}% "
                 f"(pozisyon birikiyor) [2026-08-10, arsiv olcumu +0.396R N=201]")
+
+    # ================= MA50+UCUZ KAPISI (2026-08-11, KULLANICI KARARI, Madde 9) ===========
+    # [NE] fiyat <= $0.07  VE  MA50 mesafesi >= %3.72  ->  SHORT.
+    #   Turkce: UCUZ bir coin 50 saatlik ortalamasinin belirgin ustune cikmissa -> asagi.
+    # [NEDEN] YON AVI (2026-08-10): stop/hedef olmadan, ham "rel24 = coin 24s - BTC 24s"
+    #   uzerinden 6.790 olayda tarandi. Ayi piyasasinda her sey duser; asil yon olcusu
+    #   PIYASADAN AYRISMA. Kararli (iki zaman yarisinda da ayni isaret) olculer:
+    #     MA50 mesafesi -1.76 (A -1.70 / B -1.87)  <- en guclu tek olcu
+    #     fiyat seviyesi (log10) +1.57 (A +2.18 / B +1.03)  <- ucuz coin BTC'nin ALTINDA
+    #     radar skoru -1.55 · son 24s -1.44 · MA200 -1.43 · oi24 -0.91 · mcap -0.51
+    #   RASTGELE CIKANLAR: gercek taker orani (-0.07) · sikisma (-0.17) · hacim kati (+0.03).
+    # [OLCUM — botun gercek mekanigiyle, hedef %10 / 72s / A-stop / maliyet %0.09]
+    #     bu kapi          N=460  net +0.84%  (A +0.99 / B +0.72)  isabet %29.8 / basabas %25.9
+    #     A+B (mevcut)     N=197  net +2.14%  (A +2.38 / B +1.90)
+    #     kesisim          N= 65  net +2.53%  (A +2.82 / B +1.94)  <- en guclu hucre
+    #     KONTROL          N=6790 net -0.05%
+    # [NEDEN EKLENDI] Ortusme analizi: yalniz-bu-kapi 407 olay x +0.55% = +226 EK katki.
+    #   Birlesim 604 olay x +1.07% = +648 (A+B tek basina +422) -> toplam edge %54 artar.
+    #   Bedeli: islem basi beklenti +2.14 -> +1.07. Bot 8 pozisyon kapasitesini zaten
+    #   kullanamiyordu; olay sayisini 2,3 katina cikarmak olcum hizini da artirir.
+    # [ESIKLER ICAT EDILMEDI] Ikisi de olcumun kendi dagiliminin ceyreginden:
+    #   fiyat = %20'lik dilim ($0.07) · ma50_mesafe = %80'lik dilim (%3.72).
+    # [KORUNANLAR] pump kapisi · dip-bicak · asiri_dusmus · BTC-PAY short freni ·
+    #   kaldirac guvenlik kirpmasi. TAM_BOGA'da KAPALI (olcumde boga hucresi yok).
+    # [SINIR] Fiyat seviyesi bir COIN-TIPI vekilidir (ucuz = genelde yuksek arz/yeni/
+    #   spekulatif). Rejim degisince iliski DONEBILIR — bogada ucuz coinler one gecebilir.
+    #   Ayrica ham fiyat esigi zamanla kayar; yeniden olculmeden yillarca birakilmamali.
+    # GERI ALMA: kripto-config.json -> esikler.ma50_kapisi_acik: 0
+    if (evren.esik("ma50_kapisi_acik", 1) >= 1 and rejim_ad in ("AYI", "NOTR")
+            and r.get("ma50_mesafe") is not None and r.get("price")
+            and r["price"] <= evren.esik("ucuz_fiyat_esik", 0.07)
+            and r["ma50_mesafe"] >= evren.esik("ma50_mesafe_esik", 3.72)
+            and not short_riskli_dip and not asiri_dusmus):
+        if pumplamis:
+            _veto_ekle(veto_out, "blowoff",
+                       f"MA50+ucuz pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
+            return None
+        return ("SHORT", "ANINDA",
+                f"MA50+ucuz: fiyat ${r['price']:.4f} (ucuz sinif) + MA50'nin "
+                f"%{r['ma50_mesafe']:.1f} ustunde [2026-08-11, yon avi +0.84% N=460]")
 
     if rejim_ad == "AYI":
         if r["stage"] == "BASLIYOR" and smart == "LONG" and (taker or 0) >= 1.0:
@@ -1032,8 +1075,11 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     # [SINIR] Olcum 1 SAATLIK mumla; bot 1 DAKIKALIK ile yonetiyor -> gercek MEVCUT biraz daha
     #   iyi olabilir. Funding maliyeti eklenmedi (uzun tutusta artar, MEVCUT lehine duzeltme).
     # GERI ALMA: kripto-config.json -> esikler.ab_sabit_hedef_pct: 0
+    # 2026-08-11: MA50+ucuz kapisi da ayni muameleyi gorur — olcumu de %10 hedefle
+    # yapildi (net +0.84%, A +0.99 / B +0.72). Kismi kar/trailing bu girislerde de kapali.
+    SABIT_HEDEF_KAPILARI = ("A+B", "MA50+ucuz")
     ab_hedef = evren.esik("ab_sabit_hedef_pct", 10.0)
-    if ab_hedef > 0 and str(sebep).startswith("A+B"):
+    if ab_hedef > 0 and str(sebep).startswith(SABIT_HEDEF_KAPILARI):
         pos["cikis_modu"] = "sabit_hedef"
         pos["tp1_alindi"] = True                     # kismi kar yolu kapali
         pos["tp2"] = round(giris_ef * (1 - ab_hedef / 100) if yon == "SHORT"

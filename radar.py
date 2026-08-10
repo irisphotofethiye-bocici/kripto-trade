@@ -84,7 +84,11 @@ def btc_ref():
         return 0.0, 0.0
 
 def analyze(sym, btc_chg3=0.0):
-    b = klines(sym, 50)
+    # 2026-08-11: 50 -> 60 bar. Sebep: MA50 mesafesi olcusu eklendi ve 50 barla MA50,
+    # fiyatin kendisini de iceren dejenere bir ortalama oluyordu. Diger tum hesaplar
+    # KUYRUK dilimlerini kullaniyor (son 6 / 20 / 24 bar) -> pencere buyumesi onlari
+    # ETKILEMEZ, skor ve stage BIREBIR ayni kalir.
+    b = klines(sym, 60)
     if len(b) < 25:
         return None
     price = b[-1]["c"]
@@ -154,10 +158,17 @@ def analyze(sym, btc_chg3=0.0):
     rel3 = round(last3 - btc_chg3, 2)
     ayrisma = bool(last3 > 0 and btc_chg3 <= 0 and rel3 > 3)
 
+    # MA50 MESAFESI (2026-08-11) — yon avinin en guclu tek olcusu (rel24 yon gucu -1.76,
+    # A -1.70 / B -1.87). Fiyatin 50 saatlik ortalamadan yuzde uzakligi. SKORA GIRMEZ,
+    # yalnizca karar katmanina bilgi olarak tasinir (skor formulu degismedi).
+    ma50 = statistics.mean([x["c"] for x in b[-50:]]) if len(b) >= 50 else None
+    ma50_mesafe = round((price / ma50 - 1) * 100, 2) if ma50 else None
+
     return {"sym": sym, "price": round(price, 6), "score": score, "stage": stage, "comp": round(comp, 2),
             "vol_x": round(vol_x, 1), "oi24": oi24, "oi3": oi3, "funding": f,
             "pos": round(pos, 2), "last1": round(last1, 1), "last3": round(last3, 1),
-            "dip_yakit": dip_yakit, "ayrisma": ayrisma, "rel3": rel3}
+            "dip_yakit": dip_yakit, "ayrisma": ayrisma, "rel3": rel3,
+            "ma50_mesafe": ma50_mesafe}
 
 def erken_kusak_tara(cryptos, tickers, haric=None, btc_chg3=0.0):
     """ERKEN KUSAK (2026-07-06): pump'i ERKEN yakalama evreni. Haftanin buyuk kazananlari (TLM +282%,

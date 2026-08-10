@@ -1558,3 +1558,48 @@ ikinci yarıdan geliyor. Tek dönemlik = kural yapılamaz. Yön avında da LONG 
 **AKSİYON ALINMADI** — ikinci kapı kullanıcı kararı bekliyor.
 **SINIR:** tek rejim · fiyat seviyesi bir *coin-tipi* göstergesi (ucuz coin = genelde yeni/spekülatif),
 rejim değişince ilişki dönebilir · kesişim hücresi N=65 (izlenim).
+
+### UYGULANDI — ikinci SHORT kapısı canlıda (2026-08-11, kullanıcı: "ekle")
+
+**Kural:** `fiyat ≤ $0.07` **ve** `MA50 mesafesi ≥ %3.72` → **SHORT**.
+*Ucuz bir coin 50 saatlik ortalamasının belirgin üstüne çıkmışsa → aşağı.*
+
+**Eşikler icat edilmedi:** ikisi de ölçümün kendi dağılımının çeyreğinden —
+fiyat %20'lik dilim ($0.07), ma50_mesafe %80'lik dilim (%3.72).
+
+**Kod değişiklikleri:**
+- `radar.analyze`: pencere 50 → **60 bar** (50 barla MA50, fiyatın kendisini de içeren dejenere
+  bir ortalamaydı). Diğer tüm hesaplar kuyruk dilimi kullanıyor (son 6/20/24 bar) → **skor ve
+  stage birebir aynı kaldı**. Yeni alan: `ma50_mesafe`.
+- `testbot.karar_yon`: A+B'nin hemen ardına yeni kapı; yalnız `rejim ∈ (AYI, NOTR)`,
+  **TAM_BOGA'da kapalı**.
+- **Çıkış A+B ile aynı:** sabit %10 hedef, kısmi kâr ve trailing kapalı (ölçüm o hedefle yapıldı).
+- `_aday_arsivle`: `ma50_mesafe` arşive yazılıyor → kapının karnesi geriye dönük çözümlenebilir.
+- Config: `ma50_kapisi_acik=1` · `ucuz_fiyat_esik=0.07` · `ma50_mesafe_esik=3.72`.
+
+**Birim testleri (hepsi geçti):** ucuz+MA50 üstü → SHORT/ANINDA · pahalı → karar-yok ·
+eşik altı → karar-yok · pumplamış → VETO:blowoff · aşırı düşmüş → karar-yok ·
+AYI → SHORT/ANINDA · BOĞA → karar-yok. Sabit %10 hedef doğrulandı (hedef mesafesi %10.00,
+`cikis_modu=sabit_hedef`); diğer dalların girişinde `cikis_modu=None` (değişmedi).
+
+**CANLI TUR:** kapı ilk turda tetiklendi — SQD ve GWEI koşulu sağladı, **pump kapısı doğru
+şekilde bloke etti** (ikisi de 24s'te +%20 üstü).
+
+**CANLI HALİN GERÇEK BEKLENTİSİ** (pump kapısı dahil, hedef %10/72s):
+
+| Küme | N | net % | isabet | A yarısı | B yarısı | toplam |
+|---|---|---|---|---|---|---|
+| MA50+ucuz (ham ölçüm) | 460 | +0.84 | %29.8 | +0.99 | +0.72 | +386 |
+| **MA50+ucuz + pump kapısı (canlıdaki)** | **445** | **+0.82** | %28.8 | +1.09 | +0.62 | +366 |
+| A+B + pump kapısı (canlıdaki) | 193 | +2.29 | %37.8 | +2.63 | +1.95 | +442 |
+| **BİRLEŞİM (canlı toplam)** | **577** | **+1.09** | %30.0 | +1.30 | +0.94 | **+630** |
+
+Pump kapısı yalnız 15 olay kesiyor — kapıyı bozmuyor.
+**Beklenen hız: 577 olay / 46 gün ≈ 12,5 olay/gün.** Bot artık kapasite-sınırlı çalışacak
+(8 eşzamanlı pozisyon + 4 saat cooldown), ki bu 18 günde 4 giriş yapan hâline göre kökten fark.
+
+**SINIR (tekrar):** fiyat seviyesi bir **coin-tipi vekili** (ucuz = genelde yüksek arz/yeni/
+spekülatif). Rejim değişince ilişki **dönebilir** — boğada ucuz coinler öne geçebilir.
+Ham fiyat eşiği zamanla kayar; yeniden ölçülmeden yıllarca bırakılmamalı.
+Ölçümün 46 gününün tamamı AYI/NOTR.
+**GERİ ALMA:** `ma50_kapisi_acik: 0`. Config yedeği: `kripto-config.json.yedek-2026-08-11`.
