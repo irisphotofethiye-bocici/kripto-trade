@@ -540,16 +540,26 @@ const VETO_AD = {long_veto:'Long vetosu', taker_soguma:'Alıcı hâlâ agresif',
 function sureCiz(s){
   if(!s) return '';
   const bitti = s.durum!=='AKTIF';
-  const yakin = s.kalan_gun!=null && s.kalan_gun<=2;
-  if(!bitti && !yakin) return '<div class="not" style="margin:0 0 10px">Test süresi: '+
-    n1(s.gecen_gun)+' / '+n1(s.sure_gun)+' gün.</div>';
+  const yakin = !s.sinirsiz && s.kalan_gun!=null && s.kalan_gun<=2;
+  /* Sure sinirinin YERINE gecen koruma (2026-08-10): dusus freni. Her iki halde de gorunur. */
+  const fren = (s.maks_dusus_pct>0 && s.dusus_pct!=null)
+    ? ' · Düşüş freni: zirveden <b class="'+snf(s.dusus_pct)+'">'+n1(s.dusus_pct)+'%</b> '+
+      '(fren %-'+n1(s.maks_dusus_pct)+')' : '';
+  if(!bitti && !yakin) return '<div class="not" style="margin:0 0 10px">'+
+    (s.sinirsiz ? 'Test süresi: <b>sınırsız</b> ('+n1(s.gecen_gun)+' gündür çalışıyor)'
+                : 'Test süresi: '+n1(s.gecen_gun)+' / '+n1(s.sure_gun)+' gün')+fren+'</div>';
   return '<div style="margin:0 0 12px;padding:9px 11px;border-radius:6px;border:1px solid var(--cizgi);'+
     'border-left:3px solid var(--kotu)"><b>'+(bitti
-      ? 'Test süresi DOLDU (durum: '+esc(s.durum)+') — bot yeni giriş ARAMIYOR.'
+      ? (s.durum==='HALT_DUSUS'
+          ? 'DÜŞÜŞ FRENİ devrede — bot yeni giriş ARAMIYOR.'
+          : 'Bot durumu: '+esc(s.durum)+' — yeni giriş ARAMIYOR.')
       : 'Test süresi dolmak üzere: '+n1(s.kalan_gun)+' gün kaldı.')+'</b>'+
-    '<div class="sonuk" style="font-size:12px;margin-top:3px">'+n1(s.gecen_gun)+' / '+n1(s.sure_gun)+
-    ' gün. Süre dolunca açık pozisyonlar yönetilmeye devam eder ama YENİ giriş açılmaz '+
-    '(ayarlardan <b>sure_gun</b> uzatılmadıkça).</div></div>';
+    '<div class="sonuk" style="font-size:12px;margin-top:3px">'+
+    (s.durum==='HALT_DUSUS'
+      ? 'Açık pozisyonlar yönetilmeye devam ediyor. Gözden geçirdikten sonra '+
+        '<b>python testbot.py --devam</b> ile açılır (zirve referansı sıfırlanır).'
+      : n1(s.gecen_gun)+' / '+n1(s.sure_gun)+' gün. Açık pozisyonlar yönetilir ama YENİ giriş açılmaz.')+
+    fren+'</div></div>';
 }
 
 /* GOLGE DEFTER (2026-08-10) — "bot girmediği sürece ölçemeyiz" sorununun cevabı.

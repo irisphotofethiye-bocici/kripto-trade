@@ -930,9 +930,15 @@ def _sure_durumu(st):
     try:
         gecen = (testbot.now_dt() - testbot.parse_iso(st["baslangic_ts"])).total_seconds() / 86400
         sure = float(testbot._c("sure_gun", 7))
+        zirve = float(st.get("zirve_equity") or st.get("baslangic_bakiye") or 0)
+        dusus = round((st["equity"] / zirve - 1) * 100, 1) if zirve else None
         return {"gecen_gun": round(gecen, 1), "sure_gun": sure,
-                "kalan_gun": round(max(0.0, sure - gecen), 1),
-                "durum": st.get("durum")}
+                "sinirsiz": sure <= 0,        # 2026-08-10: 0 = sure siniri YOK
+                "kalan_gun": (None if sure <= 0 else round(max(0.0, sure - gecen), 1)),
+                "durum": st.get("durum"),
+                # Sure sinirinin yerine gecen koruma panelde de gorunsun
+                "dusus_pct": dusus, "zirve": round(zirve, 2),
+                "maks_dusus_pct": float(testbot._c("maks_dusus_pct", 25))}
     except Exception:
         return None
 
