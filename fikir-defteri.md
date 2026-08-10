@@ -1284,3 +1284,88 @@ bağımsız olarak destekliyor.
 **YÖNTEM NOTU (dürüstlük):** bu bir **eşik taramasıdır** ve projede normalde yasaktır. Burada
 meşru çünkü amaç "en iyi eşiği bulup koda koymak" değil, "böyle bir eşik VAR MI" sorusunu
 kapatmak. Nitekim bulunan en iyi hücre bile negatif çıktı — koda hiçbir şey girmedi.
+
+## ⭐⭐⭐ YÜKSELENLERİN ORTAK ÖRÜNTÜSÜ — bizim göstergelerimizden BAĞIMSIZ (2026-08-10)
+
+**Talep (kullanıcı):** *"bizden bağımsız, bu coinler ortak olarak hangi sinyalleri verdi —
+aynı rejim, yükselmiş, yükseldiği andaki tüm coinlerin arasındaki örüntüyü bul."*
+
+**Parametreler (kullanıcı seçti):** yükseliş = 24 saatte **+%10** (ilk kez eşiği aştığı bar) ·
+an = **tetik barının kendisi** · evren = **tüm 570 USDT perp, yalnız fiyat/hacim** ·
+rejim = 46 günün tamamı (AYI/NOTR, tek rejim).
+
+**Yöntem:** radar skoru/stage'i **hiç kullanılmadı**; ham OHLCV'den 24 ölçü türetildi.
+**Eşleşmiş kontrol:** her yükseliş için aynı sembolden, aynı dönemde rastgele bir bar
+(sembol ve dönem etkisi sabitlenir). Rastgele olsaydı her ölçüde %25 çıkardı.
+**1.673 yükseliş olayı · 1.673 kontrol · 565 sembol.** Araç: `scratchpad/yukselen_oruntu.py`.
+
+### ⚠️ ÖNCE TOTOLOJİ AYRIMI (bu olmadan tablo yanıltıcı)
+Tetik "24h getiri > +%10" olduğu için şu ölçüler **tanım gereği** ayrışır, bulgu değildir:
+`chg_24h` (%100) · `ma50_mesafe` (%95.8) · `pos20` (%91.4) · `chg_6h` (%90.0) · `chg_1h` (%87.7) ·
+`ma200_mesafe` (%73.3) · `dip7g_yukselis` (%71.4) · `chg_72h` (%69.3) · `ardisik_yesil` (%69.2) ·
+`pos168` (%67.5) · `govde_orani` · `zirve30g_uzaklik` · `sikisma` · `atr_patlama`.
+Bir coin %10 yükseldiyse zaten aralığın tepesinde, MA'nın üstünde ve ATR'si patlamış olur.
+
+### ⭐ GERÇEK BULGU — tek bağımsız ve kararlı ortak sinyal: **HACİM**
+
+| Ölçü (totolojik olmayan) | yükselen med | kontrol med | ayrım | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| **hacim_kat_1h** (tetik barı / 24-bar medyan) | **4.34×** | 0.99× | **%81.0** | %78.4 | %83.5 |
+| hacim_kat_24h | 1.61 | 0.94 | %58.2 | %56.8 | %59.7 |
+| atr_pct | %2.34 | %1.64 | %44.4 | %45.6 | %43.2 |
+| hacim_kat_7g | 1.12 | 0.91 | %38.7 | %36.9 | %40.6 |
+| islem_sayisi | 2412 | 1911 | %28.9 | %26.5 | %31.4 |
+| hacim_musd (likidite) | $0.14M | $0.10M | %28.4 | %27.8 | %29.0 |
+| **taker_alis_pay** | 3.33 | 3.28 | **%24.8** | %20.8 | %28.8 |
+| **utc_saat** | 11 | 12 | **%20.3** | %18.9 | %21.6 |
+
+**Yükselen coinlerin ortak yanı bir tanedir: tetik barında hacim patlaması (medyan 4.3×).**
+%81 oranıyla kontrolün üst çeyreğinin dışında ve iki zaman yarısında da aynı (%78 / %84).
+
+**Ayırt ETMEYEN, kayda değer üç ölçü:**
+- **taker alış payı %24.8 = tam rastgele.** "Agresif alıcı" fikri tetik anında hiçbir şey söylemiyor.
+- **likidite %28.4** — yani sadece küçük/ince coinler değil; büyükler de aynı oranda yükseliyor.
+- **UTC saati %20.3 = rastgele.** Saat/seans etkisi yok.
+
+**TARAMA ARTIĞI YAKALANDI:** `listelenme_bar` toplamda %34.2 ayırıcı görünüyordu ama zaman
+bölmesi **A %67.8 / B %0.8** verdi — pencere yapaylığı (yeni listelenenlerin bar sayısı dönemle
+korelasyonlu). Zaman bölmesi tam da bunun için var; ölçü elendi.
+
+### ⭐⭐ ASIL SONUÇ — örüntü TANIMLAYICI, TAHMİN EDİCİ DEĞİL
+Aynı 1.563 olayda tetik barından sonra ne olduğu:
+
+| | medyan | ortalama | pozitif |
+|---|---|---|---|
+| **+24 saat** | **−2.62%** | −0.74% | **%34** |
+| **+72 saat** | **−3.98%** | −1.28% | %34 |
+| +24s en yüksek nokta | +5.50% | | |
+
+Ve ortak sinyalin **şiddeti hiç yardım etmiyor** — hatta ters:
+
+| hacim katı | N | +24s medyan | pozitif | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| 0–2× | 399 | −1.87% | %35 | −0.13 | −1.49 |
+| 2–4× | 341 | −1.86% | %36 | −0.96 | +0.55 |
+| 4–8× | 318 | −2.78% | %35 | −1.96 | −0.89 |
+| 8–20× | 275 | −2.91% | %33 | −0.57 | −1.30 |
+| **20×+** | 230 | **−4.90%** | **%26** | −3.39 | +2.60 |
+
+**En güçlü ortak sinyal, en kötü devamı veriyor.** Yükselenler birbirine benziyor (hacim), ama
+bu benzerlik hangisinin devam edeceğini ayırmıyor — tam tersine, hacim ne kadar patlarsa
+sonraki 24 saat o kadar kötü.
+
+### 🔁 BAĞIMSIZ DOĞRULAMA (dikkat çekici)
+`+24 saat medyan −2.62%` — defterdeki **erken-kuşak** ölçümünün (N=298, medyan **−2.62%**)
+**birebir aynı sayısı.** Farklı evren (570 sembol vs radar'ın 384'ü), farklı yöntem, farklı
+tarih aralığı, aynı sonuç. Bu, "hareketi kovalama tuzağı" bulgusunun en güçlü teyidi.
+
+### HÜKÜM
+1. **Sorunun cevabı:** yükselen coinlerin ortak sinyali **hacim patlaması**, başka hiçbir şey değil.
+   Taker alış payı, likidite, saat, listelenme yaşı — hiçbiri ayırt etmiyor.
+2. **Ama bu sinyal bir GİRİŞ KURALI olamaz**, çünkü sonrasını tahmin etmiyor (medyan −2.62%)
+   ve şiddeti arttıkça kötüleşiyor.
+3. **Açık kalan tek yol:** hareket ÖNCESİ pencere (tetikten 1-6 saat önce). Kullanıcı bu turda
+   "tetik anının kendisi"ni seçti; öncesi ölçülmedi. Örüntü orada varsa kullanılabilir olurdu.
+
+**SINIR:** tek rejim (46 gün AYI/NOTR) · funding/OI yok (tam evren için mevcut değil) ·
+tetik anı seçildiği için "önceden görülebilirlik" bu ölçümün konusu değil.
