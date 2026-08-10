@@ -1254,3 +1254,33 @@ sıkı çıkış hâlâ doğru.
 gerçek MEVCUT değeri biraz daha iyi olabilir. Sıralamanın değişmesi beklenmez.
 46 günün tamamı AYI/NOTR. Funding maliyeti (uzun tutuşta artar) eklenmedi — %10 hedefli
 işlemler daha uzun tutulur, bu MEVCUT lehine küçük bir düzeltme demektir.
+
+### EK ÖLÇÜM — "LONG'da stopu ayarlarsak %2.5 yaşar mı?" (2026-08-10, kullanıcı sorusu)
+
+**Tarama:** 11 stop varyantı (0.25–2.00 × ATR ve sabit %0.5–%1.5) × 3 ufuk (6/24/72 saat)
+= **33 kombinasyon**, hedef sabit %2.5, N=7.118. Araç: `scratchpad/long25_stop.py`.
+
+**HİÇBİRİ POZİTİF DEĞİL.** En iyisi `stop %0.50 / ufuk 6s` → **−0.14%**, ve zaman bölmesinde
+**A −0.14 / B −0.14** — şanslı hücre bile değil, tutarlı negatif. En iyi varyantın koşul
+kırılımında da her hücre negatif (`funding ≥ +0.05` dahil: −0.08).
+
+**NEDEN — ikili başabaş formülü yanıltıyor:** dar ATR stoplarında isabet, başabaşı GEÇİYOR
+(0.25×ATR/72s → isabet %15.2 vs başabaş %13.4, fark +1.8) ama net yine −0.17%. Sebep formülün
+ihmal ettiği iki kalem:
+1. **Zaman aşımı çıkışları** (ne stop ne hedef) — ortalamada negatif kapanıyorlar.
+2. **Maliyet** — %0,09 gidiş-dönüş, %2.5 hedefin **%3,6'sı**. Küçük hedefte maliyet oransal
+   olarak büyük; ikili formül bunu görmez.
+
+**SİMETRİ:** aynı tarama SHORT tarafında da negatif (en iyi 1.5×ATR/72s → **+0.01%**, sıfır).
+Yani **%2.5 hedef her iki yön için de kötü bir hedef** — bu, A+B'yi %10'a çekme kararını
+bağımsız olarak destekliyor.
+
+> **HÜKÜM:** LONG'un sorunu stop ayarı değil. Hedef boyutu, stop genişliği ve ufuk üç eksende
+> tarandı (6 hedef × 11 stop × 3 ufuk) — pozitif hücre yok. Ayı/nötr rejimde **yukarı yönde
+> sürüklenme yok**; hiçbir çıkış ayarı olmayan bir edge'i var edemez. LONG'un gerçek sınavı
+> boğa rejiminde ve o veri elimizde değil. Gölge defterdeki `pump_long_tezi` canlı ölçümü
+> devam ediyor — karar oradan gelecek.
+
+**YÖNTEM NOTU (dürüstlük):** bu bir **eşik taramasıdır** ve projede normalde yasaktır. Burada
+meşru çünkü amaç "en iyi eşiği bulup koda koymak" değil, "böyle bir eşik VAR MI" sorusunu
+kapatmak. Nitekim bulunan en iyi hücre bile negatif çıktı — koda hiçbir şey girmedi.
