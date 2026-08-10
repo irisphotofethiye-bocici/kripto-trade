@@ -65,3 +65,6 @@ scratchpad/*.json
 golge_state.json
 golge_islemler.jsonl
 golge_equity.jsonl
+
+# Config yedekleri — ANAHTAR ICERIR, asla commit edilmez
+kripto-config.json.yedek-*

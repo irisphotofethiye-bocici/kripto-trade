@@ -190,6 +190,12 @@ def measure(symbol, side, tf, limit, spot=False, entry=None):
     net_reward = reward_g_pct - c_reward
     net_risk = risk_g_pct + c_risk
     rr_net = round(net_reward / net_risk, 2) if net_risk > 0 else 0.0
+    # TP2 icin ayni maliyet muhasebesi (2026-08-10). Sebep: testbot TP1'i 1.5R'ye CEKIYOR
+    # (tp1_efektif_hesapla, kismi kar) ama veto 2R'lik YAPISAL tp1'e bakiyordu — kapi, botun
+    # kullanmadigi bir hedefi test ediyordu. Karar veren tarafin dogru hedefi gorebilmesi icin
+    # tp2'nin net R/R'si de doner. VETO_rr_net DEGISMEDI (CEO/skill akisi ayni kalsin).
+    reward2_g_pct = (abs(tp2 - ref) / ref * 100) if ref else 0.0
+    rr_tp2_net = round((reward2_g_pct - c_reward) / net_risk, 2) if net_risk > 0 else 0.0
 
     # D1 deterministik blok (M5 duzeltmesi): RSI/MA/cross artik BURADAN, web_search'ten degil
     closes = [b["c"] for b in bars]
@@ -212,6 +218,8 @@ def measure(symbol, side, tf, limit, spot=False, entry=None):
         "rr_tp1": round(rr, 2),
         "VETO_rr": rr < 2.0,
         "rr_tp1_net": rr_net,
+        "rr_tp2": round((abs(tp2 - ref) / risk) if risk > 0 else 0.0, 2),
+        "rr_tp2_net": rr_tp2_net,
         "VETO_rr_net": rr_net < 2.0,
         "d1": {
             "rsi14": rsi14(closes),

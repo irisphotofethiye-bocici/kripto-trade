@@ -685,3 +685,104 @@ uzatılmadı.**
 aday reddedilmedi (piyasa sakin, hepsi "karar-yok"). Kablo testi elle doğrulandı (`testbot._golge`
 → gölge pozisyon açıldı, `kapi`/`kaynak` etiketleri doğru), test artıkları silinip defter temiz
 bırakıldı. İlk gerçek kayıt ilk redde oluşacak.
+
+## ⭐⭐ TUR-3 — TEZAT RAPORU + AGRESİFLEŞTİRME (2026-08-10, kullanıcı kararı)
+
+**Talep:** "ölçüm bant genişliğini düzelt · pump'lamış coinleri pump'lamadan keşfetsin ·
+giriş hem long hem short olsun · süre sınırı olmadan çalışsın · **tezatları tespit et** ·
+daha agresif bir bot."
+
+Aşağıdaki 8 tezat kodda ve isteklerde tespit edildi. 1-3 ve 7 **onarıldı** (Madde 8: belgelenmiş
+davranışı geri getiren onarım), 4-6 ve 8 **ölçüldü ve kayda geçti**.
+
+### TEZAT-1 ⭐ — Kapı, botun kullanmadığı hedefi test ediyordu (giriş kuraklığının ASIL sebebi)
+`olcucu`: yapısal TP1'e net R/R < **2.0** ise VETO. Ama `testbot.tp1_efektif_hesapla` TP1'i
+**min(yapısal, giriş + 1.5×risk)**'e ÇEKİYOR (`kismi_kar_r`=1.5; 2026-07-04'te "TP1 pratikte hiç
+tetiklenmiyordu, 2.6-5.2R uzaktaydı" diye eklendi). **Bot, almayı hiç planlamadığı 2R hedefe göre
+işlem reddediyordu.** Kanıt: 08-08 KMNO 19 kez SHORT kararı → 19'u da bu kapıda öldü (rr 0.19);
+03-10 Ağustos 21 SHORT kararı → 0 giriş; bot 3 gün hiç işlem açmadı.
+**Onarım:** kapı artık `rr_kapisi_r` = `kismi_kar_r` (1.5) — **yeni eşik icat edilmedi**, mevcut
+config değeri kullanıldı. `olcucu` ayrıca `rr_tp2` / `rr_tp2_net` döndürüyor.
+Geri alma: `rr_kapisi_r: 2.0`.
+
+### TEZAT-2 ⭐ — Fade girişi için momentum ön-şartı aranıyordu
+NOTR dalı `stage ∈ (BASLIYOR, HAZIRLANIYOR)` şartı koyuyordu. Ama fade = ortalamaya dönüş; ihtiyacı
+"hareket başlıyor" değil **uç nokta**. Üstelik OTOPSİ-3 tam da BASLIYOR'un short için **en kötü**
+hücre olduğunu ölçmüştü (−0.09R; izle +0.07R; HAZIRLANIYOR +0.19R). **Bot, en iyi stratejisi için
+en kötü ölçülmüş ön-şartı dayatıyordu.** Havuzun **%89'u** "izle" ve o hücre POZİTİF ölçtü.
+**Onarım:** yeni NOTR-fade dalı stage şartı aramıyor (skor ≥ `radar_alert_skor`).
+
+### TEZAT-3 — Aynı kanıt tek dalda uygulanmış
+Pump kapısı (chg24 ≥ %20 → SHORT açma; 362 sembol / 16.169 gözlem, iki yarıda da negatif)
+2026-08-04'te **yalnız AYI-SHORT** dalına konmuş; kodun kendi notu "NOTR-SHORT ve BOGA-SHORT
+dokunulmadı, ayrı karar ister" diyordu. Dahası **AYI blow-off redirect** pump'ta LONG'u SHORT'a
+ÇEVİRİYORDU — yani aynı kanıtın tam tersini yapıyordu (BLESS −$488'in sınıfı).
+**Onarım:** eşik tüm SHORT dallarında; redirect kaldırıldı (pump'a short da long da açılmaz).
+
+### TEZAT-4 ⭐ — Kullanıcının iki isteği birbiriyle çelişiyor (ÖLÇÜLDÜ)
+"Pump'lamadan keşfet" ile "daha çok işlem" ilk bakışta aynı anda olamaz, çünkü **botun mevcut giriş
+akışının kendisi pump'lamış coin fade'iydi.** Ölçüm (`scratchpad/etki_tahmini.py`, 7 gün / 1152 tur /
+6799 aday kaydı, hepsi NOTR rejim):
+
+| Varyant | Toplam karar | Kırılım |
+|---|---|---|
+| **A — eski kural** | 97 | SHORT 64 (hepsi pump'lamış sınıf) · LONG 33 |
+| **B — pump kapısı + stage şartlı fade** | **72** ↓ | pump kapısı 44 SHORT'u kesiyor, fade 18 ekliyor |
+| **C — pump kapısı + stage şartsız fade** | **111** ↑ | SHORT 53 · LONG 58 — *gerçekten iki yönlü* |
+
+**C seçildi.** Çelişki gerçekti ama çözülebilirdi: pump'lamış coinleri elerken bandı korumanın yolu,
+fade'i uç-nokta tabanlı hale getirip "izle" hücresine açmaktı. **B'yi ölçmeden uygulasaydık
+kullanıcının "daha agresif" isteğinin TERSİ olurdu (97 → 72).**
+
+### TEZAT-5 — "Agresif" ile "ölçüm" aynı eksen değil
+Agresiflik iki şey olabilir: **işlem başına boyut** ya da **işlem sayısı**. Mevcut karne negatif
+(−$815 / 19 gün); negatif beklentide boyutu büyütmek kaybı hızlandırır, sayıyı büyütmek ölçüm üretir.
+**Agresiflik FREKANSA verildi:** `maks_pozisyon` 4→8, `tarama_havuz_n` 70→150, fade dalı açık.
+`islem_risk_pct` **3'te bırakıldı** — portföy riski zaten 4×3=%12'den 8×3=**%24**'e çıktı.
+Boyut agresifliği isteniyorsa tek satır: `islem_risk_pct`. (Öneri; kullanıcı kararı bekliyor.)
+
+### TEZAT-6 — Süre sınırı iki iş yapıyordu, biri sessizce kayboluyordu
+`sure_gun` yalnız bir zaman kapısı değil, **zorunlu değerlendirme durağıydı** (K1-K6 kapıları orada
+açılırdı). Sınırsız bot bu durağa hiç uğramaz. Ayrıca `min_equity_dur`=50 ($10.000'de %99,5 kayıp)
+pratikte **hiç tetiklenmez** — yani gerçek bir koruma yoktu.
+**Yerine:** `maks_dusus_pct` = %25 → equity zirveden %25 düşerse `HALT_DUSUS` (yeni giriş durur,
+açık pozisyonlar yönetilmeye devam eder, `--devam` ile açılır ve zirve referansı sıfırlanır).
+kazanan-bot-arastirma-raporu §8/3'ün uygulaması — rapor önermişti, hiç uygulanmamıştı.
+
+### TEZAT-7 — Skor bir "açık-pozisyon dedektörü" ama sıralama saf skora göreydi
+SKOR OTOPSİSİ BULGU 1: skor beş faktörlü bileşke değil, bir açık-pozisyon dedektörü. Kısa liste
+(top-10) saf skora göre diziliyordu → **en yüksek skorlular sistematik olarak zaten HAREKET ETMİŞ
+coinler** → "pump'lamadan keşfet" isteğiyle doğrudan çelişiyordu.
+**Onarım:** HAZIRLANIYOR'a sıralama bonusu (+8, `hazirlaniyor_sira_bonus`) ve NOTR skor eşiği 45→40.
+Gerekçe OTOPSİ-3: HAZIRLANIYOR skordan **bağımsız** ayırt ediyor (skor<45'te bile +0.22 vs +0.01,
+N=116) ve 7 günlük havuzda medyan skoru **40,2** — eski 45 eşiği bu hücrenin yarısını kesiyordu.
+Bonus **yalnız sıralamaya** etki eder; skor, kapılar ve karar mantığı değişmedi.
+
+### TEZAT-8 — "Tek seferde tek değişken" ihlali (kabul edilen, telafi edilen)
+Bu turda **7 değişken birden** değişti. Normalde yasak; ama 19 günde 12 işlem üreten bir kurulumda
+tek-değişken disiplini bir lükstür — koruduğumuz karne zaten kanıt üretemiyordu. **Telafi:**
+(a) `2026-08-10` sınırı defterde, karne öncesi/sonrası ayrılabilir; (b) atribüsyon aracı **gölge
+defter** — reddedilenler orada açılıyor, kapı bazında karne çıkacak; (c) her değişiklik ayrı config
+anahtarına bağlı, tek satırla geri alınabilir.
+
+### Uygulanan değişikliklerin özeti
+
+| Ne | Eski | Yeni | Anahtar |
+|---|---|---|---|
+| Süre sınırı | 19 gün | **sınırsız** | `sure_gun: 0` |
+| Düşüş freni | yok (etkisiz $50) | **%25** | `maks_dusus_pct` |
+| R/R kapısı | 2.0 (kullanılmayan hedef) | **1.5** (fiili hedef) | `rr_kapisi_r` |
+| Eşzamanlı pozisyon | 4 | **8** | `maks_pozisyon` |
+| Tarama havuzu | 70 | **150** | `tarama_havuz_n` |
+| Pump kapısı kapsamı | yalnız AYI-SHORT | **tüm SHORT dalları** | `ayi_short_chg24_max` |
+| Pump'ta LONG→SHORT çevirme | var | **kaldırıldı** | — |
+| Pump-öncesi öncelik | yok | **HAZIRLANIYOR +8 sıra, eşik 40** | `hazirlaniyor_sira_bonus` |
+| smart=NOTR adayları | hiçbir yol yoktu | **iki yönlü fade** (pos≥0.75 SHORT / ≤0.40 LONG) | `notr_fade_acik` |
+| İşlem başına risk | %3 | **%3 (değişmedi)** | `islem_risk_pct` |
+
+**DÜRÜSTLÜK NOTU:** NOTR-fade dalı **ölçümle gerekçelendirilmedi** — `notr_long_acik` (2026-08-04) ile
+aynı sınıfta, kullanıcı kararı. Kalite filtrelerinin hiçbiri gevşetilmedi (pump kapısı, long_veto,
+dip-bıçak koruması, taker≥1.0 aynen duruyor). Tahmini bant: 7 günde 97 → **111 karar**; gerçek artış
+bundan BÜYÜK olacak, çünkü HAZIRLANIYOR sıra bonusunun kısa listeye sokacağı adaylar bu simülasyonda
+görünmüyor (arşiv yalnız top-10'a girmişleri taşıyor).
+Config yedeği: `kripto-config.json.yedek-2026-08-10` (anahtar içerir, gitignore'da).

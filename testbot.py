@@ -262,7 +262,13 @@ def _aday_arsivle(aday_rows, rejim_ad, btc_chg3):
                          "top_ls": p.get("top_ls"), "glob_ls": p.get("glob_ls"),
                          "taker": p.get("taker"), "smart": p.get("smart"),
                          "float_oran": r.get("_float_oran"), "dusuk_float": r.get("_dusuk_float"),
-                         "karar": r.get("_karar"), "kaynak": "testbot"}
+                         "karar": r.get("_karar"),
+                         # 2026-08-10: karar_yon "SHORT/ANINDA" dese bile giris kapisi (rr_veto /
+                         # kaldirac_guvenlik) oldurebiliyordu ve arsivde bu GORUNMUYORDU —
+                         # panelde "SHORT/ANINDA" yaziyordu ama islem yoktu (KMNO 19 kez).
+                         # Artik nihai akibet de burada: acildi mi, hangi kapida oldu.
+                         "sonuc": r.get("_sonuc"), "red_kapi": r.get("_red_kapi"),
+                         "kaynak": "testbot"}
                 af.write(json.dumps(kayit, ensure_ascii=False) + "\n")
     except Exception:
         pass  # olcum katmani asla karar akisini durdurmaz
@@ -324,6 +330,15 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
     blowoff_esik = evren.esik("blowoff_chg24_pct", 40.0)
     asiri_yukselmis = chg24 >= blowoff_esik
     asiri_dusmus = chg24 <= -blowoff_esik
+    # PUMP KAPISI TUM SHORT DALLARINDA (2026-08-10, kullanici karari: "pumplamis coinleri
+    # pumplamadan kesfetsin"). 2026-08-04'te ayni kanitla YALNIZ AYI-SHORT dali kapatilmisti;
+    # kodun kendi notu "satir 317 NOTR-SHORT ve satir 285 BOGA-SHORT dallari dokunulmadi,
+    # ayri karar ister" diyordu. Karar simdi verildi -> ayni esik her SHORT dalinda.
+    # [KANIT] 362 sembol / 16.169 gozlem / 24sa izgara / ham fiyat: chg24 >%20 grubu IKI
+    #   YARIDA DA negatif (A -0.18 / B -0.16, N=258). Mekanizma: pump -> ATR patlar -> stop
+    #   medyani %0.97'den %8.57'ye genisler VE stop orani %65 -> %74 cikar (cifte ceza).
+    pump_esik_short = evren.esik("ayi_short_chg24_max", 20.0)
+    pumplamis = chg24 >= pump_esik_short
 
     # LONG kalite filtreleri (2026-07-06 — LONG karnesi 0W/4L: RE/O/SLX bicak-dibi girisleri).
     # SHORT'taki dip korumasinin simetrigi + CEO'nun "Fiyat DUSUYOR + OI ARTIYOR -> long girme" vetosunun koda tasinmasi.
@@ -352,10 +367,12 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
     if rejim_ad == "AYI":
         if r["stage"] == "BASLIYOR" and smart == "LONG" and (taker or 0) >= 1.0:
             if asiri_yukselmis:
-                _veto_ekle(veto_out, "blowoff", f"AYI blow-off redirect (24s {chg24:+.0f}%, LONG->SHORT-tepki)", "LONG")
-                return ("SHORT", "ONAY_BEKLE",
-                        f"BLOW-OFF TUZAGI (24s {chg24:+.0f}%, MANTA deseni): smart-long+BASLIYOR = pump'in GEC "
-                        f"safhasi, LONG DEGIL -> SHORT-tepki adayi, tepe/donus onayi bekle")
+                # 2026-08-10: bu dal LONG'u SHORT'a CEVIRIYORDU — yani pump kapisinin tam
+                # tersini yapiyordu (BLESS -$488'in sinifi). Ayni kanitla artik cevirmiyor,
+                # sadece elemine ediyor: pump'in icine SHORT atmak da girmek de olculdu, ikisi de negatif.
+                _veto_ekle(veto_out, "blowoff",
+                           f"AYI blow-off (24s {chg24:+.0f}%): pump'in gec safhasi — LONG da SHORT da acilmaz", "LONG")
+                return None
             if long_veto:
                 _veto_ekle(veto_out, "long_veto", f"AYI-istisna: {long_veto_detay}", "LONG")
                 return None  # dip-bicak/kapitulasyon/fiyat-dusuk-OI-artis -> AAVE istisnasi bile gecersiz
@@ -416,10 +433,9 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
             #   Olcum rejim-kosullu DEGILDI; kanit bu dallar icin de gecerli ama kullanici karari
             #   AYI-SHORT icindi. Bunlar ayri oturumda teklif edilir.
             # GERI ALMA: kripto-config.json -> esikler.ayi_short_chg24_max: 999 (kapi etkisiz kalir)
-            pump_esik = evren.esik("ayi_short_chg24_max", 20.0)
-            if chg24 >= pump_esik:
+            if pumplamis:
                 _veto_ekle(veto_out, "blowoff",
-                           f"AYI-SHORT pump-kapisi (24s {chg24:+.0f}% >= {pump_esik:.0f}%)", "SHORT")
+                           f"AYI-SHORT pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
                 return None
             return ("SHORT", "ONAY_BEKLE", f"AYI: skor={skor} short-aday, 1-cycle onay bekletme")
         return None
@@ -429,6 +445,10 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
                 return ("LONG", "ONAY_BEKLE",
                         f"KAPITULASYON TUZAGI (24s {chg24:+.0f}%): smart-short+BASLIYOR = dususun GEC safhasi, "
                         f"SHORT DEGIL -> LONG-tepki adayi, dip/donus onayi bekle")
+            if pumplamis:   # 2026-08-10: pump kapisi bu dala da (ayni kanit)
+                _veto_ekle(veto_out, "blowoff",
+                           f"BOGA-SHORT pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
+                return None
             return ("SHORT", "ANINDA", "BOGA-istisna: BASLIYOR+smart-SHORT+taker-satis")
         if skor >= esik_short and smart != "SHORT" and r.get("pos", 0.5) <= 0.85:
             if asiri_yukselmis and r.get("pos", 0.5) > 0.70:
@@ -440,7 +460,13 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
             return ("LONG", "ONAY_BEKLE", f"BOGA: skor={skor} long-aday, 1-cycle onay bekletme")
         return None
     # NOTR: temkinli — sadece stage aktif + smart hizali
-    if r["stage"] in ("BASLIYOR", "HAZIRLANIYOR") and skor >= esik_uzun:
+    # 2026-08-10: HAZIRLANIYOR icin esik `radar_alert_skor`a (40) iner. Gerekce OTOPSI-3:
+    # HAZIRLANIYOR skordan BAGIMSIZ ayirt ediyor — skor<45 bandinda bile +0.22R vs izle +0.01
+    # (N=116). Yani bu hucrede yuksek skor sarti bilgi katmiyor, sadece aday sayisini kisiyor.
+    # Yeni esik ICAT EDILMEDI: mevcut radar_alert_skor kullanildi. BASLIYOR esigi DEGISMEDI.
+    esik_hazir = evren.esik("radar_alert_skor", 40.0)
+    stage_esigi = esik_hazir if r["stage"] == "HAZIRLANIYOR" else esik_uzun
+    if r["stage"] in ("BASLIYOR", "HAZIRLANIYOR") and skor >= stage_esigi:
         # taker>=1.0 sarti (2026-07-06): smart etiketi tek basina 3/3 kaybetti (RE/O/SLX);
         # AYI-istisnasiyla (AAVE deseni) ayni agresif-alici teyidi burada da aranir.
         # (2026-07-08) bilesik kosul alt-dallara ayrildi: karar cikttisi BIREBIR AYNI, sadece
@@ -486,7 +512,63 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
                             f"[2026-08-04 kullanici karari; olcumle gerekcelenmedi]")
                 _veto_ekle(veto_out, "long_veto", "NOTR-belirsiz: temiz-aday ama rejim-long kapali (fade acik)", "LONG")
         if smart == "SHORT" and not short_riskli_dip and not asiri_dusmus:
+            if pumplamis:   # 2026-08-10: pump kapisi NOTR-SHORT dalina da (ayni kanit)
+                _veto_ekle(veto_out, "blowoff",
+                           f"NOTR-SHORT pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
+                return None
             return ("SHORT", "ANINDA", "NOTR: stage-aktif+smart-SHORT")
+
+        # (fade dali asagida, stage blogunun DISINDA — gerekce orada)
+    # --- SMART=NOTR IKI YONLU FADE DALI (2026-08-10, KULLANICI KARARI, Madde 9) --------
+        # [ESKI DAVRANIS] NOTR rejimde YALNIZ smart=LONG veya smart=SHORT is gorurdu.
+        #   smart=NOTR adayi HICBIR yol bulamiyordu — ve Pillar D okumalarinin cogunlugu NOTR
+        #   (kapanan 10 islemin 6'sinda smart=NOTR). Yani rejim NOTR + smart NOTR = bot sagir.
+        #   "Olcum bant genisligi" darbogazinin karar-tarafindaki yarisi buydu.
+        # [YON NEREDEN GELIYOR] smart yoksa yonu RANGE KONUMU verir — sistemin kendi kimligi:
+        #   momentum-takipcisi degil, ORTALAMAYA DONUS + rejim okuyucu (fikir defteri, ELENEN
+        #   GIRIS FIKIRLERI ortak dersi). Ust banttan fade = SHORT, alt banttan tepki = LONG.
+        # [DURUSTLUK] Bu dal OLCUMLE GEREKCELENMEDI — kullanici karari ("giris hem long hem
+        #   short olsun, daha agresif bot"). notr_long_acik (2026-08-04) ile ayni sinifta ve
+        #   ayni sekilde kayda geciyor. Kalite filtrelerinin HICBIRI gevsetilmedi: pump kapisi,
+        #   long_veto, dip-bicak korumasi, taker teyidi aynen calisiyor.
+        # [OLCUM] Bu dalin urettigi her giris golge defterde de izlenebilir; reddedilenler
+        #   zaten orada aciliyor. Karne 'NOTR-fade' sebebiyle ayrilabilir.
+        #
+        # [STAGE SARTI YOK — TEZAT ONARIMI] Bu dal, ustteki `stage in (BASLIYOR,HAZIRLANIYOR)`
+        #   blogunun DISINDA duruyor. Sebep bir CELISKI: fade = ortalamaya donus; ihtiyaci
+        #   "hareket basliyor" degil UC NOKTA'dir. Ustteki blok ise fade girisi icin momentum
+        #   sarti (BASLIYOR) ariyordu — ve OTOPSI-3 tam da BASLIYOR'un short icin EN KOTU hucre
+        #   oldugunu olcmustu (-0.09R; izle +0.07R; HAZIRLANIYOR +0.19R). Yani bot, en iyi
+        #   stratejisi icin en kotu olculmus on-sarti dayatiyordu. Havuzun %89'u 'izle' ve o
+        #   hucre POZITIF olctu -> fade dali orada da calisir. Skor esigi radar_alert_skor (40).
+        # [ETKI OLCULDU] scratchpad/etki_tahmini.py, 7 gun / 1152 tur / 6799 aday kaydi:
+        #   A eski kural 97 karar (64'u pumplamis-coin SHORT'u = olculmus negatif sinif)
+        #   B stage-sartli fade  72 karar  (pump kapisi 44 SHORT'u kesiyor, fade 18 ekliyor)
+        #   C stage-sartsiz fade 111 karar (SHORT 53 / LONG 58 — gercekten iki yonlu)  <- SECILEN
+    if (smart in (None, "NOTR") and evren.esik("notr_fade_acik", 1) >= 1
+            and skor >= evren.esik("radar_alert_skor", 40.0)):
+        pos_ust = evren.esik("notr_fade_pos_ust", 0.75)
+        pos_alt = evren.esik("notr_fade_pos_alt", 0.40)
+        if pos >= pos_ust and not short_riskli_dip and not asiri_dusmus:
+            if pumplamis:
+                _veto_ekle(veto_out, "blowoff",
+                           f"NOTR-fade SHORT pump-kapisi (24s {chg24:+.0f}%)", "SHORT")
+                return None
+            return ("SHORT", "ONAY_BEKLE",
+                    f"NOTR-fade: range ustu (pos={pos:.2f}>={pos_ust}), smart yok -> "
+                    f"ortalamaya donus SHORT [2026-08-10 kullanici karari, olcumsuz]")
+        if pos <= pos_alt:
+            if asiri_yukselmis:
+                _veto_ekle(veto_out, "blowoff", f"NOTR-fade LONG tepe (24s {chg24:+.0f}%)", "LONG")
+            elif long_veto:
+                _veto_ekle(veto_out, "long_veto", f"NOTR-fade: {long_veto_detay}", "LONG")
+            elif (taker or 0) < 1.0:
+                _veto_ekle(veto_out, "taker_soguma",
+                           f"NOTR-fade LONG taker<1.0 (taker={taker}, agresif-alici teyidi yok)", "LONG")
+            else:
+                return ("LONG", "ONAY_BEKLE",
+                        f"NOTR-fade: range alti (pos={pos:.2f}<={pos_alt}), taker={taker} -> "
+                        f"ortalamaya donus LONG [2026-08-10 kullanici karari, olcumsuz]")
     return None
 
 
@@ -788,12 +870,30 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
         for a in ("stop", "tp1", "tp2"):
             if olc_override.get(a) is not None:
                 olc[a] = float(olc_override[a])
-    if olc.get("VETO_rr_net") and not zorla:
+    # ============ R/R KAPISI — TEZAT ONARIMI (2026-08-10, Madde 8) =========================
+    # [TEZAT] Kapi `VETO_rr_net` idi: YAPISAL tp1 net R/R < 2.0 -> giris yok. AMA bot bu tp1'i
+    #   KULLANMIYOR: tp1_efektif_hesapla, TP1'i min(yapisal_tp1, giris + kismi_kar_r*risk)'e
+    #   CEKIYOR (kismi_kar_r=1.5, 2026-07-04'te "TP1 pratikte hic tetiklenmiyordu, 2.6-5.2R
+    #   uzaktaydi" diye eklendi). Yani bot, ASLA ALMAYI PLANLAMADIGI 2R'lik hedefe gore islem
+    #   REDDEDIYORDU. Kapinin test ettigi hedef ile botun gittigi hedef AYNI DEGILDI.
+    # [KANIT] 2026-08-08: KMNO 19 kez SHORT karari aldi, 19'u da burada oldu (rr 0.19).
+    #   03-10 Agustos: 21 SHORT karari, 0 giris. Bot 3 gun hic islem acmadi.
+    # [ONARIM] Kapi artik botun FIILEN gittigi ilk hedefi test eder: yapisal tp1, kismi-kar
+    #   hedefinden (kismi_kar_r) UZAK olmali. Yeni esik ICAT EDILMEDI — mevcut `kismi_kar_r`
+    #   config degeri kullanildi (tek dogruluk kaynagi). tp2'nin net R/R'si de loglanir.
+    # [BU BIR GEVSETME MI?] Sayisal olarak evet (2.0 -> 1.5) ama gerekce esik-arama degil
+    #   TUTARLILIK: iki hedef arasindaki celiski giderildi. Etkisi golge defterde olculecek
+    #   (reddedilenler orada aciliyor) — karar degil, olcum bekleyen bir onarim.
+    # GERI ALMA: kripto-config.json -> esikler.rr_kapisi_r: 2.0
+    rr_esik = evren.esik("rr_kapisi_r", evren.esik("kismi_kar_r", 1.5))
+    rr_net = olc.get("rr_tp1_net")
+    if rr_net is not None and rr_net < rr_esik and not zorla:
         # 2026-07-10: bu ret onceden SESSIZDI ("bot neden girmedi" cevabinda kor nokta) -> olcum loguna eklendi
         _veto_logla(st, sym, r, pillar, "rr_veto",
-                    f"NET R/R {olc.get('rr_tp1_net')} < 1:2 (Olcucu mekanik veto)", yon, rejim_ad or "BILINMIYOR")
+                    f"NET R/R {rr_net} < {rr_esik} (tp2 net {olc.get('rr_tp2_net')})",
+                    yon, rejim_ad or "BILINMIYOR")
         # edge kanitlanmamis giris -> mekanik veto (Olcucu ile ayni disiplin)
-        return _red("rr_veto", f"NET R/R {olc.get('rr_tp1_net')} < 1:2", olc)
+        return _red("rr_veto", f"NET R/R {rr_net} < {rr_esik}", olc)
     giris_piyasa, stop, tp1_yapisal, tp2 = olc["giris"], olc["stop"], olc["tp1"], olc["tp2"]
     cst = _maliyet()
     giris_ef = maliyet_uygula_giris(giris_piyasa, yon, cst)
@@ -928,7 +1028,22 @@ def yeni_giris_ara(st, rejim):
         except Exception:
             continue
         time.sleep(random.uniform(0.05, 0.15))  # rate-limit guvenlik payi (2026-07-08)
-    aday_rows.sort(key=lambda x: -x["score"])
+    # ---- PUMP-ONCESI ONCELIK (2026-08-10, kullanici karari: "pumplamis coinleri
+    #      pumplamadan kesfetsin") ------------------------------------------------------
+    # [KANIT — OTOPSI-3, 2026-08-03, 41 gun, fitil bazli yol testi, SHORT]
+    #     BASLIYOR     (vol_x>2.5 & last1>2 & oi3>3)  N=69  ort R -0.09  <- amiral gemisi etiket
+    #     izle                                        N=796 ort R +0.07
+    #     HAZIRLANIYOR (comp<0.65 & |last3|<4 & oi24>8) N=162 ort R +0.19  <- EN IYI
+    #   HAZIRLANIYOR = sikismis + fiyat YATAY + pozisyon birikiyor = tam olarak "pump ONCESI".
+    #   Ve skordan BAGIMSIZ ayirt ediyor: skor<45 icinde bile +0.22 vs izle +0.01 (N=116).
+    #   O olcum "aksiyon alinmadi" diye rafta duruyordu; kullanici karariyla artik SIRALAMAYA giriyor.
+    # [NE DEGISTI] Yalnizca KISA LISTEYE GIRME SIRASI. Skorun kendisi, kapilar, karar mantigi
+    #   DEGISMEDI — HAZIRLANIYOR adayi da tum vetolardan aynen gecmek zorunda. Onceden liste
+    #   sirf skora gore diziliyordu; skor bir ACIK-POZISYON DEDEKTORU (skor otopsisi BULGU 1)
+    #   oldugu icin en yuksek skorlular sistematik olarak zaten HAREKET ETMIS coinlerdi.
+    # GERI ALMA: kripto-config.json -> esikler.hazirlaniyor_sira_bonus: 0
+    sira_bonus = evren.esik("hazirlaniyor_sira_bonus", 8.0)
+    aday_rows.sort(key=lambda x: -(x["score"] + (sira_bonus if x.get("stage") == "HAZIRLANIYOR" else 0.0)))
     aday_rows = aday_rows[:10]  # Pillar D sadece kisa listeye (API bütçesi)
 
     bekleyenler = st.setdefault("bekleyenler", {})
@@ -994,11 +1109,15 @@ def yeni_giris_ara(st, rejim):
         if mod == "ANINDA":
             bekleyenler.pop(sym, None)
             red = []
-            if not yeni_giris_ac(st, sym, yon, r, pillar, sebep,
-                                 rejim_ad=rejim.get("rejim"), red_out=red):
+            if yeni_giris_ac(st, sym, yon, r, pillar, sebep,
+                             rejim_ad=rejim.get("rejim"), red_out=red):
+                r["_sonuc"] = "ACILDI"
+            else:
                 # Karar VERILDI ama giris kapisinda oldu (rr_veto / kaldirac_guvenlik / ...).
                 # 08-08 KMNO: 19 kez buraya dustu ve hicbir yerde gorunmedi.
+                r["_sonuc"] = "GIRIS_KAPISI"
                 if red:
+                    r["_red_kapi"] = red[0]["kapi"]
                     print(f"[{now_iso()}] GIRIS-KAPISI {sym} {yon}: {red[0]['kapi']} — {red[0]['detay']}")
                     _golge(sym, yon, r, pillar, red[0]["kapi"], red[0]["detay"], rejim.get("rejim"))
             continue
@@ -1017,8 +1136,12 @@ def yeni_giris_ara(st, rejim):
             if onceki["cycle_sayaci"] >= 1 and soguma_ok:  # 1 tam cycle (5dk) gecti + ivme kirildi -> onayla
                 del bekleyenler[sym]
                 red = []
-                if not yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)",
-                                     rejim_ad=rejim.get("rejim"), red_out=red) and red:
+                if yeni_giris_ac(st, sym, yon, r, pillar, sebep + " (onaylandi)",
+                                 rejim_ad=rejim.get("rejim"), red_out=red):
+                    r["_sonuc"] = "ACILDI"
+                elif red:
+                    r["_sonuc"] = "GIRIS_KAPISI"
+                    r["_red_kapi"] = red[0]["kapi"]
                     print(f"[{now_iso()}] GIRIS-KAPISI {sym} {yon}: {red[0]['kapi']} — {red[0]['detay']}")
                     _golge(sym, yon, r, pillar, red[0]["kapi"], red[0]["detay"], rejim.get("rejim"))
             elif onceki["cycle_sayaci"] >= 1 and not soguma_ok:  # onaya hazir ama taker sogumadi -> bekletiliyor (olcum)
@@ -1096,12 +1219,35 @@ def _cycle_ic():
     sure_gun = float(_c("sure_gun", 7))
     min_equity = float(_c("min_equity_dur", 50))
 
-    if st["durum"] == "AKTIF" and gun_gecti >= sure_gun:
+    # SURE SINIRI (2026-08-10 kullanici karari: "an itibari ile sure sinirli olmadan calissin")
+    # sure_gun <= 0 -> SINIRSIZ. Eskiden 19 gundu ve 11 Agustos 19:07'de bot yeni giris aramayi
+    # TAMAMEN birakacakti; bu "bot neden girmiyor"un yaklasan sessiz sebebiydi.
+    if sure_gun > 0 and st["durum"] == "AKTIF" and gun_gecti >= sure_gun:
         st["durum"] = "SURE_DOLDU"
         telegram_gonder(f"[TESTBOT] SURE DOLDU ({sure_gun} gun) — yeni giris YOK, acik pozisyonlar dogal kapanisini bekliyor")
     if st["durum"] == "AKTIF" and st["equity"] <= min_equity:
         st["durum"] = "HALT_BAKIYE"
         telegram_gonder(f"[TESTBOT] BAKIYE BITTI (${st['equity']:.2f}) — islem DURDU")
+
+    # DUSUS FRENI (2026-08-10) — sure sinirinin YERINE gecen koruma.
+    # [NEDEN] Sure siniri yalnizca bir zaman-kapisi degil, ZORUNLU DEGERLENDIRME NOKTASIYDI
+    #   (K1-K6 kapilari orada acilirdi). Sinirsiz calisan bot bu duraga hic ugramaz; yerine
+    #   sonuca bagli bir durak gerekir. kazanan-bot-arastirma-raporu §8 madde 3 zaten bunu
+    #   oneriyordu ("portfoy-dusus limiti") ve hic uygulanmamisti.
+    # [NASIL] Equity zirveden maks_dusus_pct kadar geri cekilirse YENI GIRIS durur; acik
+    #   pozisyonlar yonetilmeye DEVAM eder (yarim birakma yok). Insan `--devam` ile acar.
+    # [NOT] min_equity_dur=50 ($10.000'de %99.5 kayip) pratikte hicbir zaman tetiklenmez;
+    #   gercek koruma bu. 0 yazilirsa fren kapanir.
+    dusus_esik = float(_c("maks_dusus_pct", 25))
+    if dusus_esik > 0 and st["durum"] == "AKTIF":
+        zirve = max(float(st.get("zirve_equity") or st["baslangic_bakiye"]), st["equity"])
+        st["zirve_equity"] = round(zirve, 2)
+        dusus = (st["equity"] / zirve - 1) * 100 if zirve else 0.0
+        if dusus <= -dusus_esik:
+            st["durum"] = "HALT_DUSUS"
+            telegram_gonder(f"[TESTBOT] DUSUS FRENI: zirveden %{-dusus:.1f} geri cekildi "
+                            f"(esik %{dusus_esik:.0f}) — YENI GIRIS DURDU, acik pozlar yonetiliyor. "
+                            f"Gozden gecirip 'python testbot.py --devam' ile ac.")
 
     yonet_acik_pozisyonlar(st)
     # Kapanislar HEMEN diske (2026-07-14 VELVET dersi, Madde 8 bug-fix): islem kaydi pozisyon_kapat
@@ -1226,6 +1372,12 @@ def dur_devam(yeni_durum):
     st = _load_state()
     if st is None:
         print("Bot henuz baslamadi."); return
+    # Dusus freninden donuluyorsa zirve SIFIRLANIR (2026-08-10). Yoksa fren kalici olurdu:
+    # eski zirve duruyor -> bir sonraki cycle ayni dususu gorup yeniden HALT ederdi.
+    # Bilincli: "gozden gecirdim, buradan devam" = yeni dusus penceresi baslasin.
+    if yeni_durum == "AKTIF" and st.get("durum") == "HALT_DUSUS":
+        st["zirve_equity"] = round(st["equity"], 2)
+        print(f"Dusus freni sifirlandi: yeni zirve referansi ${st['equity']:.2f}")
     st["durum"] = yeni_durum
     _save_state(st)
     print(f"Durum -> {yeni_durum}")
