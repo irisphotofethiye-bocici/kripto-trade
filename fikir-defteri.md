@@ -1182,3 +1182,75 @@ smart-LONG + üç kalite filtresi). Ölçüm bunu desteklemiyor — kayda geçer
 2. A+B ∩ HAZIRLANIYOR N=32 → izlenim. Kural yapılmadı.
 3. Uzanım 3.0+ ATR hücresi N=34 → izlenim, ama işaret A+B ile aynı yönde (aşırı uzamışı fade).
 4. Slipaj yok sayıldı; %10 hedefli işlemler daha uzun tutulur, funding maliyeti de eklenmedi.
+
+## ⭐⭐⭐ HEDEF BOYUTU ÖLÇÜMÜ — "long hedefini %2.5 yapsak" (2026-08-10, kullanıcı önerisi)
+
+**Öneri:** ayı/nötr sezonda LONG hedefi %10 yerine **%2.5** — küçük hedef, yüksek isabet.
+
+### BULGU 1 — Hedefi küçültmek işe yaramıyor, ve sebebi öğretici
+LONG, 7.118 olay, botun A-stopu, 72 saat, maliyet %0,09:
+
+| Hedef | isabet | başabaş | net % |
+|---|---|---|---|
+| %1.5 | %46.1 | %47.4 | −0.18 |
+| %2.0 | %40.1 | %40.3 | −0.19 |
+| **%2.5** | **%35.3** | **%35.1** | **−0.20** |
+| %3.0 | %31.7 | %31.1 | −0.20 |
+| %5.0 | %21.6 | %21.3 | −0.29 |
+| %10 | %11.3 | %11.9 | −0.37 |
+
+**Her hedefte isabet oranı başabaşa neredeyse EŞİT.** Hedefi küçültmek isabeti tam da
+başabaşın gerektirdiği kadar artırıyor — net kazanç doğmuyor. Bu, fiyatın o yönde
+**sürüklenmesi olmadığının** imzası: hedef boyutu tek başına edge üretmez, ancak bir giriş
+koşulu isabeti başabaşın ÜSTÜNE çıkarırsa edge olur.
+
+Stop varyantları da değiştirmedi (%2.5 hedefle): A-stop −0.20 · 0.75×ATR −0.21 · 1.5×ATR −0.24.
+Ufuk 24s/72s farkı yok.
+
+**Tek pozitif LONG hücresi** (%2.5 hedef): `funding ≥ +0.05` → **+0.20%**, N=71,
+A +0.34 / B +0.14. Longlar kalabalıkken LONG — küçük ve tek yarıda zayıf, kural yapılmadı.
+
+### BULGU 2 ⭐⭐ — Aynı test A+B'ye uygulanınca: edge HEDEF BÜYÜDÜKÇE ARTIYOR
+A+B (funding ≤ −0.05 & oi24 ≥ %10), SHORT, N=206:
+
+| Hedef | isabet | başabaş | net % | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| %1.5 | %72.3 | %73.5 | +0.14 | +0.31 | −0.05 |
+| %2.0 | %68.4 | %67.5 | +0.22 | +0.31 | +0.12 |
+| %2.5 | %67.0 | %62.5 | +0.47 | +0.57 | +0.36 |
+| %3.0 | %65.0 | %58.1 | +0.72 | +0.78 | +0.65 |
+| %5.0 | %56.3 | %45.4 | +1.33 | +1.17 | +1.51 |
+| %7.5 | %45.6 | %35.7 | +1.63 | +1.66 | +1.59 |
+| **%10** | %37.9 | %29.4 | **+2.19** | +2.05 | +2.36 |
+| %15 | %15.0 | %21.7 | +2.36 | +2.06 | +2.69 (isabet başabaşın ALTINA düştü) |
+
+**A+B'de isabet, başabaşı hedef büyüdükçe daha çok geçiyor** — LONG'un tam tersi. Yani A+B
+gerçek bir aşağı sürüklenme yakalıyor; LONG'da öyle bir sürüklenme yok.
+
+### BULGU 3 ⭐⭐ — Botun ÇIKIŞI A+B edge'inin bir kısmını masada bırakıyor
+Aynı 206 A+B girişi, beş çıkış kuralıyla (1h mum, 48s ufuk, maliyet dahil):
+
+| Çıkış kuralı | net % | kazanan | A yarısı | B yarısı |
+|---|---|---|---|---|
+| **MEVCUT** (kısmi %50 @1.5R + ATR trailing) | **+1.24** | %66.0 | +1.22 | +1.25 |
+| kısmi yok, sadece trailing | +1.28 | %66.0 | +1.22 | +1.34 |
+| **sabit %10 hedef, trailing yok** | **+2.01** | %50.0 | +1.95 | +2.08 |
+| kısmi %5 + hedef %10 | +1.67 | %52.9 | +1.61 | +1.73 |
+| kısmi 1.5R + geniş trail (3×ATR) | +1.13 | %66.0 | +1.40 | +0.87 |
+
+**Mevcut çıkış +1.24%, sabit %10 hedef +2.01% — %62 daha fazla, iki yarıda da.**
+Bedeli: kazanma oranı %66 → %50 (daha az sıklıkta ama daha büyük kazanç).
+
+**ÖNEMLİ NÜANS:** daha önce (kötü girişlerle) ölçmüştük ki trailing+kısmi üç seçeneğin
+EN İYİSİ. Şimdi (iyi girişlerle) en kötülerinden. Çelişki değil, kural: **kötü girişte sıkı
+çıkış kaybı keser; iyi girişte sıkı çıkış kazancı keser.** Çıkış kuralı girişin kalitesine bağlı.
+
+### AKSİYON ALINMADI — kullanıcı kararı bekliyor
+Öneri: **A+B pozisyonlarına özel sabit %10 hedef** (giriş-koşullu çıkış; diğer dallar
+mevcut kısmi+trailing ile kalır). Global değiştirmek diğer dalları bozabilir — onlar için
+sıkı çıkış hâlâ doğru.
+
+**SINIR:** ölçüm 1 SAATLİK mumla; bot 1 DAKİKALIK mumla yönetiyor → trailing burada kaba,
+gerçek MEVCUT değeri biraz daha iyi olabilir. Sıralamanın değişmesi beklenmez.
+46 günün tamamı AYI/NOTR. Funding maliyeti (uzun tutuşta artar) eklenmedi — %10 hedefli
+işlemler daha uzun tutulur, bu MEVCUT lehine küçük bir düzeltme demektir.
