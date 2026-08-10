@@ -364,6 +364,41 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
     else:
         long_veto_detay = ""
 
+    # ================= A+B KAPISI (2026-08-10, KULLANICI KARARI, Madde 9) =================
+    # [NE] funding <= -0.05 (%/8s)  VE  oi24 >= %10  ->  SHORT.
+    #   Turkce: shortlar KALABALIK (derin negatif funding) ve pozisyon BIRIKIYOR.
+    # [NEDEN BU] 46 gunluk radar arsivi (121.620 kayit / 384 sembol) botun GERCEK mekanigiyle
+    #   ileri oynatildi (A-stop · 2R · 72s · fitil · maliyet 0.04R) -> 7.119 bagimsiz olay.
+    #   Bulunan TEK pozitif hucre bu. Tek-degisken guclerinin ikisi de zaman ikiye bolununce
+    #   ayakta: funding<=-0.05 -> +0.259 (A +0.250 / B +0.269, N=508)
+    #           oi24>=10       -> +0.189 (A +0.151 / B +0.228, N=803)
+    #   Kesisim: +0.375 (N=206, kontrol -0.037). Pump kapisiyla: +0.396 (N=201).
+    #   SIMETRI KONTROLU: ayni kosullar LONG tarafinda -0.28..-0.34 -> yon TASIYORLAR.
+    # [KAPI SETI REPLAY — uygulanmadan once, ayni arsivde]
+    #   bugunku set (skor>=45 + rr>=1.5)  N=107  ort R +0.008  | kazanc 1.5R'de kirpilirsa -0.143
+    #   A+B + pump kapisi                 N=201  ort R +0.396  | kirpilirsa +0.218 (A +0.127 / B +0.319)
+    #   A+B + skor>=45                    N=134  ort R +0.338  <- SKOR EKLEMEK DUSURUYOR
+    #   -> skor bu kapiya SART DEGIL. Zaten aday kisa listesi skora gore siralaniyor;
+    #      skoru bir de kapi yapmak, oi24'un tasidigi bilgiyi ikinci kez sayip aday kisiyor.
+    # [KORUNAN FILTRELER] pump kapisi (chg24 >= %20 -> acma) · dip-bicak (short_riskli_dip) ·
+    #   asiri_dusmus · BTC-PAY short freni (sarmalayicida, holdout'lu olcum) — hicbiri gevsetilmedi.
+    # [BOGA'DA KAPALI] olcumun 46 gununun tamami AYI/NOTR; boga hucresi YOK -> TAM_BOGA'da acilmaz.
+    # [SINIR] Tek rejim · sabit 2R hedefle olculdu (bot 1.5R kismi + trailing ile cikiyor) ·
+    #   slipaj yok sayildi · olaylar 15 sembolde kumeleniyor (bagimsizlik gorundugunden dusuk).
+    # GERI ALMA: kripto-config.json -> esikler.ab_kapisi_acik: 0
+    if (evren.esik("ab_kapisi_acik", 1) >= 1 and rejim_ad in ("AYI", "NOTR")
+            and (r.get("funding") is not None)
+            and r["funding"] <= evren.esik("ab_funding_esik", -0.05)
+            and (r.get("oi24") or 0) >= evren.esik("ab_oi24_esik", 10.0)
+            and not short_riskli_dip and not asiri_dusmus):
+        if pumplamis:
+            _veto_ekle(veto_out, "blowoff",
+                       f"A+B pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
+            return None
+        return ("SHORT", "ANINDA",
+                f"A+B: funding {r['funding']:.3f} (short kalabalik) + oi24 {oi24:+.0f}% "
+                f"(pozisyon birikiyor) [2026-08-10, arsiv olcumu +0.396R N=201]")
+
     if rejim_ad == "AYI":
         if r["stage"] == "BASLIYOR" and smart == "LONG" and (taker or 0) >= 1.0:
             if asiri_yukselmis:
@@ -885,9 +920,21 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     #   TUTARLILIK: iki hedef arasindaki celiski giderildi. Etkisi golge defterde olculecek
     #   (reddedilenler orada aciliyor) — karar degil, olcum bekleyen bir onarim.
     # GERI ALMA: kripto-config.json -> esikler.rr_kapisi_r: 2.0
+    # [2026-08-10 — KAPI ETKISIZLESTIRILDI, kullanici karari, Madde 9]
+    #   Arsiv olcumu (7.119 olay): kapi kazananlarin %62.8'ini, kaybedenlerin %61.8'ini kesiyor
+    #   — AYIRT ETMIYOR. Ustelik GECIRDIGI grup kestiginden KOTU (-0.053 vs -0.008).
+    #   Izole: A+B kapisiz +0.375 | A+B + rr>=1.5 -0.004 | kapinin ATTIGI grup +0.542.
+    #   Tum kapilar birlikte: rr ile N=77 +0.011 | rr'siz N=212 +0.151.
+    #   MEKANIZMA: rr_tp1 = en yakin yapisal destege uzaklik / risk. YUKSEK rr = "asagida yakin
+    #   destek YOK" = coin zaten kirip bosluga dusmus (uzamis) -> ortalamaya donus geri ziplatiyor.
+    #   Bot "kosacak yer var" sanip "zaten kosmus"u seciyordu. rr bandi TERS: 3.0+ -> -0.109.
+    #   Ek: rr<1.5 olaylarin %43'u yine de 2R'ye ulasiyor -> yapisal TP1, fiyatin duracagi yerin
+    #   kotu bir tahmini; kapinin dayandigi varsayim da zayif.
+    #   rr_kapisi_r <= 0 -> kapi TAMAMEN devre disi (negatif rr_net bile gecer; olcum boyle yapildi).
+    #   GERI ALMA: rr_kapisi_r: 1.5 (ya da eski davranis icin 2.0).
     rr_esik = evren.esik("rr_kapisi_r", evren.esik("kismi_kar_r", 1.5))
     rr_net = olc.get("rr_tp1_net")
-    if rr_net is not None and rr_net < rr_esik and not zorla:
+    if rr_esik > 0 and rr_net is not None and rr_net < rr_esik and not zorla:
         # 2026-07-10: bu ret onceden SESSIZDI ("bot neden girmedi" cevabinda kor nokta) -> olcum loguna eklendi
         _veto_logla(st, sym, r, pillar, "rr_veto",
                     f"NET R/R {rr_net} < {rr_esik} (tp2 net {olc.get('rr_tp2_net')})",

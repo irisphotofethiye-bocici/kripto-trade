@@ -1021,3 +1021,79 @@ duracağı yerin kötü bir tahmini.** R/R çerçevesinin dayandığı varsayım
 1.5R kısmi + trailing olduğu için gerçekte elde edilecek R bu tablodan küçük olur.
 rr_tp1 burada BRÜT (maliyet düşülmemiş); botunki net — sıralamayı değiştirmez, seviyeyi düşürür.
 Pillar D (smart/taker) arşivde yok, o kapılar sınanamadı.
+
+## ⭐⭐⭐⭐⭐ A+B KAPISI AÇILDI · R/R KAPISI KAPANDI (2026-08-10, kullanıcı kararı)
+
+**Kullanıcı:** *"Elimizdeki geçmiş veriyle bunları bulabilirsin, niye bekleyelim — elimdeki
+edge kapıdan geçsin."* Doğru: önerilen kapı seti **canlıya alınmadan önce** 46 günlük arşivde
+baştan sona koşuldu (`scratchpad/kapi_seti_replay.py`), sonra uygulandı.
+
+### KAPI SETİ REPLAY (7.119 olay · SHORT · botun gerçek mekaniği)
+
+| Set | N | gün/olay | ort R | hedefe | A yarısı | B yarısı | kontrol |
+|---|---|---|---|---|---|---|---|
+| **S0 bugünkü** (skor≥45 + rr≥1.5) | 107 | 2.3 | **+0.008** | %33 | −0.058 | +0.093 | −0.025 |
+| S1 R/R kalksın | 212 | 4.6 | +0.151 | %35 | +0.141 | +0.163 | −0.030 |
+| S2 S1 + A+B | 95 | 2.1 | +0.273 | %39 | +0.347 | +0.165 | −0.029 |
+| S3 sadece A+B | 206 | 4.5 | +0.375 | %40 | +0.253 | +0.510 | −0.037 |
+| S4 A+B + skor≥45 | 134 | 2.9 | +0.338 | %40 | +0.274 | +0.407 | −0.032 |
+| **S5 A+B + pump kapısı** | **201** | **4.4** | **+0.396** | **%40** | **+0.277** | **+0.528** | −0.037 |
+| S6 A+B + HAZIRLANIYOR | 32 | 0.7 | +0.702 | %47 | +0.334 | +0.988 | −0.028 |
+
+**Gerçekçilik kesintisi** (bot 2R'ye hiç ulaşmadı; kazançlar 1.5R'de kırpılarak):
+
+| Set | kırpılmış ort R | A yarısı | B yarısı |
+|---|---|---|---|
+| **S0 bugünkü** | **−0.143** | −0.196 | −0.074 |
+| S1 R/R kalksın | −0.005 | −0.002 | −0.007 |
+| **S5 A+B + pump** | **+0.218** | **+0.127** | **+0.319** |
+| S6 A+B + HAZIRLANIYOR | +0.499 | +0.231 | +0.707 |
+
+Kümülatif: S0 = **+0.8R / 46 gün**. S5 = **+79.5R / 46 gün** (201 işlem).
+
+**KRİTİK AYRINTI — skor bu kapıya ŞART DEĞİL:** S4 (+0.338) < S3 (+0.375). Skor eklemek
+performansı *düşürüyor* ve adayı kısıyor. Sebep: skorun 113 puanının 35'i zaten oi24'ten
+geliyor — `oi24 ≥ %10` şartıyla aynı bilgiyi ikinci kez saymak oluyor. Aday kısa listesi
+zaten skora göre sıralanıyor; skoru bir de kapı yapmaya gerek yok. **S6 en yüksek ama N=32
+(izlenim) → seçilmedi; S5 uygulandı.**
+
+### UYGULANAN DEĞİŞİKLİKLER
+
+| Ayar | Eski | Yeni | Gerekçe |
+|---|---|---|---|
+| `ab_kapisi_acik` | — | **1** | Yeni SHORT kapısı: `funding ≤ −0.05` **ve** `oi24 ≥ %10` |
+| `ab_funding_esik` | — | −0.05 | mevcut `funding_derin_neg_pct` ile aynı değer |
+| `ab_oi24_esik` | — | 10.0 | ölçümün gösterdiği eşik (0-10 bandı −0.02, 10-25 bandı +0.217) |
+| `rr_kapisi_r` | 1.5 | **0** (devre dışı) | kapı kazananla kaybedeni ayırt etmiyor, geçirdiği grup daha kötü |
+| `notr_fade_acik` | 1 | **0** | aynı gün açılmıştı; ölçüm iki yönüne de karşı çıktı |
+
+**A+B kapısının yeri:** `_karar_yon_ham` başında, rejim dallarından ÖNCE; yalnız
+`rejim ∈ (AYI, NOTR)`. **TAM_BOGA'da kapalı** — ölçümün 46 gününde boğa hücresi yok.
+Korunan filtreler: pump kapısı (chg24 ≥ %20 → açma) · dip-bıçak (`short_riskli_dip`) ·
+`asiri_dusmus` · BTC-PAY short freni (sarmalayıcıda, holdout'lu ölçüm) · kaldıraç güvenlik
+kırpması. **Hiçbiri gevşetilmedi.**
+
+**R/R kapısı `rr_kapisi_r ≤ 0` ile TAMAMEN devre dışı** (negatif `rr_net` bile geçer —
+ölçüm böyle yapıldığı için tutarlı). Doğrulandı: daha önce hepsi `rr_veto` yiyen
+XAN/GRVT/SQD artık açılıyor.
+
+**Birim testi (sentetik aday):** NOTR → SHORT/ANINDA · AYI → SHORT/ANINDA · BOGA → karar-yok ·
+chg24=25 → VETO:blowoff · funding=−0.02 → karar-yok · oi24=5 → karar-yok. Hepsi beklendiği gibi.
+
+### NE BEKLENİYOR
+Botun kendi aday evreninde A+B **günde ~6,4 bağımsız olay** üretiyordu (6,2 günlük ölçüm,
+40 olay / 15 sembol). Maks 8 pozisyon + 4 saat cooldown ile pratikte günde 3-5 giriş.
+Öncesi: **6,2 günde 4 giriş.**
+
+### SINIRLAR (hükümle birlikte okunur)
+1. **Tek rejim** — 46 günün tamamı AYI/NOTR. Boğa gelince A+B yeniden ölçülmeli.
+2. Ölçüm **sabit 2R hedefli**; bot 1.5R kısmi + trailing ile çıkıyor → gerçek R daha küçük.
+   Kırpılmış tablo (+0.218) daha gerçekçi ama o da tavan.
+3. **Slipaj yok sayıldı**; A+B olayları düşük hacimli coinlerde yoğunlaşıyor.
+4. **Bağımsızlık zayıf**: 206 olay 15 sembolde kümeleniyor ve düşen piyasada hepsi aynı yönde
+   → gerçek portföy riski göründüğünden yüksek. Karnede "ayrı sembol" sayısı izlenmeli.
+5. Pillar D (smart/taker) arşivde yok → o kapılar bu ölçümde sınanamadı, kodda duruyorlar.
+
+### GERİ ALMA (tek satır)
+`ab_kapisi_acik: 0` · `rr_kapisi_r: 1.5` (ya da 2.0 = 08-10 öncesi) · `notr_fade_acik: 1`.
+Config yedeği: `kripto-config.json.yedek-2026-08-10b`.
