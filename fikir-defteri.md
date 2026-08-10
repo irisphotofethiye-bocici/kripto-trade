@@ -1445,3 +1445,32 @@ gainer'a binme) ortak sebebini tek cümlede topluyor. 225.056 barla ölçüldü.
 
 **SINIR:** tek rejim (46 gün AYI/NOTR) · funding/OI tam evrende yok · yalnız LONG denendi
 (sinyal yön söylemediği için SHORT'u da ayrıca ölçmek gerekirdi; A+B zaten o işi yapıyor).
+
+### EK — hareket öncesi sinyal SHORT tarafında da ölçüldü (2026-08-10, kullanıcı yakaladı)
+
+**Kullanıcı: "bunu sadece short için mi yaptın"** → Hayır, **tam tersi**: önceki ölçüm yalnız
+LONG'du. Sınırı kendi notumda yazmıştım ama kapatmamıştım. Kapatıldı (`scratchpad/oncesi_short.py`).
+
+**Ön-kayıt:** sinyal yön değil hareket öngörüyordu ve tetik sonrası fiyat düşüyordu
+(+24s medyan −2.62%) → aynı sinyallerde SHORT, LONG'dan **iyi** olmalı. Eğer SHORT da negatifse
+sinyal tamamen değersizdir.
+
+| Sinyal (hedef %2.5 / 24s) | N | LONG net | SHORT net | SHORT isabet | S: A yarısı | S: B yarısı |
+|---|---|---|---|---|---|---|
+| chg_6h ≥ %3 | 7.984 | −0.27% | **−0.04%** | %34.2 | −0.01 | −0.07 |
+| hacim≥3 & chg_6h≥3 | 3.809 | −0.22% | −0.18% | %32.4 | −0.12 | −0.25 |
+| hacim≥6 & pos20≥0.85 | 1.391 | −0.28% | −0.27% | %26.0 | −0.28 | −0.26 |
+| chg_24h %3-8 | 8.312 | −0.18% | −0.07% | %30.4 | −0.06 | −0.09 |
+| hacim_kat_1h ≥ 6 | 4.963 | −0.21% | −0.13% | %32.3 | −0.19 | −0.07 |
+| **KONTROL (rastgele)** | 3.930 | −0.13% | **−0.10%** | %29.4 | −0.06 | −0.14 |
+
+%10 hedef / 72s'de de aynı: hepsi negatif (SHORT −0.09…−0.13, kontrol −0.21).
+
+**SONUÇ — sinyal İKİ YÖNDE DE değersiz.** Ortalamaya-dönüş eğilimi görünüyor (her satırda
+SHORT, LONG'dan daha az negatif — ön-kayıtlı beklenti tuttu) ama hiçbiri kontrolü anlamlı
+geçmiyor, hiçbiri pozitif değil. En iyisi `chg_6h ≥ %3` SHORT −0.04% (kontrol −0.10%) — fark
+0,06 puan, maliyet gürültüsü seviyesinde.
+
+> **Hareket öncesi örüntü dosyası KAPANDI.** Yapı var (tetik olasılığını 3,4 katına çıkarıyor,
+> iki yarıda kararlı) ama ne LONG ne SHORT tarafında paraya çevrilebiliyor. Sebep yukarıda
+> ölçülmüş mekanizma: yön söylemeyen bir sinyal, stop mesafesini isabetten daha hızlı büyütür.
