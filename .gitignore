@@ -72,3 +72,4 @@ kripto-config.json.yedek-*
 # Olcum scriptlerinin ara ciktilari (buyuk, yeniden uretilebilir)
 scratchpad/oruntu_olaylar.json
 scratchpad/klines_1h/
+scratchpad/kacan_olaylar.json

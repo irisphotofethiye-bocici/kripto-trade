@@ -912,3 +912,112 @@ olay biriktikten sonra kapı tartışması açılsın — erken-kuşak modelinin
    bu tablodan KÜÇÜK olur** (BULGU 1: sistem 2R'ye hiç ulaşmadı).
 4. Slipaj yok sayıldı; düşük hacimli sembollerde iyimser.
 5. A+D (+0.740) cazip ama N=33 — karar için yetersiz, eşik oynatmaya davetiye.
+
+## ⭐⭐⭐⭐ KAÇAN KAZANANLAR — R/R kapısı TERS ÇALIŞIYOR (2026-08-10)
+
+**Talep:** "kazananlara neden giremedi, girmesi gereken yerde girseydi ne olurdu —
+kazananlardaki ortak GİRİLECEK NOKTA'yı ara; aynı sinyale sahip radarda olup
+değerlendirilemeyenlerle karşılaştır."
+
+**Yöntem:** 7.119 olayın hepsine giriş-noktası ölçüleri eklendi (mumdan hesaplandı, arşivde yok):
+`stop_frac` (girişten stopa %), `rr_tp1` (en yakın yapısal hedefe uzaklık ÷ risk),
+`uzanim` (20-bar tepesinden ATR cinsinden uzaklık), `mfe/mae`. Sonra **kazanan (2R hedefe
+ulaşan, N=2289)** ile **kaybeden (stopa giden, N=4606)** karşılaştırıldı ve botun her kapısı
+bu iki grup üzerinde yeniden koşuldu. Araç: `scratchpad/kacan_kazananlar.py`.
+
+**DOĞRULAMA:** offline hesaplanan R/R kapısı, canlıdaki ret oranını birebir yeniden üretti
+(hesap %71.1 / canlı ~%70) → kapı simülasyonu sadık.
+
+### BULGU A — "Ortak girilecek nokta" DİYE BİR ŞEY YOK
+Kazanan vs kaybeden medyanları:
+
+| Ölçü | KAZANAN | KAYBEDEN | ayırt ediyor mu |
+|---|---|---|---|
+| stop mesafesi % | 1.443 | 1.398 | hayır |
+| **rr_tp1** | **1.012** | **1.001** | **hayır** |
+| tepeden ATR uzaklık | 2.403 | 2.308 | hayır |
+| skor | 8.50 | 8.10 | hayır |
+| pos | 0.43 | 0.45 | hayır |
+| comp / vol_x | 0.94 / 0.60 | 0.92 / 0.60 | hayır |
+| **oi24** | **+0.271** | **−0.054** | **EVET** |
+| **chg24** | **+0.023** | **+0.050** | evet (zayıf) |
+
+**Giriş NOKTASI (fiyatın yapıya göre yeri) kazananı kaybedenden ayırmıyor.** Ayıran tek şey
+giriş KOŞULU: açık pozisyon birikimi. Bu, "daha iyi bir yerden girseydik kazanırdık"
+hipotezini çürütüyor — 2.289 kazananla 4.606 kaybeden aynı yerlerden giriliyor.
+
+### BULGU B ⭐⭐ — R/R KAPISI KAZANANLA KAYBEDENİ AYIRT ETMİYOR
+| Kapı | kazananın %'sini keser | kaybedenin %'sini keser | kestiğinin R | **geçirdiğinin R** |
+|---|---|---|---|---|
+| skor < 45 | 95.5% | 96.8% | −0.035 | **+0.216** |
+| stage = izle | 97.8% | 98.3% | −0.029 | **+0.197** |
+| **rr_tp1 < 1.5 (yeni)** | **62.8%** | **61.8%** | **−0.008** | **−0.053** |
+| **rr_tp1 < 2.0 (eski)** | **71.9%** | **69.8%** | **−0.000** | **−0.085** |
+| chg24 ≥ 20 (pump) | 0.6% | 0.7% | −0.139 | −0.024 |
+
+Skor kapısı **düşük kapsam / yüksek isabet**: kazananların %95'ini atıyor ama geçirdiği
+grup +0.216 — bir seçici için doğru davranış. **R/R kapısı ise kazananla kaybedeni AYNI
+oranda kesiyor (62.8% vs 61.8%) ve geçirdiği grup kestiğinden DAHA KÖTÜ.** Yani filtre değil,
+%30'luk rastgele bir örnekleyici — üstelik hafif ters seçici.
+
+### BULGU C ⭐⭐⭐ — R/R KAPISI EDGE'İ YOK EDİYOR (izole ölçüm)
+| Küme | N | ort R | hedefe ulaşan | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| **A+B (kapısız)** | 206 | **+0.375** | %40 | +0.253 | +0.510 |
+| A+B + rr ≥ 1.5 (yeni kapı) | 63 | **−0.004** | %32 | −0.319 | +0.365 |
+| A+B + rr ≥ 2.0 (eski kapı) | 42 | **−0.034** | %31 | −0.427 | +0.398 |
+| **A+B + rr < 1.5 (KAPININ ÇÖPE ATTIĞI)** | **143** | **+0.542** | %43 | +0.516 | +0.571 |
+| skor≥45 (kapısız) | 276 | +0.216 | %37 | +0.144 | +0.294 |
+| skor≥45 + rr ≥ 1.5 | 122 | +0.045 | %33 | −0.033 | +0.145 |
+| **skor≥45 + rr < 1.5 (kapının attığı)** | **154** | **+0.351** | %40 | +0.305 | +0.395 |
+
+**Kapının reddettiği grup, kabul ettiğinden her seferinde belirgin daha iyi.**
+
+Botun tüm kapıları birlikte (46 gün):
+| | N | ort R |
+|---|---|---|
+| tüm kapılar + R/R 2.0 | 77 | **+0.011** |
+| tüm kapılar + R/R 1.5 | 107 | +0.008 |
+| **tüm kapılar, R/R YOK** | **212** | **+0.151** |
+
+**R/R kapısını kaldırmak hem işlem sayısını ~2×'e çıkarıyor hem beklentiyi +0.011'den
++0.151'e taşıyor.** 2.289 kazanandan sadece 26'sı (%1) mevcut kapılardan geçebiliyordu.
+
+### BULGU D — MEKANİZMA: kapı yapısı gereği ters
+`rr_tp1` bandına göre (tüm olaylar, monotonluk YOK ve yön TERS):
+
+| rr_tp1 bandı | N | ort R |
+|---|---|---|
+| 0.00 – 0.75 | 3015 | −0.011 |
+| 0.75 – 1.00 | 570 | −0.075 |
+| **1.00 – 1.50** | 872 | **+0.048** |
+| **1.50 – 2.00** | 602 | **+0.056** |
+| 2.00 – 3.00 | 1020 | −0.061 |
+| **3.00 +** | 1040 | **−0.109** ← kapının en çok sevdiği bant |
+
+**Yüksek R/R = daha kötü.** Sebep tanımın kendisinde: `rr_tp1` = *en yakın yapısal desteğe*
+uzaklık ÷ risk. Yüksek rr_tp1 "aşağıda yakın destek YOK" demektir — yani coin zaten her şeyi
+kırıp boşluğa düşmüş, uzamış durumda; ortalamaya dönüş onu geri zıplatıyor. Düşük rr_tp1 ise
+"hemen altında destek var" = kırılmayı bekleyen gerçek short kurulumu.
+**Bot "koşacak yer var" sanıp aslında "zaten koşmuş"u seçiyor.**
+
+Ek bulgu: rr_tp1 < 1.5 olan olayların %43'ü yine de 2R'ye ulaşıyor → **yapısal TP1, fiyatın
+duracağı yerin kötü bir tahmini.** R/R çerçevesinin dayandığı varsayım da bu ölçümle zayıflıyor.
+
+### HÜKÜM
+1. **"Kazananlara neden giremedi?"** → R/R kapısı yüzünden. Kapı kazananların %72'sini
+   kesiyor, kaybedenlerin %70'ini — yani ayırt etmiyor; ve kestiği grup daha iyi.
+2. **"Girmesi gereken yerde girseydi ne olurdu?"** → Giriş noktasında ortak örüntü YOK.
+   Kazananları ayıran şey *nereden* girildiği değil, *hangi koşulda* girildiği (oi24 + funding).
+3. **"Radarda olup değerlendirilemeyenler"** → R/R kapısı olmadan aynı kapılardan geçen
+   212 olay +0.151R; kapıyla 77 olay +0.011R.
+
+**ÖNERİ (kullanıcı kararı bekliyor, aksiyon ALINMADI):**
+- `rr_kapisi_r: 0` → R/R kapısını etkisizleştir (kaldırma değil, config ile kapat — geri alınabilir).
+- Yerine **A+B'yi kapı yap** (funding ≤ −0.05 **ve** oi24 ≥ %10): N=206, +0.375R, iki yarıda da pozitif.
+- Kaldıraç güvenlik kırpması (stop likidasyondan önce) **AYNEN KALIR** — o ayrı bir koruma.
+
+**SINIRLAR:** 46 günün tamamı AYI/NOTR. Ölçüm sabit 2R hedefli; botun fiili çıkışı
+1.5R kısmi + trailing olduğu için gerçekte elde edilecek R bu tablodan küçük olur.
+rr_tp1 burada BRÜT (maliyet düşülmemiş); botunki net — sıralamayı değiştirmez, seviyeyi düşürür.
+Pillar D (smart/taker) arşivde yok, o kapılar sınanamadı.
