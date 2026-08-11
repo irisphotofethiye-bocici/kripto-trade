@@ -1817,3 +1817,17 @@ elediği %27, hayatta kalmanın kazandırdığının yanında küçük kalıyor.
 **Pencere boyunca hiçbir parametreye dokunulmaz.** Yeni kapı eklenmez, eşik oynatılmaz,
 fren taşınmaz. LONG gerçek deftere açılmaz (gölgede 17/25-30 olay birikti, kendi başına dolsun).
 Bu kural olmadan pencere ölçüm değil, gözlem olur.
+
+**İŞLETİM NOTU — state yazma yarışı (2026-08-11):** `zirve_equity` düzeltmesi ilk seferde
+**ezildi**. Sebep: cycle state'i **başta yükleyip sonda yazıyor**; 12:43'te başlayan tur
+12:46:57'de yazınca 12:45'teki elle düzeltmem kayboldu. Sessizce oldu — fark edilmesinin
+tek sebebi yazma sonrası doğrulama yapmam. **Kural: `testbot_state.json`'a elle her yazma,
+bir cycle bitişinin hemen ardından yapılır ve SONRAKİ cycle'dan sonra doğrulanır.**
+İkinci yazma 12:48'de (cycle'dan 94 sn sonra) yapıldı, 12:52:05 turundan sonra `zirve=8412.06`
+olarak **doğrulandı**.
+
+**Ayrıca:** bot 5 dakikalık turlarla, her tur **ayrı kısa ömürlü süreç** olarak çalışıyor
+(zamanlanmış görev yok, `python testbot.py --cycle`). `tasklist` turlar arası boşluğa
+denk gelirse "hiç Python süreci yok" gösterir — bu bot durdu anlamına GELMEZ.
+Doğru kontrol: `testbot_state.son_cycle_ts` ve `testbot_equity.jsonl` aralıkları.
+(11:17 → 12:06 arasında 49 dakikalık bir boşluk var; sebebi bilinmiyor, izlenecek.)
