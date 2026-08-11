@@ -1,21 +1,30 @@
-# Kanal + StochRSI stratejisi — analiz
+# Price Headley Acceleration Bands + StochRSI — analiz ve ölçüm
 
-*2026-08-11 · kripto perp bağlamı · ölçüm YAPILMADI*
+*2026-08-11 · kripto perp · **ÖLÇÜLDÜ** · sonuç: **6 varyantın hepsi KALDI***
+
+> **Özet:** strateji ölçüldü. 570 sembol, ~60 gün, 5.488 LONG + 5.789 SHORT sinyali.
+> Ön-kayıtlı ölçütü **hiçbir varyant geçemedi.** Sebep tek cümleyle: hedefe ulaşmak için
+> **%24,4 isabet** gerekiyordu, **%6,2** gerçekleşti. Ve hedefi yakınlaştırmak açığı
+> kapatmıyor — sorun hedefte değil, kurulumda **yön bilgisi olmamasında.**
+> Ayrıntı için [ölçüm bölümü](#11-ölçüm-sonucu).
 
 ---
 
 ## Bu belge ne, ne değil
 
-**Ne:** görsel bir tariften çıkarılmış stratejiyi, iki kişinin aynı şekilde kodlayabileceği
-kesin kurallara dönüştürür; avantaj/dezavantajını, risk yönetimini, hangi rejimde çalışıp
-çalışmadığını ve geliştirme yollarını yazar.
+**Ne:** bir video tarifinden çıkarılmış stratejiyi kesin kurallara dönüştürür, ölçer, ve
+avantaj/dezavantajını, risk yönetimini, hangi rejimde çalışıp çalışmadığını yazar.
 
-**Ne değil:** bu stratejinin bir backtest'i **değildir.** Strateji hiç ölçülmedi.
+**Ne değil:** stratejinin *iyi olduğunu* ya da *kesin kötü olduğunu* kanıtlayan bir belge
+değildir. Ölçüm tek rejimde (ayı/nötr), tek zaman diliminde (1 saat) ve tek piyasada
+(kripto perp) yapıldı.
 
-Belgedeki her sayı ya **genel mekanik aritmetiktir** (başabaş oranı, maliyet payı gibi —
-hesaplanabilir, tartışılamaz) ya da **bu projenin başka ölçümlerinden** aktarılmıştır ve
-kaynağı belirtilmiştir. **"Bu strateji şu kadar kazandırır" türü tek bir iddia yoktur,**
-çünkü öyle bir ölçüm yapılmadı.
+Bölüm 1-10 ölçümden **önce** yazıldı ve **değiştirilmedi** — böylece hangi öngörülerin
+tuttuğu, hangilerinin tutmadığı görülebilsin. Ölçüm sonucu bölüm 11'dedir.
+
+Belgedeki her sayı ya **genel mekanik aritmetiktir** ya **bu projenin başka
+ölçümlerinden** aktarılmıştır ya da **bölüm 11'deki kendi ölçümümüzden** gelir; her biri
+kaynağıyla birlikte verilir.
 
 **Bağlam:** orijinal örnek ASTOR ENERJİ (BIST) 15 dakikalıktı. Bu belge kripto perp
 bağlamında yazıldı — projenin tüm altyapısı ve ölçülmüş bulguları oradan geliyor.
@@ -48,10 +57,37 @@ Tek grafik, tanımı gereği tek yarıdır.
 
 ---
 
-## 2. ⚠️ İndikatörün kimliği belirsiz — ve bu her şeyi ters çeviriyor
+## 2. İndikatör: Price Headley Acceleration Bands
 
-Bana görsel verilmedi; tarif metinden geldi. **"Mavi üst çizgi + kırmızı alt çizgi + gri dolgu"**
-en az üç farklı indikatöre uyuyor ve stratejinin anlamı üçünde **birbirine zıt:**
+**Çözüldü.** Kaynak X gönderisi açılamadı (**HTTP 402** — X'in API duvarı), ama kullanıcı
+indikatörü bildirdi: **Price Headley Acceleration Bands** (TradingView yerleşik) + StochRSI.
+
+```
+üst = SMA(yüksek × (1 + 4×(yüksek−düşük)/(yüksek+düşük)), 20)
+alt = SMA(düşük  × (1 − 4×(yüksek−düşük)/(yüksek+düşük)), 20)
+```
+
+Oynaklığa uyum sağlayan bir bant — Bollinger/Keltner ailesinden, Donchian'dan değil.
+Yani "alt banda değmek" **uç sapma** demek, "yeni dip" değil. Ortalamaya dönüş okuması
+tutarlı.
+
+### ⚠️ Ama yazarın kendi kullanımı bunun TERSİ
+
+Headley bu bantları **kırılım** için tasarladı: fiyatın bandın **dışında** art arda
+kapanmasını *hızlanma* sinyali sayar — yani bant, "buradan geri döner" değil,
+**"buradan çıkarsa hızlanır"** demek için çizilmiştir.
+
+Videodaki kullanım (alt bantta AL) indikatörün **tasarım amacının tersidir.** Bu tek
+başına stratejiyi geçersiz kılmaz — bir araç yaratıcısının aklına gelmeyen bir işe
+yarayabilir — ama kanıt yükünü artırır.
+
+> **Bu belirti ölçümden önce yazıldı ve ölçümde doğrulandı:** alt banttan alım
+> ölçütü geçemedi (bölüm 11).
+
+### Ölçümden önceki belirsizlik (kayıt için)
+
+İndikatör bildirilmeden önce tarif üç aileye birden uyuyordu. Bu yüzden ölçüm **üçünü de**
+kapsadı — hangisinin doğru olduğu belli olmasaydı bile sonuç bilinsin diye:
 
 | aday | tanım | alt banda değmek ne demek | strateji ne olur |
 |---|---|---|---|
@@ -63,21 +99,9 @@ Fark kozmetik değil. **Donchian ise alt banda değmek "ucuzladı" demek değil,
 demektir** — o noktada almak, düşen bıçağı bilerek yakalamaktır. Bollinger'de aynı olay
 istatistiksel bir uç sapmadır ve geri dönme beklentisi mantıklıdır.
 
-**Nasıl ayırt edilir (grafiğe bakarak, 10 saniye):**
-
-- **Bantlar fiyat oynaklığıyla nefes alıyor mu** — sakin dönemde daralıp hareketli dönemde
-  genişliyorsa → **Bollinger veya Keltner**
-- **Bantlar basamaklı, yatay platolar çiziyor mu** — bir süre düz gidip sonra sıçrayarak
-  yeni seviyeye geçiyorsa → **Donchian**
-- **Fiyat banda değdiğinde bant o barda kırılıyor mu** — Donchian'da alt bant tanımı gereği
-  fiyatı *takip eder*, fiyat onu geçemez; Bollinger'de fiyat bandın dışına taşabilir
-
-> **Bu doğrulanmadan strateji kodlanamaz.** Yanlış aileyi seçmek, stratejiyi tersine
-> çevirir — ortalamaya dönüş yerine kırılım alırsınız.
-
-**Belgenin geri kalanı `Bollinger(20, 2.0)` varsayımıyla yazılmıştır** — tarifteki
-"aşırı satımdan dönüş" mantığına uyan tek yorum budur. Varsayım yanlışsa 3. ve 8. bölümler
-geçersizdir.
+**Ölçüm sonucu üçü de aynı yere çıktı** (bölüm 11): Acceleration −0,09, Bollinger −0,15,
+Donchian −0,26. **Bant ailesi seçimi sonucu değiştirmedi** — bu, belirsizliğin
+sanıldığı kadar kritik olmadığını gösterdi. Beklentimin tersi; kayda geçsin.
 
 ---
 
@@ -89,8 +113,7 @@ Her eşik isimlendirilmiş parametre. Karşılaştırmalar (`<` mi `<=` mi) aç�
 
 ```
 PARAMETRELER
-  bant_periyot     = 20
-  bant_sapma       = 2.0
+  bant_periyot     = 20         # TradingView varsayılanı
   rsi_periyot      = 14
   stoch_periyot    = 14
   k_yumusatma      = 3
@@ -100,13 +123,18 @@ PARAMETRELER
   atr_periyot      = 14
   stop_nbar        = 10
   stop_atr_pay     = 0.25
-  zaman_stopu_saat = 4          # config: maliyet.tutma_saat_tf["15m"]
+  zaman_stopu_bar  = 12         # 1 saatlik için; config maliyet.tutma_saat_tf["1h"]
+                                # 15 dakikalık kullanılacaksa: 4 saat = 16 bar
 
-BANT (Bollinger)
-  orta_bant = SMA(kapanis, bant_periyot)
-  sapma     = stdev(kapanis, bant_periyot)          # popülasyon std sapması
-  ust_bant  = orta_bant + bant_sapma * sapma
-  alt_bant  = orta_bant - bant_sapma * sapma
+BANT — PRICE HEADLEY ACCELERATION BANDS
+  faktor    = 4 * (yuksek - dusuk) / (yuksek + dusuk)     # bar başına
+  ust_bant  = SMA(yuksek * (1 + faktor), bant_periyot)
+  alt_bant  = SMA(dusuk  * (1 - faktor), bant_periyot)
+  orta_bant = SMA(kapanis, bant_periyot)                  # yalnız görsel
+
+  # TradingView kaynağı 2*((y-d)/((y+d)/2)) yazar; sadeleşince yukarıdakiyle aynıdır.
+  # DİKKAT: bant, o barın KENDİ yüksek/düşüğünden türer — Bollinger gibi yalnız
+  # kapanışa bakmaz. Bu yüzden geniş gövdeli bir bar bandı anında genişletir.
 
 STOCHRSI
   r        = RSI(kapanis, rsi_periyot)              # Wilder RSI
@@ -547,37 +575,182 @@ Bu projenin standardı. Ölçüme başlamadan önce **sonuç görülmeden** kâ�
 
 ---
 
-## 10. Ne ölçülmedi — kapanış
+## 10. Ölçümden önce yazılan tahminler
 
-**Bu strateji hiç ölçülmedi.** Belgedeki hiçbir sayı onun performansına ait değildir.
+Bölüm 1-9 ölçümden **önce** yazıldı. Karneleri bölüm 11'de:
 
-- Genel aritmetik (başabaş, maliyet payı, R/R) → hesaplanabilir, tartışılamaz
-- Aktarılan bulgular → bu projenin **başka** ölçümlerinden, kaynağı belirtilerek
-
-### Ölçmek istenirse elimizde hazır olan
-
-| ne | nerede |
-|---|---|
-| 570 sembol × 60 gün 1h mum | `scratchpad/klines_1h/` |
-| A-stop mekaniği | `olcucu.py:120` |
-| Wilder RSI | `olcucu.py:47` |
-| ATR + swing/destek-direnç | `olcucu.py:89`, `olcucu.py:104` |
-| Kontrol grubu + A/B zaman yarısı deseni | `scratchpad/oncesi_short.py` |
-| Portföy / ruin simülatörü | `scratchpad/fren_riski.py` |
-
-**Eksik olan tek şey:** Bollinger/StochRSI hesabı (~30 satır) ve **15 dakikalık önbellek.**
-**1 saatlikte ölçüm bugün koşturulabilir** — ki 9.1'e göre zaten tercih edilmesi gereken
-zaman dilimi odur.
-
-### Ölçüm ne cevaplamalı
-
-1. Sinyal, kontrol grubunu (rastgele barlar) **yeniyor mu?**
-2. İsabeti, **stop genişlemesinden hızlı mı** artırıyor? (5.3'ün testi)
-3. İki zaman yarısında da **ayakta kalıyor mu?**
-4. Trend filtresi eklenince fark **ne kadar?** (9.2'nin değeri)
-5. SHORT tarafı LONG'dan **güçlü mü?** (9.5)
+| # | tahmin | sonuç |
+|---|---|---|
+| 5.1 | dar stop yüzünden çalışmaz | ✅ **tuttu** — stop %51 oranında önce yeniyor |
+| 8.1 | düşüş trendinde çalışmaz | ✅ **tuttu** — MA200 altı anlamlı negatif (t=−2,58) |
+| 9.2 | trend filtresi düzeltir | ❌ **tutmadı** — filtre hücresi gürültü (t=+0,31) |
+| 2 | bant ailesi kritik, seçim her şeyi değiştirir | ❌ **tutmadı** — üç aile de negatif |
+| ön-kayıt | genel sonuç negatif olacak | ✅ **tuttu** |
 
 ---
 
-*Kaynaklar: `fikir-defteri.md` (satır 1339, 1425-1432, 1873-1874 ve 2026-08-11 bölümleri),
-`kripto-config.json → maliyet`, `olcucu.py`, `evren.py:209-260`, `testbot.py:655-662`.*
+## 11. ÖLÇÜM SONUCU
+
+**Araç:** `scratchpad/kanal_stoch.py` · **ön-kayıt:** `fikir-defteri.md`, commit `2bde27b`
+(**koşturmadan önce** commit'lendi, git geçmişi doğrular)
+
+**Kısıt:** kullanıcı isteğiyle bota hiç dokunulmadı. Ölçüm tamamen `scratchpad/` içinde,
+salt-okunur mum önbelleği üzerinde. `testbot.py` / `radar.py` / config / gölge defter
+**değişmedi.**
+
+**Kurulum:** 570 sembol · ~60 gün · 1 saatlik · giriş sonraki bar açılışı ·
+maliyet %0,13 · ufuk 12 bar · hedef girişte dondurulmuş · sinyal seyreltme 24 bar
+
+### 11.1 Ana tablo
+
+| küme | N | net % | isabet | stop% | hedef% | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|---|
+| **ACC LONG** *(asıl)* | 5488 | **−0,09** | %6,2 | 1,65 | 5,62 | +0,09 | −0,32 |
+| **ACC SHORT** *(asıl)* | 5789 | **−0,12** | %4,9 | 2,03 | 6,01 | −0,09 | −0,15 |
+| ayrıştırma: yalnız bant | 9583 | −0,03 | %5,7 | 1,02 | 5,34 | +0,09 | −0,15 |
+| ayrıştırma: yalnız StochRSI | 17965 | −0,19 | %17,8 | 2,56 | 3,78 | −0,19 | −0,19 |
+| Bollinger LONG *(duyarlılık)* | 9562 | −0,15 | %19,9 | 1,51 | 3,24 | −0,05 | −0,24 |
+| Donchian LONG *(duyarlılık)* | 5205 | −0,26 | %10,9 | 1,26 | 4,36 | −0,30 | −0,22 |
+| **KONTROL rastgele (long)** | 5387 | −0,19 | %26,7 | 2,94 | 3,14 | −0,30 | −0,09 |
+| **KONTROL rastgele (short)** | 5380 | −0,06 | %29,5 | 3,32 | 2,74 | +0,06 | −0,18 |
+
+**Ön-kayıtlı ölçüt:** net > 0 **ve** kontrolü yenmek **ve** her iki zaman yarısında pozitif.
+
+> ### Altı varyantın altısı da KALDI.
+
+Bant ailesini değiştirmek kurtarmıyor. Bileşenleri ayırmak da: yalnız bant −0,03,
+yalnız StochRSI −0,19, ikisi birlikte −0,09. **Hiçbir bileşen kayıp bir kenar taşımıyor.**
+
+### 11.2 Neden — açık 18,3 puan
+
+```
+medyan stop  %1,65      medyan hedef  %5,62      R/R 3,4 : 1
+
+GEREKEN başabaş isabet  : %24,4
+GERÇEKLEŞEN isabet      : % 6,2
+AÇIK                    : −18,3 puan
+
+çıkış dağılımı:   STOP %51   ·   SÜRE %43   ·   HEDEF %6
+```
+
+**R/R 3,4:1 kulağa iyi geliyor ve tamamen yanıltıcı** — bölüm 7'deki Senaryo 1'in
+uyarısı tam olarak buydu. İşlemlerin yarısı stopa gidiyor, %43'ü zaman aşımına uğruyor;
+hedefe yalnız **%6'sı** ulaşıyor.
+
+### 11.3 ⭐ Hedefi yakınlaştırmak KURTARMIYOR — en önemli bulgu
+
+Akla gelen ilk çare: "üst bant çok uzak, daha yakın bir hedef koyalım." Ölçüldü —
+hedef, bant genişliğinin bir payı olarak süpürüldü:
+
+| hedef | hedef % | isabet | başabaş gereken | **açık** | net % |
+|---|---|---|---|---|---|
+| bant × 0,25 | 1,40 | %48,0 | %58,2 | **−10,2** | −0,07 |
+| bant × 0,50 | 2,81 | %23,1 | %39,9 | **−16,8** | −0,11 |
+| bant × 0,75 | 4,21 | %11,5 | %30,3 | **−18,8** | −0,08 |
+| bant × 1,00 | 5,62 | %6,2 | %24,4 | **−18,2** | −0,09 |
+
+**Dört hedefte de açık kapanmıyor, dördünde de net negatif.**
+
+Hedef yaklaştıkça isabet gerçekten yükseliyor (%6,2 → %48,0) — ama başabaş gereksinimi
+**daha hızlı** yükseliyor (%24,4 → %58,2). Bu, projenin defalarca ölçtüğü aynı yapı:
+
+> **Başabaş, isabetten hızlı büyür.** Bölüm 5.2 ve 5.3 bunu başka verilerde göstermişti;
+> burada üçüncü kez, bu strateji üzerinde çıktı.
+
+**Sonuç:** bu bir hedef-ayarı sorunu değil. **Stop, her hedeften önce yeniyor** — kurulumun
+kendisinde yön bilgisi yok.
+
+### 11.4 Tek hayatta kalan hücre gürültü çıktı
+
+Ana taramada iki zaman yarısında da pozitif olan **tek** hücre `ACC LONG + fiyat > MA200`
+idi (N=786, +%0,05). Test edildi:
+
+| alt küme | N | net % | standart hata | t | karar |
+|---|---|---|---|---|---|
+| fiyat > MA200 | 786 | +0,052 | 0,166 | **+0,31** | **GÜRÜLTÜ** (\|t\|<2) |
+| fiyat < MA200 | 4702 | −0,119 | 0,046 | −2,58 | anlamlı **negatif** |
+| tümü | 5488 | −0,095 | 0,046 | −2,05 | anlamlı **negatif** |
+
+Trend filtresi hücresi sıfırdan **ayırt edilemiyor.** Onlarca hücreye bakıldığında birinin
+pozitif görünmesi zaten şansla beklenir — bu, aranan kanıt değil, aranırken bulunan gürültü.
+
+**Ama bir öngörü doğrulandı:** MA200 **altında** anlamlı negatif (t=−2,58). Bölüm 8.1'in
+*"düşüş trendinde çalışmaz"* öngörüsü veriyle örtüştü — üstelik o bölüm ölçümden önce
+yazılmıştı.
+
+### 11.5 ⚠️ Geçersiz ölçüm — dürüstlük kaydı
+
+Betiğin çıktısında *"yazarın kendi kullanımı: KIRILIM long"* satırı **%98,2 isabet**
+gösteriyor. **Bu sayı anlamsızdır, kullanılamaz.**
+
+Sebep: fiyat üst bandın üstünde kapandığında hedef (üst bant) girişin **arkasında** kalıyor;
+medyan hedef mesafesi %0,03. İşlem açılır açılmaz "hedefe ulaştı" sayılıyor. Kırılım
+varyantı bu çıkış kuralıyla **ölçülemez** — kendi çıkış kuralıyla ayrıca ölçülmesi gerekir.
+
+Satır tablodan silinmedi; hata görünür kalsın diye bırakıldı.
+
+### 11.6 Ne kanıtlandı, ne kanıtlanmadı
+
+**Kanıtlanan:** bu strateji, **1 saatlik kripto perp'te, ayı/nötr rejimde, TradingView
+varsayılan parametreleriyle** kaybediyor. N büyük (5.488), sonuç istatistiksel olarak
+sıfırdan ayrı (t=−2,05), ve bant ailesi ile hedef mesafesine karşı **dayanıklı** —
+yani tek bir ayarın talihsizliği değil.
+
+**Kanıtlanmayan:**
+- **15 dakikalıkta** ne olur — orijinal tarif oydu, ölçüm 1 saatlik
+- **BIST'te** ne olur — ASTOR bir hisse; maliyet, kaldıraç, seans yapısı tümüyle farklı
+- **Boğa rejiminde** ne olur — ölçümün tamamı ayı/nötr
+- **Başka parametrelerde** ne olur — taranmadı; taransaydı **tarama artığı** riski doğardı
+
+**Not:** LONG tarafı rastgele kontrolü bir tık yeniyor (−0,09 vs −0,19), yani sinyalde
+sıfır bilgi olmayabilir. Ama fark güvenilir değil ve **her hâlükârda maliyetten sonra
+negatif** — "kontrolden az kaybetmek" bir strateji değildir.
+
+---
+
+## 12. Kapanış — bundan sonra ne yapılır
+
+### Karar
+Bu strateji **bu hâliyle bu piyasada kullanılmamalı.** Ölçüm ön-kayıtlıydı, örneklem büyüktü
+(5.488 sinyal), sonuç istatistiksel olarak sıfırdan ayrıydı (t=−2,05), ve **bant ailesine
+ve hedef mesafesine karşı dayanıklıydı** — yani tek bir ayarın talihsizliği değil.
+
+Bota **eklenmedi**, gölge deftere **alınmadı.** Sebep: gölge defter bir *aday havuzu* değil,
+ölçüm bütçesidir; ön-kayıtlı ölçütü kesin biçimde geçemeyen bir tez oraya girerse gerçek
+adayların yerini işgal eder.
+
+### Yine de ölçmeye değer üç şey
+
+| # | ne | neden | maliyet |
+|---|---|---|---|
+| 1 | **15 dakikalık** | Orijinal tarif oydu. 1 saatlik sonuç oraya birebir taşınmaz. | 15dk önbellek indirmesi |
+| 2 | **Kırılım yönü** (Headley'nin kendi kullanımı) | Bölüm 11.5'te **geçersiz** ölçüldü — hedef girişin arkasında kaldı. Kendi çıkış kuralıyla ölçülmedi. | Yeni çıkış tanımı + tekrar koşum |
+| 3 | **Boğa rejimi** | Ölçümün tamamı ayı/nötr. Ortalamaya dönüş boğada farklı davranabilir. | Rejim döndüğünde veri birikmesi |
+
+**2 numara özellikle dikkate değer:** yazarın kendi tasarım amacı kırılımdı ve biz onu
+ölçemedik. Elimizdeki tek gerçek boşluk bu.
+
+### Ne kanıtlanmadı — tekrar
+- **15 dakikalıkta** ne olur (ölçüm 1 saatlik)
+- **BIST'te** ne olur (ASTOR hisse; maliyet, kaldıraç, seans yapısı tümüyle farklı)
+- **Boğa rejiminde** ne olur (ölçümün tamamı ayı/nötr)
+- **Başka parametrelerde** ne olur (taranmadı — taransaydı tarama artığı riski doğardı)
+
+### Yeniden üretmek için
+```
+python scratchpad/kanal_stoch.py        # ana ölçüm (ön-kayıtlı)
+python scratchpad/kanal_stoch_tani.py   # tanı (keşifsel, ön-kayıtlı DEĞİL)
+```
+Ön-kayıt: `fikir-defteri.md`, commit `2bde27b` — **koşturmadan önce** commit'lendi.
+Veri: `scratchpad/klines_1h/` (570 sembol, 2026-06-12 → 2026-08-10).
+
+### Sisteme etki: yok
+Kullanıcı kısıtı gereği `testbot.py`, `radar.py`, `kripto-config.json` ve gölge defter
+**hiç ellenmedi.** Devam eden iki ölçüm penceresi (SHORT 138 işlem · LONG gölge 25 olay)
+etkilenmedi.
+
+---
+
+*Kaynaklar: kendi ölçümü `scratchpad/kanal_stoch.py` · `fikir-defteri.md` (satır 1339,
+1425-1432, 1873-1874 ve 2026-08-11 bölümleri) · `kripto-config.json → maliyet` ·
+`olcucu.py` · `evren.py:209-260` · `testbot.py:655-662`.*
