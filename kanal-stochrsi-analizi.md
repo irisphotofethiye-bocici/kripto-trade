@@ -1,12 +1,18 @@
 # Price Headley Acceleration Bands + StochRSI — analiz ve ölçüm
 
-*2026-08-11 · kripto perp · **ÖLÇÜLDÜ** · sonuç: **6 varyantın hepsi KALDI***
+*2026-08-11 · kripto perp · **ÖLÇÜLDÜ** · ana varyant + scalp + rejim: **hepsi KALDI***
 
-> **Özet:** strateji ölçüldü. 570 sembol, ~60 gün, 5.488 LONG + 5.789 SHORT sinyali.
-> Ön-kayıtlı ölçütü **hiçbir varyant geçemedi.** Sebep tek cümleyle: hedefe ulaşmak için
-> **%24,4 isabet** gerekiyordu, **%6,2** gerçekleşti. Ve hedefi yakınlaştırmak açığı
-> kapatmıyor — sorun hedefte değil, kurulumda **yön bilgisi olmamasında.**
-> Ayrıntı için [ölçüm bölümü](#11-ölçüm-sonucu).
+> **Özet:** strateji ölçüldü — ana varyant, scalp varyantı ve rejim iddiası dahil.
+> **Hiçbiri ön-kayıtlı ölçütü geçemedi.** Toplam 20+6 hücre, hepsi negatif.
+>
+> **Asıl teşhis:** maliyet düşülmeden **brüt getiri sıfır** (−0,01), rastgele girişin brütü
+> ise daha iyi (+0,04). Yani sinyal yanlış yöne bakmıyor — **hiçbir yöne bakmıyor**;
+> kaybı komisyon yapıyor. Parametre ayarıyla düzelmez.
+>
+> **"Nötr ve boğada çalışır" iddiası:** nötr **ölçüldü ve tutmadı**; strateji piyasa
+> *yükselirken* en kötü sonucu veriyor. Gerçek boğa bu veride **yok**, o kısım açık kaldı.
+>
+> Ayrıntı: [ana ölçüm](#11-ölçüm-sonucu) · [scalp ve rejim](#12-scalp-varyanti-ve-notrbogada-calisir-iddiasi)
 
 ---
 
@@ -15,16 +21,17 @@
 **Ne:** bir video tarifinden çıkarılmış stratejiyi kesin kurallara dönüştürür, ölçer, ve
 avantaj/dezavantajını, risk yönetimini, hangi rejimde çalışıp çalışmadığını yazar.
 
-**Ne değil:** stratejinin *iyi olduğunu* ya da *kesin kötü olduğunu* kanıtlayan bir belge
-değildir. Ölçüm tek rejimde (ayı/nötr), tek zaman diliminde (1 saat) ve tek piyasada
-(kripto perp) yapıldı.
+**Ne değil:** stratejinin her koşulda kötü olduğunu kanıtlayan bir belge değildir. Ölçüm
+tek zaman diliminde (1 saat), tek piyasada (kripto perp) ve **gerçek boğa içermeyen** bir
+pencerede yapıldı (bölüm 12.1).
 
 Bölüm 1-10 ölçümden **önce** yazıldı ve **değiştirilmedi** — böylece hangi öngörülerin
-tuttuğu, hangilerinin tutmadığı görülebilsin. Ölçüm sonucu bölüm 11'dedir.
+tuttuğu, hangilerinin tutmadığı görülebilsin (karne: bölüm 10).
+Ölçümler bölüm 11 (ana) ve 12'dedir (scalp + rejim).
 
 Belgedeki her sayı ya **genel mekanik aritmetiktir** ya **bu projenin başka
-ölçümlerinden** aktarılmıştır ya da **bölüm 11'deki kendi ölçümümüzden** gelir; her biri
-kaynağıyla birlikte verilir.
+ölçümlerinden** aktarılmıştır ya da **kendi ölçümümüzden** gelir; her biri kaynağıyla
+birlikte verilir.
 
 **Bağlam:** orijinal örnek ASTOR ENERJİ (BIST) 15 dakikalıktı. Bu belge kripto perp
 bağlamında yazıldı — projenin tüm altyapısı ve ölçülmüş bulguları oradan geliyor.
@@ -708,7 +715,106 @@ negatif** — "kontrolden az kaybetmek" bir strateji değildir.
 
 ---
 
-## 12. Kapanış — bundan sonra ne yapılır
+## 12. SCALP VARYANTI ve "nötr/boğada çalışır" iddiası
+
+**Soru:** kısa dönem LONG scalp olarak ayarlansa ne olur? Strateji için genellikle
+*"nötr ve boğada çalışır"* deniyor.
+
+**Araç:** `scratchpad/kanal_scalp.py` · 3.786 sinyal
+
+### 12.1 ⚠️ Önce: bu veride gerçek boğa YOK
+
+```
+BTC 2026-06-12 → 2026-08-10 :  63.618 → 64.289  =  +%1,1
+tepeden dip                  :  −%13,4
+```
+
+Pencere **nötr/yatay.** Dolayısıyla:
+
+- **"Boğada çalışır"** → bu veriyle **test EDİLEMEZ.** Edilmedi, edilmiş gibi de yazılmadı.
+- **"Nötr'de çalışır"** → **test edilebilir ve edildi.** Üstelik ortalamaya dönüşün ev sahası
+  tam da bu rejimdir; strateji en avantajlı zeminde sınandı.
+
+### 12.2 Hedef × ufuk ızgarası — 20 hücrenin 20'si negatif
+
+net %, maliyet dahil, A-stop:
+
+| hedef | 2 bar | 4 bar | 6 bar | 12 bar |
+|---|---|---|---|---|
+| %0,50 | −0,14 | −0,15 | −0,17 | −0,17 |
+| %0,75 | −0,13 | −0,14 | −0,18 | −0,19 |
+| %1,00 | −0,11 | **−0,14** | −0,19 | −0,20 |
+| %1,50 | −0,09 | −0,13 | −0,21 | −0,24 |
+| %2,00 | −0,09 | −0,14 | −0,24 | −0,27 |
+
+**Tek pozitif hücre yok.** Scalp'e çekmek — kısa ufuk, yakın hedef — sonucu düzeltmiyor.
+
+### 12.3 ⭐ Rejim iddiası tersine çıktı
+
+Birincil scalp (hedef %1,0 · 4 bar), **rejim-eşleşmiş kontrolle**:
+
+| rejim | N | net % | t | KONTROL | fark |
+|---|---|---|---|---|---|
+| TÜMÜ | 3786 | −0,14 | −6,46 | −0,09 | −0,05 |
+| **BTC > MA500 (yükselen)** | 2843 | **−0,18** | −7,17 | −0,11 | −0,07 |
+| BTC < MA500 (düşen) | 943 | −0,01 | −0,17 | −0,03 | +0,02 |
+| **BTC 24s YATAY (nötr)** | 2030 | **−0,13** | −4,20 | −0,08 | −0,05 |
+| **BTC 24s YUKARI** | 524 | **−0,24** | −3,91 | −0,12 | −0,12 |
+| BTC 24s AŞAĞI | 1232 | −0,10 | −3,34 | −0,06 | −0,04 |
+
+> **Strateji piyasa yükselirken EN KÖTÜ performansı veriyor** (−0,24, t=−3,91).
+> En az kötü olduğu yer piyasanın **düştüğü** dönem — ve orada bile sıfırdan ayırt
+> edilemiyor (t=−0,17; yarılar +0,62 / −0,09 ile dağılıyor).
+
+**Nötr rejim:** net −0,13, t=−4,20, kontrolden 0,05 puan geride. **İddia ölçüldü, tutmadı.**
+
+### 12.4 ⭐⭐ Rejim-eşleşmiş kontrol neden şart
+
+Yükselen bir piyasada **herhangi bir long** para kazanır. "Boğa hücresinde pozitif çıktı"
+demek, strateji çalışıyor demek **değildir** — piyasa çalışıyor demektir.
+
+Doğru kıyas aynı rejimdeki **rastgele** long'lardır. Bu ölçümde strateji, altı bölmenin
+**beşinde rastgeleye yeniliyor.**
+
+Bu, herhangi bir "boğada çalışır" iddiasını test ederken atlanmaması gereken adımdır.
+
+### 12.5 ⭐⭐⭐ Asıl teşhis: sinyalde bilgi yok, kaybı maliyet yapıyor
+
+`brüt = net + maliyet (%0,13)`:
+
+| küme | net % | **brüt %** |
+|---|---|---|
+| strateji, tümü | −0,14 | **−0,01** |
+| strateji, nötr | −0,13 | **0,00** |
+| **rastgele kontrol** | −0,09 | **+0,04** |
+
+**Brüt olarak strateji tam bir yazı-turadır.** Kaybın neredeyse tamamı komisyon ve kaymadır.
+Üstelik rastgele girişin brütü (+0,04), stratejininkinden (−0,01) daha iyi.
+
+> **Bu, "yanlış yöne bakıyor" demek değil — "hiçbir yöne bakmıyor" demek.**
+> Parametre ayarıyla düzelmez. Düzelmesi için sinyalin gerçek bir kenar taşıması gerekir,
+> ve taşımıyor.
+
+### 12.6 Sıkı scalp stopu daha da kötü
+
+| stop | stop% | başabaş gereken | isabet | net % | t |
+|---|---|---|---|---|---|
+| A-stop (asıl) | 1,48 | %64,9 | %41,8 | −0,14 | −6,46 |
+| 0,5 × ATR | 0,57 | %44,8 | %32,9 | −0,18 | −11,77 |
+| sabit %0,5 | 0,50 | %42,0 | %25,5 | −0,15 | −14,59 |
+| sabit %1,0 | 1,00 | %56,5 | %34,8 | −0,16 | −10,94 |
+
+Stop daralınca başabaş gereksinimi düşüyor (%64,9 → %42,0) — ama isabet **daha hızlı**
+düşüyor (%41,8 → %25,5). Açık her yerde 16-23 puan.
+
+**Bu yapı bu belgede dördüncü kez çıktı** (5.2, 5.3, 11.3, 12.6). Artık bir tesadüf değil,
+bu strateji ailesinin imzası:
+
+> **Başabaş, isabetten hızlı büyür.**
+
+---
+
+## 13. Kapanış — bundan sonra ne yapılır
 
 ### Karar
 Bu strateji **bu hâliyle bu piyasada kullanılmamalı.** Ölçüm ön-kayıtlıydı, örneklem büyüktü
@@ -719,16 +825,18 @@ Bota **eklenmedi**, gölge deftere **alınmadı.** Sebep: gölge defter bir *ada
 ölçüm bütçesidir; ön-kayıtlı ölçütü kesin biçimde geçemeyen bir tez oraya girerse gerçek
 adayların yerini işgal eder.
 
-### Yine de ölçmeye değer üç şey
+### Yine de ölçmeye değer iki şey
 
 | # | ne | neden | maliyet |
 |---|---|---|---|
-| 1 | **15 dakikalık** | Orijinal tarif oydu. 1 saatlik sonuç oraya birebir taşınmaz. | 15dk önbellek indirmesi |
-| 2 | **Kırılım yönü** (Headley'nin kendi kullanımı) | Bölüm 11.5'te **geçersiz** ölçüldü — hedef girişin arkasında kaldı. Kendi çıkış kuralıyla ölçülmedi. | Yeni çıkış tanımı + tekrar koşum |
-| 3 | **Boğa rejimi** | Ölçümün tamamı ayı/nötr. Ortalamaya dönüş boğada farklı davranabilir. | Rejim döndüğünde veri birikmesi |
+| 1 | **Kırılım yönü** (Headley'nin kendi kullanımı) | Bölüm 11.5'te **geçersiz** ölçüldü — hedef girişin arkasında kaldı. Kendi çıkış kuralıyla hiç ölçülmedi. Yazarın tasarım amacı buydu. | Yeni çıkış tanımı + tekrar koşum |
+| 2 | **Gerçek boğa rejimi** | Bölüm 12.1: bu veride boğa yok (BTC +%1,1). İddia ne doğrulandı ne çürütüldü. | Rejim döndüğünde veri birikmesi |
 
-**2 numara özellikle dikkate değer:** yazarın kendi tasarım amacı kırılımdı ve biz onu
-ölçemedik. Elimizdeki tek gerçek boşluk bu.
+**Not:** "nötr'de çalışır" iddiası artık **ölçüldü ve tutmadı** (bölüm 12.3) — o yüzden
+listeden çıktı. Geriye kalan tek gerçek boşluk kırılım yönü ve gerçek boğa.
+
+**15 dakikalık** listeden çıkarıldı: bölüm 12.5 sinyalin brüt olarak yazı-tura olduğunu
+gösterdi. Zaman dilimini düşürmek maliyet payını **artırır**, bilgi eklemez.
 
 ### Ne kanıtlanmadı — tekrar
 - **15 dakikalıkta** ne olur (ölçüm 1 saatlik)
@@ -739,7 +847,8 @@ adayların yerini işgal eder.
 ### Yeniden üretmek için
 ```
 python scratchpad/kanal_stoch.py        # ana ölçüm (ön-kayıtlı)
-python scratchpad/kanal_stoch_tani.py   # tanı (keşifsel, ön-kayıtlı DEĞİL)
+python scratchpad/kanal_stoch_tani.py   # tanı (keşifsel)
+python scratchpad/kanal_scalp.py        # scalp + rejim (ön-kayıtlı birincil yapılandırma)
 ```
 Ön-kayıt: `fikir-defteri.md`, commit `2bde27b` — **koşturmadan önce** commit'lendi.
 Veri: `scratchpad/klines_1h/` (570 sembol, 2026-06-12 → 2026-08-10).
