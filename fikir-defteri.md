@@ -1944,3 +1944,21 @@ belirsizliğini koruyor. Bu yüzden **iki aile birden** ölçülecek (Bollinger 
 - 15 dakikalık değil 1 saatlik → orijinal tarifin birebir testi **değil**
 - Tek rejim (46-60 gün, ayı/nötr) · kripto perp · BIST'e taşınmaz
 - İndikatör kimliği doğrulanmadı; Bollinger ve Donchian ayrı ayrı ölçülüyor
+
+**ÖN-KAYIT DEĞİŞİKLİĞİ (aynı gün, sonuç görülmeden):** kullanıcı indikatörü bildirdi —
+**"price hadley ve stokastik rsi"** → **Price Headley Acceleration Bands** (TradingView
+yerleşik) + StochRSI. Belirsizlik kalktı, asıl ölçüm bu bantla yapılacak.
+
+```
+üst = SMA(yüksek × (1 + 4×(yüksek−düşük)/(yüksek+düşük)), 20)
+alt = SMA(düşük  × (1 − 4×(yüksek−düşük)/(yüksek+düşük)), 20)
+```
+
+**Bu değişiklik betik hiç koşturulmadan yapıldı** — girdi düzeltmesi, bulguya göre ayar
+değil. Bollinger ve Donchian tablodan çıkarılmadı, **duyarlılık kontrolü** olarak kaldı:
+sonucun bant ailesine ne kadar bağımlı olduğu görünsün.
+
+**⚠️ Ve önemli bir belirti:** Headley bu bantları **kırılım** için tasarladı — fiyatın bandın
+**dışında** art arda kapanmasını "hızlanma" sinyali sayar. Videodaki kullanım (alt bantta AL)
+indikatörün **tasarım amacının tersi**. Bu yüzden yazarın kendi kullanımı (bant dışı ardışık
+kapanış = kırılım) ayrı bir satır olarak da ölçülüyor. Beklenti değişmedi: **NEGATİF.**
