@@ -2042,3 +2042,95 @@ kendi çıkış kuralıyla ayrıca ölçülmesi gerekir. Tabloda bırakıldı ki
 Kullanıcı kısıtı gereği `testbot.py`, `radar.py`, `kripto-config.json` ve gölge defter
 **hiç ellenmedi.** Ölçüm tamamen `scratchpad/` içinde, salt-okunur önbellek üzerinde.
 Devam eden iki pencere (SHORT 138 işlem · LONG gölge 25 olay) etkilenmedi.
+
+---
+
+## 2026-08-11 — SCALP VARYANTI + REJİM İDDİASI: ölçüldü
+
+**Kullanıcı sorusu:** "long için kısa dönem scalp olarak ayarlasak? Genelde nötr ve boğada
+çalıştığı söyleniyor."
+
+### ⚠️ ÖNCE: bu pencerede GERÇEK BOĞA YOK
+```
+BTC 2026-06-12 → 2026-08-10 :  63.618 → 64.289   =  +%1,1
+tepeden dip                  :  −%13,4
+BTC MA500 (saatlik ~21g) üstünde geçen süre: %75
+```
+**Pencere NÖTR/YATAY.** "Boğada çalışır" iddiası **bu veriyle test EDİLEMEZ** — test
+edilmedi, edilmiş gibi de yazılmadı.
+**Ama "nötr'de çalışır" iddiası test EDİLEBİLİR ve edildi** — üstelik ortalamaya dönüşün
+kendi ev sahası tam da bu rejim.
+
+**Ayrıca bu bir düzeltme:** defterde "46 günün tamamı ayı/nötr" yazıyordu. Daha doğrusu
+**nötr/yatay**, ikinci yarısı hafif yukarı. Yani LONG'un başarısızlığı "ayıda long tutuldu"
+ile açıklanamaz — **çalışması gerektiği söylenen rejimde** başarısız oldu.
+
+### Hedef × ufuk ızgarası — 20 hücrenin 20'si de negatif
+`scratchpad/kanal_scalp.py` · 3.786 sinyal · A-stop · net %, maliyet %0,13 dahil
+
+| hedef | 2 bar | 4 bar | 6 bar | 12 bar |
+|---|---|---|---|---|
+| %0,50 | −0,14 | −0,15 | −0,17 | −0,17 |
+| %0,75 | −0,13 | −0,14 | −0,18 | −0,19 |
+| %1,00 | −0,11 | **−0,14** | −0,19 | −0,20 |
+| %1,50 | −0,09 | −0,13 | −0,21 | −0,24 |
+| %2,00 | −0,09 | −0,14 | −0,24 | −0,27 |
+
+**Tek pozitif hücre yok.** Scalp'e çekmek (kısa ufuk, yakın hedef) sonucu düzeltmiyor.
+
+### ⭐ REJİM İDDİASI TERSİNE ÇIKTI
+Birincil scalp (hedef %1,0 · ufuk 4 bar), **rejim-eşleşmiş kontrolle**:
+
+| rejim | N | net % | t | KONTROL | fark | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|---|
+| TÜMÜ | 3786 | −0,14 | −6,46 | −0,09 | **−0,05** | −0,10 | −0,17 |
+| **BTC > MA500 (yükselen)** | 2843 | **−0,18** | **−7,17** | −0,11 | −0,07 | −0,15 | −0,23 |
+| BTC < MA500 (düşen) | 943 | −0,01 | −0,17 | −0,03 | +0,02 | +0,62 | −0,09 |
+| **BTC 24s YATAY (nötr)** | 2030 | **−0,13** | **−4,20** | −0,08 | −0,05 | −0,18 | −0,08 |
+| **BTC 24s YUKARI** | 524 | **−0,24** | **−3,91** | −0,12 | −0,12 | −0,05 | −0,50 |
+| BTC 24s AŞAĞI | 1232 | −0,10 | −3,34 | −0,06 | −0,04 | −0,01 | −0,20 |
+
+**Piyasa yükselirken EN KÖTÜ** (BTC 24s yukarı: −0,24, t=−3,91). En az kötü olduğu yer
+piyasanın **düştüğü** dönem (−0,01) — ve orada bile sıfırdan ayırt edilemiyor (t=−0,17,
+yarılar +0,62 / −0,09 ile dağılıyor).
+
+**Nötr rejimde net −0,13, t=−4,20, kontrolden 0,05 puan geride → iddia ÖLÇÜLDÜ ve TUTMADI.**
+
+### ⭐⭐ REJİM-EŞLEŞMİŞ KONTROLÜN ÖNEMİ
+Yükselen piyasada **herhangi bir long** para kazanır. "Boğa hücresinde pozitif" demek
+strateji çalışıyor demek değildir. Doğru kıyas aynı rejimdeki rastgele long'lardır —
+ve **strateji altı bölmenin beşinde rastgeleye yeniliyor.**
+
+### ⭐⭐⭐ ASIL TEŞHİS: sinyalde bilgi yok, kaybı maliyet yapıyor
+`brüt = net + maliyet(%0,13)`:
+
+| küme | net % | **brüt %** |
+|---|---|---|
+| strateji TÜMÜ | −0,14 | **−0,01** |
+| strateji nötr | −0,13 | **0,00** |
+| KONTROL rastgele | −0,09 | **+0,04** |
+
+**Brüt olarak strateji tam bir yazı-tura.** Kaybın neredeyse tamamı komisyon+kayma.
+Rastgele girişin brütü (+0,04) stratejininkinden (−0,01) **daha iyi**.
+
+> **Bu, "yanlış yöne bakıyor" demek değil — "hiçbir yöne bakmıyor" demek.**
+> Parametre ayarıyla düzelmez; düzelmesi için sinyalin gerçek bir kenar taşıması gerekir.
+
+### Stop varyantları — sıkı scalp stopu daha da kötü
+| stop | stop% | başabaş gereken | isabet | net % | t |
+|---|---|---|---|---|---|
+| A-stop (asıl) | 1,48 | %64,9 | %41,8 | −0,14 | −6,46 |
+| 0,5 × ATR | 0,57 | %44,8 | %32,9 | −0,18 | −11,77 |
+| sabit %0,5 | 0,50 | %42,0 | %25,5 | −0,15 | −14,59 |
+| sabit %1,0 | 1,00 | %56,5 | %34,8 | −0,16 | −10,94 |
+
+Stop daralınca başabaş düşüyor (%64,9 → %42,0) ama isabet **daha hızlı** düşüyor
+(%41,8 → %25,5). Açık her yerde 16-23 puan. **Aynı yapı, dördüncü kez.**
+
+### Karar
+**Altı rejim bölmesinin altısı da KALDI.** Scalp varyantı da, rejim iddiası da ölçüldü.
+Sisteme hiçbir şey eklenmedi.
+
+### Sınır
+"Boğada çalışır" iddiası **hâlâ açık** — bu veride boğa yok. Rejim döndüğünde ölçülebilir;
+o zamana kadar ne doğrulanmış ne çürütülmüş sayılır.
