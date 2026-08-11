@@ -1886,3 +1886,61 @@ boğada bot **kaybetmez ama hiç işlem de yapmaz.** LONG'un olmamasının gerç
 kayıp değil **körlük**. Çözümü boğa verisi olmadan LONG kapısı uydurmak değil; gölgeyi
 çalışır tutup rejim döndüğünde elde ölçüm olması. Bütün ölçümlerin 46 gününün tamamı
 AYI/NOTR olduğu için LONG'un kaybetmesi rejimin kendisinden de kaynaklanıyor olabilir.
+
+---
+
+## 2026-08-11 — KANAL + StochRSI ÖLÇÜMÜ: ÖN-KAYIT (sonuç görülmeden, koşturmadan ÖNCE commit edildi)
+
+**Kaynak:** kullanıcı bir X videosundan aldı (`x.com/ralli_kralicesi/status/2084712571748106659`).
+**Gönderi açılamadı — HTTP 402 (X API duvarı).** Videoyu göremedim; indikatörün kimliği
+belirsizliğini koruyor. Bu yüzden **iki aile birden** ölçülecek (Bollinger + Donchian).
+
+**Kısıt (kullanıcı):** bota dokunulmayacak, sisteme hiçbir ekleme yapılmayacak.
+Ölçüm tamamen `scratchpad/` içinde, salt-okunur önbellek üzerinde.
+
+### Veri ve mekanik
+- `scratchpad/klines_1h/` — 570 sembol, ~1433 bar (2026-06-12 → 2026-08-10, ~60 gün)
+- **1 saatlik** (15dk önbelleği yok; analiz belgesi zaten 1s'i öneriyordu)
+- Giriş: **sonraki barın açılışı** (`b[gi]["o"]`) — projenin tüm backtest'leriyle aynı
+- Stop: `min(son 10 bar dibi, alt bant) − 0.25×ATR(14)`
+- Hedef: **giriş anındaki üst bant, DONDURULMUŞ** — belgede (a) seçeneği; hareketli hedef
+  düşen piyasada sahte kazanç üretir
+- Aynı barda hem stop hem hedef → **STOP** (kötümser)
+- Maliyet **%0,13** (taker 0,045×2 + slipaj 0,02×2). *Not: projenin önceki betikleri %0,09
+  kullanıyordu; buradaki sayılar işlem başına ~0,04 puan daha muhafazakâr.*
+- Sinyal seyreltme: aynı sembolde en az **24 bar** ara
+- Isınma: `i >= 200` (önceki ölçümlerle aynı)
+
+### Ufuk — ÖNCEDEN sabitlendi
+- **BİRİNCİL: 12 bar** — `kripto-config.json → maliyet.tutma_saat_tf["1h"] = 12`.
+  Benim seçimim değil, config'den geliyor.
+- İkincil: 48 bar (yalnız bilgi için; karar birincilden verilir)
+
+### Ölçülecek kümeler
+1. **Bollinger LONG** — `düşük ≤ alt bant` + StochRSI aşırı satımdan yukarı kesişim
+2. **Bollinger SHORT** — simetrik (üst bant + aşırı alımdan aşağı kesişim)
+3. **Donchian LONG / SHORT** — aynı kural, bant = son 20 barın en düşüğü/en yükseği
+4. **AYRIŞTIRMA:** yalnız bant teması (StochRSI yok) · yalnız StochRSI kesişimi (bant yok)
+   → etkiyi hangi bileşenin taşıdığını görmek için
+5. **KONTROL:** aynı sembol/dönemde **rastgele** barlar, aynı mekanik
+6. **FİLTRELER:** trend filtresi (`fiyat > MA200`) ve bant genişliği tabanı
+
+### GEÇME ÖLÇÜTÜ (önceden sabit)
+1. Net > 0 (maliyet sonrası), **ve**
+2. Kontrol grubunu yeniyor, **ve**
+3. **Her iki zaman yarısında da** pozitif
+
+Üçü birden sağlanmazsa **KALDI**. Tek yarıda güçlü olması geçmez — tarama artığı imzası budur.
+
+### BEKLENTİM (önceden yazıyorum, yanılırsam kayda geçsin)
+**NEGATİF bekliyorum.** Üç gerekçe:
+1. Stop yapısı gereği dar; ölçülmüş dilim (`stop < %1,92`) isabet %10,3 / başabaş %16
+2. Bu projede LONG tarafı 63 kombinasyonda doğrulanamadı (ayı/nötr rejim)
+3. Bant genişliğine oranla maliyet yüksek
+
+**Pozitif çıkarsa bu bilgi değeri YÜKSEK bir sonuçtur** — çünkü tersini önceden yazdım.
+
+### Sınırlar (şimdiden)
+- 15 dakikalık değil 1 saatlik → orijinal tarifin birebir testi **değil**
+- Tek rejim (46-60 gün, ayı/nötr) · kripto perp · BIST'e taşınmaz
+- İndikatör kimliği doğrulanmadı; Bollinger ve Donchian ayrı ayrı ölçülüyor
