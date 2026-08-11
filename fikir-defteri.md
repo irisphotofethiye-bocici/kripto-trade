@@ -1686,3 +1686,73 @@ başabaşın *altında* kaldığı bölgenin sınırı — mekanik olarak savunu
 
 **SINIR:** aynı 46 gün, aynı rejim (AYI/NOTR), aynı olay havuzu — bu bir *yeniden ağırlıklandırma*,
 bağımsız doğrulama değil. Kapının kendi kenarı hâlâ 138 işlem bekliyor.
+
+---
+
+## 2026-08-11 — FREN RİSKİ ÖLÇÜLDÜ: kenar kendini gösteremeden bot duruyor
+
+**Soru:** kapılar bu hızda çalışırken −%25 HALT freni, kenarın belli olması için gereken
+~11 günden ÖNCE tetiklenir mi?
+
+**Yöntem — portföy simülasyonu** (tek işlem ortalaması DEĞİL): 8 slot · 4s cooldown ·
+gerçek boyutlandırma · eş zamanlı maruziyet. **Gün-bloklu bootstrap**: 41 gün yerine
+konarak yeniden örneklendi. Gün bloğu şart — tek tek olay karıştırmak, aynı gün bütün
+shortların birlikte kazanıp birlikte kaybettiği gerçeğini silerdi ve ruin riskini
+**sahte şekilde düşürürdü**. Her olayın (stop%, sonuç%, süre) üçgeni bozulmadan taşındı.
+2000 yol.
+
+### Bugünkü hâl tehlikeli
+
+| senaryo | 11g HALT | 46g HALT | medyan 46g | %5 alt | medyan dip | kaybeden yol |
+|---|---|---|---|---|---|---|
+| **S0 bugünkü (risk %3)** | **%57,0** | %97,4 | 1.24 | 0.76 | −%27,7 | %31,4 |
+| S1 stop tabanı %2 | %44,4 | %92,5 | 1.48 | 0.80 | −%27,4 | %23,6 |
+| S2 maruziyet tavanı 3x | %24,3 | %75,9 | 1.57 | 0.77 | −%26,4 | %25,4 |
+| S4 taban %2 + tavan 2x | %12,6 | %56,9 | 1.56 | 0.79 | −%25,3 | %23,2 |
+| S5 yalnız risk %3→%2 | %35,0 | %87,7 | 1.32 | 0.78 | −%26,8 | %30,6 |
+| S7 risk %2 + taban %2 | %14,9 | %58,1 | 2.33 | 0.84 | −%25,4 | %14,1 |
+| S8 risk %2 + taban %2 + tavan 3x | %9,6 | %43,5 | 2.48 | 0.84 | −%23,8 | %12,4 |
+| **S9 risk %1,5 + taban %2** | **%4,5** | %24,8 | **2.49** | **0.89** | −%20,4 | **%8,1** |
+
+**Bugünkü ayarın 11 günde freni tetikleme olasılığı %57, 46 günde %97,4.** Yani kenarın
+gerçek olup olmadığını öğrenmeden bot neredeyse kesin duruyor. Sistem para kaybettiği
+için değil — **medyan 46 gün çarpanı 1.24, yani kazanıyor** — sadece o kadar sert
+savruluyor ki fren yolda tetikleniyor.
+
+**Frenin yeri yanlış:** −%25, sistemin **medyan en dip düşüşünün** (−%27,7) neredeyse
+tam üstünde. Normal dalgalanmanın medyanına konmuş fren, güvenlik değil yazı-tura.
+
+### ⚠️ TEZAT: agresif ayar DAHA AZ para kazandırıyor
+Kullanıcının isteği "daha agresif bot"tu. Ölçüm şunu söylüyor:
+**risk %3 → %1,5 indirilince medyan 46 günlük çarpan 1.24'ten 2.49'a ÇIKIYOR** — iki katı.
+Sebep karmaşık değil: %3'te yollar erken HALT'a çarpıp işlem yapmayı bırakıyor (%97,4),
+%1,5'te hayatta kalıp bileşiklenmeye devam ediyor (%24,8).
+**Agresiflik GİRİŞ SIKLIĞINDA doğru çıktı (12 → 4 giriş/18 gün yerine ~12/gün);
+POZİSYON BOYUTUNDA yanlış çıktı.** İkisi ayrı kaldıraçlar, ayrı ölçüldüler.
+
+### KENAR SIFIRSA — yanılma maliyeti
+Kenar henüz doğrulanmadı (138 işlem gerekiyor). Aynı olaylar, aynı stoplar, aynı gün-içi
+kümelenme; sadece beklenti tam sıfıra çekilerek tekrarlandı:
+
+| senaryo | dünya | 11g HALT | 46g HALT | medyan 46g | kaybeden yol |
+|---|---|---|---|---|---|
+| S0 bugünkü | kenar VAR | %57,0 | %97,4 | 1.24 | %31,4 |
+| S0 bugünkü | **kenar YOK** | %89,1 | %100,0 | 0.91 | %69,5 |
+| S9 | kenar VAR | %4,5 | %24,8 | 2.49 | %8,1 |
+| S9 | **kenar YOK** | %38,6 | %95,5 | 0.86 | %78,1 |
+
+**En önemli satır bu:** S0'da fren tetiklenmesi hiçbir şey söylemiyor (%57 vs %89 —
+oran 1,6:1). S9'da tetiklenmesi **kenarın sahte olduğunun güçlü kanıtı** (%4,5 vs %38,6 —
+oran **8,6:1**). Yani bugünkü ayar sadece riskli değil, **deneyin bilgi değerini de yok
+ediyor**. S9 hem hayatta kalıyor hem ölçüyor.
+
+### ÖNERİ: S9
+`islem_risk_pct: 3 → 1.5` · yeni `asgari_stop_pct: 2.0`. Maruziyet tavanı **gerekmiyor**
+(S9, tavanlı S8'le aynı medyanı yarı HALT riskiyle veriyor) — daha az parça, daha az kural.
+
+**SINIRLAR (ciddi):**
+- Aynı 46 gün, tek rejim (AYI/NOTR). Bootstrap yeni bir rejim üretemez; boğaya dönüşte
+  bütün shortlar birlikte kaybeder ve örneklemdeki hiçbir günden kötü olur.
+- Gün-bloklu bootstrap **1 günden uzun trendleri kırar** → gerçek ruin riskini
+  muhtemelen **OLDUĞUNDAN AZ** gösteriyor. Hata yönü güvenli tarafta değil.
+- Simülasyon kenarın +%0,58 olduğunu varsayıyor; "kenar YOK" tablosu bunun alt sınırı.
