@@ -1831,3 +1831,58 @@ olarak **doğrulandı**.
 denk gelirse "hiç Python süreci yok" gösterir — bu bot durdu anlamına GELMEZ.
 Doğru kontrol: `testbot_state.son_cycle_ts` ve `testbot_equity.jsonl` aralıkları.
 (11:17 → 12:06 arasında 49 dakikalık bir boşluk var; sebebi bilinmiyor, izlenecek.)
+
+---
+
+## 2026-08-11 — LONG KARAR ÖLÇÜTÜ: ÖN-KAYIT
+
+**Neden şimdi:** gölge LONG tezi için "25-30 olayda karar verilir" yazılmıştı ama
+**geçme ölçütü yazılmamıştı.** Ölçüt sonuçlara bakıldıktan sonra yazılırsa karar değil
+gerekçelendirme olur. Bu yüzden pencere dolmadan, rakamlar elde varken sabitleniyor.
+
+**Tez:** `chg24 >= %10 & vol_x >= 2.0` olan adayda **gölgede** LONG açılır, botun
+**aynı çıkış kurallarıyla** izlenir. Gerçek para yok, gerçek kurallar var.
+Başlangıç: 2026-08-10 17:42.
+
+### Ölçüt (sonuç görülmeden yazıldı)
+
+| | |
+|---|---|
+| **Pencere** | 25 kapanmış gölge LONG (kronolojik ilk 25) |
+| **Yarılar** | ilk 12 / son 13, kronolojik |
+| **GEÇTİ** | toplam R > 0 **ve** ikinci yarı > 0 **ve** ortalama ≥ **+0,15R** |
+| **KALDI** | toplam R ≤ 0 |
+| **BELİRSİZ** | toplam > 0 ama ikinci yarı < 0 → pencereyi 40 olaya uzat, karar verme |
+
+**+0,15R marjı neden var:** gölge defter kaymayı (slippage) ve emir defteri derinliğini
+modellemiyor. Sıfırın hemen üstünde bir sonuç, gerçek deftere taşındığında sıfırın altına
+düşer. Marj icat edilmedi: A+B kapısının canlıya alınırken kullanılan aynı mantık.
+
+**GEÇERSE bile doğrudan canlıya alınmaz:** önce `islem_risk_pct`'in yarısıyla, yalnız
+NOTR rejimde, ayrı bir pencerede ölçülür. Sebep: LONG'un tüm negatif kanıtı duruyor;
+gölgenin pozitif çıkması onu çürütmez, sadece "yeniden bakmaya değer" der.
+
+### Ölçütün şu anki karşılığı (14 olay, pencere dolmadı — KARAR YOK)
+toplam **−2,09R** · ortalama **−0,16R** · kazanan **%46**.
+R'ler: −1,01 · +0,02 · −1,01 · −0,01 · +0,01 · +1,14 · +0,01 · +1,73 · +0,09 · −0,00 ·
+−1,02 · −1,03 · −1,01 (+ 14'üncü açık/yeni).
+İki iyi kazanç (+1,73, +1,14) beş tam stop tarafından yeniyor. **Arşiv ölçümüyle aynı
+yerde: hafif negatif.** Bu satır bilgi olarak duruyor, ölçüt bundan türetilmedi.
+
+### LONG'un neden gölgede olduğunun özeti (tek yerde)
+- Tetik eşiği × giriş zamanlaması × ufuk taraması: **30 kombinasyon, hepsi negatif**
+- Stop × ufuk taraması (%2,5 hedef, nötr-ayı): **33 kombinasyon, hepsi negatif**
+- Yön avı: kararlı altı ölçünün (MA50, fiyat seviyesi, skor, chg24, MA200, oi24)
+  **hepsi SHORT tarafını** gösteriyor
+- En iyi LONG hücresi `funding >= +0.05` → +%0,69 ama başabaş %36,8 / isabet %38,0
+  (kıl payı) ve yarılar dağılıyor (A +1,84 / B +0,14) = **tarama artığı imzası**
+- Mekanizma: yükselen coinlerin +24s medyanı **−%2,62** (iki ayrı evrende, iki ayrı
+  yöntemle aynı sayı). Hareket öngören ama yön öngörmeyen sinyal değersizdir —
+  isabeti +%43 artırırken stop mesafesini +%99 genişletir.
+
+### ⚠️ YAPISAL RİSK — kayıtta kalsın
+**Her iki canlı kapı da SHORT.** Rejim katmanı TAM_BOĞA'da ikisini de kapatıyor, yani
+boğada bot **kaybetmez ama hiç işlem de yapmaz.** LONG'un olmamasının gerçek bedeli
+kayıp değil **körlük**. Çözümü boğa verisi olmadan LONG kapısı uydurmak değil; gölgeyi
+çalışır tutup rejim döndüğünde elde ölçüm olması. Bütün ölçümlerin 46 gününün tamamı
+AYI/NOTR olduğu için LONG'un kaybetmesi rejimin kendisinden de kaynaklanıyor olabilir.
