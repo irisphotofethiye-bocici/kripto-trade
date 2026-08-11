@@ -72,6 +72,8 @@ kripto-config.json.yedek-*
 # Olcum scriptlerinin ara ciktilari (buyuk, yeniden uretilebilir)
 scratchpad/oruntu_olaylar.json
 scratchpad/klines_1h/
+scratchpad/klines_1h_uzun/
+*_state.json.yedek-*
 scratchpad/kacan_olaylar.json
 scratchpad/hedef10_olaylar.json
 scratchpad/gainer_olaylar.json
