@@ -5,9 +5,10 @@
 > **Özet:** strateji ölçüldü — ana varyant, scalp varyantı ve rejim iddiası dahil.
 > **Hiçbiri ön-kayıtlı ölçütü geçemedi.** Toplam 20+6 hücre, hepsi negatif.
 >
-> **Asıl teşhis:** maliyet düşülmeden **brüt getiri sıfır** (−0,01), rastgele girişin brütü
-> ise daha iyi (+0,04). Yani sinyal yanlış yöne bakmıyor — **hiçbir yöne bakmıyor**;
-> kaybı komisyon yapıyor. Parametre ayarıyla düzelmez.
+> **Asıl teşhis (bölüm 13'te DÜZELTİLDİ):** sinyalin **4 barlık gerçek bir kenarı var**
+> (kontrolden +0,18 puan, t=+3,3) ve **bizim stopumuz onu yiyordu** (%26,5 stop-out).
+> Ama kenarın tamamı **tek bir 10 günlük çöküş-toparlanma penceresinden** geliyor
+> (Q1 +0,58 / Q2-Q4 ≈ 0); iki zaman yarısı anlamlı farklı (t=+3,76).
 >
 > **"Nötr ve boğada çalışır" iddiası:** nötr **ölçüldü ve tutmadı**; strateji piyasa
 > *yükselirken* en kötü sonucu veriyor. Gerçek boğa bu veride **yok**, o kısım açık kaldı.
@@ -814,7 +815,94 @@ bu strateji ailesinin imzası:
 
 ---
 
-## 13. Kapanış — bundan sonra ne yapılır
+## 13. ⚠️ DÜZELTME — "sinyalde bilgi yok" yanlıştı
+
+Bölüm 12.5'te *"sinyal hiçbir yöne bakmıyor"* yazmıştım. **Bu yanlıştı ve düzeltiyorum.**
+
+Hata şuydu: bütün ölçümler **bizim A-stopumuzla** yapılmıştı. Sinyalin kendisi hiç
+mekanikten arınık ölçülmemişti. Kullanıcı bunu sordu — haklıydı.
+
+### 13.1 Mekanikten arınık ölçüm
+
+Stop yok · hedef yok · maliyet yok. Sadece: sinyalden sonra fiyat ne yaptı?
+*(Araç: `scratchpad/kanal_ham.py`)*
+
+| ufuk | sinyal ham | kontrol | fark | **fark t** | REL fark t |
+|---|---|---|---|---|---|
+| 1 bar | +0,099 | +0,009 | +0,090 | **+3,19** | +1,76 |
+| **4 bar** | **+0,243** | +0,035 | **+0,208** | **+3,84** | **+2,31** |
+| 12 bar | +0,146 | +0,061 | +0,085 | +0,90 | −0,12 |
+| 24 bar | −0,119 | −0,045 | −0,074 | −0,55 | +0,12 |
+
+**Sinyal gerçek bilgi taşıyor** — ilk ~4 barda, hem ham hem BTC'ye göre, istatistiksel
+olarak anlamlı. 12 barda tamamen sönüyor.
+
+MFE/MAE de destekliyor: 4 barda sinyalin yukarı/aşağı oranı **1,25**, kontrolünki 1,03.
+
+### 13.2 Bizim stopumuz kenarı yiyordu
+
+4. barın kapanışında çık, hedef yok *(`scratchpad/kanal_stopsuz.py`)*:
+
+| stop | net % | t | **stopa giden** | kontrol | fark | fark t |
+|---|---|---|---|---|---|---|
+| **stop YOK** | **+0,112** | +3,13 | %0 | −0,066 | +0,179 | +3,32 |
+| 3 × ATR | +0,110 | +3,12 | %3,8 | −0,069 | +0,179 | +3,36 |
+| 2 × ATR | +0,086 | +2,54 | %10,5 | −0,095 | +0,181 | +3,52 |
+| **A-stop (bizim)** | +0,051 | +1,57 | **%26,5** | −0,111 | +0,162 | +3,28 |
+
+> **A-stop işlemlerin %26,5'ini kesiyor ve kenarı +0,112 → +0,051'e düşürüyor** —
+> anlamlılık kayboluyor. Sonucun bir kısmı gerçekten **bizim sistemimizdi.**
+
+Ufuk duyarlılığı: 2 bar +0,103 · 4 bar +0,112 · **6 bar −0,036 · 8 bar −0,067.**
+Kenar 4 barda bitiyor — bölüm 3'teki 12 barlık zaman stopu bile fazla uzunmuş.
+
+### 13.3 ⭐ Ama kenarın tamamı tek bir 10 günlük pencereden geliyor
+
+| çeyrek | tarih | net % | t | N |
+|---|---|---|---|---|
+| **Q1** | 06-20 → 06-30 | **+0,579** | **+7,91** | 1372 |
+| Q2 | 06-30 → 07-13 | −0,082 | −1,13 | 1380 |
+| Q3 | 07-13 → 07-26 | −0,119 | −1,71 | 1379 |
+| Q4 | 07-26 → 08-09 | +0,074 | +1,07 | 1379 |
+
+İki zaman yarısı **anlamlı biçimde farklı**: A +0,247 / B −0,023 · fark +0,270 · **t = +3,76**.
+Rastgele dalgalanma değil — kenar gerçekten sönmüş.
+
+**Q1 ne dönemi?** BTC'nin **2026-06-19 → 06-25 arasında %6 düştüğü** hafta — pencerenin
+tek keskin satışı.
+
+> ### Mekanizma
+> Ortalamaya dönüş, **keskin bir çöküş-toparlanma sırasında** çalışıyor. Normal piyasada
+> hiçbir şey. Kenar "vardı ve söndü" değil — **yalnız V dibinde vardı.**
+
+Bu, bölüm 12.3'ü de açıklıyor: strateji piyasa yükselirken en kötüydü, çünkü Q2-Q4 tam
+o dönem. Ve "boğada çalışır" iddiasının neden bu veriyle test edilemediğini de.
+
+### 13.4 Düzeltilmiş sonuç — üç katman, üçü de doğru
+
+1. **Sinyal gerçek bilgi taşıyor** — 4 bar, kontrolden +0,18 puan, t=+3,3
+2. **Bizim A-stopumuz o bilgiyi büyük ölçüde yok ediyor** — %26,5 stop, anlamlılık kaybı
+3. **Ama kenar tek bir çöküş episoduna ait** — Q2/Q3/Q4'te yok
+
+**Karar değişmedi (KALDI), gerekçesi değişti.** Eski gerekçe *"sinyal boş"* idi ve yanlıştı.
+Doğru gerekçe: **kenar gerçek ama rejime bağlı ve dayanıksız — normal piyasada yok.**
+
+### 13.5 Bu bize strateji dışında bir şey öğretti
+
+> **Her sinyal, kapı ölçümünden ÖNCE mekanikten arınık ölçülmelidir.**
+
+Aksi hâlde bizim stopumuzun öldürdüğü bir kenarı "sinyal boş" diye kaydederiz — bu belgede
+tam olarak bunu yaptım. Doğru sıra:
+
+```
+ham ileri getiri  →  ticaret mekaniği  →  portföy simülasyonu
+```
+
+Bu ders bu stratejiden bağımsızdır ve projedeki gelecek adayların hepsine uygulanacak.
+
+---
+
+## 14. Kapanış — bundan sonra ne yapılır
 
 ### Karar
 Bu strateji **bu hâliyle bu piyasada kullanılmamalı.** Ölçüm ön-kayıtlıydı, örneklem büyüktü
@@ -825,15 +913,17 @@ Bota **eklenmedi**, gölge deftere **alınmadı.** Sebep: gölge defter bir *ada
 ölçüm bütçesidir; ön-kayıtlı ölçütü kesin biçimde geçemeyen bir tez oraya girerse gerçek
 adayların yerini işgal eder.
 
-### Yine de ölçmeye değer iki şey
+### Yine de ölçmeye değer üç şey
 
 | # | ne | neden | maliyet |
 |---|---|---|---|
 | 1 | **Kırılım yönü** (Headley'nin kendi kullanımı) | Bölüm 11.5'te **geçersiz** ölçüldü — hedef girişin arkasında kaldı. Kendi çıkış kuralıyla hiç ölçülmedi. Yazarın tasarım amacı buydu. | Yeni çıkış tanımı + tekrar koşum |
 | 2 | **Gerçek boğa rejimi** | Bölüm 12.1: bu veride boğa yok (BTC +%1,1). İddia ne doğrulandı ne çürütüldü. | Rejim döndüğünde veri birikmesi |
 
+| 3 | **Çöküş sonrası pencere** | Bölüm 13.3: kenarın tamamı BTC'nin %6 düştüğü haftadan geliyor. "Keskin satış sonrası N gün" bir REJİM KAPISI olabilir — ama tek episoddan genelleme yapılamaz; ikinci bir çöküş beklenmeli. | Yeni çöküş verisi |
+
 **Not:** "nötr'de çalışır" iddiası artık **ölçüldü ve tutmadı** (bölüm 12.3) — o yüzden
-listeden çıktı. Geriye kalan tek gerçek boşluk kırılım yönü ve gerçek boğa.
+listeden çıktı. 3 numara bölüm 13'ün açtığı yeni sorudur.
 
 **15 dakikalık** listeden çıkarıldı: bölüm 12.5 sinyalin brüt olarak yazı-tura olduğunu
 gösterdi. Zaman dilimini düşürmek maliyet payını **artırır**, bilgi eklemez.
@@ -849,6 +939,8 @@ gösterdi. Zaman dilimini düşürmek maliyet payını **artırır**, bilgi ekle
 python scratchpad/kanal_stoch.py        # ana ölçüm (ön-kayıtlı)
 python scratchpad/kanal_stoch_tani.py   # tanı (keşifsel)
 python scratchpad/kanal_scalp.py        # scalp + rejim (ön-kayıtlı birincil yapılandırma)
+python scratchpad/kanal_ham.py          # mekanikten arınık ham sinyal (bölüm 13)
+python scratchpad/kanal_stopsuz.py      # stopsuz 4-bar çıkış (bölüm 13.2)
 ```
 Ön-kayıt: `fikir-defteri.md`, commit `2bde27b` — **koşturmadan önce** commit'lendi.
 Veri: `scratchpad/klines_1h/` (570 sembol, 2026-06-12 → 2026-08-10).
