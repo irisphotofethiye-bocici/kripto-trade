@@ -4,3 +4,40 @@ Hedef: C:\Users\alper\Desktop\kripto trade\scratchpad\klines_1h_uzun  (mevcut kl
 [1/570] 0G             7869 bar  (2025-09-17'den)  ·  gecen 0dk  kalan ~70dk
 [2/570] 1000000BOB    10372 bar  (2025-06-05'den)  ·  gecen 0dk  kalan ~79dk
 [3/570] 1000000MOG    15408 bar  (2024-11-07'den)  ·  gecen 1dk  kalan ~95dk
+[20/570] AAVE          17520 bar  (2024-08-11'den)  ·  gecen 5dk  kalan ~125dk
+[40/570] ALCH          13945 bar  (2025-01-07'den)  ·  gecen 8dk  kalan ~109dk
+[60/570] ARK           17520 bar  (2024-08-11'den)  ·  gecen 12dk  kalan ~105dk
+[80/570] AXS           17520 bar  (2024-08-11'den)  ·  gecen 16dk  kalan ~99dk
+[100/570] BERA          13221 bar  (2025-02-06'den)  ·  gecen 20dk  kalan ~94dk
+[120/570] BSV           17520 bar  (2024-08-11'den)  ·  gecen 24dk  kalan ~89dk
+[140/570] CGPT          14369 bar  (2024-12-20'den)  ·  gecen 27dk  kalan ~84dk
+[160/570] CTK           11234 bar  (2025-04-30'den)  ·  gecen 31dk  kalan ~79dk
+[180/570] DRIFT         15382 bar  (2024-11-08'den)  ·  gecen 35dk  kalan ~75dk
+[200/570] ETHFI         17521 bar  (2024-08-11'den)  ·  gecen 39dk  kalan ~73dk
+[220/570] FWDI            791 bar  (2026-07-09'den)  ·  gecen 43dk  kalan ~68dk
+[240/570] GWEI           4664 bar  (2026-01-29'den)  ·  gecen 47dk  kalan ~65dk
+[260/570] IDOL           9676 bar  (2025-07-04'den)  ·  gecen 51dk  kalan ~61dk
+[280/570] KAIA          14759 bar  (2024-12-04'den)  ·  gecen 56dk  kalan ~58dk
+[300/570] LISTA         17521 bar  (2024-08-11'den)  ·  gecen 60dk  kalan ~54dk
+[320/570] MELANIA       13636 bar  (2025-01-20'den)  ·  gecen 64dk  kalan ~50dk
+[340/570] MUBARAK       12288 bar  (2025-03-17'den)  ·  gecen 68dk  kalan ~46dk
+[360/570] OGN           17521 bar  (2024-08-11'den)  ·  gecen 71dk  kalan ~41dk
+[380/570] PHAROS         2144 bar  (2026-05-14'den)  ·  gecen 75dk  kalan ~37dk
+[400/570] PUMPBTC       10179 bar  (2025-06-13'den)  ·  gecen 79dk  kalan ~33dk
+[420/570] ROBO           3965 bar  (2026-02-27'den)  ·  gecen 82dk  kalan ~29dk
+[440/570] SIGN          11282 bar  (2025-04-28'den)  ·  gecen 87dk  kalan ~26dk
+[460/570] SPK           10084 bar  (2025-06-17'den)  ·  gecen 90dk  kalan ~22dk
+[480/570] SXT           11190 bar  (2025-05-02'den)  ·  gecen 94dk  kalan ~18dk
+[500/570] TRIA           4466 bar  (2026-02-06'den)  ·  gecen 98dk  kalan ~14dk
+[520/570] USUAL         14425 bar  (2024-12-18'den)  ·  gecen 101dk  kalan ~10dk
+[540/570] XAUT           3312 bar  (2026-03-26'den)  ·  gecen 106dk  kalan ~6dk
+[560/570] ZETA          17522 bar  (2024-08-11'den)  ·  gecen 109dk  kalan ~2dk
+Traceback (most recent call last):
+  File "C:\Users\alper\Desktop\kripto trade\scratchpad\uzun_veri_indir.py", line 115, in <module>
+    main()
+  File "C:\Users\alper\Desktop\kripto trade\scratchpad\uzun_veri_indir.py", line 91, in main
+    print(f"[{n}/{len(semboller)}] {sym:12} HATA", flush=True)
+  File "C:\Users\alper\AppData\Local\Programs\Python\Python312\Lib\encodings\cp1254.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 10-13: character maps to <undefined>

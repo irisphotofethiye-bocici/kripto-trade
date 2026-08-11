@@ -17,6 +17,13 @@ GUVENLIK:
 """
 import json, os, time, sys, urllib.request, urllib.error, datetime
 
+# Windows cp1254 konsolu ASCII disi sembol adlarini (orn. Cince memecoin) basamiyor
+# ve UnicodeEncodeError ile COKUYOR — indirme bitmis olsa bile exit 1 doner (2026-08-11).
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+except Exception:
+    pass
+
 BURA = os.path.dirname(os.path.abspath(__file__))
 KAYNAK = os.path.join(BURA, "klines_1h")
 HEDEF = os.path.join(BURA, "klines_1h_uzun")

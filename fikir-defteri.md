@@ -2278,3 +2278,90 @@ Bu bir kenar değil **piyasa betası** (ayı/nötr pencerede her şey düştü) 
 Betiğin ilk sürümünde yarı örneklem 60'ın altına düşünce tablo `0.00` yazıyordu; bu
 "yarılar çöktü" diye **yanlış okunuyordu**. Eşik 30'a indirildi ve yetersizse `az` yazılıyor.
 Bu düzeltilmeden önce iki LONG hücresi de yanlışlıkla elenmiş görünüyordu.
+
+---
+
+## 2026-08-11 — FİKİR 3 TAMAM + FİKİR 1'İN ADAYLARI **ÖRNEKLEM DIŞINDA ÇÖKTÜ**
+
+### Veri (Fikir 3)
+`scratchpad/klines_1h_uzun/` — **566 sembol · 6,88 milyon bar · 2024-08-11 → 2026-08-11**
+217 sembol tam 2 yıl · 395 sembol ≥1 yıl · medyan 13.692 bar. Eski `klines_1h/`
+dokunulmadı (tüm önceki ölçümler yeniden üretilebilir).
+
+BTC rejim kapsamı: **BOĞA** 2024-09→2025-01 (+%72) · **AYI** 2025-11→2026-06 (−%49) ·
+tepeden dip −%58 · **10 keskin çöküş episodu** (eski veride 1 taneydi).
+
+**İndirici hatası:** 567/570'te `UnicodeEncodeError` ile çöktü — Windows cp1254 konsolu
+Çince sembol adlarını basamıyordu. **İndirme bitmişti, çöken `print`'ti.** Eksik 3 sembol
+eski önbellekte de **0 barlıktı** (boş kayıt). `sys.stdout.reconfigure(utf-8, replace)`
+eklendi.
+
+### Sınav: iki LONG hücresi, eşikler arşivden AYNEN alınarak (`scratchpad/long_2yil.py`)
+
+**ÖRNEKLEM DIŞI (2024-08 → 2026-06, ~22 ay, hiç görülmemiş):**
+
+| hücre | N | 12s | t | 24s | t |
+|---|---|---|---|---|---|
+| A) fiyat ≥ $58,9 + chg24 düşük | 2762 | +0,04 | +0,44 | +0,16 | **+1,17** |
+| A) fiyat AYLIK%80 + chg24 düşük | 19021 | −0,13 | −3,06 | −0,12 | **−2,12** |
+| B) MA50 düşük + fiyat ≥ $58,9 | 2583 | +0,02 | +0,23 | +0,10 | **+0,75** |
+| B) MA50 düşük + fiyat AYLIK%80 | 17674 | −0,25 | −5,75 | −0,25 | **−4,49** |
+| KONTROL rastgele | 1117 | −0,37 | −2,60 | −0,49 | −2,51 |
+
+Arşivde **+1,30 (t=+4,01)** olan hücre, 22 ayda **+0,16 (t=+1,17)** — sıfırdan ayırt
+edilemiyor. Göreli (aylık dilim) sürümler ise **anlamlı NEGATİF**.
+
+### ⭐ Boğada ne oluyor — artık cevaplanabiliyor
+
+| hücre | rejim | net 24s | KONTROL | fark |
+|---|---|---|---|---|
+| A ($58,9) | **BOĞA** | +0,39 | **+0,75** | **−0,36** |
+| A (aylık) | **BOĞA** | +0,58 | +0,75 | −0,17 |
+| B ($58,9) | **BOĞA** | +0,85 | +0,75 | +0,10 |
+| B (aylık) | **BOĞA** | +0,59 | +0,75 | −0,16 |
+| A ($58,9) | NÖTR | +0,19 | −0,54 | +0,72 |
+| A ($58,9) | AYI | −0,10 | −0,78 | +0,68 |
+
+**Boğada hücreler rastgele long'a YENİLİYOR.** Pozitifler, ama boğada her şey pozitif —
+bu kenar değil **beta**. NÖTR/AYI'da kontrolü ~+0,7 yeniyorlar ama mutlak olarak ≈ sıfır:
+yani "daha az kaybettiren", "kazandıran" değil. *(Bu projede daha önce de aynı ayrım
+çıkmıştı: "şu andaki bot kazandıran değil, az kaybettiren.")*
+
+Çeyrekler tutarsız: A(aylık) 9 çeyrekte + + − − + − − + −.
+
+### ⭐⭐ ASIL SEBEP BULUNDU — "fiyat YÜKSEK" aslında fiyat değil
+
+Arşivin fiyat dağılımına bakınca eşik anlaşıldı:
+
+```
+arşiv olayları:  %50 dilim $0,56  ·  %75 $8,30  ·  %80 $58,88  ·  %90 $367
+>= $58,88 olan 1358 olay  ->  yalnız 46 sembol
+en sık: BTC(136) ETH(136) SOL(136) BNB(136) ZEC(136) TAO(135) AAVE(135) BCH(119)
+```
+
+> **"fiyat YÜKSEK + chg24 düşük → LONG" demek, aslında
+> "BTC/ETH/SOL/BNB gibi BÜYÜK coinler düştüğünde al" demekti.**
+> Fiyat seviyesi bir **büyük-coin vekiliydi**, fiyat etkisi değil.
+
+Ve buradan ikinci, daha ciddi sorun çıkıyor: **N=113 diye görünen hücre, aslında ~8 coinin
+tekrar tekrar gözlenmesiydi.** Bu gözlemler bağımsız değil; **t=+4,01 kümelenme yüzünden
+şişmiş.** Örneklem dışı test bunu zaten çürüttü, ama çürütmeseydi bile o t'ye güvenilmezdi.
+
+### Sonuç
+**Fikir 1'in iki adayı da düştü.** Arşiv bulgusu örneklem-içi bir yapaydı; iki bağımsız
+sebeple: (1) 22 ayda tekrar etmiyor, (2) sinyalin kendisi 8 coine kümelenmiş.
+
+**Ama bu bir başarısızlık değil, sistemin çalışması.** 60 günlük veri "umut verici" diyordu;
+2 yıllık veri "hayır" dedi — **ve bu, gerçek deftere hiç girmeden oldu.**
+
+### Metodolojik sınır (bu ölçümün kendisine ait)
+2 yıllık testte sinyaller **her uygun bardan** üretildi; arşivdeki olaylar ise radar
+taramasının kısa listesinden geliyordu (hacim tabanı, skor sıralaması vb.). Yani bu
+tam bir replikasyon değil — **kuralın kendisi** test edildi, arşivin olay seçimi değil.
+Kural, yazıldığı hâliyle 22 ayda çalışmıyor.
+
+### Kalıcı ders — kümelenme kontrolü artık zorunlu
+Bir hücrenin N'i büyük görünse bile **kaç ayrı sembolden geldiği** sayılmalı.
+`N=113 ama 8 sembol` ile `N=113 ve 90 sembol` aynı kanıt değildir.
+Bu, A+B kapısı için de not edilmişti ("olaylar 15 sembolde kümeleniyor") — artık
+**her ölçümde standart sütun** olmalı.
