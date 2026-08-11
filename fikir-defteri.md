@@ -1756,3 +1756,64 @@ ediyor**. S9 hem hayatta kalıyor hem ölçüyor.
 - Gün-bloklu bootstrap **1 günden uzun trendleri kırar** → gerçek ruin riskini
   muhtemelen **OLDUĞUNDAN AZ** gösteriyor. Hata yönü güvenli tarafta değil.
 - Simülasyon kenarın +%0,58 olduğunu varsayıyor; "kenar YOK" tablosu bunun alt sınırı.
+
+---
+
+## 2026-08-11 — S9 UYGULANDI + KARAR PENCERESİ ÖN-KAYDI
+
+### Uygulanan (3 parça, tek hamle)
+
+| ne | eski | yeni | nerede |
+|---|---|---|---|
+| işlem başına risk | %3 | **%1,5** | `testbot.islem_risk_pct` |
+| asgari stop mesafesi | (yok) | **%2,0** | `testbot.asgari_stop_pct` (yeni) |
+| fren referansı (zirve) | 10000 | **8412,06** | `testbot_state.zirve_equity` |
+
+**Kod:** `yeni_giris_ac` içinde `stop_frac` hesabından hemen sonra `stop_cok_dar` reddi.
+Kapı **efektif** stop mesafesine bakıyor — boyutlandırmanın kullandığı değerin aynısı.
+Sınır taraması: nominal %1,96 → efektif %1,98 **red** · nominal %1,99 → efektif %2,01 **geçer**.
+Kesme efektif %2,00'de tam. Birim testleri: %0,42 red · %2,10 geçer · %4 geçer · %8 geçer;
+sabit %10 hedef ve `cikis_modu=sabit_hedef` korundu.
+
+**Risk doğrulaması** (equity 8412 → hedef risk 126,18 $):
+stop %2,10 → notional 5594 (0,66× sermaye), risk 118,62 $ (%1,41 — kaldıraç tavanı kırptı) ·
+stop %4,00 → notional 3138 (0,37×), risk 126,18 $ (%1,50) ·
+stop %8,00 → notional 1573 (0,19×), risk 126,18 $ (%1,50). Hedefin **üstüne** hiç çıkmıyor.
+
+### Zirve sıfırlaması — gerekçe ve kural
+Eski 10000 zirvesindeki −803 $, **artık var olmayan bir bota** ait (R/R kapısı açık,
+A+B yok, MA50 yok, 18 gün süre sınırı). Fren "şu anki yapılandırma bozulursa dur"
+demek için var; eski botun kaybından tetiklenseydi S9'un tek amacı olan "hayatta kal
+ve ölç" çalışamazdı (frene %25 değil %11 mesafe kalıyordu).
+**Equity'ye ve işlem geçmişine dokunulmadı** (19 kayıt duruyor); yalnız frenin referansı
+bugüne çekildi. Gerekçe `testbot_state._zirve_sifirlama` alanına da yazıldı.
+**KURAL:** zirve sıfırlaması *yalnızca* yapılandırma esaslı değiştiğinde yapılır ve
+defterde gerekçesiyle kaydedilir. Aksi hâlde bu hareket kaybı gizlemenin yolu olur.
+
+### ⚠️ DÜZELTME: "138 işlem ≈ 11 gün" YANLIŞTI
+O tahmin 12,5 olay/gün üzerindendi; **slot sınırı ve cooldown'u saymıyordu.**
+Simülasyon işlem sayacıyla tekrar koşturuldu (2000 yol):
+
+| senaryo | 11 günde | 46 günde | işlem/gün |
+|---|---|---|---|
+| S0 bugünkü (risk %3) | 75 | **81** | 1,8 |
+| **S9** | **80** | **319** | **6,9** |
+
+**S9 işlem sayısını AZALTMIYOR, 46 günde DÖRT KATINA çıkarıyor.** Sebep: S0 yollarının
+%97'si erken HALT'a çarpıp işlem yapmayı bırakıyor — duran bot işlem yapmaz. Stop tabanının
+elediği %27, hayatta kalmanın kazandırdığının yanında küçük kalıyor.
+**Gerçek hız ~6,9 işlem/gün → 138 işlem ≈ 20 gün, 11 gün değil.**
+
+### KARAR PENCERESİ — ÖN-KAYIT (sonuç görülmeden yazıldı)
+
+| | |
+|---|---|
+| **Başlangıç** | 2026-08-11 12:45 (S9 yürürlükte) |
+| **Pencere** | 138 kapanmış işlem **veya** 30 gün — hangisi önce |
+| **GEÇTİ** | toplam net > 0 **ve** pencerenin ikinci yarısı da > 0 |
+| **KALDI** | toplam net < 0 **ya da** fren tetiklendi (S9'da fren = kenarın sahte olduğunun 8,6:1 kanıtı) |
+| **BELİRSİZ** | toplam > 0 ama ikinci yarı < 0 → pencereyi uzat, karar verme |
+
+**Pencere boyunca hiçbir parametreye dokunulmaz.** Yeni kapı eklenmez, eşik oynatılmaz,
+fren taşınmaz. LONG gerçek deftere açılmaz (gölgede 17/25-30 olay birikti, kendi başına dolsun).
+Bu kural olmadan pencere ölçüm değil, gözlem olur.

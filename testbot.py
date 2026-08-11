@@ -1017,6 +1017,21 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     stop_frac = abs(giris_ef - stop) / giris_ef if giris_ef else 0.0
     if stop_frac <= 0:
         return _red("stop_gecersiz", f"stop_frac={stop_frac} (giris={giris_ef} stop={stop})", olc)
+    # --- ASGARI STOP TABANI (2026-08-11, Madde 10) --------------------------------------------
+    # OLCUM (577 canli-kapi olayi, hedef %10/72s): stop dilimlerine gore isabet
+    #   <%1.92 -> %10.3 (basabas ~%16) · %1.92-3.40 -> %20.1 · %3.40-5.51 -> %33.3 · >%5.51 -> %56.2
+    #   Dar dilim basabasin ALTINDA -> net sifir uretiyor ama tam boyutla alinip ucret ve slot yiyor.
+    # MEKANIZMA: dar A-stop = direnc hemen tepede -> islem gelismeden gurultuyle deliniyor.
+    # STOPU GENISLETMEK ISE YARAMIYOR (olculdu): isabet %11.0->%13.6 ama basabas %12.1->%16.7;
+    #   basabas isabetten hizli buyuyor -> "kovalama tuzagi"nin stop tarafindaki hali. O yuzden ELE.
+    # ETKI: olay basina +%0.58 -> +%0.78, toplam kar ayni (+334 -> +330), islem %27 az.
+    # ESIK GEREKCESI: %2.0 = isabetin basabasin ALTINDA kaldigi bolgenin siniri (tablonun
+    #   maksimumu %2.5'ti, ONE-KAYIT geregi secilmedi -> gerekcesi "tabloya baktim" olurdu).
+    # GERI ALMA: kripto-config.json -> testbot.asgari_stop_pct: 0
+    asg = float(_c("asgari_stop_pct", 0))
+    if asg > 0 and stop_frac * 100 < asg and not zorla:
+        return _red("stop_cok_dar", f"stop %{stop_frac*100:.2f} < asgari %{asg:.1f}", olc)
+    # ------------------------------------------------------------------------------------------
     hedef_risk = st["equity"] * float(_c("islem_risk_pct", 5)) / 100.0
     if not smart_hiz and pillar.get("smart") not in (None, "NOTR"):
         hedef_risk /= 2.0                      # smart karsi yonde -> RISK yari
