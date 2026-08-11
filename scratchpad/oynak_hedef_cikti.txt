@@ -1,0 +1,66 @@
+Rejim ve olaylar hazirlaniyor...
+  150/567 ...
+  300/567 ...
+  450/567 ...
+
+Olay: 21830 · 312 ayri sembol
+
+====================================================================================================================
+OYNAKLIGA OLCEKLI HEDEF vs SABIT %10 — 2 yillik veri (boga + ayi)
+====================================================================================================================
+maliyet %0.13 · Wilder ATR · ufuk 72s · hedef HER BARDA yeniden
+
+kural                              N  sermaye%      t  isabet   sondu  hedef~  stop~   A yari   B yari  sembol  t_kume
+--------------------------------------------------------------------------------------------------------------------
+SABIT %10 (bugunku)                0    -0.079  -4.05   12.9%    0.0%   10.0%   1.3%   -0.073   -0.085     312   -0.48
+oynak 2xATR (frensiz)              2    -0.088  -6.62   27.2%    0.1%    4.0%   1.3%   -0.104   -0.072     312   -0.79
+oynak 3xATR (frensiz)              3    -0.094  -5.98   21.0%    0.2%    6.0%   1.3%   -0.105   -0.084     312   -0.71
+oynak 4xATR (frensiz)              4    -0.096  -5.43   17.3%    0.3%    8.0%   1.3%   -0.095   -0.097     312   -0.65
+oynak 5xATR (frensiz)              5    -0.088  -4.55   14.7%    0.4%    9.9%   1.3%   -0.097   -0.079     312   -0.54
+oynak 6xATR (frensiz)              6    -0.091  -4.43   12.3%    0.4%   11.9%   1.3%   -0.103   -0.079     312   -0.53
+oynak 3xATR taban%3 tavan%20       3    -0.094  -5.96   20.9%    0.2%    6.0%   1.3%   -0.104   -0.084     312   -0.71
+oynak 4xATR taban%3 tavan%20       4    -0.095  -5.38   17.4%    0.3%    8.0%   1.3%   -0.093   -0.097     312   -0.64
+oynak 5xATR taban%3 tavan%20       5    -0.086  -4.47   14.8%    0.3%    9.9%   1.3%   -0.091   -0.081     312   -0.53
+--------------------------------------------------------------------------------------------------------------------
+  'sondu' = oynaklik dustugu icin hedef yakinlasip kapanan islem orani
+  'hedef~' = medyan hedef yuzdesi · '*' = sabit %10'u yendi
+
+====================================================================================================================
+REJIME GORE — ilk kez boga/ayi ayrimi yapilabiliyor
+====================================================================================================================
+kural                         rejim       N   sermaye%      t   isabet
+--------------------------------------------------------------------------------------------------------------------
+SABIT %10 (bugunku)           BOGA     2213     -0.170  -2.76    11.8%
+SABIT %10 (bugunku)           NOTR    16193     -0.057  -2.49    13.0%
+SABIT %10 (bugunku)           AYI      3213     -0.123  -2.46    13.3%
+
+oynak 3xATR (frensiz)         BOGA     2213     -0.163  -3.18    18.1%
+oynak 3xATR (frensiz)         NOTR    16193     -0.088  -4.90    21.3%
+oynak 3xATR (frensiz)         AYI      3213     -0.060  -1.39    22.0%
+
+oynak 4xATR (frensiz)         BOGA     2213     -0.195  -3.36    14.1%
+oynak 4xATR (frensiz)         NOTR    16193     -0.081  -3.98    17.7%
+oynak 4xATR (frensiz)         AYI      3213     -0.092  -1.92    17.8%
+
+oynak 3xATR taban%3 tavan%20  BOGA     2213     -0.159  -3.09    18.2%
+oynak 3xATR taban%3 tavan%20  NOTR    16193     -0.089  -4.92    21.2%
+oynak 3xATR taban%3 tavan%20  AYI      3213     -0.059  -1.36    22.0%
+
+oynak 4xATR taban%3 tavan%20  BOGA     2213     -0.190  -3.27    14.2%
+oynak 4xATR taban%3 tavan%20  NOTR    16193     -0.081  -3.99    17.7%
+oynak 4xATR taban%3 tavan%20  AYI      3213     -0.089  -1.84    18.0%
+
+====================================================================================================================
+GECME OLCUTU: sabit %10'u yen · iki zaman yarisi + · BOGA ve AYI'da cokme
+====================================================================================================================
+  oynak 2xATR (frensiz)          yendi H · iki yari + H  -> KALDI
+  oynak 3xATR (frensiz)          yendi H · iki yari + H  -> KALDI
+  oynak 4xATR (frensiz)          yendi H · iki yari + H  -> KALDI
+  oynak 5xATR (frensiz)          yendi H · iki yari + H  -> KALDI
+  oynak 6xATR (frensiz)          yendi H · iki yari + H  -> KALDI
+  oynak 3xATR taban%3 tavan%20   yendi H · iki yari + H  -> KALDI
+  oynak 4xATR taban%3 tavan%20   yendi H · iki yari + H  -> KALDI
+  oynak 5xATR taban%3 tavan%20   yendi H · iki yari + H  -> KALDI
+
+  SINIR: 2 yillik veride funding/OI yok -> A+B kapisi kurulamadi;
+  olcum YALNIZ MA50+ucuz kapisinin olaylari uzerinde.

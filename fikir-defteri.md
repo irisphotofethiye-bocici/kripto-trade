@@ -2625,3 +2625,61 @@ ulaşılamaz hedefi düzeltmesi lehte. İki etki birbirini götürebilir.
 ATR hem stopu hem hedefi belirlediği için `N × ATR` hedefi, stop mesafesiyle
 **mekanik olarak korele**. Yani "geniş stoplu işlem daha çok kazanır" bulgusunu
 kısmen yeniden üretiyor olabiliriz — sonuç pozitif çıkarsa bu ayrıştırılmalı.
+
+### SONUÇ — oynaklığa ölçekli hedef: **8 varyantın 8'i de KALDI**
+
+`scratchpad/oynak_hedef.py` · 21.830 olay · 312 ayrı sembol · 2 yıl · hacim tabanı $3M/24s
+
+| kural | sermaye% | t | isabet | hedef~ | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|
+| **SABİT %10 (bugünkü)** | **−0,079** | −4,05 | %12,9 | %10,0 | −0,073 | −0,085 |
+| oynak 2×ATR | −0,088 | −6,62 | %27,2 | %4,0 | −0,104 | −0,072 |
+| oynak 3×ATR | −0,094 | −5,98 | %21,0 | %6,0 | −0,105 | −0,084 |
+| oynak 4×ATR | −0,096 | −5,43 | %17,3 | %8,0 | −0,095 | −0,097 |
+| oynak 5×ATR | −0,088 | −4,55 | %14,7 | %9,9 | −0,097 | −0,079 |
+| oynak 6×ATR | −0,091 | −4,43 | %12,3 | %11,9 | −0,103 | −0,079 |
+| + taban%3 tavan%20 | −0,086…−0,095 | | | | | |
+
+**Hiçbiri sabit %10'u yenemedi.** Ve yine aynı yapı: hedef yaklaştıkça isabet
+%12,9 → **%27,2** çıkıyor ama net getiri düşüyor. **Beşinci kez: başabaş isabetten
+hızlı büyüyor.**
+
+**Beklentim tutmuştu** — ön-kayıtta *"sabit %10'u yenmesini beklemiyorum"* yazmıştım.
+
+**"Oynaklık söndü → kapat" mekanizması pratikte hiç çalışmadı:** işlemlerin
+yalnız **%0,1–0,4'ü** bu yolla kapandı. ATR 72 saatte hedefi geçersiz kılacak kadar
+hızlı düşmüyor. Fikrin en çekici kısmı ölçümde **boş çıktı**.
+
+### Rejim ayrımı (ilk kez mümkün)
+| kural | BOĞA | NÖTR | AYI |
+|---|---|---|---|
+| sabit %10 | −0,157 | −0,087 | −0,123 |
+| oynak 3×ATR | −0,163 | −0,088 | −0,060 |
+| oynak 4×ATR | −0,195 | −0,081 | −0,092 |
+
+Üç rejimde de negatif. Boğada en kötü — SHORT kapısı için beklenen yön.
+
+### ⚠️ ÖLÇÜMÜN KENDİ HATALARI (ikisi de düzeltildi, kayda geçsin)
+1. **Fikrin aleyhine çarpıtma:** hedef daralıp fiyat onu zaten geçmişse ilk sürüm
+   *hedef fiyatından* dolduruyordu; canlıda bot **piyasadan** kapatır. SHORT'ta hedef
+   daha yüksek = daha kötü fiyat → kazanç eksik yazılıyordu. Düzeltildi.
+2. **Yanlış evren:** hacim filtresi yoktu, medyan stop **%1,1** çıkıyordu (canlıda %3,4)
+   → başka bir popülasyon ölçülüyordu. Canlının `min_vol_musd=3` eşiği eklendi;
+   olay 27.576 → 21.830, stop %1,3'e çıktı.
+
+### 🔴 ASIL BULGU — hedeften daha önemli
+**Referans çizgisi (bugünkü sabit %10) 2 yıllık veride NEGATİF: −0,079 (t=−4,05).**
+Arşiv ölçümü aynı kapı için **+0,41** demişti. Bu, LONG hücrelerinde yaşadığımızın
+aynısı: örneklem-içi pozitif, örneklem-dışı negatif.
+
+**AMA doğrudan "kapı öldü" DENEMEZ.** Popülasyon hâlâ farklı: medyan stop %1,3
+(canlıda %3,4), 21.830 olay (arşivde 445). Arşiv olayları radar'ın **skorla sıralanmış
+ilk 150** kısa listesinden geliyor; benim yeniden üretimim yalnız hacim tabanı
+uyguluyor. Yani **kapının canlı performansı radar'ın seçimine bağlı olabilir** ve o
+seçimi 2 yıllık veriyle yeniden üretemiyorum (skor için funding/OI gerekiyor, uzun
+veride yok).
+
+**Açık soru, kayda geçti:** MA50+ucuz kapısının artısı kuralın kendisinden mi geliyor,
+yoksa radar'ın ön elemesinden mi? Bunu ayırmak için 2 yıllık funding/OI verisi gerekir.
+
+**KARAR: oynaklığa ölçekli hedef UYGULANMADI.** Canlı bota dokunulmadı; sabit %10 kalıyor.
