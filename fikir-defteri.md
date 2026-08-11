@@ -2683,3 +2683,54 @@ veride yok).
 yoksa radar'ın ön elemesinden mi? Bunu ayırmak için 2 yıllık funding/OI verisi gerekir.
 
 **KARAR: oynaklığa ölçekli hedef UYGULANMADI.** Canlı bota dokunulmadı; sabit %10 kalıyor.
+
+---
+
+## 2026-08-12 — ÖN-KAYIT: A+B'nin funding bacağı 2 yılda sınanıyor (koşturmadan ÖNCE)
+
+**Neden bu:** bugün MA50+ucuz kapısı 2 yıllık veride çöktü (−0,079, t=−4,05). Ama iki
+kapı eşit durumda değil:
+
+| kapı | ham ileri getiri (arşiv, 72s) | 2 yılda sınandı mı |
+|---|---|---|
+| **A+B** | **+6,10 (t=+6,82)** — projenin en güçlü delili | ❌ henüz değil |
+| MA50+ucuz | +0,78 (t=+1,66) | ✅ **çöktü** |
+
+**Neden A+B'nin şansı olabilir — MA50'den farklı bir sebeple:** MA50+ucuz'un iki bacağı
+da fiyattan türüyordu ve "fiyat seviyesi" sonradan bir **coin-tipi vekili** çıktı.
+Funding ise fiyattan türemiyor — pozisyon taşıma maliyeti, yani piyasanın **kendi
+konumlanması**. Yapısal olarak bağımsız bir sinyal. Bu, otomatik olarak işe yarar
+demek değil ama bulduğumuz tuzağa aynı yoldan düşmez.
+
+### Kısıt — dürüstçe
+Binance **funding geçmişi 2 yıl açık**, ama **açık pozisyon (OI) geçmişi yalnız ~30 gün.**
+Yani A+B'nin `oi24 >= %10` bacağı 2 yılda **kurulamaz**. Sınanacak olan **funding bacağı
+tek başına**. Arşivde tekli ölçüm: funding +0,259R (N=508). Kesişim +0,375R idi, yani
+funding tek başına daha zayıf — bu testin **kapının tamamını değil, taşıyıcı bacağını**
+sınadığı kayda geçsin.
+
+### Tasarım (sonuç görülmeden)
+- Veri: `scratchpad/funding_gecmis/` (yeni indirilecek) + `klines_1h_uzun/`
+- Sinyal: en güncel funding **≤ −0,05 %/8s** · pump kapısı (chg24 < %20) · hacim ≥ $3M/24s
+- Mekanik: botun A-stopu · Wilder ATR · sabit %10 hedef · 72s ufuk · maliyet %0,13 ·
+  giriş sonraki barın açılışı · seyreltme 24 bar
+- Kontrol: aynı sembol/dönemde **rejim-eşleşmiş rastgele** barlar
+- Bölme: BOĞA / NÖTR / AYI · iki zaman yarısı · ayrı sembol sayısı + `t_kume`
+
+### GEÇME ÖLÇÜTÜ
+1. Sermaye getirisi (işlem başına) **> 0**
+2. **Rejim-eşleşmiş kontrolü** yenmeli
+3. **Her iki zaman yarısında da** pozitif
+4. **BOĞA ve AYI'nın ikisinde de** çökmemeli
+
+Dördü birden yoksa **KALDI** → A+B de doğrulanmamış sayılır ve bu deftere yazılır.
+
+### BEKLENTİM
+**Kararsızım, hafif pozitife meyilliyim.** Lehte: funding fiyattan bağımsız, arşiv
+ham getirisi çok güçlü (t=+6,82), ve kapı gerçekten seçici (BTC'de %0, OGN'de %3
+tetikleniyor). Aleyhte: MA50+ucuz da arşivde iyiydi ve çöktü; ayrıca oi24 bacağı
+olmadan kapı zayıflar. **Yanılırsam kayda geçsin.**
+
+### İşletim notu
+Dün 2 yıllık mum indirmesi (~215 istek/dk) botun turlarını **3 saat öldürmüştü.**
+Bu indirme ~1.700 istek ve **~66 istek/dk** hızla yapılacak (üçte bir). Bot izlenecek.

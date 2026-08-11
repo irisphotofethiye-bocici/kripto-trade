@@ -73,6 +73,7 @@ kripto-config.json.yedek-*
 scratchpad/oruntu_olaylar.json
 scratchpad/klines_1h/
 scratchpad/klines_1h_uzun/
+scratchpad/funding_gecmis/
 *_state.json.yedek-*
 scratchpad/kacan_olaylar.json
 scratchpad/hedef10_olaylar.json
