@@ -2581,3 +2581,47 @@ yapılmadı. Pencere sonrası bakılacak.
 
 **PENCERE SIFIRLANDI** (cadence botun gördüğü fırsat sayısını değiştirir):
 zirve 8698,11 → **8381,06** (efektif equity). Equity ve işlem geçmişi dokunulmadı.
+
+---
+
+## 2026-08-12 — ÖN-KAYIT: hedefi oynaklığa ölçekleme (koşturmadan ÖNCE commit)
+
+**Fikir (kullanıcı):** *"TP çok aşağıdadır, hacme göre gücü yetmez."* Sabit %10 yerine
+hedef = `N × ATR`, ve **her turda coin'in güncel oynaklığıyla yeniden hesaplansın**;
+oynaklık sönmüşse pozisyon kapansın.
+
+**Neden makul — elimizdeki dolaylı delil:** stop mesafesi dilimlerine göre hedefe
+ulaşma %10,3 → %20,1 → %33,3 → **%56,2**. Stop mesafesi büyük ölçüde ATR'den geliyor,
+yani "oynak coinler %10'a ulaşıyor, sakin coinler ulaşamıyor". Bugüne kadarki bütün
+hedef taramaları **sabit yüzdeydi**; oynaklığa ölçeklenmiş hedef hiç denenmedi.
+
+### Ön-kayıtlı tasarım
+- **Veri:** `scratchpad/klines_1h_uzun/` — 566 sembol, 2 yıl, **gerçek boğa + gerçek ayı**
+- **Olaylar:** canlı iki kapının (A+B, MA50+ucuz) tetiklendiği barlar, pump kapısı dahil
+- **Mekanik:** botun A-stopu · **Wilder ATR** (`olcum_ortak.atr`, canlıyla aynı) ·
+  maliyet **%0,13** · giriş sonraki barın açılışı · aynı barda stop+hedef → STOP
+- **Hedef DİNAMİK:** her barda ATR yeniden hesaplanır, `hedef = N × ATR`.
+  Fiyat güncel hedefi geçmişse o barda kapanır. *(Önceden hesaplanamaz — bar-bar
+  simülasyon şart, yoksa ölçüm gerçeği yansıtmaz.)*
+- **Taranacak:** `N` = 2 · 3 · 4 · 5 · 6 · taban/tavan çiftleri
+- **Kıyas:** bugünkü sabit %10, aynı olaylar/stop/maliyet
+
+### GEÇME ÖLÇÜTÜ (sonuç görülmeden)
+1. Sermaye getirisi (işlem başına) **sabit %10'u yenmeli**
+2. **Her iki zaman yarısında da** pozitif
+3. **BOĞA ve AYI rejimlerinin ikisinde de** çökmemeli *(ilk kez mümkün)*
+4. Ayrı sembol sayısı ve `t_kume` raporlanacak
+
+Dördü birden sağlanmazsa **KALDI** → uygulanmaz, gerekçesi buraya yazılır.
+
+### BEKLENTİM (önceden, yanılırsam kayda geçsin)
+**Kısmen pozitif bekliyorum** — ama sabit %10'u yenmesini beklemiyorum.
+Gerekçem: dinamik hedef, kazanan işlemi coin sakinleştiğinde erken kesecek; bu
+projede "erken çıkış kazananı budar" beş kez çıktı. Buna karşılık sakin coinlerdeki
+ulaşılamaz hedefi düzeltmesi lehte. İki etki birbirini götürebilir.
+**Sabit %10'u net yenerse bu, beklentimin tersi ve bilgi değeri yüksek bir sonuçtur.**
+
+### Sınır (şimdiden)
+ATR hem stopu hem hedefi belirlediği için `N × ATR` hedefi, stop mesafesiyle
+**mekanik olarak korele**. Yani "geniş stoplu işlem daha çok kazanır" bulgusunu
+kısmen yeniden üretiyor olabiliriz — sonuç pozitif çıkarsa bu ayrıştırılmalı.
