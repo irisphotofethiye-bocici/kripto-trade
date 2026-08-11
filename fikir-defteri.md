@@ -1962,3 +1962,83 @@ sonucun bant ailesine ne kadar bağımlı olduğu görünsün.
 **dışında** art arda kapanmasını "hızlanma" sinyali sayar. Videodaki kullanım (alt bantta AL)
 indikatörün **tasarım amacının tersi**. Bu yüzden yazarın kendi kullanımı (bant dışı ardışık
 kapanış = kırılım) ayrı bir satır olarak da ölçülüyor. Beklenti değişmedi: **NEGATİF.**
+
+### SONUÇ — 6 varyantın **hepsi KALDI**
+
+`scratchpad/kanal_stoch.py` · 570 sembol · ~60 gün 1h · giriş sonraki bar açılışı ·
+maliyet %0,13 · ufuk 12 bar · hedef girişte dondurulmuş
+
+| küme | N | net % | isabet | stop% | hedef% | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|---|
+| **ACC LONG (asıl)** | 5488 | **−0.09** | %6,2 | 1,65 | 5,62 | +0.09 | −0.32 |
+| **ACC SHORT (asıl)** | 5789 | **−0.12** | %4,9 | 2,03 | 6,01 | −0.09 | −0.15 |
+| ayrıştırma: yalnız BANT | 9583 | −0.03 | %5,7 | 1,02 | 5,34 | +0.09 | −0.15 |
+| ayrıştırma: yalnız STOCH | 17965 | −0.19 | %17,8 | 2,56 | 3,78 | −0.19 | −0.19 |
+| BOLL LONG (duyarlılık) | 9562 | −0.15 | %19,9 | | | −0.05 | −0.24 |
+| DONCH LONG (duyarlılık) | 5205 | −0.26 | %10,9 | | | −0.30 | −0.22 |
+| KONTROL rastgele (long) | 5387 | −0.19 | %26,7 | 2,94 | 3,14 | −0.30 | −0.09 |
+| KONTROL rastgele (short) | 5380 | −0.06 | %29,5 | 3,32 | 2,74 | +0.06 | −0.18 |
+
+**Ön-kayıtlı ölçüt (net>0 **ve** kontrolü yenmek **ve** iki yarıda da pozitif):
+altı varyantın altısı da KALDI.** Bant ailesini değiştirmek kurtarmıyor —
+Acceleration / Bollinger / Donchian, hepsi negatif.
+
+**Beklentim tutmuştu** (ön-kayıtta "NEGATİF" yazmıştım). Bu bir başarı değil,
+sadece ölçümün sürprizsiz olduğunun kaydı.
+
+### NEDEN kaldı — açık 18,3 puan
+```
+medyan stop  %1,65   ·   medyan hedef  %5,62   ·   R/R 3,4:1
+GEREKEN başabaş isabet : %24,4
+GERÇEKLEŞEN isabet     : %6,2
+AÇIK                   : −18,3 puan
+çıkış dağılımı: STOP %51 · SÜRE %43 · HEDEF %6
+```
+**R/R 3,4:1 kulağa iyi geliyor ve tamamen yanıltıcı.** İşlemlerin yarısı stopa,
+%43'ü zaman aşımına gidiyor; hedefe yalnız %6'sı ulaşıyor.
+
+### ⭐ Hedefi yakınlaştırmak KURTARMIYOR — kritik bulgu
+Hedef, bant genişliğinin bir payı olarak süpürüldü (keşifsel, ön-kayıtlı değil):
+
+| hedef | hedef % | isabet | başabaş gereken | **açık** | net % | A | B |
+|---|---|---|---|---|---|---|---|
+| bant × 0,25 | 1,40 | %48,0 | %58,2 | **−10,2** | −0.07 | +0.13 | −0.27 |
+| bant × 0,50 | 2,81 | %23,1 | %39,9 | **−16,8** | −0.11 | +0.18 | −0.39 |
+| bant × 0,75 | 4,21 | %11,5 | %30,3 | **−18,8** | −0.08 | +0.21 | −0.36 |
+| bant × 1,00 | 5,62 | %6,2 | %24,4 | **−18,2** | −0.09 | +0.20 | −0.39 |
+
+**Dört hedefte de açık kapanmıyor ve net negatif kalıyor.** Yani bu bir hedef-ayarı
+sorunu değil; **stop, her hedeften önce yeniyor.** Kurulumun kendisinde yön bilgisi yok.
+
+### Tek hayatta kalan hücre GÜRÜLTÜ çıktı
+Ana tabloda iki yarısı da pozitif olan tek hücre `ACC LONG + fiyat > MA200` idi:
+
+| alt küme | N | net % | standart hata | t | karar |
+|---|---|---|---|---|---|
+| fiyat > MA200 | 786 | +0.052 | 0.166 | **+0.31** | **GÜRÜLTÜ** (\|t\|<2) |
+| fiyat < MA200 | 4702 | −0.119 | 0.046 | −2.58 | anlamlı NEGATİF |
+| tümü | 5488 | −0.095 | 0.046 | −2.05 | anlamlı NEGATİF |
+
+Trend filtresi hücresi sıfırdan **ayırt edilemiyor.** Çok sayıda hücreye bakıldığında
+içinden bir tanesinin pozitif görünmesi zaten şansla beklenir — bu, aranan kanıt değil.
+
+**Ama yönü doğruladı:** MA200 **altında** anlamlı negatif (t=−2,58). Belgenin
+"düşüş trendinde çalışmaz" öngörüsü veriyle örtüştü.
+
+### ⚠️ Geçersiz ölçüm — dürüstlük kaydı
+"Yazarın kendi kullanımı: KIRILIM long" satırı tabloda **%98,2 isabet** gösteriyor.
+**Bu sayı anlamsızdır ve kullanılamaz.** Sebep: fiyat üst bandın üstünde kapandığında
+hedef (üst bant) girişin *arkasında* kalıyor, medyan hedef mesafesi %0,03 → işlem
+anında "hedefe ulaştı" sayılıyor. Kırılım varyantı bu çıkış kuralıyla **ölçülemez**;
+kendi çıkış kuralıyla ayrıca ölçülmesi gerekir. Tabloda bırakıldı ki hata görünsün.
+
+### Sınırlar
+- 15 dakikalık değil **1 saatlik** → orijinal tarifin birebir testi değil
+- Tek rejim (~60 gün, ayı/nötr) · kripto perp · **BIST'e taşınmaz**
+- Bant parametreleri (20, StochRSI 14/14/3/3, eşik 20/80) TradingView varsayılanı;
+  taranmadı — taransaydı **tarama artığı** riski doğardı
+
+### Sisteme etki: YOK
+Kullanıcı kısıtı gereği `testbot.py`, `radar.py`, `kripto-config.json` ve gölge defter
+**hiç ellenmedi.** Ölçüm tamamen `scratchpad/` içinde, salt-okunur önbellek üzerinde.
+Devam eden iki pencere (SHORT 138 işlem · LONG gölge 25 olay) etkilenmedi.
