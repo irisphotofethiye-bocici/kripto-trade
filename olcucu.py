@@ -80,11 +80,20 @@ def _spread_pct(symbol, spot=False):
     except Exception:
         return None
 
-def fetch_klines(symbol, interval, limit):
-    url = f"{FAPI}/fapi/v1/klines?symbol={symbol}USDT&interval={interval}&limit={limit}"
+def fetch_klines(symbol, interval, limit, kapali=False):
+    """kapali=True -> HENUZ KAPANMAMIS son mumu atar (denetim Bulgu 3, 2026-08-11).
+
+    Binance canli klines son eleman olarak acik (olusmakta olan) mumu dondurur. Bu barin
+    yuksek/dusuk/hacim degerleri ORANTILI EKSIKTIR; ATR, swing ve N-bar dip/tepe hesaplari
+    ona bakinca sistematik olarak DAR cikar -> stop mesafesi turun dakikasina gore degisir.
+    Geriye-donuk testlerin hepsi kapanmis barla calisir; kapali=True ikisini hizalar.
+    """
+    n = limit + 1 if kapali else limit
+    url = f"{FAPI}/fapi/v1/klines?symbol={symbol}USDT&interval={interval}&limit={n}"
     data = get_json(url)
     # kline: [openTime, open, high, low, close, volume, ...]
-    return [{"o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in data]
+    bars = [{"o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in data]
+    return bars[:-1] if (kapali and len(bars) > 1) else bars
 
 def atr(bars, period=14):
     """Wilder ATR."""
@@ -118,10 +127,14 @@ def nearest(price, highs, lows):
     return (res[0] if res else None), (sup[0] if sup else None)
 
 def measure(symbol, side, tf, limit, spot=False, entry=None):
-    bars = fetch_klines(symbol, tf, limit)
-    if len(bars) < 20:
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 3] YAPI (ATR, swing, N-bar dip/tepe) KAPANMIS
+    #   barlardan; FIYAT canli. Eskiden acik mum yapiya dahildi -> stop mesafesi turun
+    #   dakikasina gore degisiyor, backtestlerle uyusmuyordu.
+    ham = fetch_klines(symbol, tf, limit + 1)
+    if len(ham) < 21:
         raise ValueError("yetersiz mum verisi")
-    price = bars[-1]["c"]
+    bars = ham[:-1]                     # kapanmis barlar
+    price = ham[-1]["c"]                # canli fiyat
     # --entry: planli giris (pullback/bounce). R/R PLAN fiyatindan hesaplanir (m2 duzeltmesi 2026-07-02;
     # LAB/MANTA vakalari: anlik-fiyat R/R'i planli giriste yaniltici mekanik veto uretiyordu).
     ref = float(entry) if entry else price
@@ -274,7 +287,7 @@ def mtf_scan(symbol, tfs=("15m", "1h", "4h", "1d")):
     out = {}
     for tf in tfs:
         try:
-            bars = fetch_klines(symbol, tf, 120)
+            bars = fetch_klines(symbol, tf, 120, kapali=True)  # denetim Bulgu 3
             t, price, sma = trend_of(bars)
             a = atr(bars)
             out[tf] = {"trend": t, "price": price, "sma20": sma,
@@ -300,7 +313,7 @@ def mtf_scan(symbol, tfs=("15m", "1h", "4h", "1d")):
     return out, uzlasi
 
 def early_warning(symbol):
-    bars = fetch_klines(symbol, "1h", 60)
+    bars = fetch_klines(symbol, "1h", 60, kapali=True)  # denetim Bulgu 3
     a = atr(bars)
     price = bars[-1]["c"]
     last_tr = max(bars[-1]["h"] - bars[-1]["l"],

@@ -2447,3 +2447,79 @@ mutlaka düzeltilmeli.**
 ### Denetimin sınırı
 Statik okuma + hedefli doğrulama; her satır çalıştırılmadı. Denetlenmeyen alanlar:
 `panel_sunucu.py`, nöbetçi/alarm katmanı, Telegram, harici sağlayıcılar (CoinGecko/Apify/Coinalyze).
+
+---
+
+## 2026-08-11 — DENETİM DÜZELTMELERİ UYGULANDI (kullanıcı: "hepsini düzelt, bot düzelmiş olarak devam etsin")
+
+Denetimde bulunan **9 hata + uygulama sırasında çıkan 1 hata daha** düzeltildi.
+Birim testleri **15/15** geçti, canlı tur doğrulandı, ölçüm penceresi yeniden başlatıldı.
+
+### Canlı bota uygulananlar
+
+| # | ne | dosya | doğrulama |
+|---|---|---|---|
+| 1 | Fren **efektif equity**'ye bakıyor (gerçekleşmiş + açık P&L) + pozisyon yönetiminden **sonra** çalışıyor + boyutlandırma da efektife göre | `testbot.py` `efektif_equity()` | canlı: equity 8270 · efektif 9017 · fark **+747 $** |
+| 2 | TP1 sonrası `marjin` **yarılanıyor** | `pozisyon_kismi_tp1` | test: likidasyon 500 $ siliyor (eskiden 1000 $ = 2 kat) |
+| 3 | A+B / MA50+ucuz / **A+B+MA50** ayrı etiketleniyor | `karar_yon` birleşik blok | canlıda CAP ve BANANAS31 doğru "MA50+ucuz" yazıldı |
+| 4 | Funding **kapanan turda da** alınıyor | `yonet_acik_pozisyonlar` | `funding_uygula` artık `continue`'dan önce |
+| 5 | Radar ve ölçücü **kapanmış bar** kullanıyor (fiyat canlı kalır) | `radar.py`, `olcucu.py` `kapali=` | test: 51 istenip 50 dönüyor |
+| 6 | Gölge: **canlı adayı** tezler canlı kurallara uyuyor | `golge.CANLI_ADAYI` | `pump_long_tezi` artık `zorla=False` |
+| 7 | **`_save_state` ATOMİK** (tmp + `os.replace` + fsync) | `testbot.py:88` | ⬇ aşağıda |
+
+### ⚠️ UYGULAMA SIRASINDA ÇIKAN 10. HATA — botun 3 saat durmasının sebebi
+Kullanıcı sordu: *"neden 84 dakika tur atmamış"*. Araştırınca çok daha ciddi bir şey çıktı.
+
+```
+Görev : KriptoTestBot (Windows Zamanlayıcı, pythonw --cycle, 5 dk)
+Sonuç : 267014 = SCHED_S_TASK_TERMINATED
+Ayar  : ExecutionTimeLimit = PT4M   <-- Windows turu 4 DAKIKADA OLDURUYOR
+```
+
+Tetikleyici 5 dakikada bir, ama süre limiti **4 dakika**. Tur 4 dakikayı aşarsa Windows
+süreci **öldürüyor** → `son_cycle` güncellenmiyor, kilit dosyası ortada kalıyor.
+
+Bugünkü boşluklar: 11:17→12:06 (49dk) · **13:22→16:22 (180dk)** · 16:37→18:16 (99dk).
+
+**180 dakikalık boşluk benim yüzümden:** 2 yıllık veri indirmesi **14:28→16:19** arası
+saniyede ~3,5 istek atıyordu; botun API çağrıları yavaşladı, turlar 4 dakikayı aştı ve
+öldürüldü. Turlar indirme bittikten **3 dakika sonra** (16:22) kendiliğinden döndü.
+*(Diğer iki boşluğun sebebi kesinleşmedi — 11:17'deki benim işimden önce.)*
+
+**Ve asıl tehlike:** `_save_state` dosyayı `open(..,"w")` ile TRUNCATE edip yazıyordu.
+Öldürme tam o ana denk gelseydi `testbot_state.json` **yarım kalır, açık pozisyonlar ve
+equity tamamen kaybolurdu.** Görev bugün 3 kez terminated döndüğü için senaryo teorik değildi.
+
+**Düzeltildi:** `ExecutionTimeLimit` **PT4M → PT10M** (`MultipleInstances=IgnoreNew`
+olduğu için uzun tur çakışma yaratmaz, sonraki tetik atlanır) **ve** `_save_state` atomik
+yazmaya geçti. Doğrulama: zamanlayıcı turu **18:33:37**'de sorunsuz tamamlandı.
+
+### Ölçüm tarafı — eski betikler BİLEREK değiştirilmedi
+Defterdeki sayıların yeniden üretilebilir kalması için. Bundan sonrası için
+**`scratchpad/olcum_ortak.py`**: Wilder ATR (canlıyla aynı) · `MALIYET=%0.13` ·
+`maliyet_r(stop)` (sabit 0.04R yerine stop-bağımlı) · `ozet()` **ayrı sembol sayısı,
+olay/sembol, ilk-5 payı ve `t_kume`** döndürüyor.
+
+Kümelenme sütununun ne yakaladığı (aynı veri, farklı dağılım):
+```
+KUMELENMIS (8 sembol)   N=120  ort +0.246  t +2.86  ->  t_kume +0.74
+YAYILMIS  (90 sembol)   N=120  ort +0.246  t +2.86  ->  t_kume +2.47
+```
+Bu sütun olmasaydı ikisi de "+2.86" diye raporlanırdı — bugün LONG hücresinde tam bu oldu.
+
+### ÖLÇÜM PENCERESİ YENİDEN BAŞLADI
+Önceki pencerenin ön-kaydı *"parametreye dokunulmaz"* diyordu; **botun davranışı değişti**,
+o pencere **GEÇERSİZ**. Yeni ön-kayıt:
+
+| | |
+|---|---|
+| **Başlangıç** | 2026-08-11 18:42 (denetim düzeltmeleri yürürlükte) |
+| **Pencere** | 138 kapanmış işlem **veya** 30 gün — hangisi önce |
+| **GEÇTİ** | toplam net > 0 **ve** ikinci yarı > 0 |
+| **KALDI** | toplam net < 0 **ya da** fren tetiklendi |
+| **BELİRSİZ** | toplam > 0 ama ikinci yarı < 0 → uzat |
+
+`zirve_equity` **9016,60**'a çekildi (efektif equity). Equity ve 20 işlemlik geçmiş
+**dokunulmadı**. Beklenti maliyet düzeltmesiyle **+%1,09 → +%1,05** / olay.
+
+**Pencere boyunca kural yine aynı:** parametre değişmez, kapı eklenmez, eşik oynatılmaz.

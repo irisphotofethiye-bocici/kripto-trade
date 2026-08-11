@@ -88,24 +88,34 @@ def analyze(sym, btc_chg3=0.0):
     # fiyatin kendisini de iceren dejenere bir ortalama oluyordu. Diger tum hesaplar
     # KUYRUK dilimlerini kullaniyor (son 6 / 20 / 24 bar) -> pencere buyumesi onlari
     # ETKILEMEZ, skor ve stage BIREBIR ayni kalir.
-    b = klines(sym, 60)
-    if len(b) < 25:
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 3] Binance canli klines son eleman olarak HENUZ
+    #   KAPANMAMIS mumu dondurur. Eskiden bu bar tum gostergelere dahildi; hacmi ve araligi
+    #   orantili EKSIK oldugu icin vol_x ve comp turun hangi DAKIKADA kostuguna gore degisiyordu.
+    #   OLCUM: "vol_x >= 2" esigini gecen olay orani -> dakika 5'te %0,3 · dakika 59'da %14,6 ·
+    #   kapanmis barda %15,0. Yani ayni coin saatin 5'inde elenip 55'inde geciyordu (50 KAT).
+    #   Ayrica tum geriye-donuk testler KAPANMIS barla calisiyordu -> canli/backtest yapisal fark.
+    # [DUZELTME] Hacim/aralik tureten her sey (atr, comp, vol_x, hi/lo) KAPANMIS barlardan;
+    #   fiyat SEVIYESI ise canli kalir (bir fiyat kismi degildir). last1/last3 semantigi
+    #   birebir korundu: eskiden de "canli fiyat vs onceki kapanis" idi.
+    tum = klines(sym, 61)
+    if len(tum) < 26:
         return None
-    price = b[-1]["c"]
+    b = tum[:-1]                      # KAPANMIS barlar -> gosterge hesaplari
+    price = tum[-1]["c"]              # canli fiyat -> seviye karsilastirmalari
     a = olcucu.atr(b)
     if not a or not price:
         return None
-    # sikisma: son 6 barin TR ort / ATR14
+    # sikisma: son 6 KAPANMIS barin TR ort / ATR14
     trs = [max(b[i]["h"]-b[i]["l"], abs(b[i]["h"]-b[i-1]["c"]), abs(b[i]["l"]-b[i-1]["c"])) for i in range(len(b)-6, len(b))]
     comp = statistics.mean(trs) / a
-    # hacim patlamasi: son bar qv / son 24 medyan
+    # hacim patlamasi: son KAPANMIS bar qv / onceki 24 medyan
     med = statistics.median([x["qv"] for x in b[-24:]])
     vol_x = (b[-1]["qv"] / med) if med else 0
-    # 20-bar aralikta konum
+    # 20-bar aralikta konum (aralik kapanmis barlardan, konum canli fiyattan)
     hi = max(x["h"] for x in b[-20:]); lo = min(x["l"] for x in b[-20:])
     pos = (price - lo) / (hi - lo) if hi > lo else 0.5
-    last1 = (b[-1]["c"] - b[-2]["c"]) / b[-2]["c"] * 100
-    last3 = (b[-1]["c"] - b[-4]["c"]) / b[-4]["c"] * 100
+    last1 = (price - b[-1]["c"]) / b[-1]["c"] * 100
+    last3 = (price - b[-3]["c"]) / b[-3]["c"] * 100
     f = funding(sym)
     oi24, oi3 = oi_changes(sym)
 

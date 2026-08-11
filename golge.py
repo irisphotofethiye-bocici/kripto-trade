@@ -99,11 +99,23 @@ def _tekrar_var_mi(st, sym):
         return False
 
 
+# [DENETIM DUZELTMESI 2026-08-11, Bulgu 6] Golge TUM tezleri zorla=True ile aciyordu; bu
+#   rr kapisini, asgari_stop_pct'yi (bugun eklenen %2 tabani) ve guvenli-kaldirac kontrolunu
+#   atlar. Iki farkli tez turu var ve ikisi ayni muameleyi GORMEMELI:
+#     VETO-CALISMASI  ("kapi olmasaydi ne olurdu") -> kapilar BILEREK atlanir  [zorla=True]
+#     CANLI ADAYI     ("bu kural canliya alinsin mi") -> canli kurallara UYMALI [zorla=False]
+#   Aksi halde on-kayitli karar olcutu, canliya alinacak olandan FARKLI bir kurali olcer
+#   ve sonuc tasinamaz. (Olcum: bugune kadar golge LONG'larin stopu hep >=%2,19 oldugu icin
+#   pratikte henuz isirmamisti — ama kural ilerde ayrisabilirdi.)
+CANLI_ADAYI = {"pump_long_tezi"}          # canli kurallara uyacak tezler
+
+
 def ac(sym, yon, r, pillar, kapi, detay="", rejim_ad=None, olc_override=None):
-    """Botun reddettigi girisi golgede AC. Donus: True/False (acildi mi).
-    zorla=True: kapilar burada BILEREK devre disi — olcmek istedigimiz sey tam da
-    'kapi olmasaydi ne olurdu'. Kaldirac guvenlik kirpmasi yine de calisir (2x tabani),
-    yoksa likidasyon stoptan once gelir ve olcum ANLAMSIZ olur."""
+    """Golgede giris AC. Donus: True/False (acildi mi).
+
+    kapi CANLI_ADAYI icindeyse zorla=False -> canlinin tum kapilari (rr, asgari stop,
+    guvenli kaldirac) aynen gecerli; olcut sonucu dogrudan canliya tasinabilir.
+    Diger tezlerde zorla=True -> 'kapi olmasaydi ne olurdu' olculur."""
     if not yon or yon not in ("LONG", "SHORT"):
         return False
     st = yukle() or yeni_state()
@@ -112,8 +124,9 @@ def ac(sym, yon, r, pillar, kapi, detay="", rejim_ad=None, olc_override=None):
     if len(st["acik_pozisyonlar"]) >= MAKS_ACIK or _tekrar_var_mi(st, sym):
         return False
 
+    _zorla = kapi not in CANLI_ADAYI       # canli adayi tezleri kapilara UYAR
     ok = _defterde(testbot.yeni_giris_ac, st, sym, yon, r, pillar,
-                   f"GOLGE[{kapi}] {detay}"[:160], zorla=True, rejim_ad=rejim_ad,
+                   f"GOLGE[{kapi}] {detay}"[:160], zorla=_zorla, rejim_ad=rejim_ad,
                    olc_override=olc_override, kaynak=f"golge:{kapi}")
     if not ok:
         # golge bile acamadi (olcum hatasi / stop gecersiz) -> sessizce gec, olay kaybedilir

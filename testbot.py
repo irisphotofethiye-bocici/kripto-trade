@@ -86,7 +86,23 @@ def _load_state():
 
 
 def _save_state(st):
-    json.dump(st, open(STATEF, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    """ATOMIK yazma (denetim ek bulgu, 2026-08-11).
+
+    [ESKI] json.dump(st, open(STATEF,"w")) — dosyayi TRUNCATE edip yaziyordu.
+    [RISK] "KriptoTestBot" zamanlanmis gorevinin ExecutionTimeLimit degeri PT4M idi:
+      Windows, 4 dakikayi asan turu SURECI OLDURDUK kesiyor. Oldurme tam bu yazmanin
+      ortasina denk gelirse testbot_state.json YARIM kalir -> acik pozisyonlar,
+      equity ve zirve kaydi TAMAMEN kaybolur. 2026-08-11'de gorev 3 kez
+      SCHED_S_TASK_TERMINATED (267014) dondu, yani senaryo teorik degil.
+    [DUZELTME] Once .tmp'ye yaz, sonra os.replace ile ATOMIK degistir. Yazma yarida
+      kesilse bile eski state saglam kalir.
+    """
+    gecici = STATEF + ".tmp"
+    with open(gecici, "w", encoding="utf-8") as fh:
+        json.dump(st, fh, ensure_ascii=False, indent=2)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(gecici, STATEF)
 
 
 def _append_jsonl(path, obj):
@@ -389,18 +405,37 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
     # [SINIR] Tek rejim · sabit 2R hedefle olculdu (bot 1.5R kismi + trailing ile cikiyor) ·
     #   slipaj yok sayildi · olaylar 15 sembolde kumeleniyor (bagimsizlik gorundugunden dusuk).
     # GERI ALMA: kripto-config.json -> esikler.ab_kapisi_acik: 0
-    if (evren.esik("ab_kapisi_acik", 1) >= 1 and rejim_ad in ("AYI", "NOTR")
-            and (r.get("funding") is not None)
-            and r["funding"] <= evren.esik("ab_funding_esik", -0.05)
-            and (r.get("oi24") or 0) >= evren.esik("ab_oi24_esik", 10.0)
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 5] Eskiden A+B ve MA50+ucuz AYRI iki blok idi ve
+    #   A+B once gelip `return` ettigi icin IKISINI BIRDEN saglayan olaylar HEP "A+B" etiketiyle
+    #   yaziliyordu. Olcum: 445 MA50 olayinin 61'i (%14) boyle kayboluyordu -> MA50 kapisinin
+    #   karnesi eksik, atif yanlis. Simdi iki kapi ONCE degerlendirilir, sonra etiketlenir.
+    #   Davranis (hangi islemin acildigi) DEGISMEDI; yalniz SEBEP etiketi duzeldi.
+    #   Not: birlesik etiket "A+B+MA50:" ile baslar, yani SABIT_HEDEF_KAPILARI ("A+B", ...)
+    #   startswith kontrolu aynen calisir -> sabit %10 hedef korunur.
+    _ab_gecti = (evren.esik("ab_kapisi_acik", 1) >= 1
+                 and (r.get("funding") is not None)
+                 and r["funding"] <= evren.esik("ab_funding_esik", -0.05)
+                 and (r.get("oi24") or 0) >= evren.esik("ab_oi24_esik", 10.0))
+    _ma50_gecti = (evren.esik("ma50_kapisi_acik", 1) >= 1
+                   and r.get("ma50_mesafe") is not None and r.get("price")
+                   and r["price"] <= evren.esik("ucuz_fiyat_esik", 0.07)
+                   and r["ma50_mesafe"] >= evren.esik("ma50_mesafe_esik", 3.72))
+    if ((_ab_gecti or _ma50_gecti) and rejim_ad in ("AYI", "NOTR")
             and not short_riskli_dip and not asiri_dusmus):
+        _hangi = ("A+B+MA50" if (_ab_gecti and _ma50_gecti)
+                  else ("A+B" if _ab_gecti else "MA50+ucuz"))
         if pumplamis:
             _veto_ekle(veto_out, "blowoff",
-                       f"A+B pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
+                       f"{_hangi} pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
             return None
-        return ("SHORT", "ANINDA",
-                f"A+B: funding {r['funding']:.3f} (short kalabalik) + oi24 {oi24:+.0f}% "
-                f"(pozisyon birikiyor) [2026-08-10, arsiv olcumu +0.396R N=201]")
+        _parca = []
+        if _ab_gecti:
+            _parca.append(f"funding {r['funding']:.3f} (short kalabalik) + oi24 {oi24:+.0f}%")
+        if _ma50_gecti:
+            _parca.append(f"fiyat ${r['price']:.4f} (ucuz sinif) + MA50'nin "
+                          f"%{r['ma50_mesafe']:.1f} ustunde")
+        return ("SHORT", "ANINDA", f"{_hangi}: " + " | ".join(_parca)
+                + " [A+B 2026-08-10 +0.396R N=201 · MA50 2026-08-11 +0.84% N=460]")
 
     # ================= MA50+UCUZ KAPISI (2026-08-11, KULLANICI KARARI, Madde 9) ===========
     # [NE] fiyat <= $0.07  VE  MA50 mesafesi >= %3.72  ->  SHORT.
@@ -429,18 +464,7 @@ def _karar_yon_ham(rejim_ad, r, pillar, kucuk_float_esik_gecerli, veto_out=None,
     #   spekulatif). Rejim degisince iliski DONEBILIR — bogada ucuz coinler one gecebilir.
     #   Ayrica ham fiyat esigi zamanla kayar; yeniden olculmeden yillarca birakilmamali.
     # GERI ALMA: kripto-config.json -> esikler.ma50_kapisi_acik: 0
-    if (evren.esik("ma50_kapisi_acik", 1) >= 1 and rejim_ad in ("AYI", "NOTR")
-            and r.get("ma50_mesafe") is not None and r.get("price")
-            and r["price"] <= evren.esik("ucuz_fiyat_esik", 0.07)
-            and r["ma50_mesafe"] >= evren.esik("ma50_mesafe_esik", 3.72)
-            and not short_riskli_dip and not asiri_dusmus):
-        if pumplamis:
-            _veto_ekle(veto_out, "blowoff",
-                       f"MA50+ucuz pump-kapisi (24s {chg24:+.0f}% >= {pump_esik_short:.0f}%)", "SHORT")
-            return None
-        return ("SHORT", "ANINDA",
-                f"MA50+ucuz: fiyat ${r['price']:.4f} (ucuz sinif) + MA50'nin "
-                f"%{r['ma50_mesafe']:.1f} ustunde [2026-08-11, yon avi +0.84% N=460]")
+    # (MA50+ucuz kapisi yukaridaki BIRLESIK blokta degerlendiriliyor — Bulgu 5 duzeltmesi)
 
     if rejim_ad == "AYI":
         if r["stage"] == "BASLIYOR" and smart == "LONG" and (taker or 0) >= 1.0:
@@ -735,6 +759,13 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
     pnl_net = pnl_ham - ucret
     st["equity"] += pnl_net
     pos["miktar"] -= yari
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 4] Miktar yarilaniyordu ama pos["marjin"] AYNI
+    #   kaliyordu. pozisyon_liq tam marjini siler (st["equity"] -= pos["marjin"]) -> TP1
+    #   alinmis bir pozisyon likide olsa zarar ~2 KAT fazla yazilirdi. Henuz hic likidasyon
+    #   olmadigi icin gerceklesmedi (0 vaka / 2 TP1), ama hata gercekti.
+    #   NOT: risk_usdt BILEREK degistirilmiyor — R, GIRISTE hedeflenen riske gore olculur;
+    #   kalan yarinin R'sinin ~yari cikmasi dogru muhasebedir.
+    pos["marjin"] = round(pos["marjin"] / 2.0, 2)
     pos["stop"] = pos["giris"]  # breakeven'e cek
     pos["tp1_alindi"] = True
     # kismi realize kaydi (2026-07-06): TP1 karlari log disinda kaliyordu -> karne ~$59 kari gormuyordu.
@@ -776,7 +807,7 @@ def atr_canli_al(sym):
     """Cycle basina 1 kez taze ATR14 (1h/100 mum) - trailing_guncelle'de 'momentum yavasladi mi' proxy'si.
     Ag hatasi veya bar'siz/0 ATR -> None (cagiran taraf atr_giriste'ye fallback eder, davranis bozulmaz)."""
     try:
-        bars = olcucu.fetch_klines(sym, "1h", 100)
+        bars = olcucu.fetch_klines(sym, "1h", 100, kapali=True)  # denetim Bulgu 3
         a = olcucu.atr(bars)
         return a if a and a > 0 else None
     except Exception:
@@ -893,10 +924,14 @@ def yonet_acik_pozisyonlar(st):
                         pozisyon_kismi_tp1(st, pos, pos["tp1"])
                     if pos["tp1_alindi"] and b["l"] <= pos["tp2"]:
                         pozisyon_kapat(st, pos, pos["tp2"], "TP2"); kapandi = True; break
+            # [DENETIM DUZELTMESI 2026-08-11, Bulgu 9] funding_uygula ESKIDEN `if kapandi:
+            #   continue`den SONRA geliyordu -> pozisyonun KAPANDIGI turda son periyodun
+            #   fonlamasi hic alinmiyordu. Tek yonlu (hep lehte) sapma. Kucuk (toplam
+            #   kumulatif funding -6$) ama sistematik. Artik kapanistan BAGIMSIZ uygulanir.
+            funding_uygula(st, pos)
             if kapandi:
                 continue
             pos["son_1m_kontrol_ts"] = now_iso()
-            funding_uygula(st, pos)
             yas_saat = (now_dt() - parse_iso(pos["giris_ts"])).total_seconds() / 3600
             if yas_saat >= zaman_stop_saat:
                 px = fiyat_fapi(pos["sym"])
@@ -1032,10 +1067,16 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     if asg > 0 and stop_frac * 100 < asg and not zorla:
         return _red("stop_cok_dar", f"stop %{stop_frac*100:.2f} < asgari %{asg:.1f}", olc)
     # ------------------------------------------------------------------------------------------
-    hedef_risk = st["equity"] * float(_c("islem_risk_pct", 5)) / 100.0
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 1] Boyut artik EFEKTIF equity'ye (gerceklesmis +
+    #   acik P&L) gore. Eskiden yalniz gerceklesmis equity kullaniliyordu; acik zarar buyurken
+    #   bot pozisyon boyutunu KUCULTMUYOR, ayni buyuklukte acmaya devam ediyordu.
+    #   efektif_equity() cycle basinda hesaplanip state'e yazilir; burada agdan tekrar
+    #   cekilmez. Yoksa (ilk cycle, --zorla, test) gerceklesmis equity'ye duser.
+    baz_equity = float(st.get("efektif_equity") or st["equity"])
+    hedef_risk = baz_equity * float(_c("islem_risk_pct", 5)) / 100.0
     if not smart_hiz and pillar.get("smart") not in (None, "NOTR"):
         hedef_risk /= 2.0                      # smart karsi yonde -> RISK yari
-    marjin = st["equity"] * marjin_pct_hesapla(skor)
+    marjin = baz_equity * marjin_pct_hesapla(skor)
     kmin, kmax = float(_c("kaldirac_min", 3)), float(_c("kaldirac_max", 10))
     kald_gerekli = ((hedef_risk / stop_frac) / marjin) if marjin > 0 else kmin
     kaldirac0 = int(round(max(kmin, min(kmax, kald_gerekli))))
@@ -1327,6 +1368,23 @@ def acik_pnl_toplam(st):
     return toplam
 
 
+def efektif_equity(st):
+    """GERCEKLESMIS + ACIK P&L. Denetim Bulgu 1 (2026-08-11) duzeltmesi.
+
+    st["equity"] yalnizca kapanmis islemleri toplar; acik pozisyonlar ne kadar zararda
+    olursa olsun ona girmez. Fren ve boyutlandirma BU degeri kullanmali, yoksa koruma
+    zarar KESINLESENE kadar kor kalir.
+
+    Sonuc st["efektif_equity"]'e yazilir; ayni cycle icinde yeniden ag cagrisi yapilmasin
+    diye yeni_giris_ac oradan okur (her giris denemesinde 8 pozisyon icin ticker cekmek
+    cycle'i yavaslatirdi).
+    """
+    ef = st["equity"] + acik_pnl_toplam(st)
+    st["efektif_equity"] = round(ef, 2)
+    st["efektif_equity_ts"] = now_iso()
+    return ef
+
+
 def _kilit_al(timeout_sn=240):
     """Ayni anda 2 cycle calismasin (2026-07-03 kaniti: manuel calistirma + zamanlayici cakisti,
     TLM kapanisi 2 KEZ loglandi — istatistikleri sisiriyordu). Kilit dosyasi timeout_sn'den eskiyse
@@ -1393,22 +1451,34 @@ def _cycle_ic():
     #   pozisyonlar yonetilmeye DEVAM eder (yarim birakma yok). Insan `--devam` ile acar.
     # [NOT] min_equity_dur=50 ($10.000'de %99.5 kayip) pratikte hicbir zaman tetiklenmez;
     #   gercek koruma bu. 0 yazilirsa fren kapanir.
-    dusus_esik = float(_c("maks_dusus_pct", 25))
-    if dusus_esik > 0 and st["durum"] == "AKTIF":
-        zirve = max(float(st.get("zirve_equity") or st["baslangic_bakiye"]), st["equity"])
-        st["zirve_equity"] = round(zirve, 2)
-        dusus = (st["equity"] / zirve - 1) * 100 if zirve else 0.0
-        if dusus <= -dusus_esik:
-            st["durum"] = "HALT_DUSUS"
-            telegram_gonder(f"[TESTBOT] DUSUS FRENI: zirveden %{-dusus:.1f} geri cekildi "
-                            f"(esik %{dusus_esik:.0f}) — YENI GIRIS DURDU, acik pozlar yonetiliyor. "
-                            f"Gozden gecirip 'python testbot.py --devam' ile ac.")
-
+    # [DENETIM DUZELTMESI 2026-08-11, Bulgu 1 — YUKSEK] Fren ESKIDEN yalniz st["equity"]'ye
+    #   bakiyordu; equity ise SADECE kapanmis islemleri toplar. acik_pnl_toplam() vardi ama
+    #   yalnizca log ve --durum ciktisinda kullaniliyordu, hicbir KARAR dalinda degil.
+    #   OLCUM (2026-08-11 canli): fren 8.401$ goruyordu, acik notional 21.889$ = sermayenin
+    #   2,61 KATI. Acik pozisyonlar birlikte %10 aleyhe gitse gercek sermaye 6.212$'a (-%26)
+    #   duserdi ama fren hala 8.401 gorup TETIKLENMEZDI.
+    #   AYRICA fren, yonet_acik_pozisyonlar'dan ONCE calisiyordu -> bir tur GEC olcuyordu.
+    # [DUZELTME] (a) pozisyonlar yonetildikten SONRA calisir, (b) EFEKTIF equity'ye bakar
+    #   (gerceklesmis + acik P&L), (c) ayni efektif deger boyutlandirmada da kullanilir ki
+    #   acik zarar buyurken pozisyon boyutu da kuculsun.
     yonet_acik_pozisyonlar(st)
     # Kapanislar HEMEN diske (2026-07-14 VELVET dersi, Madde 8 bug-fix): islem kaydi pozisyon_kapat
     # icinde aninda yaziliyor ama state cycle sonunda kaydediliyordu -> arada yeni_giris_ara'nin ag
     # hatasi cycle'i oldurunce ayni kapanis her cycle'da tekrar yazildi (VELVET 5x mukerrer kayit).
     _save_state(st)
+
+    ef = efektif_equity(st)          # gerceklesmis + acik P&L; st["efektif_equity"]'e yazilir
+    dusus_esik = float(_c("maks_dusus_pct", 25))
+    if dusus_esik > 0 and st["durum"] == "AKTIF":
+        zirve = max(float(st.get("zirve_equity") or st["baslangic_bakiye"]), ef)
+        st["zirve_equity"] = round(zirve, 2)
+        dusus = (ef / zirve - 1) * 100 if zirve else 0.0
+        if dusus <= -dusus_esik:
+            st["durum"] = "HALT_DUSUS"
+            telegram_gonder(f"[TESTBOT] DUSUS FRENI: zirveden %{-dusus:.1f} geri cekildi "
+                            f"(efektif ${ef:.2f} = gerceklesmis ${st['equity']:.2f} + acik "
+                            f"${ef - st['equity']:+.2f}; esik %{dusus_esik:.0f}) — YENI GIRIS "
+                            f"DURDU, acik pozlar yonetiliyor. 'python testbot.py --devam' ile ac.")
 
     if st["durum"] == "AKTIF":
         try:
