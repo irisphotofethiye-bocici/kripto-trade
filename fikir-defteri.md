@@ -2204,3 +2204,77 @@ stopumuzun öldürdüğü bir kenarı "sinyal boş" diye kaydederiz. Bu oturumda
 Bu ders A+B ve MA50+ucuz kapıları için de geriye dönük uygulanabilir — onlar ham ölçümle
 (yön avı) bulunmuştu, yani şanslıyız; ama gelecekteki adaylar için sıra bu olmalı:
 **ham ileri getiri → mekanik → portföy.**
+
+---
+
+## 2026-08-11 — FİKİR 1: "kaç ölü sinyalimiz aslında canlıydı?" (arşiv taraması)
+
+**Gerekçe:** bugün A-stopun gerçek bir kenarı öldürebildiğini gördük. Bu projede "negatif"
+diye kapatılmış **her şey** stoplu ölçülmüştü → bir kısmı **yanlış negatif** olabilir.
+Araç: `scratchpad/olu_sinyal_tarama.py` · 6.790 arşiv olayı · HAM = stop/hedef/maliyet YOK.
+
+### ⭐ BULUNDU — iki LONG hücresi yanlış negatifmiş
+
+**HAM ölçüm (stopsuz, sabit süreli çıkış, maliyet düşülmüş):**
+
+| hücre | en iyi ufuk | ham net | t | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| **LONG: fiyat YÜKSEK + chg24 düşük** | 24s | **+1,30** | **+4,01** | +1,19 | +1,45 |
+| **LONG: MA50 düşük + fiyat YÜKSEK** | 12s | **+1,02** | **+2,90** | +1,28 | +0,60 |
+| KONTROL: tüm olaylar LONG | 1s | −0,11 | −3,42 | −0,10 | −0,12 |
+
+**Her iki yarıda da pozitif, t anlamlı, kontrol açıkça negatif.**
+
+**Aynı hücreler MEKANİKLE (A-stop) — `yon_dogrula.py`, 2026-08-10:**
+
+| hücre | hedef %2,5/24s | hedef %10/72s | **stop%** | A yarısı | B yarısı |
+|---|---|---|---|---|---|
+| fiyat YÜKSEK + chg24 düşük | **−0,17** | +0,22 | **0,97** | **−0,47** | +1,16 |
+| MA50 düşük + fiyat YÜKSEK | **−0,08** | +0,27 | **0,98** | **−0,09** | +0,86 |
+
+**Ham temiz ve tutarlı; mekanik kırık.** A yarısı negatife dönüyor.
+
+### Sebep tek bakışta görünüyor: stop %0,98
+Bu hücrelerin A-stopu **%0,98** çıkıyor — bugün ölçtüğümüz "net sıfır üreten" dar dilimin
+tam içinde (`stop < %1,92` → isabet %10,3 / başabaş %16). Ve **canlıdaki
+`asgari_stop_pct = 2.0` kapımız bu işlemleri zaten tümden reddederdi.**
+
+> Yani sinyali reddettik çünkü **stop kuralımız o sinyale uygun değildi** — sinyalde
+> bilgi olmadığı için değil. Fikir 1'in aradığı şey tam olarak buydu.
+
+### Ne anlama geliyor — canlı kapının AYNASI
+`fiyat YÜKSEK + chg24 düşük` = **pahalı + sakin coin → LONG**, 24 saat tut.
+Canlıdaki SHORT kapımız ise `ucuz + MA50 üstü → SHORT`. İkisi aynı eksenin iki ucu.
+Bu, projenin en büyük açığına (LONG kapısı yok, boğada bot kör) doğrudan aday.
+
+### ⭐⭐ İKİNCİ BULGU — A-stop CANLI kapımızın da 2/3'ünü yiyor
+
+| küme | HAM (stopsuz, en iyi ufuk) | MEKANİK (A-stop) | kaybedilen |
+|---|---|---|---|
+| **A+B (canlı kapı)** | +6,10 (72s, t=+6,82) | +2,14 | **%65** |
+| SHORT: skor yüksek | +2,58 (48s) | +0,65 | %75 |
+| SHORT: oi24 yüksek | +2,01 (48s) | +0,69 | %66 |
+| SHORT: chg24 yüksek (pump) | +1,67 (48s) | +0,50 | %70 |
+| MA50+ucuz (canlı kapı) | +0,78 (12s) | +0,84 | %0 (korunmuş) |
+
+**A+B'nin ham kenarının %65'ini kendi stopumuz yiyor.** Not: stopsuz karşılaştırma
+kuyruk riskini yok sayar, yani "stopu kaldıralım" demek değil — ama stop mesafesinin
+**bu kapı için yeniden ölçülmesi gerektiğini** söylüyor.
+**Pencere kuralı gereği ŞİMDİ UYGULANMAZ** (138 işlem / 30 gün dolana kadar parametre
+donuk). Pencere sonrası ilk iş bu.
+
+### Genel tarama sonucu
+Bayrak koşulunu (`ham>0 & |t|>=2 & iki yarı + & mekanik<=0`) yalnız **kontrol grubu**
+karşıladı: tüm olayları stopsuz SHORT'lamak +0,90 (t=+5,12), A-stopla **−0,05**.
+Bu bir kenar değil **piyasa betası** (ayı/nötr pencerede her şey düştü) — ama A-stopun
++0,90'ı −0,05'e çevirmesi, hasarın büyüklüğünü tek satırda gösteriyor.
+
+### Sınırlar
+- N küçük (113 / 120), hücreler **tarama ile** bulundu → çoklu karşılaştırma riski
+- Aynı 60 günlük tek rejim
+- **Asıl sınav Fikir 3'ün 2 yıllık verisi olacak** — bu bulgular oraya devredildi
+
+### Kendi hatam
+Betiğin ilk sürümünde yarı örneklem 60'ın altına düşünce tablo `0.00` yazıyordu; bu
+"yarılar çöktü" diye **yanlış okunuyordu**. Eşik 30'a indirildi ve yetersizse `az` yazılıyor.
+Bu düzeltilmeden önce iki LONG hücresi de yanlışlıkla elenmiş görünüyordu.
