@@ -1384,10 +1384,28 @@ def yeni_giris_ara(st, rejim):
 
 # ---------- ana döngü ----------
 
-def acik_pnl_toplam(st):
+def _tum_fiyatlar():
+    """TEK cagrida butun perp fiyatlari. 2026-08-12: acik_pnl_toplam her pozisyon icin
+    ayri ticker cagirir ve cycle icinde birkac kez calisir (fren + equity logu + panel).
+    6 pozisyonda 12-18 gereksiz istek demekti; API basincini artiriyordu (11 Agustos'ta
+    toplu indirme yuzunden turlar 4 dk siniri asip OLDURULMUSTU — az istek = az risk)."""
+    try:
+        d = _get(f"{FAPI}/fapi/v1/ticker/price")
+        return {x["symbol"]: float(x["price"]) for x in d} if isinstance(d, list) else {}
+    except Exception:
+        return {}
+
+
+def acik_pnl_toplam(st, fiyatlar=None):
+    if not st["acik_pozisyonlar"]:
+        return 0.0
+    if fiyatlar is None:
+        fiyatlar = _tum_fiyatlar()
     toplam = 0.0
     for pos in st["acik_pozisyonlar"]:
-        px = fiyat_fapi(pos["sym"])
+        px = fiyatlar.get(pos["sym"] + "USDT")
+        if px is None:
+            px = fiyat_fapi(pos["sym"])       # toplu cagri basarisizsa tek tek (fail-safe)
         if px is None:
             continue
         yon_isaret = 1 if pos["yon"] == "LONG" else -1
@@ -1517,7 +1535,7 @@ def _cycle_ic():
     st["son_cycle_ts"] = now_iso()
     _save_state(st)
     _append_jsonl(EQUITYF, {"ts": now_iso(), "equity": round(st["equity"], 2),
-                            "acik_pnl": round(acik_pnl_toplam(st), 2), "acik_sayisi": len(st["acik_pozisyonlar"]),
+                            "acik_pnl": round((st.get("efektif_equity") or st["equity"]) - st["equity"], 2), "acik_sayisi": len(st["acik_pozisyonlar"]),
                             "durum": st["durum"]})
     print(f"[{now_iso()}] durum={st['durum']} equity=${st['equity']:.2f} acik={len(st['acik_pozisyonlar'])} "
           f"gun={gun_gecti:.1f}/{sure_gun}")
