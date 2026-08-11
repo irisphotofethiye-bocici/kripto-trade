@@ -2134,3 +2134,73 @@ Sisteme hiçbir şey eklenmedi.
 ### Sınır
 "Boğada çalışır" iddiası **hâlâ açık** — bu veride boğa yok. Rejim döndüğünde ölçülebilir;
 o zamana kadar ne doğrulanmış ne çürütülmüş sayılır.
+
+---
+
+## 2026-08-11 — ⚠️ DÜZELTME: "sinyalde bilgi yok" DEDİM, YANLIŞTI
+
+**Kullanıcının sorusu bu düzeltmeyi tetikledi:** *"sonuç olumsuz? ama bizim sisteme göre"* —
+haklı çıktı. Önceki bütün ölçümlerde **bizim** A-stopumuz vardı. Sinyalin kendisi hiç
+mekanikten arınık ölçülmemişti.
+
+### Mekanikten arınık ölçüm (`scratchpad/kanal_ham.py`)
+Stop yok · hedef yok · maliyet yok. Sadece: sinyalden sonra fiyat ne yaptı?
+
+| ufuk | sinyal ham | KONTROL | fark | fark t | sinyal REL | fark REL t |
+|---|---|---|---|---|---|---|
+| 1 bar | +0,099 | +0,009 | +0,090 | **+3,19** | +0,044 | +1,76 |
+| **4 bar** | **+0,243** | +0,035 | **+0,208** | **+3,84** | +0,124 | **+2,31** |
+| 12 bar | +0,146 | +0,061 | +0,085 | +0,90 | +0,003 | −0,12 |
+| 24 bar | −0,119 | −0,045 | −0,074 | −0,55 | −0,085 | +0,12 |
+
+**Sinyal GERÇEK bilgi taşıyor** — ilk ~4 barda, hem ham hem BTC'ye göre, anlamlı.
+12 barda tamamen sönüyor. MFE/MAE de destekliyor: 4 barda sinyal 1,25 oranı, kontrol 1,03.
+
+**Yani "sinyal hiçbir yöne bakmıyor" ifadem YANLIŞTI.** Doğrusu: sinyal bakıyor, ama
+çok kısa mesafeye — ve bizim stopumuz o mesafeyi görmeden kesiyor.
+
+### Stopsuz 4-bar çıkış (`scratchpad/kanal_stopsuz.py`)
+| stop | net % | t | stopa giden | KONTROL | fark | fark t | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|---|---|
+| **stop YOK** | **+0,112** | +3,13 | %0 | −0,066 | +0,179 | +3,32 | +0,247 | −0,023 |
+| 3 × ATR | +0,110 | +3,12 | %3,8 | −0,069 | +0,179 | +3,36 | +0,249 | −0,029 |
+| 2 × ATR | +0,086 | +2,54 | %10,5 | −0,095 | +0,181 | +3,52 | +0,249 | −0,077 |
+| **A-stop (bizim)** | +0,051 | +1,57 | **%26,5** | −0,111 | +0,162 | +3,28 | +0,237 | −0,135 |
+
+**Bizim A-stopumuz işlemlerin %26,5'ini kesiyor ve kenarı +0,112 → +0,051'e düşürüyor
+(anlamlılık kayboluyor).** Kullanıcının sezgisi doğruydu: sonucun bir kısmı bizim sistemimizdi.
+
+Ufuk: 2 bar +0,103 · 4 bar +0,112 · **6 bar −0,036 · 8 bar −0,067** → kenar 4 barda bitiyor.
+
+### ⭐⭐⭐ AMA — kenarın TAMAMI tek bir 10 günlük pencereden geliyor
+| çeyrek | tarih | net % | t | N |
+|---|---|---|---|---|
+| **Q1** | 06-20 → 06-30 | **+0,579** | **+7,91** | 1372 |
+| Q2 | 06-30 → 07-13 | −0,082 | −1,13 | 1380 |
+| Q3 | 07-13 → 07-26 | −0,119 | −1,71 | 1379 |
+| Q4 | 07-26 → 08-09 | +0,074 | +1,07 | 1379 |
+
+İki yarı **anlamlı farklı**: A +0,247 / B −0,023, fark +0,270, **t = +3,76**.
+Yani rastgele dalgalanma değil — kenar gerçekten **sönmüş**.
+
+**Ve Q1 ne dönemi?** BTC'nin **2026-06-19 → 06-25 arasında %6 düştüğü** hafta —
+pencerenin tek keskin satışı.
+
+> **MEKANİZMA:** ortalamaya dönüş **keskin bir çöküş-toparlanma sırasında** çalışıyor.
+> Normal piyasada hiçbir şey. Kenar "vardı ve söndü" değil, **"yalnız V dibinde vardı."**
+
+### Sonuç — üç katmanlı, hepsi doğru
+1. **Sinyal gerçek bilgi taşıyor** (4 bar, kontrolden +0,18 puan, t=+3,3)
+2. **Bizim A-stopumuz o bilgiyi büyük ölçüde yok ediyor** (%26,5 stop, anlamlılık kaybı)
+3. **Ama kenar tek bir çöküş episoduna ait** — Q2/Q3/Q4'te yok. Ön-kayıtlı ölçütün
+   "her iki yarıda pozitif" şartı bu yüzden düşüyor.
+
+**Karar değişmedi (KALDI) ama GEREKÇE değişti.** Eski gerekçe "sinyal boş" idi — yanlıştı.
+Doğru gerekçe: **sinyalin kenarı gerçek ama rejime bağlı ve dayanıksız; normal piyasada yok.**
+
+### Bunun bize öğrettiği (stratejiden bağımsız)
+**Her sinyal, kapı ölçümünden ÖNCE mekanikten arınık ölçülmeli.** Aksi hâlde bizim
+stopumuzun öldürdüğü bir kenarı "sinyal boş" diye kaydederiz. Bu oturumda tam bunu yaptım.
+Bu ders A+B ve MA50+ucuz kapıları için de geriye dönük uygulanabilir — onlar ham ölçümle
+(yön avı) bulunmuştu, yani şanslıyız; ama gelecekteki adaylar için sıra bu olmalı:
+**ham ileri getiri → mekanik → portföy.**
