@@ -2365,3 +2365,85 @@ Bir hücrenin N'i büyük görünse bile **kaç ayrı sembolden geldiği** sayı
 `N=113 ama 8 sembol` ile `N=113 ve 90 sembol` aynı kanıt değildir.
 Bu, A+B kapısı için de not edilmişti ("olaylar 15 sembolde kümeleniyor") — artık
 **her ölçümde standart sütun** olmalı.
+
+---
+
+## 2026-08-11 — SİSTEM DENETİMİ: 9 doğrulanmış hata (rapor: `denetim-raporu.md`)
+
+**Gerekçe:** bu oturumda arka arkaya üç ölçüm hatası tesadüfen yakalandı (birim hatası
+`tbv/qv`, yarı-örneklem `0.00` gösterimi, kümelenmeyle şişen `t=+4.01`). Sistematik tarama
+yapılmamıştı. Keşif üç paralel Explore ajanına dağıtıldı (bağlam şişmesin diye), her bulgu
+sonra **elle doğrulandı ve sayısallaştırıldı**. Doğrulama betiği: `scratchpad/denetim_olcum.py`.
+
+### Doğrulanan bulgular
+
+| # | bulgu | yer | ciddiyet | zarar verdi mi |
+|---|---|---|---|---|
+| 1 | **Düşüş freni açık pozisyonları görmüyor** | `testbot.py:1396-1402` | 🔴 YÜKSEK | koruma çalışmıyor |
+| 2 | Maliyet %0,09 (betikler) vs %0,13 (canlı) | 11 betik | 🟠 ORTA | tüm geçmiş sayılar iyimser |
+| 3 | Kapanmamış mum göstergelere dahil | `radar.py:91,97-107` | 🟠 ORTA | evet, canlı seçim bozuk |
+| 4 | TP1 sonrası likidasyonda marjin çift sayımı | `testbot.py:703` | 🟠 ORTA | hayır (0 likidasyon) |
+| 5 | A+B kapısı MA50+ucuz'u gölgeliyor | `testbot.py:392-443` | 🟡 DÜŞÜK | karne yanlış |
+| 6 | Gölge `zorla=True` canlı kuralları atlıyor | `golge.py:116` | 🟡 DÜŞÜK | henüz hayır |
+| 7 | ATR: Wilder (canlı) vs basit ortalama (~20 betik) | `olcucu.py:89` | 🟡 DÜŞÜK | kısmen |
+| 8 | Toplam maruziyet tavanı yok | — | 🟡 DÜŞÜK | 1 ile birlikte önemli |
+| 9 | Kapanan turda funding atlanıyor | `testbot.py:896-899` | 🟢 ÖNEMSİZ | 6 $ |
+
+### ⚠️ 1 NUMARA — bugünkü S9 kararını doğrudan etkiliyor
+Fren yalnız `st["equity"]`'ye bakıyor. `acik_pnl_toplam` (`:1319`) **var** ama sadece log
+(`:1423`) ve `--durum` (`:1459`) çıktısında; hiçbir karar dalında değil. Ayrıca fren
+`yonet_acik_pozisyonlar`'dan **önce** çalışıyor (bir tur geç), ve `hedef_risk`/`marjin` de
+aynı gerçekleşmiş equity'ye dayanıyor (açık zarar büyürken boyut küçülmüyor).
+
+Canlı ölçüm:
+```
+frenin gördüğü equity  :  8.401 $  (düşüş %0,1)
+toplam açık notional   : 21.889 $  = sermayenin 2,61 KATI
+%10 aleyhe senaryo     : gerçek 6.212 $ (−%26) ama fren hâlâ 8.401 görür -> TETİKLENMEZ
+```
+**Bugün riski %3→%1,5 indirdim, gerekçe "fren tetiklenmesin, bot hayatta kalsın" idi.
+O hesap frenin ÇALIŞTIĞINI varsayıyordu.** `fren_riski.py` simülasyonu de gerçekleşmiş
+equity üzerinden modelledi — yani simülasyon canlıya *sadık*, ama **ikisi de gerçek ruin
+riskini olduğundan az gösteriyor**: hesap, fren görmeden açık pozisyonlarla yok olabilir.
+
+### Sayısallaştırmalar
+- **Bulgu 2:** A+B +2,29 → **+2,25** · MA50+ucuz +0,82 → **+0,78** · birleşim +1,09 → **+1,05**
+  (işaret değişmiyor, kenar %3,7 küçülüyor). `gainer_*` betiklerindeki `0.04R` varsayımı
+  stop %0,5'te gerçek 0,26R → **6,5 kat** hata.
+- **Bulgu 3:** `vol_x >= 2` eşiğini geçen olay oranı — dakika 5'te **%0,3**, dakika 59'da
+  %14,6, kapanmış barda **%15,0**. Aynı coin saatin 5'inde elenip 55'inde geçiyor (**50 kat**).
+- **Bulgu 5:** MA50 kapısının gerçek katkısı 445 olay, karnede 384 → **%14 eksik** sayılıyor
+  (61 olay ikisini birden sağlıyor, hepsi A+B etiketli).
+- **Bulgu 6:** gölge LONG'ların stopu hesaplanabilenlerin **hiçbiri** %2 altında değil
+  (min %2,19) → çelişki ilkesel, pratikte henüz ısırmamış. blowoff SHORT'ta 3'te 1.
+- **Bulgu 7:** Wilder/basit oranı medyan 1,015 ama **vakaların %39'unda fark >%10**.
+
+### ⭐ Kümelenme — beklediğimden İYİ çıktı
+Bugün LONG hücresinde (N=113 ama 8 sembol) yakalanan sorun **canlı kapılarda yok**:
+
+| kapı | N | ayrı sembol | olay/sembol | en sık 5'in payı |
+|---|---|---|---|---|
+| A+B | 193 | **78** | 2,5 | %17 |
+| MA50+ucuz | 445 | **119** | 3,7 | %21 |
+| birleşim | 577 | **158** | 3,7 | %16 |
+
+Canlı kapılar makul dağılmış. Yine de **"kaç ayrı sembol" sütunu artık standart** olmalı —
+41 betikten yalnız 2'si sayıyordu.
+
+### TEMİZ çıkanlar (kontrol edildi, sorun yok)
+Zaman dilimi hizası (ampirik doğrulandı, kayma 0) · kline alan indeksleri · funding/OI
+ölçekleri · stop aday listesinin test-canlı uyumu (3×ATR koşulu dahil) · look-ahead yok ·
+R hesabı gerçekleşen riski kullanıyor.
+*(Kırılganlık notu: arşiv damgaları tz taşımıyor — makine saat dilimi değişirse sessizce bozulur.)*
+
+### KARAR BEKLİYOR
+Açık pencere (138 işlem / 30 gün) ön-kaydı *"hiçbir parametreye dokunulmaz"* diyor.
+Bulgu 1, 3, 4, 5 kod düzeltmesi ama yine de davranışı değiştirir → pencereyi geçersiz kılar.
+Seçenekler: **(a)** pencere dolsun sonra düzelt · **(b)** yalnız freni düzelt, pencere yeniden ·
+**(c)** hepsi + pencere yeniden.
+Bot kağıt üstünde olduğu için (a) savunulabilir. **Gerçek paraya geçilmeden 1 numara
+mutlaka düzeltilmeli.**
+
+### Denetimin sınırı
+Statik okuma + hedefli doğrulama; her satır çalıştırılmadı. Denetlenmeyen alanlar:
+`panel_sunucu.py`, nöbetçi/alarm katmanı, Telegram, harici sağlayıcılar (CoinGecko/Apify/Coinalyze).
