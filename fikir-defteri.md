@@ -1603,3 +1603,86 @@ spekülatif). Rejim değişince ilişki **dönebilir** — boğada ucuz coinler 
 Ham fiyat eşiği zamanla kayar; yeniden ölçülmeden yıllarca bırakılmamalı.
 Ölçümün 46 gününün tamamı AYI/NOTR.
 **GERİ ALMA:** `ma50_kapisi_acik: 0`. Config yedeği: `kripto-config.json.yedek-2026-08-11`.
+
+---
+
+## 2026-08-11 — BOT İŞLEM AÇIYOR: ilk parti + ÖLÇÜMÜN AĞIRLIK HATASI
+
+**Durum:** iki SHORT kapısı canlıda; 9 saatte **7 kapanış + 2 açık**. Beklenen hız
+(12,5 olay/gün) tutuyor — 18 günde 4 giriş yapan bot bitti.
+
+| ts | sym | kapı | stop% | R | sonuç $ | tutuş |
+|---|---|---|---|---|---|---|
+| 03:38 | PROM | A+B | 1.36 | −1.05 | −149.83 | 0.1s |
+| 04:03 | WLFI | MA50+ucuz | 0.42 | −1.18 | −30.28 | 0.1s |
+| 04:53 | SQD | MA50+ucuz | 3.96 | −1.02 | −274.51 | 0.4s |
+| 09:13 | SQD | MA50+ucuz | 5.44 | −1.01 | −264.71 | 0.3s |
+| 09:28 | PROM | A+B | 4.60 | −1.02 | −265.37 | 0.9s |
+| **10:23** | **AIOT** | **MA50+ucuz** | **3.96** | **+2.55** | **+333.02** | **2.7s** |
+| 11:33 | JST | A+B | 1.23 | −1.06 | −80.28 | 1.5s |
+
+**Toplam −731,96 $.** Equity 8415 (zirve 10000 → düşüş **−%15,9**; HALT eşiği −%25).
+Eski dönemin 12 işlemi ayrıca −803 $ (kapılar öncesi).
+
+### 1) İlk parti ölçümle çelişiyor mu? — HAYIR
+Ölçümün isabet oranı %30,0. 7 denemede **tam 1 kazanç olasılığı %24,7**; 1 veya daha az
+**%33,0**. Beklenen 2,1/7. Yani bu sonuç dağılımın tam ortasında; ne doğrular ne yalanlar.
+**Ayırt etmek için gereken:** 2 standart hata güveni ≈ **138 işlem ≈ 11 gün**;
+3 SH ≈ 310 işlem ≈ 25 gün. Erken karar vermek yasak.
+
+### 2) ⚠️ ÖLÇÜMÜN AĞIRLIK HATASI — düzeltme
+Ölçüm her olayı **eşit notional** ile topluyordu ("olay başına net %"). Bot ise
+**risk-önce** boyutlandırıyor: `notional = risk/stop_frac` → **dar stop = büyük pozisyon**.
+Bunlar aynı portföy değil. Kaldıraç tavanı (`marjin×kaldirac_max` = sermayenin 1,0 katı)
+yüzünden canlı, ikisinin **melezi**.
+
+| Küme | N | A eşit-notional | B saf risk-önce | **C CANLI** | C: A yarı | C: B yarı |
+|---|---|---|---|---|---|---|
+| A+B | 193 | +2.29 | +1.69 | **+1.37** | +1.43 | +1.31 |
+| MA50+ucuz | 445 | +0.82 | +0.48 | **+0.41** | +0.60 | +0.25 |
+| **BİRLEŞİM** | **577** | **+1.09** | +0.66 | **+0.58** | +0.70 | +0.49 |
+| KONTROL (tüm olaylar SHORT) | 6790 | −0.05 | −0.84 | **−0.14** | −0.21 | −0.08 |
+
+**Dün "+%1,09 / olay" dedim; botun gerçek boyutlandırmasıyla doğrusu +%0,58.**
+Kenar hâlâ var (kontrol −0,14; iki yarı da pozitif) ama **yarı yarıya küçük**.
+
+### 3) Kârı yalnız GENİŞ stoplu işlemler taşıyor — ve bot onları KÜÇÜK alıyor
+
+| stop dilimi | N | isabet | başabaş gereken | eşit-not % | CANLI % | ort boyut |
+|---|---|---|---|---|---|---|
+| < %1.92 | 145 | %10.3 | ~%16 | −0.06 | **−0.06** | **1.00** |
+| %1.92–3.40 | 144 | %20.1 | ~%21 | +0.27 | +0.27 | 0.98 |
+| %3.40–5.51 | 144 | %33.3 | ~%30 | +1.27 | +0.92 | 0.70 |
+| > %5.51 | 144 | %56.2 | ~%44 | +2.89 | **+1.19** | **0.40** |
+
+İsabet monoton artıyor ve mekanik gerekçesi var: **dar A-stop = direnç hemen tepede,
+gürültü teğet geçiyor**; geniş stop = yapı gerçekten uzakta. Dar dilim başabaşın altında
+kalıyor → matematiksel olarak kaybediyor.
+**Ters ağırlık:** kaldıraç tavanı yüzünden bot değersiz dar-stop işlemini sermayenin
+**1,00 katıyla**, kârlı geniş-stop işlemini **0,40 katıyla** alıyor. Boyutlandırma
+edge'in tam tersine bakıyor. Canlıdaki WLFI'nin **%0,42 stopu** ölçüm dağılımının
+**0. yüzdeliği** — 46 günde eşi görülmemiş bir darlık.
+
+### 4) ELE mi GENİŞLET mi? — ELE
+
+| taban | ELE: N | olay/gün | net % | A yarı | B yarı | toplam | GENİŞLET: net % | toplam |
+|---|---|---|---|---|---|---|---|---|
+| %0.0 (bugünkü) | 577 | 12.5 | +0.58 | +0.70 | +0.49 | +334 | +0.58 | +334 |
+| %1.5 | 482 | 10.5 | +0.68 | +0.70 | +0.67 | +329 | +0.52 | +300 |
+| **%2.0** | **423** | **9.2** | **+0.78** | **+0.64** | **+0.89** | **+330** | +0.59 | +341 |
+| %2.5 | 372 | 8.1 | +0.87 | +0.81 | +0.91 | +322 | +0.60 | +346 |
+| %3.0 | 321 | 7.0 | +0.92 | +0.94 | +0.90 | +294 | +0.59 | +342 |
+
+**GENİŞLET işe yaramıyor** — ve sebebi bu oturumun ana dersinin aynısı: stopu %2,0'a itmek
+isabeti %11,0 → %13,6 çıkarıyor ama başabaşı %12,1 → %16,7 çıkarıyor. **Başabaş isabetten
+hızlı büyüyor.** ("Kovalama tuzağı"nın stop tarafındaki hâli.)
+
+**ELE doğru:** %2,0 tabanında olay başına getiri **+0,58 → +0,78**, toplam kâr neredeyse
+aynı (+334 → +330), işlem sayısı **%27 azalıyor**. Yani atılan işlemler net sıfır üretiyor
+ama ücret, kayma ve **pozisyon slotu** yiyor.
+**Seçim gerekçesi (ön-kayıt uyarınca tablonun maksimumu DEĞİL):** %2,0, isabetin
+başabaşın *altında* kaldığı bölgenin sınırı — mekanik olarak savunulabilir tek çizgi.
+%2,5 daha yüksek getiri veriyor ama gerekçesi tabloya bakmak olurdu.
+
+**SINIR:** aynı 46 gün, aynı rejim (AYI/NOTR), aynı olay havuzu — bu bir *yeniden ağırlıklandırma*,
+bağımsız doğrulama değil. Kapının kendi kenarı hâlâ 138 işlem bekliyor.
