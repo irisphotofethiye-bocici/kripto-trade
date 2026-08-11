@@ -2523,3 +2523,61 @@ o pencere **GEÇERSİZ**. Yeni ön-kayıt:
 **dokunulmadı**. Beklenti maliyet düzeltmesiyle **+%1,09 → +%1,05** / olay.
 
 **Pencere boyunca kural yine aynı:** parametre değişmez, kapı eklenmez, eşik oynatılmaz.
+
+---
+
+## 2026-08-12 — TARAMA CADENCE'İ: 10 dk (kazara) → 7,5 dk (kararlı)
+
+**Nasıl fark edildi:** kullanıcı "sistem tarama çalışıyor mu" diye sordu. Görevlerin
+hepsi sağlıklıydı (`Sonuç: 0`, dünkü `267014` ölümleri gitmiş), ama tur aralıkları
+**5 değil 10 dakika** çıktı.
+
+**Sebep — 11 saniyelik fark:**
+```
+tur suresi   : 311 saniye (5 dk 11 sn)
+tetikleyici  : 5 dakika
+MultipleInstances = IgnoreNew  ->  tur hala kosarken gelen tetik ATLANIR
+sonuc: efektif cadence 10 dakika, üstelik KARARSIZ (bazen 5, bazen 10)
+```
+
+### Denenen ama İŞE YARAMAYAN optimizasyon (dürüstlük kaydı)
+`acik_pnl_toplam` her pozisyon için ayrı ticker çağırıyordu ve cycle içinde iki yerde
+çalışıyordu → 6 pozisyonda 12 gereksiz istek. Tek `/fapi/v1/ticker/price` çağrısına
+indirdim (731 sembol, 0,57 sn) + equity logu önbelleklenmiş değeri kullanıyor.
+**Ölçülen API kazancı ~5,5 sn — ama tur süresi 308 → 311 sn, yani DEĞİŞMEDİ.**
+Darboğaz fiyat çağrıları değil, **150 sembollük tarama turu.**
+Optimizasyon yine de tutuldu: daha az istek = daha az hız-limiti riski (11 Ağustos'ta
+toplu indirme turları öldürtmüştü).
+
+### Uygulanan: tetik 5 dk → **7,5 dk**
+Kullanıcı sordu: *"7,5 dakikaya ayarla, çakışmayı önler ama bizi kör eder mi?"*
+
+**Kör etmiyor — ve bunun sebebi kodda:** `testbot.py:903`
+```python
+bars = klines_since(pos["sym"], "1m", to_ms(son_ts))
+for b in bars:  ...stop / likidasyon / TP1 / TP2 her 1 dakikalık bar için
+```
+Çıkışlar, son kontrolden bu yana geçen **tüm 1 dakikalık barlar geri oynatılarak**
+tespit ediliyor. Stop 3. dakikada tetiklendiyse tur 7,5 dk sonra koşsa bile **o barın
+fiyatından** kapanıyor. Geciken şey fiyat değil, kaydın deftere düşme anı.
+`limit=500` → 500 dakikalık boşluğa kadar tolerans.
+
+| | önce | sonra |
+|---|---|---|
+| gerçek cadence | 10 dk (kararsız) | **7,5 dk (kararlı)** |
+| çıkış fiyatları | doğru | doğru |
+| yeni giriş tespiti | ≤10 dk gecikme | **≤7,5 dk** |
+| tur payı | 5:11 / 10:00 | 5:11 / 7:30 (2:19 boşluk) |
+
+**Yani körlüğü azalttı.** 10 dakika bir tercih değil, kazara oluşmuş bir durumdu.
+Doğrulama: 00:48:43 → 00:56:23 = **7,7 dk**. Görev bilgisi: son 00:43:42, sonraki
+00:51:11 = 7,48 dk. `ExecutionTimeLimit` PT10M kaldı (uzun tur öldürülmesin,
+sadece sonraki tetik atlansın).
+
+### Kalan sınır
+Tur 5:11 sürüyor ve bunun tamamı **150 sembollük tarama**. Havuzu küçültmek cadence'i
+5 dakikaya indirirdi ama **botun ne gördüğünü değiştirir** — ölçüm penceresi açıkken
+yapılmadı. Pencere sonrası bakılacak.
+
+**PENCERE SIFIRLANDI** (cadence botun gördüğü fırsat sayısını değiştirir):
+zirve 8698,11 → **8381,06** (efektif equity). Equity ve işlem geçmişi dokunulmadı.
