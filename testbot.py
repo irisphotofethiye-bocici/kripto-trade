@@ -766,7 +766,12 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
     #   NOT: risk_usdt BILEREK degistirilmiyor — R, GIRISTE hedeflenen riske gore olculur;
     #   kalan yarinin R'sinin ~yari cikmasi dogru muhasebedir.
     pos["marjin"] = round(pos["marjin"] / 2.0, 2)
-    pos["stop"] = pos["giris"]  # breakeven'e cek
+    # [2026-08-11] Sabit-hedef pozisyonlarda stop BASABASA CEKILMEZ. Olculdu (577 olay):
+    #   kismi sonrasi stop ayni kalirsa +0.274, basabasa cekilirse +0.261 — cekmek
+    #   kalan yarinin nefes alanini oldurup hedefe varmadan susturuyor.
+    #   Diger (klasik) cikis modlarinda eski davranis aynen korunur.
+    if pos.get("cikis_modu") != "sabit_hedef":
+        pos["stop"] = pos["giris"]  # breakeven'e cek
     pos["tp1_alindi"] = True
     # kismi realize kaydi (2026-07-06): TP1 karlari log disinda kaliyordu -> karne ~$59 kari gormuyordu.
     # kismi=true satirlari islem SAYILMAZ (win-rate/R disi) ama toplam PnL'e dahil edilir.
@@ -1137,11 +1142,33 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     ab_hedef = evren.esik("ab_sabit_hedef_pct", 10.0)
     if ab_hedef > 0 and str(sebep).startswith(SABIT_HEDEF_KAPILARI):
         pos["cikis_modu"] = "sabit_hedef"
-        pos["tp1_alindi"] = True                     # kismi kar yolu kapali
         pos["tp2"] = round(giris_ef * (1 - ab_hedef / 100) if yon == "SHORT"
                            else giris_ef * (1 + ab_hedef / 100), 6)
-        pos["tp1"] = pos["tp2"]
         pos["sabit_hedef_pct"] = ab_hedef
+        # --- KISMI KAR (2026-08-11, kullanici karari) -----------------------------------
+        # [NE] Hedefin `kismi_pay` kadarina gelince pozisyonun YARISI satilir, kalan yari
+        #   ayni stop ve ayni %10 hedefle devam eder. kismi_pay=0 -> kapali (eski davranis).
+        # [OLCUM] 577 canli-kapi olayi, hedef %10/72s, Wilder ATR, maliyet %0.13.
+        #   Sermaye getirisi (islem basi): kismi YOK +0.301 · %60 +0.280 · %40 +0.274 ·
+        #   %50 +0.270 · %30 +0.205.  YANI KISMI KAR OLCUMDE KENARI KUCULTUYOR.
+        #   Mekanizma: hedefe ULASMA orani DEGISMIYOR (%29.1 ikisinde de), ama kazanan
+        #   islemde kazancin ~%30'u kesiliyor; kaybedende zarar kapaniyor. Bu kapida
+        #   kazananlar kaybedenlerden buyuk oldugu icin takas zararina.
+        # [YINE DE ACILDI] Kullanici karari: tek islem bazinda kar korumasi ve dalgalanma
+        #   dusuklugu icin kenarin bir kismindan bilerek vazgecildi (%30'da ~%32'si).
+        # [STOP] Kismi sonrasi stop BASABASA CEKILMEZ — olculdu: cekilirse +0.274 -> +0.261.
+        #   pozisyon_kismi_tp1 bunu cikis_modu'na bakarak ayirt eder.
+        # GERI ALMA: kripto-config.json -> esikler.kismi_pay: 0
+        pay = evren.esik("kismi_pay", 0.0)
+        if pay > 0:
+            kismi_pct = ab_hedef * pay
+            pos["tp1"] = round(giris_ef * (1 - kismi_pct / 100) if yon == "SHORT"
+                               else giris_ef * (1 + kismi_pct / 100), 6)
+            pos["tp1_alindi"] = False                # kismi kar yolu ACIK
+            pos["kismi_pay"] = pay
+        else:
+            pos["tp1_alindi"] = True                 # kismi kar yolu kapali
+            pos["tp1"] = pos["tp2"]
     if olc_override:
         pos["stop_elle"] = True
     st["sonraki_id"] += 1
