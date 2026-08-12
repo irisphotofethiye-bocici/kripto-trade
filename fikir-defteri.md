@@ -2997,3 +2997,56 @@ kazancı keser."* Dar stoplu işlemde 1,5R çok erken bir seviye — pozisyonun 
 %10 hedefe gitme şansını hiç kullanamadan kapanıyor. Ama dar stop aynı zamanda
 **büyük pozisyon** demek (risk-öncelikli boyutlandırma), yani erken kâr almanın
 dalgalanma faydası bu hücrede en yüksek. Bu yüzden emin değilim.
+
+### SONUÇ — 1,5R kuralı KALDI (geçme ölçütünü sağlayamadı)
+
+Koşturuldu: `scratchpad/kismi_15r.py`, 2 yıl, 566 sembol.
+
+**ÖNEMLİ DÜZELTME (koşturma sırasında):** ilk turda `asgari_stop_pct` kapısı
+uygulanmamıştı; ölçülen 34.084 olayın **%71'i canlıda zaten reddedilecek** (stop < %2)
+işlemlerdi. Canlı popülasyona daraltıldı: **N=13.951, 510 sembol, stop medyanı %3,27**
+(canlı açık pozisyonlarla uyumlu). Aşağıdaki her sayı bu daraltılmış evrenden.
+
+Ayrışma bandı gerçek boyutu: `%2,0 ≤ stop < %2,67` → **canlı girişlerin %30'u.**
+
+#### Asıl test — dar stop alt kümesi (N=4.195)
+
+| kural | sermaye/işlem | kısmi değdi | A yarısı | B yarısı |
+|---|---|---|---|---|
+| A) kısmi YOK | **+0,038** | 0% | +0,057 | +0,021 |
+| B) sabit %40 (niyet edilen) | +0,005 | 38% | −0,002 | +0,011 |
+| C) MEVCUT (yakın olan) | **−0,011** | 41% | −0,016 | −0,006 |
+| D) saf 1,5R | −0,011 | 41% | −0,016 | −0,006 |
+
+**Ölçüt 1 (C, B'yi yenmeli): HAYIR** — C, B'nin 0,016 altında. Pencere burada kapandı.
+Ölçüt 2: iki zaman yarısında da C daha kötü (tutarlı, ama B lehine).
+Ölçüt 3: NÖTR ve AYI'da C daha kötü; BOĞA'da 0,005 daha iyi ama N=295 (hüküm yok).
+Ölçüt 4: `t_kume` C −0,10 / B +0,05 — ikisi de sıfırdan ayrılmıyor.
+
+#### Beklenti tuttu, ama asıl bulgu daha büyük
+
+Beklentim "1,5R kaybettirir" idi — **doğru çıktı.** Ama asıl örüntü, kısmi kârın
+**erkenliğinde monoton**:
+
+| | tüm olaylar | dar stop | geniş stop |
+|---|---|---|---|
+| 1,0R | +0,018 | −0,029 | +0,039 |
+| 1,5R | +0,041 | −0,011 | +0,064 |
+| 2,0R | +0,050 | +0,008 | +0,068 |
+| 3,0R | +0,065 | +0,036 | +0,077 |
+| **kısmi YOK** | **+0,065** | **+0,038** | **+0,076** |
+
+Kısmi kâr ne kadar erken alınırsa o kadar kaybettiriyor; 3,0R zaten kısmiye ancak
+%13 değdiği için "kısmi yok" ile aynı yere geliyor. **Altıncı kez aynı kural:
+"iyi girişte sıkı çıkış kazancı keser."**
+
+#### KARAR
+1,5R ezmesi **kaldırılmalı** — ama `kismi_kar_r = 0` GÜVENLİ DEĞİL: SHORT'ta
+`tp_r = giriş − 0×risk = giriş` olur, `max(yapısal, giriş)` girişin kendisini seçer
+ve TP1 anında tetiklenir. Doğru onarım kod tarafında: `tp1_efektif_hesapla` çağrısı
+`cikis_modu == "sabit_hedef"` pozisyonlarda **atlanmalı** (klasik çıkış modları
+1,5R'yi korur — orada yapısal TP1 2,6–5,2R uzakta ve hiç tetiklenmiyordu, 2026-07-04).
+
+Kısmi kârın kendisi (%40) kapatılmıyor: kullanıcı 2026-08-11'de bunun kenarı
+küçülttüğünü **bilerek** kabul etmişti (tek işlem bazında kâr koruması). Bu ölçüm o
+kararı değiştirmiyor, yalnızca **ayarın sözünü tutmasını** sağlıyor.

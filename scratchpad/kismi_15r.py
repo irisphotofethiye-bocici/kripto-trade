@@ -226,6 +226,16 @@ def main():
         o["_sp"] = r[2] if r else None
     olay = [o for o in olay if o["_sp"]]
 
+    # [DUZELTME 2026-08-12] CANLI POPULASYON: asgari_stop_pct kapisi stop'u dar olan
+    # girisleri ZATEN REDDEDIYOR (testbot: "stop_cok_dar"). Onu uygulamazsak olculen
+    # evrenin buyuk kismi botun hic acmayacagi islemlerden olusur ve ayrisma bandi
+    # oldugundan cok genis gorunur. Varsayilan canliyla ayni: %2.0.
+    ASGARI = float(os.environ.get("ASGARI_STOP", "2.0"))
+    ham = len(olay)
+    olay = [o for o in olay if o["_sp"] >= ASGARI]
+    print(f"\nASGARI STOP KAPISI %{ASGARI:.2f} (canli ayar) -> {ham} olaydan "
+          f"{len(olay)} kaldi (%{len(olay)/ham*100:.0f})", flush=True)
+
     print("\n" + "=" * 118)
     print("ESKI 1.5R KISMI KURALI LEHIMIZE MI? — 2 yillik sinav")
     print("=" * 118)
