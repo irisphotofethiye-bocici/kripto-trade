@@ -2734,3 +2734,70 @@ olmadan kapı zayıflar. **Yanılırsam kayda geçsin.**
 ### İşletim notu
 Dün 2 yıllık mum indirmesi (~215 istek/dk) botun turlarını **3 saat öldürmüştü.**
 Bu indirme ~1.700 istek ve **~66 istek/dk** hızla yapılacak (üçte bir). Bot izlenecek.
+
+### SONUÇ — A+B'nin funding bacağı: **KALDI, ama MA50'den kökten farklı biçimde**
+
+`scratchpad/ab_funding_2yil.py` · **14.599 sinyal · 523 ayrı sembol** · 2 yıl · funding
+geçmişi 567/567 sembol indirildi (52 dk, ~66 istek/dk — bot boyunca sağlıklı kaldı)
+
+| küme | N | sermaye% | t | isabet | stop~ | A yarısı | B yarısı |
+|---|---|---|---|---|---|---|---|
+| **funding ≤ −0,05** | 14599 | **+0,111** | **+4,68** | %20,9 | 2,40 | +0,081 | +0,140 |
+| KONTROL rastgele | 12095 | +0,003 | +0,10 | %13,4 | 1,52 | +0,022 | −0,034 |
+| **FARK** | | **+0,108** | | | | | |
+
+**Rejime göre — kontrolü ÜÇ REJİMDE DE yeniyor, hem de tutarlı biçimde:**
+
+| rejim | N | sinyal | KONTROL | **fark** |
+|---|---|---|---|---|
+| BOĞA | 558 | −0,030 | −0,123 | **+0,093** |
+| NÖTR | 11228 | +0,139 | +0,025 | **+0,114** |
+| AYI | 2729 | +0,021 | −0,083 | **+0,104** |
+
+Farkın üç rejimde de +0,09…+0,11 bandında olması dikkate değer — tek bir dönemin
+artığı değil.
+
+### ⚠️ KÜME-DAYANIKLI TEST — ham t şişmiş
+`t = +4,68` sembol içi korelasyonu yok sayıyor. Her **sembolü tek gözlem** sayarak
+tekrar ölçtüm (455 sembol ortalaması üzerinden):
+
+| küme | sembol | ort % | t |
+|---|---|---|---|
+| funding ≤ −0,05 | 455 | +0,058 | **+1,58** |
+| KONTROL | 533 | −0,018 | −0,51 |
+| **FARK** | | **+0,076** | **+1,51** |
+
+Sembol düzeyinde: BOĞA +0,012 (t=0,09) · NÖTR +0,080 (t=1,76) · AYI −0,037 (t=−0,54).
+
+**Yani doğru yöne bakıyor ama |t| < 2 — kanıtlanamıyor.**
+
+### ÖN-KAYITLI ÖLÇÜT: KALDI
+1. net > 0 → **EVET** (+0,111)
+2. kontrolü yener → **EVET** (+0,108)
+3. iki zaman yarısı + → **EVET** (A +0,081 / B +0,140)
+4. BOĞA ve AYI'da çökme yok → **HAYIR** (boğa −0,030)
+
+**Dördüncü şart düştü.** Ölçütü şimdi gevşetmek kale direğini oynatmak olur — düşürdü.
+*Kayda geçsin: "çökme yok" diye yazmıştım, kodda `> 0` diye uyguladım. Boğa hücresi
+N=558, t=−0,26 — bu bir çöküş değil, sıfır etrafında gürültü, üstelik kontrolü +0,093
+yeniyor. Ölçüt kaba tanımlanmıştı. Ama tanımı sonradan değiştirmiyorum.*
+
+**Beklentim** ("kararsızım, hafif pozitife meyilliyim") **tuttu** — pozitif çıktı ama
+kanıtlanamadı.
+
+### ⭐ İKİ KAPI ARTIK EŞİT DEĞİL — asıl çıktı bu
+
+| | MA50+ucuz | A+B (funding bacağı) |
+|---|---|---|
+| 2 yıl sonucu | **−0,079 (t=−4,05)** | **+0,111 (t=+4,68)** |
+| küme-dayanıklı | negatif | +0,076 (t=+1,51) |
+| rejimler | **üçü de negatif** | **üçünde de kontrolü yeniyor** |
+| popülasyon uyumu | stop %1,3 (canlı %3,4) — **uzak** | stop %2,4 (canlı ~%3) — **yakın** |
+| verdikt | **ÇÜRÜTÜLDÜ** | **kanıtlanamadı, çürütülmedi** |
+
+**MA50+ucuz reddedildi. A+B askıda.** İkisi aynı torbaya konamaz.
+
+### Sınırlar
+- **oi24 bacağı yok** (OI geçmişi ~30 gün). Arşivde kesişim funding-tekliden **1,4 kat**
+  güçlüydü (+0,375 vs +0,259R) → canlı kapı ölçtüğümden **iyi olabilir**
+- Yeniden üretim canlı evrenin birebir aynısı değil (radar skor sıralaması yok)
