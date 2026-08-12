@@ -86,6 +86,9 @@ def _durum_json():
         "kullanilan_marjin": kullanilan_marjin,
         "serbest_bakiye": round(st["equity"] - kullanilan_marjin, 2),
         "toplam_notional": round(sum(a["notional"] for a in acik), 2),
+        # AYNA DEFTERI (2026-08-12): botun girislerinin birebir kopyasi; kullanici
+        # "kapatirdim" dedikce ayrisir. Fark yalnizca CIKIS kararindan gelir.
+        "ayna": _ayna_ozet(),
         "acik_pozisyonlar": acik, "son_islemler": islemler[-200:],
         "equity_serisi": equity_serisi[-2000:],
         "karne": {
@@ -841,11 +844,34 @@ def _kontrol(eylem, arg=None):
             if not px:
                 return False, "Anlık fiyat alınamadı, kapatma yapılmadı."
             testbot.pozisyon_kapat(st, pos, px, "PANEL_MANUEL")
+            # [ONARIM 2026-08-12] pozisyon_kapat defteri yazar ve equity'yi gunceller ama
+            # pozisyonu LISTEDEN CIKARMAZ (cikarmayi yonet_acik_pozisyonlar'daki 'kalanlar'
+            # yeniden kurulumu yapar). Panelden kapatinca o yeniden kurulum HIC calismadigi
+            # icin pozisyon acik kaliyor -> sonraki tur ayni pozisyonu BIR KEZ DAHA kapatiyor:
+            # cift defter kaydi + cift PnL. Ayni hata golge defterde 2026-08-11'de FIILEN
+            # gerceklesti (BANANAS31, 314$ sapma). benim.py:165 dogru surumu zaten iceriyordu.
+            st["acik_pozisyonlar"] = [p for p in st["acik_pozisyonlar"]
+                                      if p["sym"] != pos["sym"]]
             testbot._save_state(st)
         finally:
             testbot._kilit_birak()
         _iz_yaz({"eylem": "pozisyon_kapat", "anahtar": str(arg).upper(), "eski": "acik", "yeni": "kapali"})
         return True, f"{str(arg).upper()} pozisyonu kapatıldı (sebep: PANEL_MANUEL)."
+
+    # AYNA DEFTERI (2026-08-12): "ben burada kapatirdim". BOTA DOKUNMAZ — botun ayni
+    # pozisyonu kendi kaderini yasamaya devam eder, karsilastirma ancak boyle olur.
+    if eylem == "ayna_kapat":
+        if not arg:
+            return False, "Hangi pozisyon? (sembol gerekli)"
+        try:
+            import ayna
+        except Exception as e:
+            return False, f"Ayna defteri yuklenemedi: {e}"
+        ok, mesaj = ayna.kapat(arg)
+        if ok:
+            _iz_yaz({"eylem": "ayna_kapat", "anahtar": str(arg).upper(),
+                     "eski": "acik", "yeni": "ELLE_KAPAT"})
+        return ok, mesaj
 
     return False, f"Bilinmeyen eylem: {eylem}"
 
@@ -908,6 +934,35 @@ def _kafa():
         # bu olabilir, o yuzden sayfada gorunur.
         "sure": _sure_durumu(st),
     }
+
+
+def _ayna_ozet():
+    """Ayna defteri: acik pozisyonlar (canli fiyatla), equity ve bot ile ESLESMIS
+    kapanislarin karnesi. Ayna yoksa/bozuksa None -> panel bozulmaz."""
+    try:
+        import ayna
+        st = ayna.yukle()
+        if not st:
+            return None
+        acik = []
+        for p in st["acik_pozisyonlar"]:
+            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+            isaret = 1 if p["yon"] == "LONG" else -1
+            acik.append({**p, "anlik_fiyat": px,
+                         "acik_pnl": round((px - p["giris"]) * p["miktar"] * isaret, 2)})
+        try:
+            eq = [json.loads(l) for l in
+                  open(ayna.EQUITYF, encoding="utf-8").read().splitlines() if l.strip()]
+        except Exception:
+            eq = []
+        return {"equity": round(st.get("equity", 0), 2),
+                "baslangic_bakiye": st.get("baslangic_bakiye"),
+                "baslangic_ts": st.get("baslangic_ts"),
+                "acik_pnl_toplam": round(sum(a["acik_pnl"] for a in acik), 2),
+                "acik_pozisyonlar": acik, "equity_serisi": eq[-2000:],
+                "karne": ayna.karne()}
+    except Exception:
+        return None
 
 
 def _golge_ozet():

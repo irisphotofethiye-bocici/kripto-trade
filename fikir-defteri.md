@@ -3073,3 +3073,61 @@ boyutlandırma), erken alınan yarı daha çok dolar kilitler. Ölçüm bunun ge
 Geri dönmek istenirse tek satır: `testbot.py:902` çağrısını `cikis_modu ==
 "sabit_hedef"` pozisyonlarda atla. `kismi_kar_r = 0` YAPILMAMALI (SHORT'ta TP1=giriş
 olur, anında tetikler).
+
+---
+
+## ⭐ AYNA DEFTERİ — "botun girişlerinde benim çıkışım" (2026-08-12, kullanıcı kararı)
+
+**Soru:** *"Botun pozisyonlarını kâr ettiğini gördüğüm ve yeterli bulduğum yerde
+kapatsam işe yarar mı? Reelde de böyle yapmayı düşünüyorum."*
+
+**Neden geçmiş veriyle ölçülemez:** kullanıcı sabit bir eşik uygulamıyor — grafiğe,
+hacme, coinin davranışına bakıyor. Bu bilgi geçmiş mumların içinde **yok**. Backtest
+"+%X'te kapat" kuralını ölçebilir (13 kez ölçüldü, 13'ü de kaybettirdi) ama
+**yargıyı** ölçemez. Yargı yalnızca ileriye doğru kaydedilebilir.
+
+**Kullanıcının fikri:** mevcut `benim.py` defterini kullanmak — "tamamen farklı
+düzlem, karışmaz". Ayrılık iddiası **doğru** (ayrı state/defter/equity, aynı
+boyutlandırma), ama `benim.py`'nin kuruluş şartıyla çelişiyor: *"çıkışlar AYNI kalsın,
+fark yalnızca GİRİŞ kararından gelsin."* Bu deney tam tersi (giriş aynı, fark çıkıştan).
+İkisi tek defterde toplanırsa equity eğrisi iki deneyin toplamı olur ve **ayrılamaz** —
+`benim.py`'yi doğuran problemin bir kat yukarısı. Ayrıca `giris_ac` o anki piyasadan
+açıyor, botun giriş fiyatından değil → eşleşme bozulurdu.
+
+### Kurulan: dördüncü kasa `ayna.py`
+
+Bot bir pozisyon açtığında **birebir kopyası** aynaya düşer (fiyat/boyut/stop/TP
+kopyalanır, yeniden hesaplanmaz) ve **botun kendi kurallarıyla** yönetilir.
+Kullanıcı dokunmazsa ayna botun **aynısını** yapar → **kontrol grubu bedava gelir.**
+Tek yetki: panelden "kapatırdım".
+
+| defter | fark nereden gelir |
+|---|---|
+| `testbot` | — (referans) |
+| `golge` | botun **reddettiği** girişler |
+| `benim` | **giriş** kararı |
+| `ayna` | **çıkış** kararı |
+
+Dördü de aynı çıkış motorunu kullanır; her biri **tek değişkende** ayrışır.
+
+**Başlangıç:** botun o anki durumunun tam kopyası (equity 8.201,18 $ + 5 açık pozisyon
++ id'ler). İki defter aynı noktadan başladı, fark 0,00 $. Eşleştirme id üzerinden.
+
+**Sağlamlık:** `ayna.kaydet` ilk günden **atomik** (gölge defterin 11 Ağustos'ta 314 $
+saptıran hatasının kökü atomik olmayan kayıttı). Bot kancaları try/except — ayna
+çökerse bot etkilenmez. Bildirim göndermez.
+
+### Yanında düzeltilen gerçek hata
+`panel_sunucu.py` → `pozisyon_kapat` eylemi pozisyonu **listeden çıkarmıyordu**.
+Panelden elle kapatılan her pozisyon sonraki turda **bir kez daha** kapanır, çift
+defter kaydı + çift PnL üretirdi. Gölge defterde bu hata 11 Ağustos'ta fiilen
+gerçekleşmişti (BANANAS31). Artık `benim.py:165`'teki doğru sürümle aynı.
+
+### Okuma eşiği
+Eşli karşılaştırma (aynı pozisyonun iki çıkışı) olduğu için coin/rejim/giriş kalitesi
+birbirini götürüyor — **~30 karar** kabaca okuma verir, 138 işlemlik pencereye gerek yok.
+
+**Tuzaklar (baştan kayda geçsin):** ① seçici bakma — yalnız kapattıklarını değil,
+**tuttuklarını da** kaydet; ② sonradan karar — kayıt fiyatı gördüğün an düşmeli;
+③ maliyet — erken çıkış fazladan bir alış-satış, %0,13 karşılaştırmaya dahil (kod
+zaten uyguluyor).

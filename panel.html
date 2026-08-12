@@ -486,10 +486,13 @@ async function ozetYukle(el){
     '<div class="deger">'+c[2]+'</div><div class="alt">'+c[3]+'</div></div>').join('')+'</div>'+
   '<section><h2>'+T('equity',null,'Bakiye eğrisi')+'</h2><div class="grafik" id="g-equity"></div></section>'+
   '<section><h2>Açık pozisyonlar</h2><div id="acikPoz"></div></section>'+
+  aynaBolumu(d)+
   '<section><h2>Fiyat grafiği <span class="sonuk" id="mumBaslik" style="font-weight:400"></span></h2>'+
     '<div class="grafik" id="g-mum" style="height:260px"></div></section>';
 
   cizgiGrafik('equity','g-equity', seriHazirla(d.equity_serisi||[], 'ts','equity'), renk('--vurgu'));
+  if(d.ayna && (d.ayna.equity_serisi||[]).length)
+    cizgiGrafik('equity','g-ayna-equity', seriHazirla(d.ayna.equity_serisi,'ts','equity'), renk('--uyari'));
 
   const bas = ['<th>Coin</th><th>Yön</th><th class="sag">'+T('kaldirac',null,'Kald.')+'</th>',
     '<th class="sag">'+T('marjin',null,'Teminat')+'</th><th class="sag">'+T('notional',null,'Büyüklük')+'</th>',
@@ -540,6 +543,72 @@ async function pozKapat(sym){
   if(!confirm(sym+' pozisyonu ŞU ANKİ piyasa fiyatından kapatılsın mı?\n\nBu geri alınamaz.')) return;
   const r = await gonder('/api/kontrol',{eylem:'pozisyon_kapat', arg:sym});
   tost(r.mesaj, r.ok); if(r.ok) hepsiniYenile();
+}
+
+/* AYNA DEFTERI (2026-08-12) — "botun girdiği pozisyonu ben burada kapatsaydım?"
+   Ayna, botun girişlerinin birebir kopyasını tutar ve BOTUN KENDİ KURALLARIYLA
+   yönetir; dokunmadıkça botun aynısını yapar. "Kapatırdım" dediğin an ayrışır,
+   yani ölçülen şey SADECE senin çıkış kararın. Bot bundan hiç etkilenmez. */
+async function aynaKapat(sym){
+  if(!confirm(sym+' — AYNA defterinde kapatılsın mı?\n\n'+
+    'Botun pozisyonuna DOKUNULMAZ; o kendi kuralıyla devam eder.\n'+
+    'Sonra ikisi karşılaştırılır: senin çıkışın mı, botunki mi daha iyiydi.')) return;
+  const r = await gonder('/api/kontrol',{eylem:'ayna_kapat', arg:sym});
+  tost(r.mesaj, r.ok); if(r.ok) hepsiniYenile();
+}
+
+function aynaBolumu(d){
+  const a = d.ayna;
+  if(!a) return '<section><h2>Ayna defteri</h2><div class="not">Ayna defteri kurulu değil. '+
+    'Kurmak için: <code>python ayna.py --kur</code></div></section>';
+  const fark = a.equity - (d.equity||0);
+  const k = a.karne || {};
+  const elle = k.elle || [];
+  const bas = ['<th>Coin</th><th>Yön</th><th class="sag">Giriş</th><th class="sag">Anlık</th>',
+    '<th class="sag">Kâr/Zarar</th><th class="sag">'+T('stop',null,'Stop')+'</th>',
+    '<th class="sag">TP2</th><th></th>'];
+  const sat = (a.acik_pozisyonlar||[]).map(p=>'<tr>'+
+    '<td><b>'+esc(p.sym)+'</b></td><td class="'+(p.yon==='LONG'?'iyi':'kotu')+'">'+esc(p.yon)+'</td>'+
+    '<td class="sag">'+esc(p.giris)+'</td><td class="sag">'+esc(p.anlik_fiyat)+'</td>'+
+    '<td class="sag '+snf(p.acik_pnl)+'">'+isar(p.acik_pnl)+para(p.acik_pnl)+'$</td>'+
+    '<td class="sag">'+esc(p.stop)+'</td><td class="sag">'+(p.tp2!=null?esc(p.tp2):'–')+'</td>'+
+    '<td><button onclick="aynaKapat(\''+p.sym+'\')">kapatırdım</button></td></tr>');
+
+  let karneHtml = '<div class="not">Henüz eşleşmiş kapanış yok — karşılaştırma için '+
+    'işlemin <b>iki defterde de</b> kapanması gerekir.</div>';
+  if(elle.length){
+    karneHtml = tablo(['<th>Coin</th><th>Senin çıkışın</th><th class="sag">Ayna</th>',
+      '<th>Botun çıkışı</th><th class="sag">Bot</th><th class="sag">Fark</th>'],
+      elle.map(e=>'<tr><td><b>'+esc(e.sym)+'</b></td>'+
+        '<td class="sonuk">'+esc(e.ayna_ts.slice(5,16))+'</td>'+
+        '<td class="sag '+snf(e.ayna)+'">'+isar(e.ayna)+para(e.ayna)+'$</td>'+
+        '<td class="sonuk">'+esc(e.bot_sebep)+' '+esc(e.bot_ts.slice(5,16))+'</td>'+
+        '<td class="sag '+snf(e.bot)+'">'+isar(e.bot)+para(e.bot)+'$</td>'+
+        '<td class="sag '+snf(e.fark)+'"><b>'+isar(e.fark)+para(e.fark)+'$</b></td></tr>'))+
+      '<div class="not"><b>Fark artı</b> = elle kapatmak daha iyiydi. '+
+      '<b>Fark eksi</b> = botu bırakmak daha iyiydi. '+
+      'Şu ana kadar net <b>'+isar(k.elle_fark)+para(k.elle_fark)+'$</b> '+
+      '('+k.kazandiran+' kazandırdı / '+k.kaybettiren+' kaybettirdi, '+elle.length+' karar).</div>';
+  }
+  return '<section><h2>Ayna defteri — <span class="sonuk" style="font-weight:400">'+
+      'botun girişlerinde benim çıkışım</span></h2>'+
+    '<div class="not">Ayna, botun her girişinin <b>birebir kopyasını</b> tutar ve botun '+
+    'kendi kurallarıyla yönetir — dokunmazsan botun aynısını yapar. “Kapatırdım” dediğin '+
+    'an ayrışır, <b>fark yalnızca senin çıkış kararından</b> gelir. Bot etkilenmez.</div>'+
+    '<div class="kartlar">'+
+      '<div class="kart"><div class="etiket">Ayna bakiyesi</div><div class="deger">$'+
+        para(a.equity)+'</div><div class="alt">açık K/Z '+isar(a.acik_pnl_toplam)+
+        para(a.acik_pnl_toplam)+'$</div></div>'+
+      '<div class="kart"><div class="etiket">Bota göre fark</div><div class="deger '+snf(fark)+'">'+
+        isar(fark)+para(fark)+'$</div><div class="alt">'+(Math.abs(fark)<0.01?
+        'henüz ayrışmadı':'senin kararlarından')+'</div></div>'+
+      '<div class="kart"><div class="etiket">Verdiğin karar</div><div class="deger">'+
+        elle.length+'</div><div class="alt">okunabilir eşik ~30</div></div>'+
+    '</div>'+
+    '<div class="grafik" id="g-ayna-equity"></div>'+
+    tablo(bas, sat, 'Aynada açık pozisyon yok.')+
+    '<h3 style="margin:18px 0 8px;font-size:14px">Kararlarının karnesi</h3>'+
+    karneHtml+'</section>';
 }
 
 /* =========================================================================

@@ -1176,11 +1176,26 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
         pos["stop_elle"] = True
     st["sonraki_id"] += 1
     st["acik_pozisyonlar"].append(pos)
+    _aynala(pos)
     telegram_gonder(f"[TESTBOT] GIRIS {sym} {yon} {kaldirac}x marjin=${marjin:.2f} "
                      f"giris={giris_ef:.6g} stop={stop:.6g} tp1={tp1:.6g} skor={skor} — {sebep}",
                     olay="giris")
     toast_gonder("TestBot GIRIS", f"{sym} {yon} {kaldirac}x skor={skor}", olay="giris")
     return True
+
+
+def _aynala(pos):
+    """Acilan pozisyonu AYNA deftere kopyala (2026-08-12). FAIL-SAFE: ayna.py yoksa,
+    coker veya yavaslarsa BOT ETKILENMEZ. Karar/veto mantigina HICBIR dokunus yok;
+    bu cagri yalnizca 'ben bu pozisyonu erken kapatsaydim' sorusunu olculebilir kilar.
+    Kopya BIREBIR olmali (fiyat/boyut/stop/TP yeniden hesaplanmaz) — yoksa iki defter
+    ayni islemi degil, iki farkli islemi kiyaslar ve eslestirmenin gucu kaybolur."""
+    try:
+        import ayna
+        return ayna.aynala(pos)
+    except Exception as e:
+        print(f"[{now_iso()}] ayna kaydi atlandi (bot etkilenmedi): {str(e)[:90]}")
+        return False
 
 
 def _golge(sym, yon, r, pillar, kapi, detay="", rejim_ad=None):
@@ -1565,6 +1580,17 @@ def _cycle_ic():
         golge.tur()
     except Exception as e:
         print(f"[{now_iso()}] golge turu atlandi (bot etkilenmedi): {e}")
+
+    # --- AYNA DEFTERI — 2026-08-12, kullanici karari ------------------------
+    # Botun ACTIGI girislerin BIREBIR kopyasi burada da acilir ve AYNI kurallarla
+    # yonetilir; boylece kullanici dokunmadikca ayna botun aynisini yapar. Kullanici
+    # panelden "kapatirdim" derse fark yalnizca O KARARDAN gelir (kontrol grubu bedava).
+    # Yeni giris ARAMAZ (girisler yalnizca yeni_giris_ac icindeki _aynala kancasindan).
+    try:
+        import ayna
+        ayna.tur()
+    except Exception as e:
+        print(f"[{now_iso()}] ayna turu atlandi (bot etkilenmedi): {e}")
 
 
 # ---------- CLI yardımcıları ----------
