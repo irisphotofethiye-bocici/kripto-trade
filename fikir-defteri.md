@@ -3333,3 +3333,47 @@ oranlanıp bileşikleniyor. Dönüşüm tam, yaklaşık değil.
 kararlarının saf karnesi**. Gerçek kasa ayrıca ücret/fonlama taşıyor.
 
 Panelde eğrisiyle birlikte, yayın bölümünün manşeti olarak duruyor.
+
+## ⭐ KASA SIFIRLAMASI — "23 Temmuz botu ile işimiz bitti" (2026-08-12, kullanıcı kararı)
+
+**İstek:** serbest para yeni kasaya göre hesaplansın; eski botun kaybı bugünkü botu
+kısıtlamasın.
+
+**Gerekçe:** 23 Temmuz – 11 Ağustos 12:48 arasında kaybedilen **−1.587,94 $**, artık
+var olmayan bir yapılandırmaya aitti (risk %3, asgari stop yok, kapıların bir kısmı
+yok). Ama boyutlandırma ve fren gerçek kasaya baktığı için o kayıp bugünkü botun
+oynayabileceği büyüklüğü hâlâ kısıtlıyordu. Aynı gerekçe 11 Ağustos'ta `zirve_equity`
+için de kabul edilmişti — bu, onun kasa tarafındaki karşılığı.
+
+### Neden 9.792 değil 9.558 yazıldı
+
+Panelde görünen **9.792,18** bir **efektif** değerdi — açık pozisyonların
+**gerçekleşmemiş** kârını içeriyordu. Onu gerçekleşmiş equity alanına yazmak,
+pozisyonlar kapandığında aynı kârı **ikinci kez** saymak olurdu.
+
+Yazılan: **9.558,08** = sanal karnenin **kapanmış işlem** bakiyesi. Açık pozisyonların
+kârı kapandıkça normal yoldan gelir. Hedeflenen sonuç aynı, çift sayım yok.
+(Kullanıcıya seçenek sunarken 9.792 yazmıştım; hata bendeydi, uygulamadan önce
+düzeltildi ve söylendi.)
+
+| | önce | sonra |
+|---|---|---|
+| equity | 8.552,14 | **9.558,08** |
+| zirve_equity | 9.069,16 | 9.558,08 → *(tur sonrası 10.039,54, efektif zirveyi izliyor)* |
+| serbest para | 6.573,52 | **7.579,46** |
+| fren eşiği (−%25) | 6.801,87 | 7.529,66 |
+
+### Dokunulmayanlar
+- **İşlem defteri ve geçmiş** — hiç değiştirilmedi
+- **Açık 5 pozisyon** — teminatları eski tabana göre hesaplanmıştı, aynen devam
+  ediyorlar; yalnızca **yeni** girişler büyüyecek (hedef risk 128 $ → 143 $)
+- **Ölçüm penceresi (12/138) SIFIRLANMADI** — getiri R ve yüzde ile ölçülüyor, hesap
+  büyüklüğünden bağımsız. Strateji değişmedi, yalnızca ölçek değişti.
+
+### Panel tarafı
+`_yayin_karnesi` artık `_kasa_sifirlama.delta`'yı tabana ekliyor. Yoksa equity
+eğrisindeki sıçrama **sahte +1.005,94 $ kâr** gibi görünürdü. Doğrulandı: yayın
+karnesi sıfırlamadan önce ve sonra aynı — **+140,08 $**.
+
+Yedek: `testbot_state.json.yedek-20260812-225602`. Geri alma: equity ve zirve_equity'yi
+yedekten yaz, `_kasa_sifirlama` alanını sil.

@@ -1066,6 +1066,12 @@ def _yayin_karnesi(st, acik):
     rler = [k["r"] for k in tam if k.get("r") is not None]
     onceki = [x for x in eq if x["ts"] <= ankraj]
     baz = round(onceki[-1]["equity"], 2) if onceki else st["baslangic_bakiye"]
+    # [2026-08-12] Kasa sifirlamasi ankrajdan SONRA yapildiysa, equity egrisinde bir
+    # SICRAMA var. Taban duzeltilmezse o sicrama "kar" gibi gorunur (+1005.94\$ sahte
+    # kazanc). Taban ayni miktar kaydirilir -> "bakiye degisimi" sifirlamadan ETKILENMEZ.
+    sf = st.get("_kasa_sifirlama") or {}
+    if sf.get("ts") and str(sf["ts"]) > ankraj:
+        baz = round(baz + float(sf.get("delta") or 0), 2)
     ger = round(st["equity"] - baz, 2)
     # ACIK pozisyonlar da ikiye ayrilir: ankrajdan SONRA acilanlar bu botun eseri,
     # ONCE acilanlar devir. Ayrilmazsa "efektif K/Z" eski botun tasidigi pozisyonlarin
