@@ -4,7 +4,7 @@
   "equity": 8817.0,
   "durum": "AKTIF",
   "acik_pozisyonlar": [],
-  "sonraki_id": 58,
+  "sonraki_id": 33,
   "cooldown": {
     "RVN": "2026-08-12 14:53:15",
     "IOTX": "2026-08-12 14:54:20",
@@ -17,9 +17,10 @@
     "BLESS": "2026-08-12 17:04:34"
   },
   "bekleyenler": {},
-  "son_cycle_ts": "2026-08-12 17:42:03",
+  "son_cycle_ts": "2026-08-12 17:49:20",
   "kumulatif_giris_ucret": 0.0,
   "kumulatif_funding": 0.0,
   "kaynak_not": "Bottan anlik kopya. Kopyalanan acik pozisyonlarin gecmisi (TP1 kismileri) botun defterinde; buradaki equity o karlari ZATEN icerir cunku botun gerceklesmis equity'sinden baslandi.",
-  "temizlik_notu": "20260812-173445: golge sizintisi geri alindi — 5 kayit + 4 acik pozisyon silindi, equity kararlardan yeniden kuruldu. Kullanicinin 5 karari korundu."
+  "temizlik_notu": "20260812-173445: golge sizintisi geri alindi — 5 kayit + 4 acik pozisyon silindi, equity kararlardan yeniden kuruldu. Kullanicinin 5 karari korundu.",
+  "kayip_veri_notu": "2026-08-12: golge sizintisi yuzunden BOTUN GERCEK BLESS pozisyonu (id 32, SHORT, MA50+ucuz) aynaya HIC DUSMEDI — o anda ayna acik pozisyonlarinda golgeden sizmis bir BLESS (LONG) vardi ve aynala() ayni-sembol korumasi gercek girisi reddetti. Bot o pozisyonda TP1 +44.74 ve TP2 +140.07 (toplam +184.81) yapti. Kullanici o pozisyon icin KARAR VERMEDI, dolayisiyla veri geri uretilemez; deneyde EKSIK bir gozlem olarak kayda gecer."
 }

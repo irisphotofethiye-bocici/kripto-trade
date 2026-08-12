@@ -3186,3 +3186,43 @@ Bu ayrım önemli: bekleyen farkı toplama katmak, henüz olmamış bir sonucu k
 yazmak olurdu. Panelde "bekliyor" rozetiyle ve soluk renkle ayrışıyor.
 
 **Durum:** 5 karar · 2 kesinleşti (net **+53,66 $**) · 3 bekliyor.
+
+### 🔴 YANILTICI KIYAS — "ama ayna realize etmiş oluyor o kârı" (2026-08-12, kullanıcı yakaladı)
+
+**Kullanıcı haklıydı ve bu, işaretin ters dönmesine yol açacak kadar ciddiydi.**
+
+Panel iki defterin **gerçekleşmiş** equity'sini kıyaslıyordu. Ayna bir pozisyonu
+kapattığında kârı **bankaya yazıyor**; botun aynı pozisyonu hâlâ açık olduğu için o kâr
+botun equity'sine **hiç yansımıyor**. Yani ölçülen şey karar değil, **"kim daha önce
+kapattı"** oluyordu.
+
+| | gerçekleşmiş | açık K/Z | efektif |
+|---|---|---|---|
+| ayna | 8.817,00 | 0 (0 açık) | **8.817,00** |
+| bot | 8.597,00 | +429,78 (3 açık) | **9.026,78** |
+
+Panelde **+220 $ (ayna önde)** yazıyordu; doğrusu **−210 $ (ayna geride)**. İşaret ters.
+
+**Onarım:** kıyas **efektif equity** (gerçekleşmiş + açık K/Z) üzerinden yapılıyor;
+panelin manşeti artık **KESİNLEŞEN fark** (+53,66 $) — tek dürüst skor tablosu o.
+Efektif karşılaştırma bilgi olarak duruyor ama "karar değil kıyas" diye etiketli.
+CLI'da (`ayna.py --durum`) aynı düzeltme yapıldı.
+
+**Ders:** bu, 11 Ağustos'ta frende düzelttiğimiz hatanın aynısı — *gerçekleşmiş equity,
+açık pozisyon varken tek başına bir şey anlatmaz.* Aynı hatayı iki farklı yerde
+yaptım; artık bu projede "equity" gördüğüm her yerde "açık pozisyonlar dahil mi?"
+sorusu refleks olmalı.
+
+### Sızıntının ikinci zararı: KAYIP GÖZLEM
+
+Sızıntı yalnızca çöp eklemedi, **gerçek bir veriyi de engelledi.**
+
+Bot 16:58'de kendi **BLESS SHORT**'unu (id 32, MA50+ucuz) açıp kapattı — TP1 +44,74,
+TP2 +140,07, **toplam +184,81 $**. Bu pozisyon aynaya **hiç düşmedi**, çünkü o anda
+aynanın açık listesinde gölgeden sızmış bir **BLESS LONG** vardı ve `aynala()`'nın
+aynı-sembol koruması gerçek girişi reddetti.
+
+Kullanıcı o pozisyon için karar vermedi; veri **geri üretilemez** (sonucu bilerek
+"şurada kapatırdım" demek ölçümü sahteleştirir). Deneyde **eksik gözlem** olarak
+kayda geçti (`ayna_state.json → kayip_veri_notu`). `sonraki_id` de botla hizalandı
+(58 → 33; gölge id'leri şişirmişti).

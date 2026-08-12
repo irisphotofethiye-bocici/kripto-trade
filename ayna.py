@@ -231,11 +231,25 @@ def durum():
         print("AYNA DEFTERI kurulu degil.  Kurmak icin: python ayna.py --kur")
         return
     bst = testbot._load_state() or {}
+
+    def _acik_pnl(s):
+        t = 0.0
+        for p in (s.get("acik_pozisyonlar") or []):
+            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+            t += (px - p["giris"]) * p["miktar"] * (1 if p["yon"] == "LONG" else -1)
+        return t
+
     print("=== AYNA DEFTERI — botun girislerinde BENIM CIKISIM ===")
     print(f"Baslangic {st['baslangic_ts']}  |  ${st['baslangic_bakiye']:.2f} -> ${st['equity']:.2f}")
     if bst:
-        print(f"Bot equity: ${bst.get('equity', 0):.2f}   (ayna farki "
-              f"{st['equity'] - bst.get('equity', 0):+.2f}$)")
+        # [ONARIM 2026-08-12] Eskiden GERCEKLESMIS equity'ler kiyaslaniyordu; ayna
+        # kapatinca kari bankaya yazdigi, botunki hala acik oldugu icin bu YANILTICIYDI
+        # (isaret bile ters donuyordu: +220$ gorunurken gercek -210$). Efektif kiyas.
+        ae, be = st["equity"] + _acik_pnl(st), bst.get("equity", 0) + _acik_pnl(bst)
+        print(f"EFEKTIF (acik K/Z dahil)  ayna ${ae:.2f}  vs  bot ${be:.2f}   "
+              f"fark {ae - be:+.2f}$")
+        print("  (gerceklesmis equity'leri dogrudan kiyaslamak yanlis olur — ayna kapattigi")
+        print("   anda kari yazar, botun ayni pozisyonu hala acik. Karne KESINLESENDEN okunur.)")
     print(f"Acik ayna pozisyonu: {len(st['acik_pozisyonlar'])}")
     for p in st["acik_pozisyonlar"]:
         print(f"   {p['sym']:10} {p['yon']:5} giris {p['giris']:<12} "

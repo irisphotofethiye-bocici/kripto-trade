@@ -561,7 +561,10 @@ function aynaBolumu(d){
   const a = d.ayna;
   if(!a) return '<section><h2>Ayna defteri</h2><div class="not">Ayna defteri kurulu değil. '+
     'Kurmak için: <code>python ayna.py --kur</code></div></section>';
-  const fark = a.equity - (d.equity||0);
+  /* GERÇEKLEŞMİŞ equity'leri kıyaslamak YANILTICI: ayna kapatınca kârı bankaya yazar,
+     botun aynı pozisyonu hâlâ açıktır ve kârı equity'sine hiç yansımaz. İşaret bile
+     ters dönebiliyor. Kıyas EFEKTİF (gerçekleşmiş + açık K/Z) üzerinden yapılır. */
+  const fark = (a.efektif!=null && a.bot_efektif!=null) ? (a.efektif - a.bot_efektif) : null;
   const k = a.karne || {};
   const elle = k.elle || [];
   const bas = ['<th>Coin</th><th>Yön</th><th class="sag">Giriş</th><th class="sag">Anlık</th>',
@@ -613,16 +616,24 @@ function aynaBolumu(d){
     'kendi kurallarıyla yönetir — dokunmazsan botun aynısını yapar. “Kapatırdım” dediğin '+
     'an ayrışır, <b>fark yalnızca senin çıkış kararından</b> gelir. Bot etkilenmez.</div>'+
     '<div class="kartlar">'+
-      '<div class="kart"><div class="etiket">Ayna bakiyesi</div><div class="deger">$'+
-        para(a.equity)+'</div><div class="alt">açık K/Z '+isar(a.acik_pnl_toplam)+
-        para(a.acik_pnl_toplam)+'$</div></div>'+
-      '<div class="kart"><div class="etiket">Bota göre fark</div><div class="deger '+snf(fark)+'">'+
-        isar(fark)+para(fark)+'$</div><div class="alt">'+(Math.abs(fark)<0.01?
-        'henüz ayrışmadı':'senin kararlarından')+'</div></div>'+
+      '<div class="kart"><div class="etiket">KESİNLEŞEN fark</div><div class="deger '+
+        snf(k.elle_fark)+'">'+isar(k.elle_fark)+para(k.elle_fark)+'$</div>'+
+        '<div class="alt">'+elle.length+' işlem ikisinde de kapandı</div></div>'+
       '<div class="kart"><div class="etiket">Verdiğin karar</div><div class="deger">'+
         (k.karar_sayisi||0)+'</div><div class="alt">'+elle.length+' kesinleşti · '+
         (k.bekleyen||[]).length+' bekliyor · eşik ~30</div></div>'+
+      '<div class="kart"><div class="etiket">Efektif bakiye — ayna</div><div class="deger">$'+
+        para(a.efektif)+'</div><div class="alt">gerçekleşmiş '+para(a.equity)+
+        ' + açık '+isar(a.acik_pnl_toplam)+para(a.acik_pnl_toplam)+'</div></div>'+
+      '<div class="kart"><div class="etiket">Efektif bakiye — bot</div><div class="deger">$'+
+        para(a.bot_efektif)+'</div><div class="alt">açık K/Z '+isar(a.bot_acik_pnl)+
+        para(a.bot_acik_pnl)+' dahil</div></div>'+
     '</div>'+
+    '<div class="not">Efektif fark <b class="'+snf(fark)+'">'+isar(fark)+para(fark)+'$</b> — '+
+    'ama bu <b>karar değil kıyas</b>: botun açık pozisyonları henüz gerçekleşmedi. '+
+    'Gerçekleşmiş bakiyeleri doğrudan kıyaslamak <b>yanıltır</b>, çünkü ayna kapattığı anda '+
+    'kârı bankaya yazar, botun aynı pozisyonu hâlâ açıktır — ölçülen şey karar değil '+
+    '“kim daha önce kapattı” olur. Karneyi <b>kesinleşen</b> sütun belirler.</div>'+
     '<div class="grafik" id="g-ayna-equity"></div>'+
     tablo(bas, sat, 'Aynada açık pozisyon yok.')+
     '<h3 style="margin:18px 0 8px;font-size:14px">Kararlarının karnesi</h3>'+

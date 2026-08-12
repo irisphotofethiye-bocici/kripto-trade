@@ -966,10 +966,26 @@ def _ayna_ozet():
                 isaret = 1 if e["yon"] == "LONG" else -1
                 e["bot_canli"] = round((px - e["bot_giris"]) * e["bot_miktar"] * isaret, 2)
                 e["fark_canli"] = round(e["ayna"] - e["bot_canli"], 2)
+        # [ONARIM 2026-08-12, kullanici: "ama ayna realize etmis oluyor o kari"]
+        # Iki defterin GERCEKLESMIS equity'sini dogrudan kiyaslamak YANILTICI: ayna
+        # pozisyonu kapatinca kari BANKAYA yazar, botun ayni pozisyonu hala aciktir ve
+        # kari equity'ye HIC yansimaz. Olculen sey karar degil, "kim daha once kapatti"
+        # olur. Isaret bile ters donuyordu (+220$ gorunurken gercekte -210$).
+        # Dogru kiyas EFEKTIF equity: gerceklesmis + acik pozisyonlarin K/Z'si.
+        ayna_acik = sum(a["acik_pnl"] for a in acik)
+        bst = testbot._load_state() or {}
+        bot_ger = float(bst.get("equity") or 0)
+        bot_acik = 0.0
+        for p in (bst.get("acik_pozisyonlar") or []):
+            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+            bot_acik += (px - p["giris"]) * p["miktar"] * (1 if p["yon"] == "LONG" else -1)
         return {"equity": round(st.get("equity", 0), 2),
                 "baslangic_bakiye": st.get("baslangic_bakiye"),
                 "baslangic_ts": st.get("baslangic_ts"),
-                "acik_pnl_toplam": round(sum(a["acik_pnl"] for a in acik), 2),
+                "acik_pnl_toplam": round(ayna_acik, 2),
+                "efektif": round(st.get("equity", 0) + ayna_acik, 2),
+                "bot_efektif": round(bot_ger + bot_acik, 2),
+                "bot_acik_pnl": round(bot_acik, 2),
                 "acik_pozisyonlar": acik, "equity_serisi": eq[-2000:],
                 "karne": k}
     except Exception:
