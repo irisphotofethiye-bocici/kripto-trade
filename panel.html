@@ -495,6 +495,14 @@ async function ozetYukle(el){
   cizgiGrafik('equity','g-equity', seriHazirla(d.equity_serisi||[], 'ts','equity'), renk('--vurgu'));
   if(d.ayna && (d.ayna.equity_serisi||[]).length)
     cizgiGrafik('equity','g-ayna-equity', seriHazirla(d.ayna.equity_serisi,'ts','equity'), renk('--uyari'));
+  /* Sanal 10.000$ eğrisi: ilk nokta ts=null (başlangıç), grafik için ilk işlemin
+     zamanına sabitlenir; yoksa seriHazirla o noktayı düşürür ve eğri 10.000'den
+     değil ilk işlemden başlıyormuş gibi görünür. */
+  const y10k = (d.yayin||{}).sanal_10k;
+  if(y10k && (y10k.egri||[]).length>1){
+    const eg = y10k.egri.map(x=>({ts: x.ts || y10k.egri[1].ts, bakiye: x.bakiye}));
+    cizgiGrafik('equity','g-sanal10k', seriHazirla(eg,'ts','bakiye'), renk('--vurgu'));
+  }
 
   const bas = ['<th>Coin</th><th>Yön</th><th class="sag">'+T('kaldirac',null,'Kald.')+'</th>',
     '<th class="sag">'+T('marjin',null,'Teminat')+'</th><th class="sag">'+T('notional',null,'Büyüklük')+'</th>',
@@ -565,6 +573,7 @@ async function aynaKapat(sym){
    Ankraj: 11 Ağustos 12:48 — S9'un uygulandığı an (state'teki _zirve_sifirlama ile aynı). */
 function yayinBolumu(y){
   if(!y) return '';
+  const s = y.sanal_10k;
   const kart = (etiket,deger,alt,snfAd)=>'<div class="kart"><div class="etiket">'+etiket+
     '</div><div class="deger'+(snfAd?' '+snfAd:'')+'">'+deger+'</div><div class="alt">'+alt+'</div></div>';
   const devir = (y.devir_liste||[]).map(x=>esc(x.sym)+' '+esc(x.sebep)+' '+
@@ -577,11 +586,31 @@ function yayinBolumu(y){
       '<i>önce</i> de aynıydı, o yüzden devir işlemleri de bu botun kapılarından geçti. '+
       'Değişen şey <b>pozisyon boyutu ve stop tabanı</b>. Örnek: UMA’nın stopu %0,96 idi — '+
       'bugünkü bot onu <b>“stop çok dar”</b> diye reddederdi.</div>'+
+    (s?'<div class="kartlar">'+
+      kart('10.000$ sıfırdan başlasaydı', '$'+para(s.guncel),
+        isar(s.getiri_pct)+n2(s.getiri_pct)+'% · yalnızca bu '+s.islem_sayisi+' işlem',
+        snf(s.getiri_pct))+
+      kart('— kapananlardan sonra', '$'+para(s.kapali_bakiye),
+        isar(s.kapali_getiri_pct)+n2(s.kapali_getiri_pct)+'% · gerçekleşmiş',
+        snf(s.kapali_getiri_pct))+
+      kart('— açık pozisyonların etkisi', isar(s.acik_etki_pct)+n2(s.acik_etki_pct)+'%',
+        (s.acik_detay||[]).map(x=>x.sym+' '+isar(x.pct)+n2(x.pct)+'%').join(' · ')||'açık yok',
+        snf(s.acik_etki_pct))+
+    '</div>'+
+    '<div class="grafik" id="g-sanal10k" style="height:200px"></div>'+
+    '<div class="not"><b>Bu ne demek:</b> bot bugünkü hâliyle <b>10.000$ ile sıfırdan</b> '+
+      'başlasaydı şu an <b>'+para(s.guncel)+'$</b> olurdu. Sadece bu botun açtığı '+
+      '<b>'+s.islem_sayisi+' işlem</b> var — <b>UMA, ME ve bütün devir işlemleri hariç</b> '+
+      '(RVN’in +282,88$’ı dahil).<br>'+
+      '<b>Neden dolar toplanmıyor:</b> pozisyon boyutu bakiyeyle doğru orantılı '+
+      '(risk yüzdesi esaslı). Aynı işlemleri 10.000$’lık hesap yapsaydı pozisyonlar daha '+
+      'büyük olurdu; o yüzden her işlemin <b>yüzde getirisi</b> bileşikleniyor. '+
+      'Ücret ve fonlama dahil değil — bu, <b>işlem kararlarının saf karnesi</b>.</div>':'')+
     '<div class="kartlar">'+
       kart('Bu botun açtığı işlemler', y.toplam_islem,
         (y.kazanan||0)+' kazandı · %'+(y.win_rate!=null?y.win_rate:'–')+' · ort '+
         (y.ort_r!=null?y.ort_r+' R':'–'), '')+
-      kart('Bu işlemlerin K/Z', isar(y.islem_pnl)+para(y.islem_pnl)+'$',
+      kart('Gerçek kasadaki K/Z', isar(y.islem_pnl)+para(y.islem_pnl)+'$',
         'yalnızca yayından sonra AÇILANLAR', snf(y.islem_pnl))+
       kart('Açık K/Z — bu botun', isar(y.acik_pnl_yeni)+para(y.acik_pnl_yeni)+'$',
         (y.acik_yeni||[]).join(' · ')||'açık yok', snf(y.acik_pnl_yeni))+

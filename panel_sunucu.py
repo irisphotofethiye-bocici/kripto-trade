@@ -973,6 +973,55 @@ def _px(sym, varsayilan=None):
     return _fiyatlar().get(f"{sym}USDT", varsayilan)
 
 
+def _sanal_10k(kayitlar, eq_serisi, acik_yeni, baslangic=10000.0):
+    """10.000$ ile sifirdan baslamis bir hesap, YALNIZCA bu botun actigi islemlerle.
+    Her islemin getirisi, GIRIS anindaki equity'ye oranlanip bilesiklenir (risk-yuzdesi
+    esasli boyutlandirma equity ile dogru orantili oldugu icin bu donusum tamdir)."""
+    def eq_at(ts):
+        o = [x for x in eq_serisi if x["ts"] <= ts]
+        return o[-1]["equity"] if o else baslangic
+
+    def giris_ts(k):
+        try:
+            ts = datetime.datetime.strptime(k["ts"], "%Y-%m-%d %H:%M:%S")
+            return (ts - datetime.timedelta(hours=float(k.get("tutma_saat") or 0))
+                    ).strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            return k["ts"]
+
+    b = baslangic
+    egri = [{"ts": None, "bakiye": round(b, 2)}]
+    satir = []
+    for k in sorted(kayitlar, key=lambda x: x["ts"]):
+        q = eq_at(giris_ts(k)) or baslangic
+        pct = k["sonuc_usdt"] / q if q else 0.0
+        b *= (1 + pct)
+        egri.append({"ts": k["ts"], "bakiye": round(b, 2)})
+        satir.append({"ts": k["ts"], "sym": k["sym"], "sebep": k["sebep"],
+                      "usd": k["sonuc_usdt"], "pct": round(pct * 100, 2),
+                      "bakiye": round(b, 2)})
+    kapali_bakiye = b
+    acik_pct = 0.0
+    acik_detay = []
+    for p in (acik_yeni or []):
+        q = eq_at(p["giris_ts"]) or baslangic
+        pct = (p["acik_pnl"] / q) if q else 0.0
+        acik_pct += pct
+        acik_detay.append({"sym": p["sym"], "usd": p["acik_pnl"], "pct": round(pct * 100, 2)})
+    guncel = kapali_bakiye * (1 + acik_pct)
+    tam = [k for k in kayitlar if not k.get("kismi")]
+    return {
+        "baslangic": baslangic,
+        "kapali_bakiye": round(kapali_bakiye, 2),
+        "kapali_getiri_pct": round((kapali_bakiye / baslangic - 1) * 100, 2),
+        "acik_etki_pct": round(acik_pct * 100, 2), "acik_detay": acik_detay,
+        "guncel": round(guncel, 2),
+        "getiri_pct": round((guncel / baslangic - 1) * 100, 2),
+        "islem_sayisi": len(tam), "kayit_sayisi": len(kayitlar),
+        "egri": egri, "satirlar": satir,
+    }
+
+
 def _yayin_karnesi(st, acik):
     """Botun SON HALIYLE yayina alindigi andan itibaren karne.
 
@@ -1040,6 +1089,18 @@ def _yayin_karnesi(st, acik):
         "win_rate": round(len(kazanan) / len(tam) * 100, 1) if tam else None,
         "ort_r": round(sum(rler) / len(rler), 2) if rler else None,
         "islem_pnl": round(sum(k["sonuc_usdt"] for k in yeni), 2),
+        # SANAL 10.000 (2026-08-12, kullanici: "10000 usd bakiyeyi 12 giris uzerinde
+        # goster, 30 degil; UMA ve ME haric digerleri olmasin").
+        # "Bu bot 10.000$ ile SIFIRDAN baslasaydi simdi nerede olurdu?"
+        # NEDEN YUZDEYLE BILESIKLENIYOR, dolar TOPLANMIYOR: boyutlandirma risk-yuzdesi
+        # esasli, yani pozisyon buyuklugu equity ile DOGRU ORANTILI. Ayni islemleri
+        # 10.000$'lik hesap yapsaydi pozisyonlar 10000/8400 kat buyuk olurdu ve YUZDE
+        # getiri ayni cikardi. Dolarlari duz toplamak 8.400$'lik hesabin dolarlarini
+        # 10.000$'lik hesaba yazmak olurdu — yanlis.
+        # KAPSAM: yalnizca ankraj SONRASI acilan islemler. UMA, ME ve butun devir
+        # (RVN'in +282.88'i dahil) DISARIDA. Ucret/fonlama dahil DEGIL (islem defterine
+        # yazilmiyor); o yuzden bu sayi islem kararlarinin saf karnesidir.
+        "sanal_10k": _sanal_10k(yeni, eq, a_yeni),
         "devir_pnl": round(sum(k["sonuc_usdt"] for k in devir), 2),
         "devir_sayisi": len([k for k in devir if not k.get("kismi")]),
         # TUM devir kayitlari (kismi dahil) — devir_pnl bunlarin toplami; yalniz tam

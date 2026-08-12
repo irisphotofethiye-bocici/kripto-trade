@@ -3307,3 +3307,29 @@ bir** yeniliyor → istekler üst üste yığılıyor, kalıcı kuyruk oluşuyor
 sorulmalı. Aynı ders 11 Ağustos'ta da çıkmıştı — o gün toplu indirme API'yi doyurup
 botun turlarını 3 saat öldürmüştü. `_tum_fiyatlar()` zaten o gün bu yüzden yazılmıştı;
 panelde kullanmayı atlamışım.
+
+### SANAL 10.000$ — "12 giriş üzerinde göster, 30 değil" (2026-08-12, kullanıcı)
+
+**İstek:** panelde bakiye, botun **kendi açtığı 12 işlem** üzerinden 10.000$'dan
+başlatılarak gösterilsin; **UMA, ME ve bütün devir işlemleri hariç** (RVN'in +282,88$'ı
+dahil).
+
+**Kritik incelik — dolar toplanmıyor, yüzde bileşikleniyor.** İşlemler 8.000–8.600$'lık
+bir kasada açıldı; dolarları 10.000'e eklemek, küçük hesabın dolarlarını büyük hesaba
+yazmak olurdu. Boyutlandırma **risk-yüzdesi esaslı**, yani pozisyon büyüklüğü equity ile
+**doğru orantılı** — 10.000$'lık hesap aynı işlemleri `10000/8400` kat büyük yapardı ve
+**yüzde getirisi aynı çıkardı.** Bu yüzden her işlemin getirisi giriş anındaki equity'ye
+oranlanıp bileşikleniyor. Dönüşüm tam, yaklaşık değil.
+
+**Sonuç (12 işlem, 18 kayıt — kısmiler dahil):**
+
+| | |
+|---|---|
+| kapananlardan sonra | **9.558,08** (−%4,42) |
+| açık pozisyonların etkisi | **+%2,49** (IOTX +2,52 · RVN −0,47 · DOS +0,44) |
+| **güncel** | **9.795,85 (−%2,04)** |
+
+Ücret ve fonlama dahil değil (işlem defterine yazılmıyor) — bu sayı **işlem
+kararlarının saf karnesi**. Gerçek kasa ayrıca ücret/fonlama taşıyor.
+
+Panelde eğrisiyle birlikte, yayın bölümünün manşeti olarak duruyor.
