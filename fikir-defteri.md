@@ -3377,3 +3377,35 @@ karnesi sıfırlamadan önce ve sonra aynı — **+140,08 $**.
 
 Yedek: `testbot_state.json.yedek-20260812-225602`. Geri alma: equity ve zirve_equity'yi
 yedekten yaz, `_kasa_sifirlama` alanını sil.
+
+### Ayna defteri de kaydırıldı — yoksa kıyas bozulurdu (2026-08-12)
+
+**Kullanıcı:** *"ayna defterini de botunki gibi yap, 8550 olmasın yani"* — ve bu sadece
+görüntü meselesi değildi.
+
+Botun kasası +1.005,94 $ kaydırılmıştı. Ayna kaydırılmasaydı iki defter **farklı
+ölçekte** kalırdı ve `ayna − bot` farkı **1.005,94 $ kadar sahte** kayardı. Deneyin
+ölçtüğü tek şey o fark olduğu için bu, ölçümü doğrudan bozardı.
+
+- efektif fark sıfırlama öncesi görünen: **−1.230,66 $** (sahte)
+- kaydırma sonrası: **−206,90 $** (gerçek)
+
+**Kaydırma, çarpma değil.** Botta yapılan işlem toplamaydı (`equity += delta`), o yüzden
+aynaya da aynı toplama uygulandı. Hem `equity` hem `baslangic_bakiye` kaydırıldı →
+aynanın **kendi $ kazancı (+599,57) değişmedi**.
+
+| | önce | sonra |
+|---|---|---|
+| ayna equity | 8.800,75 | **9.806,69** |
+| ayna başlangıç | 8.201,18 | 9.207,12 |
+| kendi $ kazancı | +599,57 | +599,57 *(aynı)* |
+
+İşlem defteri, açık pozisyonlar ve **kullanıcının 6 kararı** değiştirilmedi.
+Yedek: `ayna_state.json.yedek-20260812-233326`.
+
+### Ayna sağlık kontrolü (aynı anda yapıldı)
+Sızıntı onarımından sonra aynalama **kusursuz çalışıyor**: COTI (id 34) aynalandı ve
+botla aynı şekilde STOP oldu; DOS (id 35) aynalandı, kullanıcı elle kapattı (+58,64).
+Botta olup aynada hiç görülmeyen pozisyon **yok**.
+
+**Karne durumu:** 6 karar · 2 kesinleşti (**net +53,66 $**) · 4 bekliyor.
