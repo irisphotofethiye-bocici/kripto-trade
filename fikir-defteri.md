@@ -3275,3 +3275,35 @@ sebebi yazılı.
 
 Açık pozisyonlar da ayrıldı: ME/UMA yayından önce açıldığı için "efektif K/Z"ye tek
 parça bakmak eski botun taşıdığı kârı bugünkünün hanesine yazardı.
+
+### 🔴 PANEL SÜREKLİ DÜŞÜYORDU — sebep benim eklediklerimdi (2026-08-12)
+
+**Kullanıcı bildirdi:** *"panel sürekli düşüyor ve yeniden yükleniyor"*.
+
+**Ölçüm:** `/api/durum` **43,3 · 85,1 · 19,9 saniye** sürüyordu. Panel ise **30 saniyede
+bir** yeniliyor → istekler üst üste yığılıyor, kalıcı kuyruk oluşuyordu.
+
+**İki sebep üst üste bindi, ikisi de bugün benim eklediklerimden:**
+
+1. **İstek başına ~16 ardışık ticker çağrısı.** Ayna defteri ve yayın karnesi eklenince
+   `/api/durum` her açık pozisyon, her ayna pozisyonu, her bekleyen karar ve bir kez daha
+   botun pozisyonları için **ayrı ayrı** `fiyat_fapi` çağırıyordu.
+2. **Sunucu tek iş parçacıklıydı** (`HTTPServer`). Yavaş bir API isteği, sayfanın kendisini
+   (`panel.html`, ~108 KB) de bloke ediyordu — tarayıcı için "panel düştü" demek bu.
+
+**Onarım:**
+- `_fiyatlar()` önbelleği: `testbot._tum_fiyatlar()` **tek çağrıyla** bütün perp
+  fiyatlarını getiriyor, 8 sn TTL. **16 istek → 1 istek.** Emir/kapatma yollarında
+  önbellek KULLANILMIYOR (orada taze fiyat şart).
+- `ThreadingHTTPServer`: yavaş bir istek diğerlerini kilitlemiyor.
+
+| | önce | sonra |
+|---|---|---|
+| `/api/durum` | 43–85 sn | **0,03–0,79 sn** |
+| `panel.html` | bloke oluyordu | 0,02 sn |
+| 8 paralel istek | — | 0,18 sn, hatasız |
+
+**Ders:** panel bir ölçüm katmanı; ona her yeni bölüm eklendiğinde **istek sayısı**
+sorulmalı. Aynı ders 11 Ağustos'ta da çıkmıştı — o gün toplu indirme API'yi doyurup
+botun turlarını 3 saat öldürmüştü. `_tum_fiyatlar()` zaten o gün bu yüzden yazılmıştı;
+panelde kullanmayı atlamışım.

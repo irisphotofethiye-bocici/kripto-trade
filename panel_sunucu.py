@@ -28,7 +28,7 @@ Panelden yapılan her değişiklik panel_islem_log.jsonl'e yazılır.
 Bağımlılık yok (stdlib http.server). Kullanım: python panel_sunucu.py [--port 8787]
 """
 import json, os, sys, time, argparse, urllib.parse, datetime
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import testbot
 import evren
@@ -62,7 +62,7 @@ def _durum_json():
         return {"basladi": False}
     acik = []
     for p in st["acik_pozisyonlar"]:
-        px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+        px = _px(p["sym"], p["giris"])          # onbellek: 16 istek -> 1
         yon_isaret = 1 if p["yon"] == "LONG" else -1
         pnl = (px - p["giris"]) * p["miktar"] * yon_isaret
         notional = p["miktar"] * p["giris"]
@@ -149,7 +149,7 @@ def _gercek_pozlar():
                 continue
             sym, giris, stop = p["sembol"], float(p["giris"]), float(p.get("stop") or 0)
             isaret = 1 if p.get("yon") == "LONG" else -1
-            px = testbot.fiyat_fapi(sym)
+            px = _px(sym)
             pnl_pct = pnl_usdt = stop_uzaklik = None
             if px:
                 pnl_pct = round((px - giris) / giris * 100 * isaret, 2)
@@ -718,7 +718,7 @@ def _benim():
         return {"var": False}
     acik = []
     for p in st["acik_pozisyonlar"]:
-        px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+        px = _px(p["sym"], p["giris"])
         yi = 1 if p["yon"] == "LONG" else -1
         acik.append({**p, "anlik_fiyat": px,
                      "acik_pnl": round((px-p["giris"])*p["miktar"]*yi, 2),
@@ -942,6 +942,37 @@ def _kafa():
     }
 
 
+# --- FIYAT ONBELLEGI (2026-08-12) --------------------------------------------------
+# SORUN: /api/durum her acik pozisyon, her ayna pozisyonu ve her bekleyen karar icin
+#   AYRI ticker cagirisi yapiyordu (~16 ardisik HTTPS gidis-donus). Olculdu: istek
+#   basina 20-85 saniye. Panel 30 saniyede bir yeniliyor -> istekler ust uste yigiliyor,
+#   sayfa "dusup yeniden yukleniyor" gibi gorunuyordu.
+# COZUM: testbot._tum_fiyatlar() TEK cagriyla butun perp fiyatlarini getiriyor; kisa
+#   omurlu onbellekte tutulur. 16 istek -> 1 istek. API basinci da duser (11 Agustos'ta
+#   toplu indirme botun turlarini oldurmustu — az istek = az risk).
+# NOT: emir/kapatma yollarinda ONBELLEK KULLANILMAZ; orada taze fiyat sarttir.
+_FIYAT_ONBELLEK = {"ts": 0.0, "veri": {}}
+_FIYAT_TTL = 8.0
+
+
+def _fiyatlar():
+    simdi = time.time()
+    if simdi - _FIYAT_ONBELLEK["ts"] > _FIYAT_TTL or not _FIYAT_ONBELLEK["veri"]:
+        try:
+            d = testbot._tum_fiyatlar()
+            if d:
+                _FIYAT_ONBELLEK["veri"] = d
+                _FIYAT_ONBELLEK["ts"] = simdi
+        except Exception:
+            pass
+    return _FIYAT_ONBELLEK["veri"]
+
+
+def _px(sym, varsayilan=None):
+    """Onbellekten fiyat. Sembol yoksa (yeni listelenmis vb.) varsayilan doner."""
+    return _fiyatlar().get(f"{sym}USDT", varsayilan)
+
+
 def _yayin_karnesi(st, acik):
     """Botun SON HALIYLE yayina alindigi andan itibaren karne.
 
@@ -1029,7 +1060,7 @@ def _ayna_ozet():
             return None
         acik = []
         for p in st["acik_pozisyonlar"]:
-            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+            px = _px(p["sym"], p["giris"])
             isaret = 1 if p["yon"] == "LONG" else -1
             acik.append({**p, "anlik_fiyat": px,
                          "acik_pnl": round((px - p["giris"]) * p["miktar"] * isaret, 2)})
@@ -1044,7 +1075,7 @@ def _ayna_ozet():
         for e in (k.get("bekleyen") or []):
             if e.get("durum") != "bekliyor":
                 continue
-            px = testbot.fiyat_fapi(e["sym"])
+            px = _px(e["sym"])
             if px:
                 isaret = 1 if e["yon"] == "LONG" else -1
                 e["bot_canli"] = round((px - e["bot_giris"]) * e["bot_miktar"] * isaret, 2)
@@ -1060,7 +1091,7 @@ def _ayna_ozet():
         bot_ger = float(bst.get("equity") or 0)
         bot_acik = 0.0
         for p in (bst.get("acik_pozisyonlar") or []):
-            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+            px = _px(p["sym"], p["giris"])
             bot_acik += (px - p["giris"]) * p["miktar"] * (1 if p["yon"] == "LONG" else -1)
         return {"equity": round(st.get("equity", 0), 2),
                 "baslangic_bakiye": st.get("baslangic_bakiye"),
@@ -1529,7 +1560,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8787)
     a = ap.parse_args()
-    srv = HTTPServer(("127.0.0.1", a.port), Handler)
+    # [ONARIM 2026-08-12] Eskiden HTTPServer (TEK IS PARCACIGI): yavas bir /api/durum
+    # sayfanin kendisini de (panel.html, ~108 KB) bloke ediyordu. Kullanici bunu
+    # "panel surekli dusuyor ve yeniden yukleniyor" diye gordu. ThreadingHTTPServer ile
+    # yavas bir istek digerlerini kilitlemez. Asil sebep (istek basina ~16 ardisik
+    # ticker cagirisi) _fiyatlar() onbellegiyle ayrica giderildi.
+    srv = ThreadingHTTPServer(("127.0.0.1", a.port), Handler)
+    srv.daemon_threads = True
     print(f"Panel: http://127.0.0.1:{a.port}/  (Ctrl+C ile durdur)")
     try:
         srv.serve_forever()
