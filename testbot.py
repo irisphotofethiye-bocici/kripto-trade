@@ -1189,7 +1189,16 @@ def _aynala(pos):
     coker veya yavaslarsa BOT ETKILENMEZ. Karar/veto mantigina HICBIR dokunus yok;
     bu cagri yalnizca 'ben bu pozisyonu erken kapatsaydim' sorusunu olculebilir kilar.
     Kopya BIREBIR olmali (fiyat/boyut/stop/TP yeniden hesaplanmaz) — yoksa iki defter
-    ayni islemi degil, iki farkli islemi kiyaslar ve eslestirmenin gucu kaybolur."""
+    ayni islemi degil, iki farkli islemi kiyaslar ve eslestirmenin gucu kaybolur.
+
+    [HATA VE ONARIMI 2026-08-12] yeni_giris_ac BOTA OZEL DEGIL: golge.py ve benim.py
+    de ayni fonksiyonu cagirir (defter yolunu _DEFTER ile gecici degistirerek). Kanca
+    korumasiz konuldugu icin GOLGE girisleri de aynaya dustu — ayna, botun HIC acmadigi
+    LONG'lari (pump_long_tezi) acmis gorundu (BLESS/BTW/BEAT/APR) ve equity'si sapti.
+    KORUMA: _DEFTER None ise cagri GERCEK bota aittir; degilse baska bir defter
+    (golge/benim/ayna) icin kosuyoruz demektir ve aynalamayiz."""
+    if _DEFTER is not None:
+        return False
     try:
         import ayna
         return ayna.aynala(pos)

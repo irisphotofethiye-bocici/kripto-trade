@@ -3131,3 +3131,39 @@ birbirini götürüyor — **~30 karar** kabaca okuma verir, 138 işlemlik pence
 **tuttuklarını da** kaydet; ② sonradan karar — kayıt fiyatı gördüğün an düşmeli;
 ③ maliyet — erken çıkış fazladan bir alış-satış, %0,13 karşılaştırmaya dahil (kod
 zaten uyguluyor).
+
+### 🔴 HATA VE ONARIMI — ayna defterine gölge sızıntısı (2026-08-12, aynı gün)
+
+**Kullanıcı bildirdi:** *"BLESS aynada var ama botun pozu yok"* · *"ayna LONG açıyor"*.
+
+**Sebep — benim hatam.** `_aynala` kancasını `yeni_giris_ac` içine **korumasız**
+koydum. Ama o fonksiyon **bota özel değil**: `golge.py` ve `benim.py` de aynı
+fonksiyonu çağırıyor (defter yolunu `_DEFTER` ile geçici değiştirerek). Sonuç: gölge
+defterin **reddedilmiş LONG girişleri** (pump_long_tezi) aynaya düştü. Ayna, botun
+hiç açmadığı BLESS/BTW/BEAT/APR/QTUM/BOT/BR/HOLO pozisyonlarını açmış göründü.
+
+Bu, `_defterde` deseninin tam olarak önlemek için var olduğu tuzağın kendisi — ve
+kancayı koyarken onu düşünmedim.
+
+**Onarım:** `_DEFTER is not None` ise aynalama yapılmaz — o durumda çağrı başka bir
+defter (gölge/benim/aynanın kendisi) için koşuyor demektir. Dört durumla sınandı
+(bot ✓ aynalanır · gölge ✗ · benim ✗ · aynanın kendi turu ✗).
+
+**Temizlik:** 5 sızıntı kaydı + 4 sızıntı pozisyonu silindi, equity kararlardan
+yeniden kuruldu (8.420,84 → **8.817,00**). Kullanıcının **5 kararı korundu** — deneyin
+asıl verisi onlar. Yedek alındı.
+
+**Ders:** paylaşılan bir fonksiyona kanca koyarken "beni kim çağırıyor" sorusu
+sorulmalı. Bu projede o sorunun cevabı zaten `_DEFTER`'de duruyordu.
+
+### İlk sonuçlar (N=2, hüküm yok)
+
+| coin | senin çıkışın | botun çıkışı | fark |
+|---|---|---|---|
+| RVN | +228,69 | TP2 +282,88 | **−54,19** |
+| CAP | +40,77 | STOP −67,08 | **+107,85** |
+| | | **net** | **+53,66** |
+
+Örüntü tanıdık: **erken çıkış kaybedeni kesiyor, kazananı da kesiyor.** CAP'te kâr
+korundu, RVN'de hedefin bir kısmı bırakıldı. İki işlemden kural çıkmaz — okuma eşiği
+~30 karar.
