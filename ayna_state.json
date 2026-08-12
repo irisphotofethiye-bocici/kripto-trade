@@ -26,7 +26,7 @@
       "stage_giriste": "izle",
       "rejim_giriste": "NOTR",
       "son_funding_kontrol_ts": "2026-08-12 19:43:03",
-      "son_1m_kontrol_ts": "2026-08-12 22:34:06",
+      "son_1m_kontrol_ts": "2026-08-12 22:41:32",
       "sebep_giris": "A+B: funding -0.260 (short kalabalik) + oi24 +19% [A+B 2026-08-10 +0.396R N=201 · MA50 2026-08-11 +0.84% N=460]",
       "stop_orijinal": 0.002703,
       "atr_giriste": 6.2e-05,
@@ -54,7 +54,7 @@
     "DOS": "2026-08-12 22:11:34"
   },
   "bekleyenler": {},
-  "son_cycle_ts": "2026-08-12 22:34:06",
+  "son_cycle_ts": "2026-08-12 22:41:32",
   "kumulatif_giris_ucret": 0.0,
   "kumulatif_funding": 0.0,
   "kaynak_not": "Bottan anlik kopya. Kopyalanan acik pozisyonlarin gecmisi (TP1 kismileri) botun defterinde; buradaki equity o karlari ZATEN icerir cunku botun gerceklesmis equity'sinden baslandi.",

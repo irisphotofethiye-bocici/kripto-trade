@@ -448,9 +448,18 @@ async function ustBar(){
     if(!d.basladi){ b.textContent='BAŞLAMADI'; b.className='rozet'; return; }
     b.textContent = d.durum;
     b.className = 'rozet ' + (d.durum==='AKTIF' ? 'iyi' : 'uyari');
+    /* Üst bar artık ÖNCE bu botun sanal 10.000$ bakiyesini gösteriyor; gerçek kasa
+       (eski bot dahil) ikincil. Aksi halde sayfanın manşeti bir sayı, üst bar başka
+       bir sayı söylüyordu. */
     const fark = d.equity - d.baslangic_bakiye;
-    $('#ustOzet').innerHTML = para(d.equity)+'$ <span class="'+snf(fark)+'">('+isar(fark)+
-      n1(fark/d.baslangic_bakiye*100)+'%)</span> · '+d.acik_pozisyonlar.length+' açık pozisyon';
+    const s10 = (d.yayin||{}).sanal_10k;
+    $('#ustOzet').innerHTML = (s10
+        ? para(s10.guncel)+'$ <span class="'+snf(s10.getiri_pct)+'">('+isar(s10.getiri_pct)+
+          n2(s10.getiri_pct)+'%)</span> <span class="sonuk">bu botun '+s10.islem_sayisi+
+          ' işlemi</span> · <span class="sonuk">gerçek kasa '+para(d.equity)+'$</span> · '
+        : para(d.equity)+'$ <span class="'+snf(fark)+'">('+isar(fark)+
+          n1(fark/d.baslangic_bakiye*100)+'%)</span> · ')
+      + d.acik_pozisyonlar.length+' açık pozisyon';
   }catch(e){}
 }
 
@@ -463,18 +472,30 @@ async function ozetYukle(el){
   if(!d.basladi){ el.innerHTML='<section><div class="bos">Bot henüz başlamamış.</div></section>'; return; }
   const k = d.karne || {}, fark = d.equity - d.baslangic_bakiye;
 
+  /* 2026-08-12: bu kartlar 23 Temmuz'dan beri HER ŞEYİ topluyordu (30 işlem, eski
+     %3 riskli bot dahil). Kullanıcı "12 giriş üzerinde göster, 30 değil" dedi.
+     Sayaçlar artık YAYINDAN BERİ (11 Ağu 12:48) — eski toplamlar alt satırda
+     kayboluyor değil, ikincil bilgi olarak duruyor. */
+  const yy = d.yayin || {};
+  const s10 = yy.sanal_10k || {};
   const kartlar = [
-    ['Bakiye','equity','<span class="'+snf(fark)+'">'+para(d.equity)+'$</span>',
-      'başlangıç '+para(d.baslangic_bakiye)+'$ (23 Tem, ESKİ bot dahil) · '+
-      isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
+    ['Bakiye','equity','<span class="'+snf(s10.getiri_pct)+'">'+para(s10.guncel)+'$</span>',
+      '10.000$ sıfırdan · bu botun '+(s10.islem_sayisi||0)+' işlemi · '+
+      isar(s10.getiri_pct)+n2(s10.getiri_pct)+'%'],
+    ['Gerçek kasa',null, para(d.equity)+'$',
+      '23 Tem 10.000$ · ESKİ bot dahil · '+isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
     ['Serbest para','marjin', para(d.serbest_bakiye)+'$', para(d.kullanilan_marjin)+'$ teminatta kilitli'],
     ['Açık kâr/zarar',null,'<span class="'+snf(d.acik_pnl_toplam)+'">'+isar(d.acik_pnl_toplam)+para(d.acik_pnl_toplam)+'$</span>',
-      d.acik_pozisyonlar.length+' pozisyon'],
-    ['Kapanan işlem',null, (k.toplam_islem||0), (k.kazanan||0)+' tanesi kazandı'],
-    ['Kazanma oranı','winrate', (k.win_rate!=null?'%'+k.win_rate:'–'), 'tek başına yeterli değil'],
-    ['Ortalama','r','<span class="'+snf(k.ort_r)+'">'+(k.ort_r!=null?k.ort_r+' R':'–')+'</span>','risk birimi başına'],
-    ['Toplam kâr/zarar',null,'<span class="'+snf(k.toplam_pnl)+'">'+isar(k.toplam_pnl)+para(k.toplam_pnl)+'$</span>',
-      'fonlama '+isar(k.kumulatif_funding)+n2(k.kumulatif_funding)+'$ · ücret '+n2(k.kumulatif_giris_ucret)+'$']
+      d.acik_pozisyonlar.length+' pozisyon (devir dahil)'],
+    ['Kapanan işlem',null, (yy.toplam_islem!=null?yy.toplam_islem:'–'),
+      'yayından beri · tüm zamanlar '+(k.toplam_islem||0)],
+    ['Kazanma oranı','winrate', (yy.win_rate!=null?'%'+yy.win_rate:'–'),
+      'yayından beri · tüm zamanlar '+(k.win_rate!=null?'%'+k.win_rate:'–')],
+    ['Ortalama','r','<span class="'+snf(yy.ort_r)+'">'+(yy.ort_r!=null?yy.ort_r+' R':'–')+'</span>',
+      'yayından beri · tüm zamanlar '+(k.ort_r!=null?k.ort_r+' R':'–')],
+    ['Ücret + fonlama',null,'<span class="'+snf(-1)+'">'+
+      n2(yy.gerceklesmis_pnl!=null?(yy.gerceklesmis_pnl-yy.islem_pnl-yy.devir_pnl):0)+'$</span>',
+      'yayından beri · işlem defterinde GÖRÜNMEZ']
   ];
 
   el.innerHTML =
@@ -486,7 +507,11 @@ async function ozetYukle(el){
   '<div class="kartlar">'+kartlar.map(c=>
     '<div class="kart"><div class="etiket">'+(c[1]?T(c[1],null,c[0]):c[0])+'</div>'+
     '<div class="deger">'+c[2]+'</div><div class="alt">'+c[3]+'</div></div>').join('')+'</div>'+
-  '<section><h2>'+T('equity',null,'Bakiye eğrisi')+'</h2><div class="grafik" id="g-equity"></div></section>'+
+  '<section><h2>'+T('equity',null,'Gerçek kasa eğrisi')+' <span class="sonuk" '+
+    'style="font-weight:400">— 23 Temmuz\'dan beri, ESKİ bot dahil</span></h2>'+
+    '<div class="not">Bu botun kendi eğrisi yukarıda (10.000$ sıfırdan). Buradaki eğri '+
+    'gerçek kasanın tamamı: eski %3 riskli dönem, devir işlemler, ücret ve fonlama dahil.</div>'+
+    '<div class="grafik" id="g-equity"></div></section>'+
   '<section><h2>Açık pozisyonlar</h2><div id="acikPoz"></div></section>'+
   aynaBolumu(d)+
   '<section><h2>Fiyat grafiği <span class="sonuk" id="mumBaslik" style="font-weight:400"></span></h2>'+
