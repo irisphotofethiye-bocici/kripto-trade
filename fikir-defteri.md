@@ -3409,3 +3409,34 @@ botla aynı şekilde STOP oldu; DOS (id 35) aynalandı, kullanıcı elle kapatt�
 Botta olup aynada hiç görülmeyen pozisyon **yok**.
 
 **Karne durumu:** 6 karar · 2 kesinleşti (**net +53,66 $**) · 4 bekliyor.
+
+### "ben" hesabı KAYDIRILMADI — gerekmiyordu (2026-08-12)
+
+**Kullanıcı:** *"ben ve botu da düzelt"*.
+
+**Kontrol edildi:** `benim` hesabı **6 Ağustos'ta 10.000 $ ile bağımsız** başladı ve
+yalnızca kullanıcının kendi 6 giriş kararını içeriyor. **23 Temmuz botunun kaybını hiç
+taşımadı** — silinecek bir şey yok. Kaydırmak, hiç var olmamış bir kaybı geri ekleyip
+hesabı **şişirmek** olurdu (10.167,88 → 11.173,82 sahte).
+
+Bugünkü DOS/COTI işlemleri de kontrol edildi: hepsi `kaynak='elle'`, yani panelden
+kullanıcı açmış. **Ayna türü bir sızıntı yok.**
+
+### Ama gerçek bir sorun vardı: eğrilerdeki sahte sıçrama
+
+Kasa sıfırlaması equity **eğrisinde** dikey bir atlama bıraktı — grafikte o an
++1.005,94 $ kazanılmış gibi görünüyordu, ve `maks_dusus` hesabı da bundan etkileniyordu.
+
+`_egri_duzelt()`: sıfırlamadan **önceki** noktalar aynı miktar yukarı kaydırılıyor →
+eğri sürekli oluyor ve her nokta bugünkü kasa ölçeğinde okunuyor. **Yalnızca görünüm**,
+dosyadaki veri değişmiyor. Bot ve ayna eğrilerine uygulandı; `ben` eğrisine
+uygulanmıyor (sıfırlama görmedi). Doğrulandı: iki eğride de 600 $ üstü sıçrama **yok**.
+
+### Kalan bir dürüstlük sorunu — panelde işaretlendi
+"BOT vs BEN" sayfası **aynı dönemi kapsamıyor**: bot 23 Temmuz'dan (eski %3 riskli
+yapılandırma dahil), ben 6 Ağustos'tan beri. Bu yüzden "en kötü düşüş" gibi ölçüler
+doğrudan kıyaslanamaz (bot %−17,77 vs ben %−3,30 — botunki eski dönemin kaybını da
+içeriyor). Sayfaya uyarı notu eklendi; botun bugünkü hâlinin saf karnesi Özet
+sekmesindeki "Yayından beri" bölümünde.
+
+Dönemi hizalamak ayrı bir karar — kullanıcıya soruldu, henüz istenmedi.

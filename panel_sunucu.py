@@ -96,7 +96,7 @@ def _durum_json():
         # botun sonucunu bugunkunun uzerine yazmaktir.
         "yayin": _yayin_karnesi(st, acik),
         "acik_pozisyonlar": acik, "son_islemler": islemler[-200:],
-        "equity_serisi": equity_serisi[-2000:],
+        "equity_serisi": _egri_duzelt(equity_serisi[-2000:], st),
         "karne": {
             "toplam_islem": len(tam), "kazanan": len(kazanan),
             "win_rate": round(len(kazanan) / len(tam) * 100, 1) if tam else None,
@@ -780,6 +780,11 @@ def _karsilastirma():
     # NOT: kapanan kayitta bot_gorusu yoksa (eski/kismi) "bota ragmen" sayilir —
     # bu muhafazakar taraf: kendi lehimize saymiyoruz.
 
+    # Bot egrisindeki kasa-sifirlama sicramasi duzeltilir; yoksa "BOT vs BEN" grafiginde
+    # bot bir anda +1005.94\$ kazanmis gibi gorunur ve maks_dusus da yanlis hesaplanir.
+    # BEN hesabi sifirlama GORMEDI ve gormemeli: 6 Agustos'ta 10.000\$ ile bagimsiz
+    # basladi, 23 Temmuz botunun kaybini HIC tasimadi — kaydirmak onu sisirmek olurdu.
+    bot_eq = _egri_duzelt(bot_eq, testbot._load_state())
     return {
         "bot": {**_karne_ozet(bot_i), "maks_dusus": _dusus(bot_eq),
                 "equity": (bot_eq[-1]["equity"] if bot_eq else None)},
@@ -971,6 +976,20 @@ def _fiyatlar():
 def _px(sym, varsayilan=None):
     """Onbellekten fiyat. Sembol yoksa (yeni listelenmis vb.) varsayilan doner."""
     return _fiyatlar().get(f"{sym}USDT", varsayilan)
+
+
+def _egri_duzelt(seri, st):
+    """Kasa sifirlamasi equity EGRISINDE bir SICRAMA birakir; grafikte bu, o an
+    kazanilmis gibi gorunen sahte bir dikey atlamadir (+1005.94 $). Sifirlamadan
+    ONCEKI noktalar ayni miktarda yukari kaydirilir -> egri SUREKLI olur ve her
+    noktanin BUGUNKU kasa olceginde ne ifade ettigi okunur.
+    YALNIZCA GORUNUM — dosyadaki veri degistirilmez."""
+    sf = (st or {}).get("_kasa_sifirlama") or {}
+    d, ts = float(sf.get("delta") or 0), sf.get("ts")
+    if not d or not ts or not seri:
+        return seri
+    return [({**x, "equity": round(x["equity"] + d, 2)} if x.get("ts") and x["ts"] <= ts else x)
+            for x in seri]
 
 
 def _sanal_10k(kayitlar, eq_serisi, acik_yeni, baslangic=10000.0):
@@ -1167,7 +1186,7 @@ def _ayna_ozet():
                 "efektif": round(st.get("equity", 0) + ayna_acik, 2),
                 "bot_efektif": round(bot_ger + bot_acik, 2),
                 "bot_acik_pnl": round(bot_acik, 2),
-                "acik_pozisyonlar": acik, "equity_serisi": eq[-2000:],
+                "acik_pozisyonlar": acik, "equity_serisi": _egri_duzelt(eq[-2000:], st),
                 "karne": k}
     except Exception:
         return None

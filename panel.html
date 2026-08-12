@@ -1582,6 +1582,14 @@ async function karsYukle(el){
   const k=r[0], ben=r[1];
   const b=k.bot||{}, n=k.ben||{};
   const sut=(ad,x)=>'<td class="sag">'+x+'</td>';
+  /* 2026-08-12: iki defter AYNI DÖNEMİ kapsamıyor — bot 23 Temmuz'dan (eski %3 riskli
+     yapılandırma dahil), "ben" 6 Ağustos'tan beri. Bot eğrisindeki kasa-sıfırlama
+     sıçraması sunucuda düzeltildi ama dönem farkı duruyor; okuyan bunu bilmeli. */
+  const donemNotu = '<div class="not"><b>Dikkat — aynı dönem değil.</b> Botun karnesi '+
+    '<b>23 Temmuz</b>\'dan beri (eski %3 riskli yapılandırma dahil), senin hesabın '+
+    '<b>6 Ağustos</b>\'tan beri. Maksimum düşüş gibi ölçüler bu yüzden doğrudan '+
+    'kıyaslanamaz — botunki eski dönemin kaybını da içeriyor. Botun bugünkü hâlinin '+
+    'saf karnesi <b>Özet</b> sekmesindeki “Yayından beri” bölümünde.</div>';
   el.innerHTML =
   (ben.var
     ? '<section><h2>Açık pozisyonlarım <span class="rozet uyari">SANAL</span></h2>'+
@@ -1605,6 +1613,7 @@ async function karsYukle(el){
     : '<section><div class="bos">Kendi hesabın henüz açılmadı. '+
       '<b>Coin Ara</b> sekmesinden ilk sanal işlemini açtığında oluşur.</div></section>')+
   '<section><h2>İki sistem yan yana</h2>'+
+    donemNotu+
     tablo(['<th></th><th class="sag">BOT (otomatik)</th><th class="sag">BEN (elle)</th>'],
       [['Bakiye', b.equity!=null?para(b.equity)+'$':'–', n.equity!=null?para(n.equity)+'$':'–'],
        ['Kapanan işlem', b.n, n.n],
