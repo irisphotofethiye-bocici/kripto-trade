@@ -2819,3 +2819,77 @@ geliyor, yoksa radar'ın ön elemesinden mi? Bunu ayırmanın tek yolu 2 yıllı
 ve o yok. **Hakem canlı pencere olacak** (138 işlem).
 
 **Pencere sıfırlanmadı** — hiçbir şey değişmedi, bot aynen devam ediyor.
+
+---
+
+## 2026-08-12 — SCALP PENCERESİ: "botun girdiği poza elle binebilir miyim?"
+
+**Kullanıcının gerçek kullanım amacı ortaya çıktı:** botu otonom kazanan makine olarak
+değil, **sinyal üreteci** olarak kullanmak — pozisyon artıdayken elle kısa vadeli işlem
+almak. Bu, bugüne kadar ölçtüğümüz hiçbir şeyin cevaplamadığı bir soru: tüm ölçümler
+botun **kendi** çıkışlarıyla (A-stop, %10 hedef, 72s) yapılmıştı.
+
+`scratchpad/scalp_penceresi.py` · 2 yıl · A+B 14.634 (524 sembol) · MA50+ucuz 21.977
+(312 sembol) · kontrol 12.048 (557 sembol)
+
+### 1) Kapılar rastgeleden GERÇEKTEN daha çok lehte hareket üretiyor
+
+İlk 1 saatte MFE (lehte en uç nokta):
+
+| küme | MFE medyan | ≥ +%1 | ≥ +%2 |
+|---|---|---|---|
+| MA50+ucuz | **1,09%** | %54 | %25 |
+| A+B | 0,88% | %45 | %20 |
+| KONTROL | 0,64% | %33 | %12 |
+
+**Kapılar çalışıyor** — girişten sonra fiyat rastgeleden belirgin daha çok lehe gidiyor.
+
+### 2) ⚠️ Ama aleyhte de aynı kadar gidiyor — MFE/MAE ≈ 1,1
+
+| ufuk | A+B MFE/MAE | MA50 MFE/MAE | kontrol |
+|---|---|---|---|
+| 1s | 1,06 | 1,07 | 1,05 |
+| 4s | 1,13 | 1,06 | 1,11 |
+| 24s | 1,17 | 1,10 | 1,11 |
+
+Hareket **neredeyse simetrik**. Kapılar oynaklık üretiyor, **yön asimetrisi** değil —
+en azından ilk saatlerde.
+
+### 3) ASIL TABLO — her hedef/stop çifti NEGATİF
+
+İlk 4 saat, maliyet %0,13 dahil, en iyi hücreler:
+
+| küme | en iyi hedef/stop | hedef% | stop% | **beklenti** |
+|---|---|---|---|---|
+| A+B | 2,0 / 1,5 | %32 | %47 | **−0,168** |
+| MA50+ucuz | 2,0 / 0,5 | %16 | %80 | **−0,199** |
+| **KONTROL** | 1,5 / 1,5 | %37 | %37 | **−0,094** |
+
+**36 hücrenin 36'sı da negatif.** Ve kontrol her ikisinden **daha az kötü** — çünkü
+kapılar daha oynak, oynaklık hem hedefi hem stopu daha çok vurduruyor.
+
+**Aritmetiği:** MFE/MAE ≈ 1,1 iken simetrik hedef/stop ≈ %52/%48 verir.
+Beklenti = 0,52×(H−0,13) − 0,48×(H+0,13) = **0,04H − 0,13**.
+Başabaş için **H > %3,25** gerekir — o da artık scalp değil.
+
+### 4) ⭐ "HIZLI TEPE = KAYBEDEN" HİPOTEZİ ÇÜRÜTÜLDÜ
+17 canlı pozisyonda "hızlı tepe yapanlar kaybediyor" gibi görünüyordu. 2 yılda tersi:
+
+| | ilk 4 saatte ≥ +%1 görenler | görmeyenler |
+|---|---|---|
+| A+B | N=10.234 · 72s medyan **+3,43%** | N=4.365 · **+0,08%** |
+| MA50+ucuz | N=16.326 · **+3,07%** | N=5.509 · **+0,04%** |
+
+**Erken güç, sonraki gücü haber veriyor** — uyarı değil. 17 pozisyonluk gözlem
+küçük örneklem artığıydı. *(İyi ki "bu bir gözlem, kural değil" diye yazmıştım.)*
+
+### SONUÇ
+**Scalp bu ölçümde çalışmıyor.** Ama iki şey kayda değer:
+- Kapılar gerçekten bilgi taşıyor (MFE kontrolden belirgin yüksek)
+- Erken hareket **pozitif** bir sinyal — scalp'lemek yerine **beklemek/eklemek** için
+
+### ⚠️ ÖLÇÜMÜN SINIRI — cevabı değiştirebilir
+1 saatlik bar kullanıldı; bar **içinde** hedefin mi stopun mu önce geldiği bilinemez →
+**kötümser** varsayımla hep STOP sayıldı. Yani bu tablo **ALT SINIR**. Canlıda ekranı
+izleyen biri sırayı görür ve daha iyisini yapabilir. Gerçek cevap için **15 dakikalık
+veri** gerekir; 1 saatlik çözünürlükte kapanmayan soru bu.
