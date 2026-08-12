@@ -2801,3 +2801,21 @@ kanıtlanamadı.
 - **oi24 bacağı yok** (OI geçmişi ~30 gün). Arşivde kesişim funding-tekliden **1,4 kat**
   güçlüydü (+0,375 vs +0,259R) → canlı kapı ölçtüğümden **iyi olabilir**
 - Yeniden üretim canlı evrenin birebir aynısı değil (radar skor sıralaması yok)
+
+### KARAR (kullanıcı, 2026-08-12): **her iki kapı da AÇIK KALIYOR**
+
+Ölçüm MA50+ucuz'u kapatmayı öneriyordu (2 yıl, üç rejim, 21.830 olay, t=−4,05).
+**Kullanıcı ikisini de açık bırakmayı seçti.** Bilinçli bir karar; kayda geçiyor ki
+pencere dolduğunda "gözden kaçmış" sanılmasın.
+
+**Kararı savunulabilir kılan şey:** MA50 testi bir *yeniden üretim* — canlı evrenin
+birebir aynısı değil. Medyan stop %1,3 çıktı, canlıda %3,4. Arşiv olayları radar'ın
+skorla sıralanmış ilk-150 kısa listesinden geliyor; ben yalnız hacim tabanı
+uygulayabildim (skor için funding+OI gerekiyor, uzun veride OI yok). Yani ölçüm
+"kural geniş uygulanınca negatif" diyor, "canlı kapı negatif" demiyor.
+
+**Açık soru aynen duruyor:** MA50+ucuz'un canlıdaki artısı kuralın kendisinden mi
+geliyor, yoksa radar'ın ön elemesinden mi? Bunu ayırmanın tek yolu 2 yıllık OI verisi
+ve o yok. **Hakem canlı pencere olacak** (138 işlem).
+
+**Pencere sıfırlanmadı** — hiçbir şey değişmedi, bot aynen devam ediyor.
