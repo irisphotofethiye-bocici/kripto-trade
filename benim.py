@@ -66,15 +66,35 @@ def kaydet(st):
     json.dump(st, open(STATEF, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
 
 
+def _sessiz(*a, **kw):
+    """Bu defterin girisleri/cikislari '[TESTBOT] ...' bildirimi GONDERMEZ.
+
+    [HATA VE ONARIMI 2026-08-12] Kullanici panelden BTW SHORT acti ve Telegram'a
+    '[TESTBOT] GIRIS BTW ...' dustu — ama pozisyon BOTTA YOKTU, bu hesaptaydi.
+    Sebep: yeni_giris_ac bota ozel degil; buradan da cagriliyor ve icindeki bildirim
+    cagrisi 'bot girdi' diye haber veriyordu. golge.py ve ayna.py bunu ilk gunden
+    susturuyordu, benim.py'de eksikti (bildirimler 3 Agustos'tan beri kapali oldugu
+    icin bugune kadar gorunmedi — 12 Agustos'ta giris bildirimi acilinca ortaya cikti).
+    Bu hesabin girisini zaten SEN aciyorsun ve panel aninda onayliyor; bota ait olmayan
+    bir hareketi bot bildirimi gibi gondermek yaniltir."""
+    return None
+
+
 def _defterde(fn, *a, **kw):
-    """testbot'un fonksiyonunu BENIM defterime yazacak sekilde calistir.
-    finally ile MUTLAKA geri alinir — yoksa botun kapanislari benim defterime duser."""
+    """testbot'un fonksiyonunu BENIM defterime yazacak + SESSIZ calistir.
+    finally ile MUTLAKA geri alinir — yoksa botun kapanislari benim defterime duser
+    ve botun bildirimleri kalici olarak susar."""
     eski = testbot._DEFTER
+    eski_tg, eski_toast = testbot.telegram_gonder, testbot.toast_gonder
     testbot._DEFTER = ISLEMLERF
+    testbot.telegram_gonder = _sessiz
+    testbot.toast_gonder = _sessiz
     try:
         return fn(*a, **kw)
     finally:
         testbot._DEFTER = eski
+        testbot.telegram_gonder = eski_tg
+        testbot.toast_gonder = eski_toast
 
 
 # ---------------------------------------------------------------------------

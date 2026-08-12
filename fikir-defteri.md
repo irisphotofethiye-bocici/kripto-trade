@@ -3440,3 +3440,34 @@ içeriyor). Sayfaya uyarı notu eklendi; botun bugünkü hâlinin saf karnesi Ö
 sekmesindeki "Yayından beri" bölümünde.
 
 Dönemi hizalamak ayrı bir karar — kullanıcıya soruldu, henüz istenmedi.
+
+### 🔴 "BTW'ye girildi" mesajı geldi ama pozisyon botta yoktu (2026-08-13)
+
+**Kullanıcı bildirdi.** Doğru — pozisyon **senin kendi hesabındaydı** (`benim`), bot
+onu hiç açmadı.
+
+```
+BTW SHORT · giriş 12 Ağu 23:24 · çıkış 13 Ağu 00:06 STOP −77,89 $ · kaynak='elle'
+BENIM defterinde  : VAR      TESTBOT defterinde : YOK (hiç kayıt yok)
+```
+
+**Sebep — bugün üçüncü kez aynı kök:** `testbot.yeni_giris_ac` **bota özel değil**;
+`golge.py`, `benim.py` ve `ayna.py` de onu çağırıyor. İçindeki Telegram çağrısı
+"bot girdi" diye haber veriyor. `golge.py` ve `ayna.py` bunu ilk günden susturuyordu,
+**`benim.py`'de eksikti.** Bildirimler 3 Ağustos'tan beri kapalı olduğu için bugüne
+kadar görünmedi — 12 Ağustos'ta giriş bildirimini açınca ortaya çıktı.
+
+**Onarım:** `benim._defterde` artık `telegram_gonder` ve `toast_gonder`'ı da
+susturuyor (diğer iki defterle aynı). Bu hesabın girişini zaten kullanıcı açıyor ve
+panel anında onaylıyor; bota ait olmayan hareketi bot bildirimi gibi göndermek yanıltır.
+
+### Bu kökten çıkan hatalar (bugün üçü de)
+1. `_aynala` korumasızdı → gölgenin LONG'ları aynaya düştü
+2. Panel `pozisyon_kapat` pozisyonu listeden çıkarmıyordu → çift kayıt riski
+3. `benim.py` bildirimleri susturmuyordu → sahte "[TESTBOT] GİRİŞ" mesajı
+
+**Kalıcı önlem:** `scratchpad/defter_izolasyon_testi.py` — dört defterin izolasyonunu
+birden doğrular: bot çağrısında bildirim **gider** ve ayna **kopyalar**; gölge/benim/ayna
+çağrılarında **hiçbiri** olmaz, her biri **kendi defterine** yazar, ve çağrı sonrası
+bot **normale döner**. 14 kontrol, hepsi geçti. Paylaşılan bir fonksiyona her yeni yan
+etki eklendiğinde bu test koşturulmalı.
