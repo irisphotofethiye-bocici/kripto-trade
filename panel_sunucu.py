@@ -27,7 +27,7 @@ Panelden yapılan her değişiklik panel_islem_log.jsonl'e yazılır.
 
 Bağımlılık yok (stdlib http.server). Kullanım: python panel_sunucu.py [--port 8787]
 """
-import json, os, sys, time, argparse, urllib.parse
+import json, os, sys, time, argparse, urllib.parse, datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import testbot
@@ -89,6 +89,12 @@ def _durum_json():
         # AYNA DEFTERI (2026-08-12): botun girislerinin birebir kopyasi; kullanici
         # "kapatirdim" dedikce ayrisir. Fark yalnizca CIKIS kararindan gelir.
         "ayna": _ayna_ozet(),
+        # YAYIN KARNESI (2026-08-12, kullanici: "botu yayina son haliyle 11'inde aldik,
+        # aldigimiz tarihten itibaren gostersin"). Defter 23 Temmuz'a kadar gidiyor ve
+        # ESKI yapilandirmayi (risk %3, asgari stop yok, R/R kapisi acik, A+B ve MA50
+        # kapilari yok) iceriyor. Iki donemi tek karnede toplamak, artik var olmayan bir
+        # botun sonucunu bugunkunun uzerine yazmaktir.
+        "yayin": _yayin_karnesi(st, acik),
         "acik_pozisyonlar": acik, "son_islemler": islemler[-200:],
         "equity_serisi": equity_serisi[-2000:],
         "karne": {
@@ -933,6 +939,83 @@ def _kafa():
         # Sure: SURE_DOLDU'ya girince YENI GIRIS HIC olmaz; "bot girmiyor"un sessiz sebebi
         # bu olabilir, o yuzden sayfada gorunur.
         "sure": _sure_durumu(st),
+    }
+
+
+def _yayin_karnesi(st, acik):
+    """Botun SON HALIYLE yayina alindigi andan itibaren karne.
+
+    ANKRAJ (kripto-config.json -> testbot.yayin_ts, varsayilan 2026-08-11 12:48:31):
+      11 Agustos 12:46'da S9 uygulandi — islem_risk_pct %3 -> %1.5 ve asgari_stop_pct
+      %2.0. Ondan onceki islemler IKI KAT buyuk pozisyonlarla acilmisti; ayni karnede
+      toplanirsa bugunku botun performansi carpitilir. Ayni gerekce state'teki
+      _zirve_sifirlama notunda da yazili (fren zirvesi de o an bugune cekilmisti).
+
+    FILTRE GIRIS zamanina gore: 'bu bot hangi islemleri ACMAYA karar verdi'. Cikis
+    zamanina gore suzmek, eski botun actigi ama yeni donemde kapanan islemleri
+    (orn. 10 Agustos girisli RVN) yanlislikla bugune yazardi.
+    EQUITY VE ISLEM GECMISI DEGISTIRILMEZ — bu yalnizca bir GORUNUM."""
+    ANKRAJ_VAR = "2026-08-11 12:48:31"
+    try:
+        ankraj = str(testbot._c("yayin_ts", ANKRAJ_VAR))
+        a_dt = datetime.datetime.strptime(ankraj, "%Y-%m-%d %H:%M:%S")
+    except Exception:
+        ankraj, a_dt = ANKRAJ_VAR, datetime.datetime.strptime(ANKRAJ_VAR, "%Y-%m-%d %H:%M:%S")
+    try:
+        kay = [json.loads(l) for l in
+               open(testbot.ISLEMLERF, encoding="utf-8").read().splitlines() if l.strip()]
+        eq = [json.loads(l) for l in
+              open(testbot.EQUITYF, encoding="utf-8").read().splitlines() if l.strip()]
+    except Exception:
+        return None
+
+    def giris_dt(k):
+        try:
+            return (datetime.datetime.strptime(k["ts"], "%Y-%m-%d %H:%M:%S")
+                    - datetime.timedelta(hours=float(k.get("tutma_saat") or 0)))
+        except Exception:
+            return None
+
+    yeni = [k for k in kay if (giris_dt(k) or a_dt) >= a_dt]
+    # DEVIR: ankrajdan ONCE acilmis ama SONRA kapanmis islemler. Bunlarin sonucu
+    # bugunku equity'ye giriyor ama "bu botun actigi islemler" karnesine GIRMIYOR.
+    # Iki sayi arasindaki farkin buyuk kismi bu; gizlenirse tablo tutmaz.
+    devir = [k for k in kay if (giris_dt(k) or a_dt) < a_dt and k["ts"] > ankraj]
+    tam = [k for k in yeni if not k.get("kismi")]
+    kazanan = [k for k in tam if k["sonuc_usdt"] > 0]
+    rler = [k["r"] for k in tam if k.get("r") is not None]
+    onceki = [x for x in eq if x["ts"] <= ankraj]
+    baz = round(onceki[-1]["equity"], 2) if onceki else st["baslangic_bakiye"]
+    ger = round(st["equity"] - baz, 2)
+    # ACIK pozisyonlar da ikiye ayrilir: ankrajdan SONRA acilanlar bu botun eseri,
+    # ONCE acilanlar devir. Ayrilmazsa "efektif K/Z" eski botun tasidigi pozisyonlarin
+    # karini bugunku bota yazar — kullanicinin tam kacinmak istedigi sey.
+    a_yeni = [p for p in (acik or []) if str(p.get("giris_ts") or "") >= ankraj]
+    a_devir = [p for p in (acik or []) if str(p.get("giris_ts") or "") < ankraj]
+    ap_yeni = round(sum(p["acik_pnl"] for p in a_yeni), 2)
+    ap_devir = round(sum(p["acik_pnl"] for p in a_devir), 2)
+    return {
+        "ankraj": ankraj,
+        "ankraj_sebep": "S9: islem_risk_pct %3 -> %1.5 · asgari_stop_pct %2.0",
+        "baz_equity": baz,
+        "equity": round(st["equity"], 2),
+        "gerceklesmis_pnl": ger,
+        "acik_pnl_yeni": ap_yeni, "acik_pnl_devir": ap_devir,
+        "acik_yeni": [p["sym"] for p in a_yeni], "acik_devir": [p["sym"] for p in a_devir],
+        "efektif_pnl": round(ger + ap_yeni + ap_devir, 2),
+        "getiri_pct": round(ger / baz * 100, 2) if baz else None,
+        "efektif_getiri_pct": round((ger + ap_yeni + ap_devir) / baz * 100, 2) if baz else None,
+        "toplam_islem": len(tam), "kazanan": len(kazanan),
+        "win_rate": round(len(kazanan) / len(tam) * 100, 1) if tam else None,
+        "ort_r": round(sum(rler) / len(rler), 2) if rler else None,
+        "islem_pnl": round(sum(k["sonuc_usdt"] for k in yeni), 2),
+        "devir_pnl": round(sum(k["sonuc_usdt"] for k in devir), 2),
+        "devir_sayisi": len([k for k in devir if not k.get("kismi")]),
+        # TUM devir kayitlari (kismi dahil) — devir_pnl bunlarin toplami; yalniz tam
+        # kapanislari listelemek toplamla celisen bir tablo uretiyordu.
+        "devir_liste": [{"sym": k["sym"], "sebep": k["sebep"],
+                         "sonuc": k["sonuc_usdt"], "ts": k["ts"]} for k in devir],
+        "gun": round((datetime.datetime.now() - a_dt).total_seconds() / 86400, 1),
     }
 
 

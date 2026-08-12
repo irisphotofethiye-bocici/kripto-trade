@@ -465,7 +465,8 @@ async function ozetYukle(el){
 
   const kartlar = [
     ['Bakiye','equity','<span class="'+snf(fark)+'">'+para(d.equity)+'$</span>',
-      'başlangıç '+para(d.baslangic_bakiye)+'$ · '+isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
+      'başlangıç '+para(d.baslangic_bakiye)+'$ (23 Tem, ESKİ bot dahil) · '+
+      isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
     ['Serbest para','marjin', para(d.serbest_bakiye)+'$', para(d.kullanilan_marjin)+'$ teminatta kilitli'],
     ['Açık kâr/zarar',null,'<span class="'+snf(d.acik_pnl_toplam)+'">'+isar(d.acik_pnl_toplam)+para(d.acik_pnl_toplam)+'$</span>',
       d.acik_pozisyonlar.length+' pozisyon'],
@@ -477,6 +478,7 @@ async function ozetYukle(el){
   ];
 
   el.innerHTML =
+  yayinBolumu(d.yayin)+
   '<section><h2>Şu an ne oluyor?</h2>'+
     '<div class="anlati">'+(o.anlati||[]).map(p=>'<p>'+p+'</p>').join('')+'</div>'+
     '<ul class="maddeler">'+(o.maddeler||[]).map(m=>
@@ -555,6 +557,53 @@ async function aynaKapat(sym){
     'Sonra ikisi karşılaştırılır: senin çıkışın mı, botunki mi daha iyiydi.')) return;
   const r = await gonder('/api/kontrol',{eylem:'ayna_kapat', arg:sym});
   tost(r.mesaj, r.ok); if(r.ok) hepsiniYenile();
+}
+
+/* YAYIN KARNESİ (2026-08-12) — defter 23 Temmuz'a kadar gidiyor ve ESKİ yapılandırmayı
+   (risk %3, asgari stop yok, A+B ve MA50 kapıları yok) içeriyor. İki dönemi tek karnede
+   toplamak, artık var olmayan bir botun sonucunu bugünkünün üzerine yazmaktır.
+   Ankraj: 11 Ağustos 12:48 — S9'un uygulandığı an (state'teki _zirve_sifirlama ile aynı). */
+function yayinBolumu(y){
+  if(!y) return '';
+  const kart = (etiket,deger,alt,snfAd)=>'<div class="kart"><div class="etiket">'+etiket+
+    '</div><div class="deger'+(snfAd?' '+snfAd:'')+'">'+deger+'</div><div class="alt">'+alt+'</div></div>';
+  const devir = (y.devir_liste||[]).map(x=>esc(x.sym)+' '+esc(x.sebep)+' '+
+    isar(x.sonuc)+para(x.sonuc)+'$').join(' · ');
+  return '<section><h2>Yayından beri <span class="sonuk" style="font-weight:400">'+
+      '— '+esc(y.ankraj.slice(0,16))+"'den itibaren, "+y.gun+' gün</span></h2>'+
+    '<div class="not">Bot <b>son haliyle</b> bu tarihte yayına alındı ('+esc(y.ankraj_sebep)+
+      '). Öncesindeki işlemler <b>iki kat büyük</b> pozisyonlarla ve farklı kapılarla '+
+      'açılmıştı — aynı karneye katılmıyor.</div>'+
+    '<div class="kartlar">'+
+      kart('Bu botun açtığı işlemler', y.toplam_islem,
+        (y.kazanan||0)+' kazandı · %'+(y.win_rate!=null?y.win_rate:'–')+' · ort '+
+        (y.ort_r!=null?y.ort_r+' R':'–'), '')+
+      kart('Bu işlemlerin K/Z', isar(y.islem_pnl)+para(y.islem_pnl)+'$',
+        'yalnızca yayından sonra AÇILANLAR', snf(y.islem_pnl))+
+      kart('Açık K/Z — bu botun', isar(y.acik_pnl_yeni)+para(y.acik_pnl_yeni)+'$',
+        (y.acik_yeni||[]).join(' · ')||'açık yok', snf(y.acik_pnl_yeni))+
+      kart('Açık K/Z — devir', isar(y.acik_pnl_devir)+para(y.acik_pnl_devir)+'$',
+        (y.acik_devir||[]).join(' · ')||'yok', snf(y.acik_pnl_devir))+
+      kart('Bakiye değişimi', isar(y.gerceklesmis_pnl)+para(y.gerceklesmis_pnl)+'$',
+        para(y.baz_equity)+'$ → '+para(y.equity)+'$', snf(y.gerceklesmis_pnl))+
+    '</div>'+
+    '<div class="not"><b>Sayılar neden farklı?</b> “Bu işlemlerin K/Z” yalnızca '+
+      '<b>yayından sonra açılan</b> işlemleri sayar. “Bakiye değişimi” ise kasaya giren '+
+      'her şeyi — <b>devir</b> işlemleri (yayından önce açılmış, sonra kapanmış), fonlama '+
+      've giriş ücretleri dahil.<br>'+
+      '<span style="font-family:ui-monospace,monospace">'+
+      isar(y.islem_pnl)+para(y.islem_pnl)+' (yeni) &nbsp;'+
+      isar(y.devir_pnl)+para(y.devir_pnl)+' (devir) &nbsp;'+
+      isar(y.gerceklesmis_pnl-y.islem_pnl-y.devir_pnl)+
+      para(y.gerceklesmis_pnl-y.islem_pnl-y.devir_pnl)+' (ücret+fonlama) &nbsp;=&nbsp; '+
+      '<b>'+isar(y.gerceklesmis_pnl)+para(y.gerceklesmis_pnl)+'$</b></span>'+
+      (devir?'<br><span class="sonuk">devir: '+devir+'</span>':'')+
+      '<br><b>Botun bugünkü hâlinin saf karnesi</b>, açıkları da katarsan: '+
+      '<b class="'+snf(y.islem_pnl+y.acik_pnl_yeni)+'">'+
+      isar(y.islem_pnl+y.acik_pnl_yeni)+para(y.islem_pnl+y.acik_pnl_yeni)+'$</b> '+
+      '(kapanan '+isar(y.islem_pnl)+para(y.islem_pnl)+' + açık '+
+      isar(y.acik_pnl_yeni)+para(y.acik_pnl_yeni)+') — ücret/fonlama hariç.</div>'+
+    '</section>';
 }
 
 function aynaBolumu(d){
