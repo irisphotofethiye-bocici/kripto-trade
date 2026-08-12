@@ -2945,3 +2945,55 @@ tarayıcısı** olarak değerli: "şu an hangi coinler hareketli" sorusuna cevap
 Yön sinyali olarak değil.
 
 **KARAR: scalp fikri ölçüldü ve çalışmıyor. Bota hiçbir şey eklenmedi.**
+
+---
+
+## ⭐ ÖN-KAYIT — "eski 1,5R kısmi kuralı lehimize mi?" (2026-08-12, kullanıcı sorusu)
+
+**Nasıl bulundu:** kullanıcı açık pozisyonların TP1'lerini panelden sordu. İnceleme
+`kismi_pay=0.40` ayarı ile kodun fiilen yaptığı şeyin **çeliştiğini** gösterdi.
+
+**Çelişki:** `testbot.py:902` her turda TP1'i yeniden hesaplıyor ve **yapısal TP1 ile
+1,5×risk'ten hangisi daha yakınsa** onu seçiyor (`tp1_efektif_hesapla`, 2026-07-04'ten
+kalma). Stop dar olduğunda 1,5R seviyesi %4'ten yakın kalıyor ve kullanıcının %40
+ayarını **sessizce eziyor.**
+
+Ayrışma sınırı: `1,5 × stop% < 10 × 0,40`  →  **stop < %2,67**.
+`asgari_stop_pct = %2,0` olduğu için bu aralık dar değil.
+
+Canlı kanıt (12 Ağustos, 4 açık pozisyon):
+
+| | stop | 1,5R | %40 kuralı | fiilen kullanılan |
+|---|---|---|---|---|
+| UMA | %0,96 | **%1,43** | %4,00 | %1,43 — **1,5R ezdi**, yarısı −%1,4'te satıldı (+46$) |
+| IOTX | %2,80 | %4,20 | %4,00 | %4,00 |
+| RVN | %4,49 | %6,73 | %4,00 | %4,00 |
+| ME | %3,20 | %4,79 | %4,00 | (kural öncesi giriş, TP1=TP2) |
+
+### Sınanan
+Aynı girişlerde 4 kural: **A)** kısmi yok · **B)** sabit %40 (niyet edilen) ·
+**C)** mevcut fiili = yakın olan{%4, 1,5R} · **D)** saf 1,5R. Şekil için 1,0R/2,0R/3,0R.
+
+**Asıl test dar-stop alt kümesinde** (stop < %2,67) — iki kural yalnızca orada
+ayrışıyor. Genel ortalama farkı sulandırır, karar oradan okunmayacak.
+
+Betik: `scratchpad/kismi_15r.py` · veri: `klines_1h_uzun` (566 sembol, 2 yıl, **gerçek
+boğa + gerçek ayı**) · mekanik canlının aynısı (A-stop, Wilder ATR, %10 hedef, 72s,
+maliyet %0,13, kısmi sonrası stop başabaşa ÇEKİLMEZ).
+
+### GEÇME ÖLÇÜTÜ (koşturmadan önce yazıldı)
+1,5R kuralı **kalır** ancak dar-stop alt kümesinde şunların **hepsi** sağlanırsa:
+1. `C (mevcut)` sermaye getirisi `B (sabit %40)`'ı **yenmeli**
+2. Bu üstünlük **iki zaman yarısında da** aynı yönde olmalı
+3. Boğa ve ayı rejimlerinin **ikisinde de** çökmemeli
+4. Kaç ayrı sembolden geldiği raporlanacak (`t_kume`)
+
+Geçmezse `kismi_kar_r` kapatılır ve %40 ayarı sözünü tutar. Sonuç ne olursa olsun
+deftere yazılır.
+
+**BEKLENTİM (yanılabilirim, kayda geçsin):** 1,5R'nin **kaybettireceğini** bekliyorum.
+Daha önce beş kez çıkan kural aynı yöne işaret ediyor: *"iyi girişte sıkı çıkış
+kazancı keser."* Dar stoplu işlemde 1,5R çok erken bir seviye — pozisyonun yarısı
+%10 hedefe gitme şansını hiç kullanamadan kapanıyor. Ama dar stop aynı zamanda
+**büyük pozisyon** demek (risk-öncelikli boyutlandırma), yani erken kâr almanın
+dalgalanma faydası bu hücrede en yüksek. Bu yüzden emin değilim.

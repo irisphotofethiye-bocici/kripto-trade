@@ -39,6 +39,7 @@ h3{font-size:11px;margin:18px 0 8px;font-weight:600;color:var(--yazi3);
   background:color-mix(in srgb,var(--kotu) 12%,transparent)}
 .rozet.uyari{color:var(--uyari);border-color:color-mix(in srgb,var(--uyari) 45%,transparent);
   background:color-mix(in srgb,var(--uyari) 12%,transparent)}
+.vurgulu{font-weight:600;color:var(--vurgu)}
 button{font:inherit;font-size:12px;font-weight:500;padding:6px 12px;border-radius:8px;cursor:pointer;
   border:1px solid var(--kenar);background:var(--yuzey2);color:var(--yazi);
   transition:border-color .13s,background .13s,transform .06s}
@@ -494,15 +495,26 @@ async function ozetYukle(el){
     '<th class="sag">'+T('marjin',null,'Teminat')+'</th><th class="sag">'+T('notional',null,'Büyüklük')+'</th>',
     '<th class="sag">Giriş</th><th class="sag">Anlık</th><th class="sag">Kâr/Zarar</th>',
     '<th class="sag">'+T('stop',null,'Stop')+'</th><th class="sag">'+T('tp',null,'TP1')+'</th>',
+    '<th class="sag">'+T('tp',null,'TP2')+'</th>',
     '<th class="sag">'+T('likidasyon',null,'Likidasyon')+'</th>',
     '<th class="sag">'+T('skor',null,'Skor')+'</th><th></th><th></th>'];
+  // 2026-08-12: TP1 alinmissa artik HICBIR SEY yapmiyor (testbot yalniz tp1_alindi=false
+  // iken bakar) — canli hedef TP2'dir. Once TP2 hic gosterilmiyordu ve harcanmis TP1
+  // gelecek hedef gibi duruyordu; panele bakan yanlis seviyeyi izliyordu.
   const sat = (d.acik_pozisyonlar||[]).map(p=>'<tr>'+
     '<td><b>'+esc(p.sym)+'</b></td><td class="'+(p.yon==='LONG'?'iyi':'kotu')+'">'+p.yon+'</td>'+
     '<td class="sag">'+p.kaldirac+'x</td><td class="sag">'+para(p.marjin)+'$</td>'+
     '<td class="sag">'+para(p.notional)+'$</td><td class="sag">'+p.giris+'</td>'+
     '<td class="sag">'+p.anlik_fiyat+'</td>'+
     '<td class="sag '+snf(p.acik_pnl)+'">'+isar(p.acik_pnl)+para(p.acik_pnl)+'$</td>'+
-    '<td class="sag">'+p.stop+'</td><td class="sag">'+p.tp1+'</td>'+
+    '<td class="sag">'+p.stop+'</td>'+
+    (p.tp1_alindi
+      ? '<td class="sag sonuk" title="Yarisi bu seviyede satildi — bu hedef harcandi, artik islemiyor">'
+          +esc(p.tp1)+' <span class="rozet">alındı</span></td>'
+      : '<td class="sag">'+esc(p.tp1)+'</td>')+
+    '<td class="sag'+(p.tp1_alindi?' vurgulu':'')+'" title="'
+      +(p.tp1_alindi?'CANLI HEDEF — pozisyonun kalani burada kapanir':'Kalan yarinin hedefi')
+      +'">'+(p.tp2!=null?esc(p.tp2):'–')+'</td>'+
     '<td class="sag sonuk">'+n2(p.likidasyon)+'</td>'+
     '<td class="sag" data-terim="skor" data-deger="'+p.skor_giriste+'">'+(p.skor_giriste!=null?p.skor_giriste:'–')+'</td>'+
     '<td><button onclick="mumGoster(\''+p.sym+'\')">grafik</button></td>'+

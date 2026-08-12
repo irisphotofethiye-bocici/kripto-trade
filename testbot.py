@@ -717,8 +717,9 @@ def pozisyon_kapat(st, pos, cikis_fiyat_piyasa, sebep):
     _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
     msg = f"[TESTBOT] KAPANDI {pos['sym']} {pos['yon']} {sebep} PnL={pnl_net:+.2f}$ (R={kayit['r']})"
-    telegram_gonder(msg)
-    toast_gonder("TestBot kapandi", f"{pos['sym']} {pos['yon']} {sebep} {pnl_net:+.2f}$")
+    telegram_gonder(msg, olay="kapanis")
+    toast_gonder("TestBot kapandi", f"{pos['sym']} {pos['yon']} {sebep} {pnl_net:+.2f}$",
+                 olay="kapanis")
     return kayit
 
 
@@ -743,8 +744,9 @@ def pozisyon_liq(st, pos):
     _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
     msg = f"[TESTBOT] LIKIDASYON {pos['sym']} {pos['yon']} marjin kaybi ${pos['marjin']:.2f}"
-    telegram_gonder(msg)
-    toast_gonder("TestBot LIKIDASYON", f"{pos['sym']} {pos['yon']} -${pos['marjin']:.2f}")
+    telegram_gonder(msg, olay="likidasyon")
+    toast_gonder("TestBot LIKIDASYON", f"{pos['sym']} {pos['yon']} -${pos['marjin']:.2f}",
+                 olay="likidasyon")
     return kayit
 
 
@@ -791,7 +793,8 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
     }
     _append_jsonl(_islem_defteri(), kayit)
-    telegram_gonder(f"[TESTBOT] TP1 {pos['sym']} {pos['yon']} yari kapatildi PnL={pnl_net:+.2f}$ (stop girise cekildi)")
+    telegram_gonder(f"[TESTBOT] TP1 {pos['sym']} {pos['yon']} yari kapatildi PnL={pnl_net:+.2f}$ (stop girise cekildi)",
+                    olay="tp1")
 
 
 def funding_uygula(st, pos):
@@ -1174,8 +1177,9 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
     st["sonraki_id"] += 1
     st["acik_pozisyonlar"].append(pos)
     telegram_gonder(f"[TESTBOT] GIRIS {sym} {yon} {kaldirac}x marjin=${marjin:.2f} "
-                     f"giris={giris_ef:.6g} stop={stop:.6g} tp1={tp1:.6g} skor={skor} — {sebep}")
-    toast_gonder("TestBot GIRIS", f"{sym} {yon} {kaldirac}x skor={skor}")
+                     f"giris={giris_ef:.6g} stop={stop:.6g} tp1={tp1:.6g} skor={skor} — {sebep}",
+                    olay="giris")
+    toast_gonder("TestBot GIRIS", f"{sym} {yon} {kaldirac}x skor={skor}", olay="giris")
     return True
 
 

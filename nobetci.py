@@ -67,9 +67,26 @@ def _bildirim_acik(kanal):
     return bool(b.get("acik", True)) and bool(b.get(kanal, True))
 
 
-def telegram_gonder(msg):
+def _olay_izinli(olay):
+    """kripto-config.json -> "bildirim": {"olaylar": ["giris", ...]}
+
+    [2026-08-12 KULLANICI KARARI: "bot giris yapinca telegramdan bildiri gelsin, sade giris"]
+    Liste YOKSA veya BOSSA hepsi gecer (eski davranis birebir korunur).
+    Liste varsa yalnizca icindeki olaylar gonderilir; digerleri sessizce atlanir.
+    Olay adlari: giris · kapanis · tp1 · likidasyon · alarm
+    Olaysiz (olay=None) cagrilar HER ZAMAN gecer — cagri yerleri etiketlenmemis
+    olabilir, filtre onlari susturmamali."""
+    if not olay:
+        return True
+    izin = (evren.cfg().get("bildirim") or {}).get("olaylar")
+    if not izin:
+        return True
+    return olay in izin
+
+
+def telegram_gonder(msg, olay=None):
     """kripto-config.json -> telegram_bot_token/telegram_chat_id. Yoksa sessizce atla."""
-    if not _bildirim_acik("telegram"):
+    if not _bildirim_acik("telegram") or not _olay_izinli(olay):
         return False
     cfg = evren.cfg()
     tok, chat = cfg.get("telegram_bot_token", ""), cfg.get("telegram_chat_id", "")
@@ -84,9 +101,9 @@ def telegram_gonder(msg):
         return False
 
 
-def toast_gonder(baslik, msg):
+def toast_gonder(baslik, msg, olay=None):
     """Windows toast, best-effort (WinRT). PowerShell yoksa/hata verirse sessizce gecilir."""
-    if not _bildirim_acik("toast"):
+    if not _bildirim_acik("toast") or not _olay_izinli(olay):
         return False
     try:
         import subprocess
@@ -120,8 +137,8 @@ def alarm_yaz(tur, sym, detay):
     except Exception:
         pass
     msg = f"[NOBETCI] {tur} {sym}: {detay}"
-    telegram_gonder(msg)
-    toast_gonder(f"Nobetci: {sym}", detay[:120])
+    telegram_gonder(msg, olay="alarm")
+    toast_gonder(f"Nobetci: {sym}", detay[:120], olay="alarm")
     return msg
 
 
