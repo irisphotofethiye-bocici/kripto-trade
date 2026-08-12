@@ -3226,3 +3226,52 @@ Kullanıcı o pozisyon için karar vermedi; veri **geri üretilemez** (sonucu bi
 "şurada kapatırdım" demek ölçümü sahteleştirir). Deneyde **eksik gözlem** olarak
 kayda geçti (`ayna_state.json → kayip_veri_notu`). `sonraki_id` de botla hizalandı
 (58 → 33; gölge id'leri şişirmişti).
+
+## ⭐ YAYIN KARNESİ — "11'inde aldığımız tarihten itibaren göster" (2026-08-12, kullanıcı)
+
+Defter 23 Temmuz'a kadar gidiyor ve **artık var olmayan bir botun** sonuçlarını içeriyor
+(risk %3, asgari stop yok, R/R kapısı açık, A+B ve MA50 kapıları yok). Tek karnede
+toplamak, eski botun karnesini bugünkünün üzerine yazmaktır.
+
+**Ankraj: 2026-08-11 12:48:31** — S9'un uygulandığı an (`islem_risk_pct %3→%1,5`,
+`asgari_stop_pct %2,0`). State'teki `_zirve_sifirlama` aynı anı, aynı gerekçeyle zaten
+kaydetmişti. Config: `testbot.yayin_ts` (yalnızca **görünüm**; equity ve işlem geçmişi
+değiştirilmez).
+
+**Filtre GİRİŞ zamanına göre** (`çıkış ts − tutma_saat`) — "bu bot hangi işlemleri
+**açmaya** karar verdi". Çıkışa göre süzmek, 10 Ağustos girişli RVN'i (+282,88) bugünkü
+bota yazardı.
+
+### "ME ve UMA'yı bu bot açtı" — kullanıcı sordu, ölçüldü
+
+Kullanıcı haklıydı ama **yarısında**. Giriş anındaki risk yüzdeleri:
+
+| giriş | coin | risk % | not |
+|---|---|---|---|
+| 11 Ağu 03:27 | ME | %1,50 | ayar değil — **akıllı para LONG**'du, boyut yarıya indi (%3→%1,5) |
+| 11 Ağu 08:34 | PROM | %2,99 | eski %3 |
+| 11 Ağu 10:30 | RVN | %3,00 | eski %3 |
+| 11 Ağu 12:21 | UMA | %0,76 | kaldıraç tavanı bağladı |
+| *— S9 —* | | | |
+| 11 Ağu 16:25+ | hepsi | %1,5–1,6 | bugünkü ayar |
+
+**Kapılar aynıydı** (A+B 10 Ağu, MA50+ucuz 11 Ağu 00:12) — o yüzden "bu bot açtı"
+sezgisi doğru. Değişen **boyut ve stop tabanı**.
+
+Keskin kanıt: **UMA'nın stopu %0,96** — bugünkü bot `asgari_stop_pct = %2,0` ile onu
+**reddederdi**. Yani UMA, bugünkü botun asla açmayacağı bir işlem.
+
+**Kullanıcı kararı: ankraj 12:48'de kalsın.** ME ve UMA "devir" sayılıyor; panelde
+sebebi yazılı.
+
+### Üç sayı ayrı gösteriliyor (toplamak yanıltır)
+
+| | |
+|---|---|
+| bu botun açtıkları | 12 işlem · %25 kazanç · ort −0,43 R · kapanan −390,34 + açık +216,95 = **saf karne −173,39** |
+| devir | kapanan +611,32 · hâlâ açık +288,10 (ME, UMA) |
+| ücret + fonlama | −109,20 |
+| **kasa** | 8.412,06 → 8.523,84 (**+111,78**) |
+
+Açık pozisyonlar da ayrıldı: ME/UMA yayından önce açıldığı için "efektif K/Z"ye tek
+parça bakmak eski botun taşıdığı kârı bugünkünün hanesine yazardı.

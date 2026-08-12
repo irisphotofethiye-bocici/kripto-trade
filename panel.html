@@ -572,8 +572,11 @@ function yayinBolumu(y){
   return '<section><h2>Yayından beri <span class="sonuk" style="font-weight:400">'+
       '— '+esc(y.ankraj.slice(0,16))+"'den itibaren, "+y.gun+' gün</span></h2>'+
     '<div class="not">Bot <b>son haliyle</b> bu tarihte yayına alındı ('+esc(y.ankraj_sebep)+
-      '). Öncesindeki işlemler <b>iki kat büyük</b> pozisyonlarla ve farklı kapılarla '+
-      'açılmıştı — aynı karneye katılmıyor.</div>'+
+      '). Öncesindeki işlemler <b>iki kat büyük</b> pozisyonlarla açılmıştı — aynı karneye '+
+      'katılmıyor.<br><b>“Devir” ne demek:</b> giriş kapıları (A+B, MA50+ucuz) bu tarihten '+
+      '<i>önce</i> de aynıydı, o yüzden devir işlemleri de bu botun kapılarından geçti. '+
+      'Değişen şey <b>pozisyon boyutu ve stop tabanı</b>. Örnek: UMA’nın stopu %0,96 idi — '+
+      'bugünkü bot onu <b>“stop çok dar”</b> diye reddederdi.</div>'+
     '<div class="kartlar">'+
       kart('Bu botun açtığı işlemler', y.toplam_islem,
         (y.kazanan||0)+' kazandı · %'+(y.win_rate!=null?y.win_rate:'–')+' · ort '+
