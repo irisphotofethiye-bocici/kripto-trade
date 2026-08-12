@@ -574,21 +574,38 @@ function aynaBolumu(d){
     '<td class="sag">'+esc(p.stop)+'</td><td class="sag">'+(p.tp2!=null?esc(p.tp2):'–')+'</td>'+
     '<td><button onclick="aynaKapat(\''+p.sym+'\')">kapatırdım</button></td></tr>');
 
-  let karneHtml = '<div class="not">Henüz eşleşmiş kapanış yok — karşılaştırma için '+
-    'işlemin <b>iki defterde de</b> kapanması gerekir.</div>';
-  if(elle.length){
-    karneHtml = tablo(['<th>Coin</th><th>Senin çıkışın</th><th class="sag">Ayna</th>',
-      '<th>Botun çıkışı</th><th class="sag">Bot</th><th class="sag">Fark</th>'],
-      elle.map(e=>'<tr><td><b>'+esc(e.sym)+'</b></td>'+
+  /* Kararların TAMAMI görünür: kesinleşenler + botta hâlâ açık olanlar.
+     Eskiden yalnız eşleşmiş kapanışlar listeleniyordu; 5 karar verip 3'ü botta açık
+     kalınca panelde 2 satır görünüyordu ve karar kaybolmuş gibi duruyordu. */
+  const bekleyen = k.bekleyen || [];
+  let karneHtml = '<div class="not">Henüz karar verilmedi. Açık bir ayna pozisyonunda '+
+    '“kapatırdım” dediğinde burada görünür.</div>';
+  if(elle.length || bekleyen.length){
+    const satirlar = elle.map(e=>'<tr><td><b>'+esc(e.sym)+'</b></td>'+
         '<td class="sonuk">'+esc(e.ayna_ts.slice(5,16))+'</td>'+
         '<td class="sag '+snf(e.ayna)+'">'+isar(e.ayna)+para(e.ayna)+'$</td>'+
         '<td class="sonuk">'+esc(e.bot_sebep)+' '+esc(e.bot_ts.slice(5,16))+'</td>'+
         '<td class="sag '+snf(e.bot)+'">'+isar(e.bot)+para(e.bot)+'$</td>'+
-        '<td class="sag '+snf(e.fark)+'"><b>'+isar(e.fark)+para(e.fark)+'$</b></td></tr>'))+
+        '<td class="sag '+snf(e.fark)+'"><b>'+isar(e.fark)+para(e.fark)+'$</b></td>'+
+        '<td><span class="rozet iyi">kesin</span></td></tr>')
+      .concat(bekleyen.map(e=>{
+        const c = (e.bot_canli!=null), f = e.fark_canli;
+        return '<tr><td><b>'+esc(e.sym)+'</b></td>'+
+        '<td class="sonuk">'+esc(e.ayna_ts.slice(5,16))+'</td>'+
+        '<td class="sag '+snf(e.ayna)+'">'+isar(e.ayna)+para(e.ayna)+'$</td>'+
+        '<td class="sonuk">'+(e.durum==='bekliyor'?'botta açık':'eşleşmedi')+'</td>'+
+        '<td class="sag sonuk">'+(c?isar(e.bot_canli)+para(e.bot_canli)+'$':'–')+'</td>'+
+        '<td class="sag sonuk">'+(c?'('+isar(f)+para(f)+'$)':'–')+'</td>'+
+        '<td><span class="rozet uyari">bekliyor</span></td></tr>';}));
+    karneHtml = tablo(['<th>Coin</th><th>Senin çıkışın</th><th class="sag">Ayna</th>',
+      '<th>Botun çıkışı</th><th class="sag">Bot</th><th class="sag">Fark</th><th></th>'],
+      satirlar)+
       '<div class="not"><b>Fark artı</b> = elle kapatmak daha iyiydi. '+
-      '<b>Fark eksi</b> = botu bırakmak daha iyiydi. '+
-      'Şu ana kadar net <b>'+isar(k.elle_fark)+para(k.elle_fark)+'$</b> '+
-      '('+k.kazandiran+' kazandırdı / '+k.kaybettiren+' kaybettirdi, '+elle.length+' karar).</div>';
+      '<b>Fark eksi</b> = botu bırakmak daha iyiydi.<br>'+
+      '<b>Kesinleşen net: '+isar(k.elle_fark)+para(k.elle_fark)+'$</b> '+
+      '('+k.kazandiran+' kazandırdı / '+k.kaybettiren+' kaybettirdi, '+elle.length+' işlem).'+
+      (bekleyen.length?' <b>'+bekleyen.length+' karar bekliyor</b> — botta hâlâ açık, '+
+        'parantez içindeki sayılar <b>gerçekleşmedi</b> ve karneye girmiyor.':'')+'</div>';
   }
   return '<section><h2>Ayna defteri — <span class="sonuk" style="font-weight:400">'+
       'botun girişlerinde benim çıkışım</span></h2>'+
@@ -603,7 +620,8 @@ function aynaBolumu(d){
         isar(fark)+para(fark)+'$</div><div class="alt">'+(Math.abs(fark)<0.01?
         'henüz ayrışmadı':'senin kararlarından')+'</div></div>'+
       '<div class="kart"><div class="etiket">Verdiğin karar</div><div class="deger">'+
-        elle.length+'</div><div class="alt">okunabilir eşik ~30</div></div>'+
+        (k.karar_sayisi||0)+'</div><div class="alt">'+elle.length+' kesinleşti · '+
+        (k.bekleyen||[]).length+' bekliyor · eşik ~30</div></div>'+
     '</div>'+
     '<div class="grafik" id="g-ayna-equity"></div>'+
     tablo(bas, sat, 'Aynada açık pozisyon yok.')+

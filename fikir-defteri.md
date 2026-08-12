@@ -3167,3 +3167,22 @@ sorulmalı. Bu projede o sorunun cevabı zaten `_DEFTER`'de duruyordu.
 Örüntü tanıdık: **erken çıkış kaybedeni kesiyor, kazananı da kesiyor.** CAP'te kâr
 korundu, RVN'de hedefin bir kısmı bırakıldı. İki işlemden kural çıkmaz — okuma eşiği
 ~30 karar.
+
+### Panel eksiği — verilen kararın 3'ü görünmüyordu (2026-08-12)
+
+**Kullanıcı bildirdi:** *"aynada kapatılmış 2 poz görünüyor sadece"* — beş karar
+verilmişti.
+
+**Sebep:** `karne()` yalnızca **iki defterde de kapanmış** işlemleri döndürüyordu.
+ME/UMA/IOTX botta hâlâ açık olduğu için karşılaştırılamıyor, dolayısıyla listeye
+hiç girmiyorlardı. Karar kaybolmuş gibi duruyordu.
+
+**Onarım:** `karne()` artık iki küme döndürüyor —
+- **kesin**: ikisinde de kapandı, fark **gerçekleşti**
+- **bekliyor**: aynada kapandı, botta açık; botun **gerçekleşmemiş** K/Z'si canlı
+  fiyattan gösterilir, parantez içinde ve `elle_fark` toplamına **dahil edilmez**
+
+Bu ayrım önemli: bekleyen farkı toplama katmak, henüz olmamış bir sonucu karneye
+yazmak olurdu. Panelde "bekliyor" rozetiyle ve soluk renkle ayrışıyor.
+
+**Durum:** 5 karar · 2 kesinleşti (net **+53,66 $**) · 3 bekliyor.

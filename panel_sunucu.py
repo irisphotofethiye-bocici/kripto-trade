@@ -955,12 +955,23 @@ def _ayna_ozet():
                   open(ayna.EQUITYF, encoding="utf-8").read().splitlines() if l.strip()]
         except Exception:
             eq = []
+        k = ayna.karne() or {}
+        # Bekleyen kararlar (aynada kapandi, botta ACIK): botun GERCEKLESMEMIS
+        # K/Z'sini canli fiyattan doldur ki kullanici "kararim ne durumda" gorsun.
+        for e in (k.get("bekleyen") or []):
+            if e.get("durum") != "bekliyor":
+                continue
+            px = testbot.fiyat_fapi(e["sym"])
+            if px:
+                isaret = 1 if e["yon"] == "LONG" else -1
+                e["bot_canli"] = round((px - e["bot_giris"]) * e["bot_miktar"] * isaret, 2)
+                e["fark_canli"] = round(e["ayna"] - e["bot_canli"], 2)
         return {"equity": round(st.get("equity", 0), 2),
                 "baslangic_bakiye": st.get("baslangic_bakiye"),
                 "baslangic_ts": st.get("baslangic_ts"),
                 "acik_pnl_toplam": round(sum(a["acik_pnl"] for a in acik), 2),
                 "acik_pozisyonlar": acik, "equity_serisi": eq[-2000:],
-                "karne": ayna.karne()}
+                "karne": k}
     except Exception:
         return None
 

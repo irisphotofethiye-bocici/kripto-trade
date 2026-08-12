@@ -179,29 +179,50 @@ def equity_yaz(st):
 
 
 def karne():
-    """Ayna vs bot: yalnizca AYNI id'ye sahip, IKISINDE DE KAPANMIS islemler eslesir."""
+    """Ayna vs bot, id uzerinden eslestirerek.
+
+    [EKSIK VE ONARIMI 2026-08-12] Eskiden yalnizca IKISINDE DE KAPANMIS islemler
+    donuyordu; kullanici 5 karar verdiyse ve bunlarin 3'u BOTTA HALA ACIKSA panelde
+    yalnizca 2 satir gorunuyordu ("aynada kapatilmis 2 poz goruyorum"). Verilen karar
+    kaybolmus gibi duruyordu. Artik ucu de donuyor:
+      kesin   : ikisinde de kapandi -> fark GERCEKLESTI
+      bekleyen: aynada kapandi, botta ACIK -> fark henuz belirsiz (canli PnL panelde)
+    'elle_fark' YALNIZ kesinlesenleri toplar; bekleyenler karari kirletmez."""
     try:
         ay = [json.loads(l) for l in open(ISLEMLERF, encoding="utf-8") if l.strip()]
         bo = [json.loads(l) for l in open(testbot.ISLEMLERF, encoding="utf-8") if l.strip()]
     except Exception:
         return None
+    bst = testbot._load_state() or {}
+    bot_acik = {p["id"]: p for p in (bst.get("acik_pozisyonlar") or [])}
     ay = [k for k in ay if not k.get("kismi")]
-    bo = {k["id"]: k for k in bo if not k.get("kismi")}
-    esli = []
+    bo_kapali = {k["id"]: k for k in bo if not k.get("kismi")}
+
+    kesin, bekleyen = [], []
     for k in ay:
-        b = bo.get(k["id"])
+        ortak = {"id": k["id"], "sym": k["sym"], "yon": k["yon"],
+                 "ayna_sebep": k["sebep"], "ayna": k["sonuc_usdt"], "ayna_ts": k["ts"]}
+        b = bo_kapali.get(k["id"])
         if b and b["sym"] == k["sym"]:
-            esli.append({"id": k["id"], "sym": k["sym"], "yon": k["yon"],
-                         "ayna_sebep": k["sebep"], "ayna": k["sonuc_usdt"],
-                         "bot_sebep": b["sebep"], "bot": b["sonuc_usdt"],
-                         "fark": round(k["sonuc_usdt"] - b["sonuc_usdt"], 2),
-                         "ayna_ts": k["ts"], "bot_ts": b["ts"]})
-    elle = [e for e in esli if e["ayna_sebep"] == "ELLE_KAPAT"]
-    return {"esli": esli, "elle": elle,
-            "elle_fark": round(sum(e["fark"] for e in elle), 2),
-            "tum_fark": round(sum(e["fark"] for e in esli), 2),
-            "kazandiran": sum(1 for e in elle if e["fark"] > 0),
-            "kaybettiren": sum(1 for e in elle if e["fark"] < 0)}
+            kesin.append({**ortak, "bot_sebep": b["sebep"], "bot": b["sonuc_usdt"],
+                          "fark": round(k["sonuc_usdt"] - b["sonuc_usdt"], 2),
+                          "bot_ts": b["ts"], "durum": "kesin"})
+        elif k["id"] in bot_acik and bot_acik[k["id"]]["sym"] == k["sym"]:
+            p = bot_acik[k["id"]]
+            bekleyen.append({**ortak, "durum": "bekliyor", "bot_sebep": "ACIK",
+                             "bot_giris": p["giris"], "bot_miktar": p["miktar"],
+                             "bot_tp2": p.get("tp2"), "bot_stop": p.get("stop")})
+        else:
+            # botta ne acik ne kapali (orn. kurulum oncesi kapanmis) -> eslesemez
+            bekleyen.append({**ortak, "durum": "eslesmedi", "bot_sebep": "?"})
+
+    elle_kesin = [e for e in kesin if e["ayna_sebep"] == "ELLE_KAPAT"]
+    return {"esli": kesin, "elle": elle_kesin, "bekleyen": bekleyen,
+            "elle_fark": round(sum(e["fark"] for e in elle_kesin), 2),
+            "tum_fark": round(sum(e["fark"] for e in kesin), 2),
+            "kazandiran": sum(1 for e in elle_kesin if e["fark"] > 0),
+            "kaybettiren": sum(1 for e in elle_kesin if e["fark"] < 0),
+            "karar_sayisi": sum(1 for k in ay if k["sebep"] == "ELLE_KAPAT")}
 
 
 def durum():
@@ -220,19 +241,31 @@ def durum():
         print(f"   {p['sym']:10} {p['yon']:5} giris {p['giris']:<12} "
               f"stop {p['stop']:<12} tp2 {p.get('tp2')}  [{p.get('ayna_kaynak','')}]")
     k = karne()
-    if not k or not k["esli"]:
-        print("\nHenuz eslesmis kapanis yok (ikisinde de kapanan islem gerekiyor).")
+    if not k or not (k["esli"] or k["bekleyen"]):
+        print("\nHenuz karar verilmedi.")
         return
-    print(f"\nESLESMIS KAPANIS: {len(k['esli'])}  |  ELLE kapatilan: {len(k['elle'])}")
+    print(f"\nVERDIGIN KARAR: {k['karar_sayisi']}  |  kesinlesen: {len(k['elle'])}  "
+          f"|  bekleyen: {len(k['bekleyen'])}")
     print(f"{'id':>4} {'coin':10}{'AYNA':>22}{'BOT':>22}{'FARK':>10}")
     print("-" * 72)
     for e in k["esli"]:
         print(f"{e['id']:>4} {e['sym']:10}{e['ayna_sebep']:>12}{e['ayna']:+10.2f}"
               f"{e['bot_sebep']:>12}{e['bot']:+10.2f}{e['fark']:+10.2f}")
+    for e in k["bekleyen"]:
+        canli = ""
+        if e["durum"] == "bekliyor":
+            px = testbot.fiyat_fapi(e["sym"])
+            if px:
+                isaret = 1 if e["yon"] == "LONG" else -1
+                canli = f"{(px - e['bot_giris']) * e['bot_miktar'] * isaret:+10.2f}"
+        print(f"{e['id']:>4} {e['sym']:10}{e['ayna_sebep']:>12}{e['ayna']:+10.2f}"
+              f"{e['bot_sebep']:>12}{canli:>10}{'   (bekliyor)' if e['durum']=='bekliyor' else '   (eslesmedi)'}")
     print("-" * 72)
-    print(f"Elle kapatilanlarin net farki: {k['elle_fark']:+.2f}$   "
+    print(f"KESINLESEN net fark: {k['elle_fark']:+.2f}$   "
           f"({k['kazandiran']} kazandirdi / {k['kaybettiren']} kaybettirdi)")
     print("  (+) = elle kapatmak DAHA IYIYDI   (-) = botu birakmak daha iyiydi")
+    if k["bekleyen"]:
+        print("  Bekleyenler bot kapanana kadar karneye GIRMEZ (canli sayilar gerceklesmedi).")
 
 
 def main():
