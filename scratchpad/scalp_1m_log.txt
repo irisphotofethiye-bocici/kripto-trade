@@ -1,0 +1,42 @@
+Rejim ve sinyaller hazirlaniyor...
+  sinyal taramasi 150/567 ...
+  sinyal taramasi 300/567 ...
+  sinyal taramasi 450/567 ...
+
+BULUNAN SINYALLER (kapi x rejim):
+  A+B      BOGA  mevcut    558 -> ornek  500
+  A+B      NOTR  mevcut  11277 -> ornek  500
+  A+B      AYI   mevcut   2729 -> ornek  500
+  MA50     BOGA  mevcut   2213 -> ornek  500
+  MA50     NOTR  mevcut  16377 -> ornek  500
+  MA50     AYI   mevcut   3213 -> ornek  500
+  KONTROL  BOGA  mevcut    502 -> ornek  500
+  KONTROL  NOTR  mevcut   4018 -> ornek  500
+  KONTROL  AYI   mevcut    616 -> ornek  500
+
+TOPLAM 4500 istek · ~68 dk
+[200/4500] gecen 5dk · kalan ~106dk · bot son tur 1.0dk once
+[400/4500] gecen 10dk · kalan ~99dk · bot son tur 5.7dk once
+[600/4500] gecen 14dk · kalan ~93dk · bot son tur 3.7dk once
+[800/4500] gecen 19dk · kalan ~88dk · bot son tur 1.0dk once
+[1000/4500] gecen 24dk · kalan ~83dk · bot son tur 5.6dk once
+[1200/4500] gecen 28dk · kalan ~78dk · bot son tur 2.9dk once
+[1400/4500] gecen 33dk · kalan ~73dk · bot son tur 0.2dk once
+[1600/4500] gecen 38dk · kalan ~68dk · bot son tur 4.9dk once
+[1800/4500] gecen 43dk · kalan ~64dk · bot son tur 1.9dk once
+[2000/4500] gecen 47dk · kalan ~59dk · bot son tur 6.6dk once
+[2200/4500] gecen 52dk · kalan ~54dk · bot son tur 4.0dk once
+[2400/4500] gecen 57dk · kalan ~50dk · bot son tur 1.1dk once
+[2600/4500] gecen 61dk · kalan ~45dk · bot son tur 5.9dk once
+[2800/4500] gecen 66dk · kalan ~40dk · bot son tur 3.2dk once
+[3000/4500] gecen 71dk · kalan ~35dk · bot son tur 0.2dk once
+[3200/4500] gecen 76dk · kalan ~31dk · bot son tur 5.0dk once
+[3400/4500] gecen 80dk · kalan ~26dk · bot son tur 2.4dk once
+[3600/4500] gecen 85dk · kalan ~21dk · bot son tur 7.1dk once
+[3800/4500] gecen 90dk · kalan ~17dk · bot son tur 4.4dk once
+[4000/4500] gecen 94dk · kalan ~12dk · bot son tur 1.4dk once
+[4200/4500] gecen 99dk · kalan ~7dk · bot son tur 6.2dk once
+[4400/4500] gecen 104dk · kalan ~2dk · bot son tur 3.6dk once
+
+BITTI — 4498 yeni · toplam 4498 · 107 dk
+

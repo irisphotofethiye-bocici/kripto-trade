@@ -2893,3 +2893,55 @@ küçük örneklem artığıydı. *(İyi ki "bu bir gözlem, kural değil" diye 
 **kötümser** varsayımla hep STOP sayıldı. Yani bu tablo **ALT SINIR**. Canlıda ekranı
 izleyen biri sırayı görür ve daha iyisini yapabilir. Gerçek cevap için **15 dakikalık
 veri** gerekir; 1 saatlik çözünürlükte kapanmayan soru bu.
+
+### KESİN CEVAP — 1 dakikalık ölçüm (alt sınır değil, gerçek)
+
+Kullanıcı haklıydı: *"6 ay eşit sınama olmaz, ayı sadece."* Toplu 15dk yerine **her
+sinyalin etrafından tek istek** çekildi — 4.498 kayıt, **rejime tam eşit** (kapı × rejim
+başına ~500), her birinde 260 dakikalık bar. İndirme 107 dk, bot boyunca sağlıklı.
+`scratchpad/scalp_1m_indir.py` + `scalp_1m_olc.py`
+
+**1 saatlik ölçüm gerçekten kötümsermiş** — ama yönü değiştirmedi:
+
+| kapı | 1 saatlik (alt sınır) | **1 dakikalık (gerçek)** | fark |
+|---|---|---|---|
+| A+B | −0,168 | **−0,008** | +0,160 |
+| MA50+ucuz | −0,199 | **−0,085** | +0,114 |
+| **KONTROL** | −0,094 | **+0,032** | +0,126 |
+
+**Rastgele giriş her iki kapıyı da yeniyor.** Ve o +0,032 bile 20 hücrelik ızgaranın
+maksimumu — yani tarama artığı adayı.
+
+### Rejim ayrımı ikisini de çürütüyor
+| kapı | en iyi hücre | BOĞA | NÖTR | AYI |
+|---|---|---|---|---|
+| A+B | 2,0/2,0 | **+0,093** | −0,030 | −0,087 |
+| MA50+ucuz | 2,0/0,5 | −0,039 | −0,116 | −0,100 |
+| KONTROL | 1,5/2,0 | −0,051 | **+0,089** | **+0,060** |
+
+**İkisi de rejime göre işaret değiştiriyor.** A+B yalnız boğada, kontrol yalnız boğa
+dışında pozitif. Bu bir kenar değil, ızgara taramasının gürültüsü.
+
+### ⭐ YAPISAL SEBEP — MFE/MAE her yerde ~1,0
+| kapı | 15dk MFE | 15dk MAE | oran |
+|---|---|---|---|
+| MA50+ucuz | 0,60 | 0,57 | **1,05** |
+| A+B | 0,45 | 0,45 | **1,00** |
+| KONTROL | 0,37 | 0,34 | **1,09** |
+
+240 dakikaya kadar oran hep **1,00–1,15**. Kapılar **daha çok hareket** üretiyor
+(MA50 kontrolden %62 fazla) ama **yön asimetrisi ÜRETMİYOR.**
+
+Aritmetiği: oran ~1,05 iken simetrik hedef/stop ≈ %51/%49 verir →
+`beklenti = 0,02×H − 0,13` → başabaş için **H > %6,5**. O da scalp değil.
+
+> **Bot, girişleriyle sana daha OYNAK bir coin veriyor — daha YÖNLÜ bir coin değil.**
+> Scalper maliyeti (%0,13) simetrik harekette her zaman kazanır.
+
+### Ama işe yarar bir kullanım kaldı
+MA50+ucuz 15 dakikada medyan **%0,60** hareket üretiyor, kontrol %0,37 — **%62 fazla.**
+Yönü kendi belirleyebilen biri için (grafik, emir akışı, haber) bot bir **oynaklık
+tarayıcısı** olarak değerli: "şu an hangi coinler hareketli" sorusuna cevap veriyor.
+Yön sinyali olarak değil.
+
+**KARAR: scalp fikri ölçüldü ve çalışmıyor. Bota hiçbir şey eklenmedi.**
