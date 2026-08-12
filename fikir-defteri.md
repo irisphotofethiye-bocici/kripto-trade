@@ -3050,3 +3050,26 @@ ve TP1 anında tetiklenir. Doğru onarım kod tarafında: `tp1_efektif_hesapla` 
 Kısmi kârın kendisi (%40) kapatılmıyor: kullanıcı 2026-08-11'de bunun kenarı
 küçülttüğünü **bilerek** kabul etmişti (tek işlem bazında kâr koruması). Bu ölçüm o
 kararı değiştirmiyor, yalnızca **ayarın sözünü tutmasını** sağlıyor.
+
+### KULLANICI KARARI: 1,5R KALSIN (2026-08-12)
+
+Ölçüm sonucu sunuldu, onarım **uygulanmadı**. Kullanıcının gerekçesi: stop dar
+olduğunda kâr alma erken tetikleniyor ve bunu **istiyor**.
+
+Mekanik netleştirmesi (kullanıcı "stop erken tetikleniyor" dedi, düzeltildi):
+stop HAREKET ETMİYOR; short'ta girişin üstünde duruyor. Erkene gelen **TP1**:
+`TP1 = yakın olan{%4 · 1,5×stop%}`. Dar stop → 1,5R küçülür → kâr alma girişe yaklaşır.
+
+Kararın bedeli açıkça kayda geçti: dar-stop diliminde (canlı girişlerin %30'u)
+işlem başına **−0,016 sermaye**, `t_kume −0,10` — yani **gürültüden ayrışmıyor**.
+Kanıt "zararlı" demiyor, "bedava değil" diyor. Kullanıcı 2026-08-11'de `kismi_pay`
+için de aynı takası bilerek yapmıştı (kenardan feragat ↔ tek işlem kâr koruması).
+
+Karşı-argüman da kayda geçsin: dar stop = büyük pozisyon (risk-öncelikli
+boyutlandırma), erken alınan yarı daha çok dolar kilitler. Ölçüm bunun getirdiğinden
+çok götürdüğünü söylüyor ama fark istatistiksel değil.
+
+**Değişen hiçbir şey yok — pencere (6/138) sıfırlanmadı, bot kesintisiz.**
+Geri dönmek istenirse tek satır: `testbot.py:902` çağrısını `cikis_modu ==
+"sabit_hedef"` pozisyonlarda atla. `kismi_kar_r = 0` YAPILMAMALI (SHORT'ta TP1=giriş
+olur, anında tetikler).
