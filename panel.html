@@ -491,10 +491,18 @@ async function ozetYukle(el){
     /* 2026-08-13: "tüm zamanlar" ikincil etiketleri kaldırıldı — kullanıcı 23 Temmuz
        verisinin panelde hiç görünmemesini istedi. Sunucu zaten ankraj öncesi 20 işlemi
        süzüyor, bu yüzden k.* ile yy.* artık aynı şeyi gösteriyordu. */
-    ['Kapanan işlem',null, (yy.toplam_islem!=null?yy.toplam_islem:'–'),
-      '11 Ağustos\'tan beri'],
-    ['Kazanma oranı','winrate', (yy.win_rate!=null?'%'+yy.win_rate:'–'),
-      'tek başına yeterli değil'],
+    /* Sayaçlar POZİSYON bazında (kısmi + kalan yarı birlikte) — kayıt bazında saymak
+       kısmi kâr almış pozisyonu net kârda olsa bile "kaybeden" yazıyordu. */
+    ['Kapanan işlem',null, (k.toplam_islem!=null?k.toplam_islem:'–'),
+      '11 Ağustos\'tan beri · pozisyon bazında'],
+    ['Kazanma oranı','winrate', (k.win_rate!=null?'%'+k.win_rate:'–'),
+      (k.kazanan||0)+' kazandı · başabaş ~%40'],
+    ['Kapanmış işlem K/Z',null,'<span class="'+snf(k.toplam_pnl)+'">'+
+      isar(k.toplam_pnl)+para(k.toplam_pnl)+'$</span>',
+      'ort kazanç '+n2(k.ort_kazanc)+' · ort kayıp '+n2(k.ort_kayip)],
+    ['Açık pozisyonların kısmi kârı',null,'<span class="'+snf(k.acik_kismi_pnl)+'">'+
+      isar(k.acik_kismi_pnl)+para(k.acik_kismi_pnl)+'$</span>',
+      'bankada · ama diğer yarı hâlâ RİSKTE'],
     ['Ortalama','r','<span class="'+snf(yy.ort_r)+'">'+(yy.ort_r!=null?yy.ort_r+' R':'–')+'</span>',
       'risk birimi başına'],
     /* Ücret/fonlama artık YAYINDAN BERİ — state'teki kümülatif sayaçlar 23 Temmuz'dan

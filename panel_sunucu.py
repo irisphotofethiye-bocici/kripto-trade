@@ -101,9 +101,17 @@ def _durum_json():
         "acik_pozisyonlar": acik, "son_islemler": islemler[-200:],
         "equity_serisi": _egri_kirp(_egri_duzelt(equity_serisi, st))[-2000:],
         "karne": {
-            "toplam_islem": len(tam), "kazanan": len(kazanan),
-            "win_rate": round(len(kazanan) / len(tam) * 100, 1) if tam else None,
-            "toplam_pnl": round(sum(t["sonuc_usdt"] for t in islemler), 2),
+            # [ONARIM 2026-08-13, kullanici: "kazanma orani %33 diyor ama kazanilan
+            #  rakam daha fazla"] — iki ayri olcu hatasi vardi:
+            #  (a) KAZANMA ORANI kayit basina sayiliyordu. Kismi kar alinmis bir
+            #      pozisyon defterde IKI satir olur (yari + kalan yari); kalan yari
+            #      zararla kapanirsa pozisyon NET karda olsa bile "kaybeden" sayiliyordu.
+            #      Ornek: CAP kismi +93.63, kalan -67.08 -> pozisyon +26.55 KAZANC,
+            #      ama eski sayim onu kayip yaziyordu. 7/21 (%33.3) -> 8/21 (%38.1).
+            #  (b) TOPLAM PNL, hala ACIK pozisyonlarin kismi karlarini da topluyordu.
+            #      O para bankaya girdi ama pozisyonun DIGER YARISI hala riskte —
+            #      kapanmis karne gibi gostermek yaniltiyordu. Ayrildi.
+            **_pozisyon_karne(islemler, st),
             "tp1_kismi_pnl": round(sum(t["sonuc_usdt"] for t in islemler if t.get("kismi")), 2),
             "ort_r": round(sum(rler) / len(rler), 2) if rler else None,
             # funding/giris-ucreti acik pozisyonlarda equity'yi degistirir ama islem-log'a hic yazilmaz
@@ -992,6 +1000,37 @@ def _px(sym, varsayilan=None):
 #   yanlislikla bugune yazardi.
 # NOT: "Yayindan beri" bolumu defteri KENDI okur (suzulmemis) — devir islemleri orada
 #   ayrica gosterilmesi gerekiyor. Bu filtre panelin GERI KALANI icin.
+def _pozisyon_karne(islemler, st):
+    """Karneyi POZISYON bazinda kurar (kismi + kalan yari BIRLIKTE).
+
+    NEDEN: defterde bir pozisyon birden fazla satir olabilir (TP1_KISMI + kapanis).
+    Satir basina saymak iki hata uretiyordu:
+      - kismi kar almis ama kalan yarisi zararla kapanmis pozisyon, NET karda olsa
+        bile "kaybeden" sayiliyordu;
+      - hala ACIK pozisyonlarin kismi karlari "kapanmis karne" toplamina giriyordu,
+        oysa o pozisyonun diger yarisi hala riskte.
+    Artik ikisi ayri raporlanir: kapali_pnl (gercek karne) ve acik_kismi_pnl."""
+    acik_id = {p["id"] for p in (st.get("acik_pozisyonlar") or [])}
+    poz = {}
+    for k in islemler:
+        p = poz.setdefault(k["id"], {"usd": 0.0, "kapandi": False})
+        p["usd"] += k["sonuc_usdt"]
+        if not k.get("kismi"):
+            p["kapandi"] = True
+    kapali = [p for i, p in poz.items() if p["kapandi"] and i not in acik_id]
+    kazanan = [p for p in kapali if p["usd"] > 0]
+    return {
+        "toplam_islem": len(kapali),
+        "kazanan": len(kazanan),
+        "win_rate": round(len(kazanan) / len(kapali) * 100, 1) if kapali else None,
+        "toplam_pnl": round(sum(p["usd"] for p in kapali), 2),
+        "acik_kismi_pnl": round(sum(p["usd"] for i, p in poz.items() if i in acik_id), 2),
+        "ort_kazanc": round(sum(p["usd"] for p in kazanan) / len(kazanan), 2) if kazanan else None,
+        "ort_kayip": round(sum(p["usd"] for p in kapali if p["usd"] <= 0)
+                           / max(len(kapali) - len(kazanan), 1), 2) if kapali else None,
+    }
+
+
 def _ankraj():
     try:
         return str(testbot._c("yayin_ts", "2026-08-11 12:48:31"))

@@ -3637,3 +3637,44 @@ bugüne yazardı.
 
 Kart etiketlerindeki "tüm zamanlar ..." ikincil satırları kaldırıldı (sunucu zaten
 süzdüğü için aynı sayıyı gösteriyorlardı).
+
+### 🔴 "Kazanma oranı %33 ama kazanılan rakam daha fazla" — kullanıcı iki ölçü hatası buldu (2026-08-13)
+
+Soru haklıydı ve altından **iki ayrı hata** çıktı.
+
+#### Hata 1 — kazanma oranı KAYIT bazında sayılıyordu
+Kısmi kâr alınmış bir pozisyon defterde **iki satır** olur (yarı + kalan yarı). Kalan
+yarı zararla kapanırsa, pozisyon **net kârda olsa bile** "kaybeden" sayılıyordu.
+
+Örnek **CAP**: kısmi **+93,63**, kalan **−67,08** → pozisyon **+26,55 KAZANÇ**, ama eski
+sayım onu kayıp yazıyordu. Düzeltince **7/21 (%33,3) → 8/21 (%38,1)**.
+
+#### Hata 2 — toplam PnL, hâlâ açık pozisyonların kısmi kârını da topluyordu
+Panelde **+119,04 $** yazıyordu. Açılımı:
+
+```
+21 KAPANMIŞ pozisyonun toplamı      −83,62 $   <- ASIL KARNE
+hâlâ AÇIK pozisyonların kısmi kârı +202,66 $   <- diğer yarısı RİSKTE
+────────────────────────────────────────────
+panelde görünen                    +119,04 $
+```
+
+O +202,66 (PROM, MOVE, COTI, KAITO) bankaya girdi ama **pozisyonların diğer yarısı hâlâ
+açık**. Kapanmış karne gibi göstermek yanıltıyordu.
+
+**Düzeltilmiş gerçek tablo (21 kapanmış pozisyon):**
+
+| | |
+|---|---|
+| kazanan | 8 (%38,1) · ortalama **+147,23 $** |
+| kaybeden | 13 · ortalama **−97,04 $** |
+| kazanç/kayıp oranı | 1,52× → **başabaş isabet %39,7** |
+| **net** | **−83,62 $** |
+| ort R | **−0,28** |
+
+Yani gerçek isabet (%38,1) başabaşın (%39,7) **hemen altında** — ve `ort R −0,28` bunu
+doğruluyor. Sistem şu an kıl payı kaybediyor, kazanmıyor.
+
+**Onarım:** `_pozisyon_karne()` — karne artık pozisyon bazında kuruluyor; kapanmış K/Z
+ile açık pozisyonların kısmi kârı **ayrı** kartlarda. `ort_kazanc` / `ort_kayip` de
+eklendi, çünkü kazanma oranı tek başına hiçbir şey söylemiyor.
