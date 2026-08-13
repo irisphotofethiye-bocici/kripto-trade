@@ -3516,3 +3516,44 @@ kadar tutuluyor ve %1/gün × 3 gün = **%3**. Maliyet kenardan büyük olabilir
 **Bu, kapıyı kapatmak için yeterli değil** — ölçülmemiş bir kalem bulundu, o kadar.
 2 yıllık funding verisi elimizde (`scratchpad/funding_gecmis/`, 567 sembol); A+B ölçümü
 fonlama maliyeti dahil tekrar koşturulabilir. Kullanıcıya soruldu.
+
+## ⭐ ÖN-KAYIT — A+B'nin funding MALİYETİ dahil sınavı (2026-08-13, koşturulmadan önce)
+
+**Neden:** canlıda fonlama yayından beri **−189,05 $** çıktı ve şu an **günde −100 $**
+akıyor (hesabın ~%1'i/gün). A+B'nin 2 yıllık ölçümünde deftere *"funding maliyeti
+eklenmedi"* yazmıştım — o boşluk şimdi kapanıyor.
+
+**Sınanan:** A+B'nin funding bacağı (`funding ≤ −0,05 %/8s → SHORT`), **fonlama
+maliyeti dahil**. Aynı olaylar, aynı mekanik, tek fark maliyet kalemi.
+
+**Fonlama muhasebesi.** Pozisyon tutulurken her 8 saatlik fonlama anında gerçek
+tarihsel oran uygulanır. SHORT için P&L katkısı = Σ(oran) — oran negatifken **ödersin**.
+Bu, canlı botun `funding_uygula` mantığıyla aynı işaret kuralı.
+
+**Popülasyon:** canlı `asgari_stop_pct = %2,0` uygulanır (11 Ağustos'ta öğrenildi:
+uygulanmazsa örneklemin %71'i botun hiç açmayacağı işlemlerden oluşuyor).
+
+**Mekanik canlının aynısı:** A-stop · Wilder ATR · sabit %10 hedef · 72 saat · işlem
+maliyeti %0,13 · giriş sonraki barın açılışı · pump kapısı · hacim tabanı $3M/24s ·
+seyreltme 24 bar. Kontrol: rejim-eşleşmiş rastgele barlar.
+
+Betik: `scratchpad/ab_funding_maliyetli.py` · veri: `klines_1h_uzun` (566 sembol, 2 yıl)
++ `funding_gecmis` (567 sembol).
+
+### GEÇME ÖLÇÜTÜ (koşturmadan önce yazıldı)
+A+B **kalır** ancak fonlama maliyeti dahil edildikten sonra şunların **hepsi**:
+1. Net sermaye getirisi **> 0**
+2. Kontrolü **yenmeli**
+3. **İki zaman yarısında da** pozitif
+4. Boğa ve ayı rejimlerinin **ikisinde de** çökmemeli
+5. Kaç ayrı sembolden geldiği raporlanacak (`t_kume`)
+
+Geçmezse kapı kapatılır ve gerekçe deftere yazılır.
+
+**BEKLENTİM (yanılabilirim, kayda geçsin):** kenarın **yenileceğini** bekliyorum.
+Maliyetsiz ölçümde net +0,111 sermaye/işlem idi. Fonlama −0,05 %/8s eşiğinde bile
+72 saatte 9 fonlama anı × %0,05 = **%0,45**; ama kapı eşiği aşan coinleri de alıyor ve
+canlıda gördüğüm oranlar **−0,18 ile −0,51** arasında. Ortalama −0,15 varsayarsam
+72 saatte **%1,35** — kenarın kendisinden büyük. Yine de tutuş süresi çoğu işlemde
+72 saatten kısa (stop erken vuruyor), o yüzden emin değilim: **gerçek fonlama yükü
+tutma süresine bağlı ve onu ancak ölçüm söyler.**
