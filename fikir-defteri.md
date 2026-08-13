@@ -3852,3 +3852,57 @@ pencereleri, hepsi benim test çalıştırmalarımdan); yedeklenip temizlendi: 2
 Kapanmış 44 pozisyonun **ömür boyu hacim/agresör** verisi geriye dönük doldurulabilir
 (mumlar tarihsel), ama `--doldur` özette zaten kayıtlı id'leri atlıyor. Yenileme
 gerekirse ayrı karar.
+
+---
+
+### 2026-08-13 · Kapanmış 45 pozisyon geriye dönük yenilendi + agresör ölçümü
+
+`izleyici.py --yenile` eklendi: kapanmış özetlerin **mumdan türeyen** alanlarını
+yeniden hesaplar, **radar izini korur** (birleştirme; radar noktasal, geri üretilemez).
+45/45 yenilendi. **Yan ürün doğrulama: `arti_dakika` sapması 0/45** — yeniden hesap
+eski değerleri birebir üretti, mum penceresi doğru.
+
+Yeni alanlar: `ilk_taker_60` (girişten sonraki ilk saat) ile `son_taker_60`
+(kapanıştan önceki saat) yan yana — *"girerken ne vardı / çıkarken ne vardı"*.
+
+#### Ölçüm: agresör dengesi kazananları ayırıyor mu?
+Ön-kayıt `d1e7f8c` ile koşmadan önce yazıldı; yön düzeltmesi şart (SHORT'ta lehte olan
+**düşük** taker alış payı).
+
+**İlk bakışta üç kapı da geçti:**
+
+| | N | kazanan | ort $ |
+|---|---|---|---|
+| ilk saat agresörü lehte (medyan üstü) | 22 | 50% | +36,67 |
+| aleyhte (medyan altı) | 23 | 26% | −68,66 |
+
+Fark +105,33 $; 11 Ağustos sonrası alt örnekte +129,77 $. Ön-kayıtlı kapı
+*"KURAL ADAYI"* dedi.
+
+#### Ama kural ÇIKARILMADI — karıştırıcı kontrolü çürüttü
+
+Şüphe uyandıran şey: aynı koşuda **"ömür boyu hacim"** de neredeyse aynı farkı verdi
+(+111,55 $). İki bağımsız ölçünün aynı cevabı vermesi genelde **ortak bir karıştırıcı**
+demektir.
+
+`ilk_taker_60` girişTEN SONRAKİ 60 dakikada ölçülüyor. O saatte fiyat lehimize
+gittiyse agresör de lehimize görünür. Test:
+
+- `ilk_lehte` ↔ ilk saat getirisi **r = +0,578** — ölçü büyük ölçüde fiyatın kendisi
+- `ilk_lehte` ↔ sonuç r = +0,212, ilk getiri ↔ sonuç r = +0,330 → **fiyat daha güçlü**
+- **İlk saat getirisi sabitlenince işaret tutarsız:** artıda başlayanlarda +34,94 $,
+  ekside başlayanlarda **−5,51 $**
+- Kapı dağılımı da dengesiz (MA50+ucuz 8/4 lehte yarıda, A+B 4/6) — ayrım kısmen
+  hangi kapıdan girildiğini temsil ediyor
+
+**Karıştırıcı kontrolü ön-kayıtlı DEĞİLDİ.** Bunu açıkça yazıyorum: ama iddiayı
+*büyüten* değil *küçülten* bir geçerlilik testi olduğu için yöntemsel olarak meşru.
+Tersi olsaydı (kapıda kalan bir bulguyu ek testle kurtarmak) meşru olmazdı.
+
+#### Ne öğrendik
+Agresör dengesi, `erken_mudahale.py`'nin zaten bulduğu **"erken durum sonucu haber
+verir"** gözleminin başka bir ifadesi. Yeni bilgi taşıdığı **kanıtlanamadı**.
+Bu, aynı örüntünün yedincisi.
+
+**Asıl değerli olan hâlâ toplanmadı:** `d_taker` (15dk − 60dk kayması) pozisyonun
+ömrü BOYUNCA, her 5 dakikada. Geriye dönük üretilemez, canlı birikmeli. Bugün başladı.
