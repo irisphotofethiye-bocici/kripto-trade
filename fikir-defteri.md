@@ -3557,3 +3557,51 @@ canlıda gördüğüm oranlar **−0,18 ile −0,51** arasında. Ortalama −0,1
 72 saatte **%1,35** — kenarın kendisinden büyük. Yine de tutuş süresi çoğu işlemde
 72 saatten kısa (stop erken vuruyor), o yüzden emin değilim: **gerçek fonlama yükü
 tutma süresine bağlı ve onu ancak ölçüm söyler.**
+
+### 🔴 SONUÇ — A+B, fonlama maliyeti dahil edilince KALDI (2026-08-13)
+
+Koşturuldu: `scratchpad/ab_funding_maliyetli.py` · 8.666 işlem · **497 ayrı sembol** ·
+2 yıl · canlı `asgari_stop_pct %2,0` uygulanmış.
+
+| küme | sermaye/işlem | t | t_kume | isabet | fonlama% |
+|---|---|---|---|---|---|
+| SİNYAL — fonlamasız | **+0,154** | +5,68 | +1,36 | %28,6 | −0,341 |
+| **SİNYAL — FONLAMALI** | **+0,027** | +1,01 | **+0,24** | %28,6 | −0,341 |
+| KONTROL — fonlamasız | +0,071 | +1,76 | +0,60 | %23,4 | −0,030 |
+| **KONTROL — FONLAMALI** | **+0,061** | +1,50 | +0,51 | %23,4 | −0,030 |
+
+**Fonlamanın bedeli: −0,127 — kenarın %83'ü.**
+
+#### Geçme ölçütü (ön-kayıtlı)
+1. net > 0 — **EVET** (+0,027)
+2. kontrolü yener — **HAYIR** (fark **−0,034**; kontrol +0,061 ile sinyali geçiyor)
+3. iki zaman yarısı da + — **HAYIR** (A −0,076 / B +0,131)
+4. boğa ve ayıda çökme yok — **HAYIR** (BOĞA −0,119 · AYI −0,021 · NÖTR +0,048)
+5. 497 sembol · `t_kume +0,24`
+
+→ **KALDI.** Beklentim doğrulandı: kenar fonlamayı kaldıramadı.
+
+#### Mekanizma net görünüyor
+Kontrolün fonlama yükü **−0,030**, sinyalinki **−0,341** — kapı, fonlama ödeyen coinleri
+**bilerek seçtiği için 11 kat fazla** ödüyor. Kapının tanımı bu.
+
+Tutuş süresine göre kırılım, fonlamanın **tam kenarın yaşadığı yerde** yediğini gösteriyor:
+
+| tutuş | N | fonlamasız | FONLAMALI | fonlama% | isabet |
+|---|---|---|---|---|---|
+| 0–8 saat | 3.735 | −0,827 | −0,857 | −0,097 | %16,7 |
+| 8–24 saat | 2.463 | +0,306 | +0,175 | −0,397 | %37,2 |
+| 24–48 saat | 1.236 | +1,345 | +1,105 | −0,625 | %52,3 |
+| 48–72 saat | 1.232 | +1,626 | +1,326 | −0,685 | %23,5 |
+
+Kısa tutuşta fonlama az ama işlem zaten kaybediyor; kâr uzun tutuştan geliyor ve
+fonlama orada en ağır. **Kenar ve maliyet aynı yerde büyüyor.**
+
+#### Sınır (dürüstlük payı)
+Fonlama **giriş notional'i** üzerinden hesaplandı; gerçekte SHORT kazanırken notional
+küçülür, yani gerçek maliyet kazananlarda biraz daha az. Bu ölçüm fonlama yükünü
+**hafif abartıyor** — ama kapıyı kurtaracak yönde değil: kontrolü **−0,034** ile
+kaybediyor ve iki rejimde birden eksi.
+
+**Not:** bu ölçüm yalnızca **A+B'nin funding bacağını** kapsıyor. `MA50+ucuz` kapısı
+funding'e göre seçim yapmıyor; onun fonlama yükü ayrı ölçülmeli.
