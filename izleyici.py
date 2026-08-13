@@ -40,6 +40,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 IZLEME = os.path.join(HERE, "pozisyon_izleme.jsonl")
 OZET = os.path.join(HERE, "pozisyon_ozet.jsonl")
 STATEF = os.path.join(HERE, "izleyici_state.json")
+KILITF = os.path.join(HERE, "izleyici.lock")
 
 if sys.stdout is None:
     sys.stdout = open(os.devnull, "w", encoding="utf-8")
@@ -47,6 +48,36 @@ try:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 except Exception:
     pass
+
+
+# ---------- kilit ----------
+
+def kilit_al(timeout_sn=300):
+    """[KANIT 2026-08-13] Elle calistirma + zamanli gorev cakisti: 8 pozisyonun her biri
+    icin AYNI dakikada IKI anlik goruntu yazildi (22:35:00 ve 22:35:03 MOVE). Sayaclar
+    bozulmadi (son_bar_t tekrar saymayi engelliyor) ama defterde ciftlenmis gozlem
+    kalirdi — bu da her istatistigi sisirir. testbot ayni hatayi 2026-07-03'te yasadi.
+    Kilit timeout_sn'den eskiyse onceki surec cokmustur, devam edilir."""
+    if os.path.exists(KILITF):
+        try:
+            yas = time.time() - os.path.getmtime(KILITF)
+        except Exception:
+            yas = timeout_sn + 1
+        if yas < timeout_sn:
+            return False
+    try:
+        with open(KILITF, "w", encoding="utf-8") as f:
+            f.write(str(os.getpid()))
+    except Exception:
+        pass
+    return True
+
+
+def kilit_birak():
+    try:
+        os.remove(KILITF)
+    except Exception:
+        pass
 
 
 # ---------- durum dosyasi ----------
@@ -95,13 +126,28 @@ def mumlari_ozetle(barlar, giris, yon, birik):
 
     arti/eksi dakika : her barin KAPANISI girisin lehinde mi
     mfe/mae          : bar HIGH/LOW'larindan en iyi / en kotu uzanim
+    hacim/agresor    : q (USDT hacim), tq (taker ALIS hacmi), n (islem sayisi)
     Dakika cozunurlugu bilerek: 5 dakikada bir orneklemek 'ne kadar artida kaldi'yi
-    kaba olcerdi. Maliyeti pozisyon basina 1 ek cagri."""
+    kaba olcerdi. Maliyeti pozisyon basina 1 ek cagri.
+
+    [2026-08-13] OLUSMAKTA OLAN DAKIKA ARTIK SAYILMIYOR. Acik barin hacmi EKSIK;
+    son_bar_t onu isaretleseydi eksik hacim kalici olarak deftere yazilirdi."""
     isaret = yon_isaret(yon)
+    simdi_ms = int(time.time() * 1000)
+    pen = birik.setdefault("pencere", [])
     for b in barlar:
+        if b["t"] + 60000 > simdi_ms:
+            break             # bar henuz kapanmadi: hacmi eksik, bir sonraki turda sayilir
         if b["t"] <= (birik.get("son_bar_t") or 0):
             continue          # ayni bari iki kez sayma
         birik["son_bar_t"] = b["t"]
+        q, tq, n = b.get("q"), b.get("tq"), b.get("n")
+        if q is not None:
+            birik["hacim_usdt"] = birik.get("hacim_usdt", 0.0) + q
+            birik["taker_alis_usdt"] = birik.get("taker_alis_usdt", 0.0) + (tq or 0.0)
+            birik["islem_sayisi"] = birik.get("islem_sayisi", 0) + (n or 0)
+            birik["hacim_dakika"] = birik.get("hacim_dakika", 0) + 1
+            pen.append([b["t"], round(q, 2), round(tq or 0.0, 2), n or 0])
         kap = pnl_yuzde(giris, b["c"], yon)
         if kap > 0:
             birik["arti_dakika"] = birik.get("arti_dakika", 0) + 1
@@ -122,7 +168,46 @@ def mumlari_ozetle(barlar, giris, yon, birik):
             birik["tepe_pnl_pct"] = round(kap, 4)
         if kap < birik.get("dip_pnl_pct", 10 ** 9):
             birik["dip_pnl_pct"] = round(kap, 4)
+    if len(pen) > PENCERE_DK:
+        del pen[:-PENCERE_DK]   # durum dosyasi sismesin: yalnizca son 60 dakika
     return birik
+
+
+PENCERE_DK = 60
+
+
+def hacim_olculeri(birik):
+    """Kayan pencereden agresor/hacim olculeri. SEVIYE degil DEGISIM icin:
+    taker_15 ile taker_60'in FARKI, 'son 15 dakikada denge kaydi mi' demektir."""
+    pen = birik.get("pencere") or []
+    o = {"hacim_dakika": birik.get("hacim_dakika", 0)}
+
+    def dilim(k, asgari):
+        d = pen[-k:]
+        if len(d) < asgari:
+            return None
+        q = sum(x[1] for x in d)
+        return {"q": q, "tq": sum(x[2] for x in d), "n": sum(x[3] for x in d),
+                "dk": len(d), "oran": (sum(x[2] for x in d) / q) if q else None}
+
+    d15, d60 = dilim(15, 5), dilim(60, 20)
+    o["hacim_15_usdt"] = round(d15["q"], 2) if d15 else None
+    o["hacim_60_usdt"] = round(d60["q"], 2) if d60 else None
+    o["taker_15"] = round(d15["oran"], 4) if d15 and d15["oran"] is not None else None
+    o["taker_60"] = round(d60["oran"], 4) if d60 and d60["oran"] is not None else None
+    o["d_taker"] = (round(o["taker_15"] - o["taker_60"], 4)
+                    if o["taker_15"] is not None and o["taker_60"] is not None else None)
+    o["islem_15"] = d15["n"] if d15 else None
+    # ortalama islem boyu: "ne kadar" degil "kac kisi" — balina mi kalabalik mi
+    o["ort_islem_usdt"] = (round(d15["q"] / d15["n"], 2)
+                           if d15 and d15["n"] else None)
+    # hacim genislemesi: son 15 dk'nin dakika basi hacmi / pozisyon omru ortalamasi
+    omur_dk, omur_q = birik.get("hacim_dakika", 0), birik.get("hacim_usdt", 0.0)
+    if d15 and omur_dk >= 30 and omur_q > 0:
+        o["hacim_x"] = round((d15["q"] / d15["dk"]) / (omur_q / omur_dk), 3)
+    else:
+        o["hacim_x"] = None
+    return o
 
 
 def yeni_birik():
@@ -130,6 +215,8 @@ def yeni_birik():
             "mfe_pct": -10 ** 9, "mae_pct": 10 ** 9,
             "tepe_pnl_pct": -10 ** 9, "dip_pnl_pct": 10 ** 9,
             "tepe_ts": None, "dip_ts": None, "son_bar_t": 0,
+            "hacim_usdt": 0.0, "taker_alis_usdt": 0.0, "islem_sayisi": 0,
+            "hacim_dakika": 0, "pencere": [],
             "anlik_goruntu": 0, "son_pnl_pct": None}
 
 
@@ -145,7 +232,16 @@ def _temiz(b):
     top = o.get("arti_dakika", 0) + o.get("eksi_dakika", 0) + o.get("notr_dakika", 0)
     o["toplam_dakika"] = top
     o["arti_oran"] = round(o.get("arti_dakika", 0) / top * 100, 1) if top else None
+    # omur boyu agresor dengesi. hacim_dakika < toplam_dakika ise kapsam EKSIK
+    # (pozisyon bu olcum eklenmeden once acilmis) — kiyaslarken buna bakilmali.
+    hq = o.get("hacim_usdt") or 0.0
+    o["kum_taker_oran"] = round((o.get("taker_alis_usdt") or 0.0) / hq, 4) if hq else None
+    o["hacim_usdt"] = round(hq, 2) if hq else None
+    o["taker_alis_usdt"] = round(o.get("taker_alis_usdt") or 0.0, 2) if hq else None
+    o["ort_islem_usdt_omur"] = (round(hq / o["islem_sayisi"], 2)
+                                if hq and o.get("islem_sayisi") else None)
     o.pop("son_bar_t", None)
+    o.pop("pencere", None)
     return o
 
 
@@ -242,6 +338,12 @@ def anlik_goruntu(pos, birik, btc_chg3, fiyat_harita, chg24_harita=None,
         "top_ls": r.get("top_ls"), "glob_ls": r.get("glob_ls"), "mcap": r.get("mcap"),
         "btc_chg3": btc_chg3,
     }
+    # dakika cozunurluklu hacim/agresor (mumlardan, ek ag maliyeti yok)
+    # DIKKAT — 'taker' ile 'taker_15' AYNI SEY DEGIL, karistirma:
+    #   taker      = Binance takerlongshortRatio, ORAN (alis/satis; 1.0 = denge)
+    #   taker_15/60= bizim mumlardan, PAY (taker alis / toplam; 0.50 = denge)
+    # Farkli pencereler ve farkli olcekler; ikisi ayrisirsa bu bir bulgudur, hata degil.
+    kayit.update(hacim_olculeri(birik))
     kayit.update({k: v for k, v in _temiz(birik).items()
                   if k not in ("anlik_goruntu", "son_pnl_pct")})
     if not kuru:
@@ -439,12 +541,20 @@ def main():
     ap.add_argument("--kuru", action="store_true", help="hicbir dosyaya yazma, ekrana bas")
     ap.add_argument("--durum", action="store_true")
     a = ap.parse_args()
-    if a.doldur:
-        doldur(a.kuru)
-    elif a.durum:
-        durum()
-    else:
-        tur(a.kuru)
+    if a.durum:
+        durum(); return
+    # --durum salt-okunur; yazan her yol kilit ister. --kuru da kilit alir:
+    # yazmasa bile durum dosyasini OKUR ve es zamanli yazicidan yarim veri gorebilir.
+    if not kilit_al():
+        print(f"[{testbot.now_iso()}] izleyici zaten calisiyor — bu calistirma atlandi.")
+        return
+    try:
+        if a.doldur:
+            doldur(a.kuru)
+        else:
+            tur(a.kuru)
+    finally:
+        kilit_birak()
 
 
 if __name__ == "__main__":

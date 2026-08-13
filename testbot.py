@@ -159,7 +159,16 @@ def fiyat_fapi(sym):
 def klines_since(sym, interval, start_ms, limit=500):
     try:
         d = _get(f"{FAPI}/fapi/v1/klines?symbol={sym}USDT&interval={interval}&startTime={start_ms}&limit={limit}")
-        return [{"t": int(k[0]), "o": float(k[1]), "h": float(k[2]), "l": float(k[3]), "c": float(k[4])} for k in d]
+        # [2026-08-13] v/q/n/tb/tq EKLENDI. Binance bu alanlari AYNI yanitta zaten
+        # gonderiyordu, biz okumadan atiyorduk -> ek ag maliyeti YOK.
+        #   v hacim(baz) · q hacim(USDT) · n islem sayisi
+        #   tb taker ALIS hacmi(baz) · tq taker ALIS hacmi(USDT)
+        # tq/q = dakika cozunurluklu AGRESOR baskisi. radar'in 'taker' alani 5 dakikada
+        # bir noktasal olcum; fiyat donerken ilk kirilanin agresor dengesi olmasi
+        # bekleniyor, o seri buradan cikiyor.
+        return [{"t": int(k[0]), "o": float(k[1]), "h": float(k[2]), "l": float(k[3]),
+                 "c": float(k[4]), "v": float(k[5]), "q": float(k[7]), "n": int(k[8]),
+                 "tb": float(k[9]), "tq": float(k[10])} for k in d]
     except Exception:
         return []
 

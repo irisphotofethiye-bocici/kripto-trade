@@ -3806,3 +3806,49 @@ kazancı keser."*
 
 **Radar tarafı henüz cevaplanamıyor** — iz bugün başladı (25 satır). "Hangi radar
 koşulunda döndü" sorusu birkaç gün veri biriktikten sonra sorulabilir.
+
+---
+
+### 2026-08-13 · İz defterine dakika çözünürlüklü hacim/agresör eklendi
+
+**Neden:** izleyici 61 alan kaydediyordu ama hepsi **seviye**; fiyatın dönüşü bir
+**değişim** olayı. En büyük boşluk buydu.
+
+**Bulgu:** `testbot.klines_since` Binance'in aynı yanıtta gönderdiği hacim (`k[5]`),
+USDT hacmi (`k[7]`), **işlem sayısı** (`k[8]`) ve **taker alış hacmi** (`k[9]`,`k[10]`)
+alanlarını okumadan atıyordu. Yani veri zaten indiriliyordu. **Ek ağ maliyeti sıfır.**
+
+**Eklenen ölçüler** (`izleyici.hacim_olculeri`, son 60 dakikalık kayan pencereden):
+
+| alan | ne |
+|---|---|
+| `taker_15` / `taker_60` | taker alışın toplam hacme **payı** (0,50 = denge) |
+| `d_taker` | 15dk − 60dk. **Seviye değil kayma** — asıl aranan sütun |
+| `hacim_x` | son 15dk'nın dakika başı hacmi ÷ pozisyon ömrü ortalaması |
+| `ort_islem_usdt` | ortalama işlem boyu — "ne kadar" değil **"kaç kişi"** |
+| `islem_15`, `hacim_15_usdt`, `hacim_60_usdt` | ham pencere toplamları |
+| `kum_taker_oran`, `ort_islem_usdt_omur` | ömür boyu (özet satırında da) |
+| `hacim_dakika` | **kapsam göstergesi** — `toplam_dakika`'dan küçükse iz eksik |
+
+`taker` (radar, Binance takerlongshortRatio, **oran**, 1,0 = denge) ile `taker_15`
+(bizim, **pay**, 0,50 = denge) **aynı şey değil** — farklı ölçek, farklı pencere.
+Ayrışmaları bir bulgudur, hata değil.
+
+#### İki hata bu sırada bulundu ve onarıldı
+
+**1) Oluşmakta olan dakika sayılıyordu.** Açık barın hacmi eksiktir; `son_bar_t` onu
+işaretleseydi eksik hacim deftere **kalıcı** yazılırdı. Artık kapanmamış bar atlanıyor,
+bir sonraki turda sayılıyor. (MFE/artı-dakika sayaçları da bundan yararlandı.)
+
+**2) İzleyicide kilit yoktu.** Elle çalıştırma + zamanlı görev çakıştı: 8 pozisyonun her
+biri için **iki** anlık görüntü yazıldı (MOVE 22:35:00 ve 22:35:03). Sayaçlar bozulmadı
+(`son_bar_t` tekrar saymayı engelliyor) ama defterde **çiftlenmiş gözlem** kalırdı — bu
+her istatistiği şişirir. testbot aynı hatayı 2026-07-03'te yaşamıştı; kilit deseni
+izleyiciye kopyalandı (`izleyici.lock`, 300 sn bayat-kilit kurtarma).
+Geriye dönük tarama **14 çakışma satırı** buldu (19:29–19:32 ve 21:32–21:34
+pencereleri, hepsi benim test çalıştırmalarımdan); yedeklenip temizlendi: 258 → 244.
+
+#### Henüz yapılmadı
+Kapanmış 44 pozisyonun **ömür boyu hacim/agresör** verisi geriye dönük doldurulabilir
+(mumlar tarihsel), ama `--doldur` özette zaten kayıtlı id'leri atlıyor. Yenileme
+gerekirse ayrı karar.
