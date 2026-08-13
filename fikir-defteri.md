@@ -3751,3 +3751,58 @@ artıda. Bu, "kötü giriş kendini hemen belli ediyor" demek — **ölçülecek
 henüz kural değil.
 
 Kapı kırılımı: A+B medyan artı-süresi %66,4 / MFE %4,46 · MA50+ucuz %38,3 / MFE %1,56.
+
+### Erken müdahale ölçümü — "ilk N dakika sonucu haber veriyor mu?" (2026-08-13)
+
+**Önce bir tuzak temizlendi.** Dünkü "kazananlar %91,7 süre artıda kaldı" bulgusu
+pozisyonun **tüm ömründen** hesaplanmıştı — kazanan işlem zaten kazandığı *için* çoğu
+zaman artıdadır. Bu bir tahmin değil, sonucun yeniden ifadesi. Karar verilebilir tek
+soru: **ilk N dakikada görülen**, sonucu **önceden** haber veriyor mu?
+`scratchpad/erken_mudahale.py` yalnız ilk N dakikaya bakıyor; kontrol noktasından
+sonraki hiçbir bilgi kullanılmıyor.
+
+#### Bulgu A — erken durum GERÇEKTEN haber verici (tutarlı, monoton)
+
+| kontrol | artıda → kazanan | ekside → kazanan |
+|---|---|---|
+| 15 dk | %64 | **%14** |
+| 30 dk | %57 | %19 |
+| 60 dk | %72 | %15 |
+| 120 dk | **%80** | **%4** |
+
+En keskin ayraç **"hiç %1 kâr göstermemiş olmak"**:
+
+| kontrol | MFE ≥ %1 | MFE < %1 |
+|---|---|---|
+| 60 dk | %50 kazanan | **%8** · ort −113,93 $ |
+| 120 dk | %50 kazanan | **%0** (10 işlem) · ort −134,32 $ |
+
+Dört kontrol noktasının dördünde de aynı yön — bu, tek hücrelik bir tesadüf değil.
+
+#### Bulgu B — ama mekanik müdahale kuralı KARARSIZ
+
+"N dakikada artıda değilse kapat" kuralının 44 pozisyondaki net etkisi:
+
+| kural | net etki |
+|---|---|
+| 15 dakika | **+1.170,46 $** |
+| 30 dakika | **−226,71 $** |
+| 60 dakika | +161,23 $ |
+| 120 dakika | **−222,14 $** |
+
+**İşaret dönüyor.** Gerçek bir kenar olsaydı dört noktada da aynı yöne bakardı. 30 ve
+120 dakikada erken çıkışın kaçırdığı kâr (1.282 $ ve 488 $), kestiği zarardan büyük.
+
+**Kural çıkarılmadı.** Gerekçe: N=44 · örneklem-içi · 4 kontrol noktası × 2 kural
+denendi (çoklu karşılaştırma) · her satırda örneklem farklı (yalnız o noktadan uzun
+yaşayan pozisyonlar). +1.170'e bakıp 15 dakikayı seçmek, tabloya bakıp en iyi hücreyi
+almak olurdu — bu projede daha önce reddedilen şey.
+
+#### Ne öğrendik
+"Erken ekside olan işlem büyük ihtimalle kaybeder" **doğru bir gözlem**, ama ondan
+işleyen bir **çıkış kuralı** çıkmıyor — çünkü erken çıkış, dönenleri de kesiyor.
+Aynı örüntü daha önce beş kez çıktı: *"kötü girişte sıkı çıkış kaybı keser, iyi girişte
+kazancı keser."*
+
+**Radar tarafı henüz cevaplanamıyor** — iz bugün başladı (25 satır). "Hangi radar
+koşulunda döndü" sorusu birkaç gün veri biriktikten sonra sorulabilir.
