@@ -3678,3 +3678,76 @@ doğruluyor. Sistem şu an kıl payı kaybediyor, kazanmıyor.
 **Onarım:** `_pozisyon_karne()` — karne artık pozisyon bazında kuruluyor; kapanmış K/Z
 ile açık pozisyonların kısmi kârı **ayrı** kartlarda. `ort_kazanc` / `ort_kayip` de
 eklendi, çünkü kazanma oranı tek başına hiçbir şey söylemiyor.
+
+## ⭐ POZİSYON İZLEYİCİ — "hangi durumda poz inip çıkıyor" (2026-08-13, kullanıcı kararı)
+
+**İstek:** bot bir pozisyondayken o coinin radar ölçümlerini pozisyonun o anki PnL'iyle
+birlikte kapanışa kadar kaydet; ayrıca ne kadar **artıda**, ne kadar **ekside** kaldığını
+not et. Sonradan incelemek için.
+
+**Bu veri neden yoktu:** [testbot.py:962](testbot.py#L962) `_cikar_havuzdan` açık
+pozisyonlu sembolleri tarama havuzundan **çıkarıyor**. Giriş anında ne gördüğümüzü
+biliyorduk, girişten **sonra** ne olduğunu hiç bilmiyorduk.
+
+**Bedava yol yoktu — ölçüldü:** radar kendi tarıyor ama evreni hacim-patlaması odaklı;
+coin sakinleşince radardan düşüyor. 6 açık pozisyonun son 20 taramadaki kapsamı:
+KAITO 20/20 · MOVE 19/20 · 2Z 19/20 · GPS 12/20 · HOME 5/20 · **COLLECT 0/20**.
+Tam da ilgilendiğimiz "sakinleşme" anında veri kesiliyordu.
+
+### Kurulan
+`izleyici.py` — **ayrı zamanlı görev** (`KriptoIzleyici`, PT5M). Botun state'ini yalnızca
+**okur**; botun hiçbir dosyasına yazmaz, `_DEFTER`'e dokunmaz, bildirim göndermez.
+Ayrı süreç olduğu için botun tur süresine **sıfır** etkisi var (tur zaten sınırdaydı:
+son 14 turun 4'ü 7,5 dk'yı aşmıştı).
+
+- `pozisyon_izleme.jsonl` — her çalıştırmada her açık pozisyon için bir satır
+- `pozisyon_ozet.jsonl` — pozisyon kapanınca tek özet satır
+- `izleyici_state.json` — biriken sayaçlar, **atomik** yazılır (gölge defterin 314 $
+  saptıran hatasının kökü atomik olmayan kayıttı)
+
+**Artı/eksi süre 1 DAKİKALIK çözünürlükte** — 5 dakikada bir örneklemek kaba olurdu.
+Her çalıştırmada son bakıştan bu yana 1m mumlar çekiliyor; bar kapanışı lehteyse
+`arti_dakika`, aleyhteyse `eksi_dakika` artıyor. MFE/MAE bar high/low'larından.
+
+`radar.analyze()` bazı alanları boş bırakıyordu (`taker`, `smart`, `top_ls`, `glob_ls`,
+`mcap`, `float_oran`, `chg24`) — radar bunları yalnız kısa listeye uyguluyor. Pozisyon
+izlemede tam bu ölçüler ("poz neden hareket ediyor"un merkezi) olduğu için `pillar_d()`,
+`raw_tickers` ve `cg_universe` ile açıkça dolduruldu.
+
+**Süre:** ilk çalıştırma 51 sn (geçmişi baştan çekiyor), sürekli hâlde **31–40 sn**.
+5 dakikalık pencerede rahat. API yükü ~10 ağırlık/dk (limit 2.400).
+
+### Geriye dönük doldurma
+Kullanıcı *"botu sıfırdan başlatsak daha mı faydalı?"* diye sordu. **Gerek olmadı:**
+pozisyon tarafındaki verinin tamamı 1m mumlardan geri dolduruldu — **44 pozisyon**.
+Doğrulama: `arti_dakika + eksi_dakika` ile işlem defterindeki `tutma_saat × 60`
+**44/44'ünde ±2 dakika içinde tuttu (sapan 0)**. Doldurma satırları `kaynak: doldurma`
+ve `radar_izi: false` ile işaretli — canlı satırlarla karışmıyor.
+
+Geri üretilemeyen tek şey noktasal radar ölçümleri; o da yalnızca **şu an açık 6
+pozisyon** için eksik. Bundan sonra açılan her pozisyon tam ize sahip.
+
+### İLK BULGU (44 pozisyon, doldurma verisi)
+
+| | kazanan (17) | kaybeden (27) |
+|---|---|---|
+| **artıda geçen süre** | **%91,7** | **%31,7** |
+| MFE (en iyi uzanım) | %9,98 | %1,50 |
+| MAE (en kötü) | −%1,64 | −%5,24 |
+| tutuş | 360 dk | 54 dk |
+
+**Artıda geçen süre oranı, sonucu neredeyse tam ayırıyor:**
+
+| artı oranı | N | kazanan | ort PnL |
+|---|---|---|---|
+| %0–25 | 13 | **%0** | −150,56 |
+| %25–50 | 9 | **%0** | −136,66 |
+| %50–75 | 5 | %20 | −96,85 |
+| **%75–100** | 17 | **%94** | **+175,08** |
+
+Kaybeden işlemler **erken ve kalıcı olarak** eksiye geçiyor (medyan MFE sadece %1,5 —
+yani hiç ciddi kâr göstermeden ölüyorlar). Kazananlar girişten itibaren neredeyse hep
+artıda. Bu, "kötü giriş kendini hemen belli ediyor" demek — **ölçülecek bir hipotez**,
+henüz kural değil.
+
+Kapı kırılımı: A+B medyan artı-süresi %66,4 / MFE %4,46 · MA50+ucuz %38,3 / MFE %1,56.
