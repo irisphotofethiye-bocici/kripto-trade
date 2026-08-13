@@ -52,22 +52,32 @@ except Exception:
 
 # ---------- kilit ----------
 
-def kilit_al(timeout_sn=300):
+def kilit_al(timeout_sn=300, tut_sn=None):
     """[KANIT 2026-08-13] Elle calistirma + zamanli gorev cakisti: 8 pozisyonun her biri
     icin AYNI dakikada IKI anlik goruntu yazildi (22:35:00 ve 22:35:03 MOVE). Sayaclar
     bozulmadi (son_bar_t tekrar saymayi engelliyor) ama defterde ciftlenmis gozlem
     kalirdi — bu da her istatistigi sisirir. testbot ayni hatayi 2026-07-03'te yasadi.
-    Kilit timeout_sn'den eskiyse onceki surec cokmustur, devam edilir."""
+    Kilit timeout_sn'den eskiyse onceki surec cokmustur, devam edilir.
+
+    tut_sn: kilidi ne kadar TUTACAGIMIZI dosyaya yazar. Uzun suren --yenile 5 dakikayi
+    asinca zamanlayici onu 'bayat' sanip kilidi calardi; o zaman yenile'nin bellekteki
+    ozet kopyasi, tur'un bu arada ekledigi kapanis satirini EZERDI. Suresini kendisi
+    ilan etsin."""
+    tut_sn = tut_sn or timeout_sn
     if os.path.exists(KILITF):
         try:
             yas = time.time() - os.path.getmtime(KILITF)
         except Exception:
             yas = timeout_sn + 1
-        if yas < timeout_sn:
+        try:
+            ilan = int(open(KILITF, encoding="utf-8").read().split()[1])
+        except Exception:
+            ilan = timeout_sn
+        if yas < max(timeout_sn, ilan):
             return False
     try:
         with open(KILITF, "w", encoding="utf-8") as f:
-            f.write(str(os.getpid()))
+            f.write(f"{os.getpid()} {int(tut_sn)}")
     except Exception:
         pass
     return True
@@ -148,6 +158,13 @@ def mumlari_ozetle(barlar, giris, yon, birik):
             birik["islem_sayisi"] = birik.get("islem_sayisi", 0) + (n or 0)
             birik["hacim_dakika"] = birik.get("hacim_dakika", 0) + 1
             pen.append([b["t"], round(q, 2), round(tq or 0.0, 2), n or 0])
+            # ILK saat ayrica biriktirilir: pencere kayar, giris anini kaybeder.
+            # 'giriste agresor ne yapiyordu' ile 'kapanistan once ne yapiyordu'
+            # ancak boyle YAN YANA konabilir.
+            if birik["hacim_dakika"] <= 60:
+                birik["ilk60_q"] = birik.get("ilk60_q", 0.0) + q
+                birik["ilk60_tq"] = birik.get("ilk60_tq", 0.0) + (tq or 0.0)
+                birik["ilk60_n"] = birik.get("ilk60_n", 0) + (n or 0)
         kap = pnl_yuzde(giris, b["c"], yon)
         if kap > 0:
             birik["arti_dakika"] = birik.get("arti_dakika", 0) + 1
@@ -217,6 +234,7 @@ def yeni_birik():
             "tepe_ts": None, "dip_ts": None, "son_bar_t": 0,
             "hacim_usdt": 0.0, "taker_alis_usdt": 0.0, "islem_sayisi": 0,
             "hacim_dakika": 0, "pencere": [],
+            "ilk60_q": 0.0, "ilk60_tq": 0.0, "ilk60_n": 0,
             "anlik_goruntu": 0, "son_pnl_pct": None}
 
 
@@ -240,6 +258,12 @@ def _temiz(b):
     o["taker_alis_usdt"] = round(o.get("taker_alis_usdt") or 0.0, 2) if hq else None
     o["ort_islem_usdt_omur"] = (round(hq / o["islem_sayisi"], 2)
                                 if hq and o.get("islem_sayisi") else None)
+    i_q = o.pop("ilk60_q", 0.0) or 0.0
+    i_tq = o.pop("ilk60_tq", 0.0) or 0.0
+    i_n = o.pop("ilk60_n", 0) or 0
+    o["ilk_taker_60"] = round(i_tq / i_q, 4) if i_q else None
+    o["ilk_hacim_usdt"] = round(i_q, 2) if i_q else None
+    o["ilk_ort_islem_usdt"] = round(i_q / i_n, 2) if i_q and i_n else None
     o.pop("son_bar_t", None)
     o.pop("pencere", None)
     return o
@@ -380,7 +404,15 @@ def ozet_yaz(pid, kap, kuru=False):
              "radar_izi": kap.get("radar_izi", True),
              "anlik_goruntu_sayisi": kap.get("birik", {}).get("anlik_goruntu", 0),
              "giris_radar": kap.get("giris_radar"), "son_radar": kap.get("son_radar")}
-    kayit.update(_temiz(kap.get("birik") or {}))
+    b = kap.get("birik") or {}
+    # KAPANISTAN ONCEKI SAAT: pencere pozisyonun son 60 dakikasini tutuyor.
+    # ilk_taker_60 ile yan yana konunca "girdiginde ne vardi / cikarken ne vardi"
+    # sorusu tek satirdan cevaplanir.
+    ho = hacim_olculeri(b)
+    kayit.update({"son_taker_15": ho.get("taker_15"), "son_taker_60": ho.get("taker_60"),
+                  "son_d_taker": ho.get("d_taker"), "son_hacim_x": ho.get("hacim_x"),
+                  "son_ort_islem_usdt": ho.get("ort_islem_usdt")})
+    kayit.update(_temiz(b))
     kayit.pop("son_pnl_pct", None); kayit.pop("anlik_goruntu", None)
     kayit.update(_islem_sonucu(int(pid)))
     if not kuru:
@@ -516,6 +548,80 @@ def doldur(kuru=False):
     print("Doldurma bitti." + (" (KURU — yazilmadi)" if kuru else ""))
 
 
+def yenile(kuru=False):
+    """Kapanmis pozisyonlarin HACIM/AGRESOR alanlarini geriye donuk hesapla.
+
+    Mumlar tarihsel oldugu icin bu veri geri uretilebilir; radar olcumleri UretILEMEZ.
+    O yuzden BIRLESTIRME yapilir: yalnizca mumdan tureyen alanlar yeniden yazilir,
+    radar izi (giris_radar/son_radar/radar_izi/kaynak) ve islem sonucu KORUNUR.
+
+    Yan urun DOGRULAMA: arti/eksi dakika yeniden hesaplanir; eski degerle sapma
+    varsa bildirilir (sapma = mum penceresi ya da onceki hesap hatali demektir)."""
+    try:
+        satirlar = [json.loads(l) for l in open(OZET, encoding="utf-8") if l.strip()]
+    except Exception as e:
+        print(f"ozet okunamadi: {e}"); return
+    if not kuru:
+        import shutil
+        yedek = OZET + ".yedek-yenile-" + testbot.now_dt().strftime("%Y%m%d%H%M")
+        shutil.copy(OZET, yedek)
+        print(f"yedek: {os.path.basename(yedek)}")
+
+    # mumdan tureyen alanlar — SADECE bunlar yeniden yazilir
+    MUMDAN = ("arti_dakika", "eksi_dakika", "notr_dakika", "toplam_dakika", "arti_oran",
+              "mfe_pct", "mae_pct", "tepe_pnl_pct", "dip_pnl_pct", "tepe_ts", "dip_ts",
+              "hacim_usdt", "taker_alis_usdt", "islem_sayisi", "hacim_dakika",
+              "kum_taker_oran", "ort_islem_usdt_omur",
+              "ilk_taker_60", "ilk_hacim_usdt", "ilk_ort_islem_usdt",
+              "son_taker_15", "son_taker_60", "son_d_taker", "son_hacim_x",
+              "son_ort_islem_usdt")
+
+    print(f"Yenilenecek kapanmis pozisyon: {len(satirlar)}")
+    yeni, basarili, sapan = [], 0, 0
+    for s in satirlar:
+        try:
+            g_ts, s_ts = s.get("giris_ts"), s.get("sonuc_ts")
+            if not (g_ts and s_ts and s.get("giris")):
+                print(f"  {s.get('sym'):10} id={s.get('id')} zaman/giris eksik, dokunulmadi")
+                yeni.append(s); continue
+            barlar = tum_mumlar(s["sym"], testbot.to_ms(g_ts), testbot.to_ms(s_ts))
+            if not barlar:
+                print(f"  {s.get('sym'):10} id={s.get('id')} mum yok, dokunulmadi")
+                yeni.append(s); continue
+            b = yeni_birik()
+            mumlari_ozetle(barlar, s["giris"], s["yon"], b)
+            ho, t = hacim_olculeri(b), _temiz(b)
+            t.update({"son_taker_15": ho.get("taker_15"), "son_taker_60": ho.get("taker_60"),
+                      "son_d_taker": ho.get("d_taker"), "son_hacim_x": ho.get("hacim_x"),
+                      "son_ort_islem_usdt": ho.get("ort_islem_usdt")})
+            eski_arti = s.get("arti_dakika")
+            guncel = dict(s)
+            guncel.update({k: t.get(k) for k in MUMDAN})
+            guncel["hacim_yenilendi"] = testbot.now_iso()
+            yeni.append(guncel)
+            basarili += 1
+            fark = (abs((eski_arti or 0) - (t.get("arti_dakika") or 0))
+                    if eski_arti is not None else 0)
+            if fark > 2:
+                sapan += 1
+            print(f"  {s['sym']:10} id={s.get('id'):<4} {len(barlar):5d} mum · "
+                  f"giris_taker {t.get('ilk_taker_60')} -> cikis_taker {t.get('son_taker_60')} · "
+                  f"hacim {t.get('hacim_usdt')}$"
+                  + (f"  [artidk {eski_arti}->{t.get('arti_dakika')} SAPMA]" if fark > 2 else ""))
+            time.sleep(0.2)
+        except Exception as e:
+            print(f"  {s.get('sym')}: HATA {str(e)[:70]}")
+            yeni.append(s)
+    if not kuru:
+        gecici = OZET + ".tmp"
+        with open(gecici, "w", encoding="utf-8") as f:
+            for k in yeni:
+                f.write(json.dumps(k, ensure_ascii=False) + "\n")
+        os.replace(gecici, OZET)
+    print(f"Yenileme bitti: {basarili}/{len(satirlar)} guncellendi · "
+          f"arti_dakika sapmasi olan: {sapan}" + (" (KURU — yazilmadi)" if kuru else ""))
+
+
 def durum():
     st = yukle()
     print("=== POZISYON IZLEYICI ===")
@@ -538,6 +644,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true", help="bir anlik goruntu al (zamanli gorev)")
     ap.add_argument("--doldur", action="store_true", help="tek seferlik gecmis doldurma")
+    ap.add_argument("--yenile", action="store_true",
+                    help="kapanmis ozetlerin hacim/agresor alanlarini geriye donuk hesapla")
     ap.add_argument("--kuru", action="store_true", help="hicbir dosyaya yazma, ekrana bas")
     ap.add_argument("--durum", action="store_true")
     a = ap.parse_args()
@@ -545,12 +653,15 @@ def main():
         durum(); return
     # --durum salt-okunur; yazan her yol kilit ister. --kuru da kilit alir:
     # yazmasa bile durum dosyasini OKUR ve es zamanli yazicidan yarim veri gorebilir.
-    if not kilit_al():
+    uzun = a.yenile or a.doldur          # toplu mum indirme: dakikalar surebilir
+    if not kilit_al(tut_sn=2400 if uzun else None):
         print(f"[{testbot.now_iso()}] izleyici zaten calisiyor — bu calistirma atlandi.")
         return
     try:
         if a.doldur:
             doldur(a.kuru)
+        elif a.yenile:
+            yenile(a.kuru)
         else:
             tur(a.kuru)
     finally:
