@@ -76,6 +76,9 @@ def _durum_json():
         equity_serisi = [json.loads(l) for l in open(testbot.EQUITYF, encoding="utf-8").read().splitlines() if l.strip()]
     except Exception:
         equity_serisi = []
+    # [2026-08-13] Panelin TAMAMI 11 Agustos'u baz aliyor. Ankraj oncesi 20 islem eski
+    # yapilandirmaya ait; ayni tabloda toplanmalari bugunku botun karnesini carpitiyordu.
+    islemler = _yayin_suz(islemler)
     tam = [t for t in islemler if not t.get("kismi")]  # TP1_KISMI satirlari islem SAYILMAZ, PnL'e dahil
     kazanan = [t for t in tam if t["sonuc_usdt"] > 0]
     rler = [t["r"] for t in tam if t.get("r") is not None]
@@ -96,7 +99,7 @@ def _durum_json():
         # botun sonucunu bugunkunun uzerine yazmaktir.
         "yayin": _yayin_karnesi(st, acik),
         "acik_pozisyonlar": acik, "son_islemler": islemler[-200:],
-        "equity_serisi": _egri_duzelt(equity_serisi[-2000:], st),
+        "equity_serisi": _egri_kirp(_egri_duzelt(equity_serisi, st))[-2000:],
         "karne": {
             "toplam_islem": len(tam), "kazanan": len(kazanan),
             "win_rate": round(len(kazanan) / len(tam) * 100, 1) if tam else None,
@@ -784,7 +787,8 @@ def _karsilastirma():
     # bot bir anda +1005.94\$ kazanmis gibi gorunur ve maks_dusus da yanlis hesaplanir.
     # BEN hesabi sifirlama GORMEDI ve gormemeli: 6 Agustos'ta 10.000\$ ile bagimsiz
     # basladi, 23 Temmuz botunun kaybini HIC tasimadi — kaydirmak onu sisirmek olurdu.
-    bot_eq = _egri_duzelt(bot_eq, testbot._load_state())
+    bot_eq = _egri_kirp(_egri_duzelt(bot_eq, testbot._load_state()))
+    bot_i = _yayin_suz(bot_i)          # bot tarafi da 11 Agustos'tan
     return {
         "bot": {**_karne_ozet(bot_i), "maks_dusus": _dusus(bot_eq),
                 "equity": (bot_eq[-1]["equity"] if bot_eq else None)},
@@ -976,6 +980,43 @@ def _fiyatlar():
 def _px(sym, varsayilan=None):
     """Onbellekten fiyat. Sembol yoksa (yeni listelenmis vb.) varsayilan doner."""
     return _fiyatlar().get(f"{sym}USDT", varsayilan)
+
+
+# --- YAYIN FILTRESI (2026-08-13) ---------------------------------------------------
+# Kullanici: "paneldeki butun veriler 11 Agustos'u baz alsin, 23 Temmuz verisi olmasin,
+#   o zamana ait 20 islem olmasin". Dogrulandi: giris zamanina gore ankraj oncesi TAM
+#   20 islem var (23 Tem 22:33 ON'dan 11 Ag 12:22 UMA'ya kadar) — hepsi eski
+#   yapilandirmaya ait (risk %3, asgari stop yok, kapilarin bir kismi yok).
+# FILTRE GIRIS zamanina gore: "bu bot hangi islemleri ACMAYA karar verdi". Cikisa gore
+#   suzmek, eski botun actigi ama yeni donemde kapanan islemleri (RVN, ME, UMA)
+#   yanlislikla bugune yazardi.
+# NOT: "Yayindan beri" bolumu defteri KENDI okur (suzulmemis) — devir islemleri orada
+#   ayrica gosterilmesi gerekiyor. Bu filtre panelin GERI KALANI icin.
+def _ankraj():
+    try:
+        return str(testbot._c("yayin_ts", "2026-08-11 12:48:31"))
+    except Exception:
+        return "2026-08-11 12:48:31"
+
+
+def _giris_ts(k):
+    try:
+        ts = datetime.datetime.strptime(k["ts"], "%Y-%m-%d %H:%M:%S")
+        return (ts - datetime.timedelta(hours=float(k.get("tutma_saat") or 0))
+                ).strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return k.get("ts", "")
+
+
+def _yayin_suz(kayitlar, ankraj=None):
+    a = ankraj or _ankraj()
+    return [k for k in kayitlar if _giris_ts(k) >= a]
+
+
+def _egri_kirp(seri, ankraj=None):
+    """Equity egrisini ankrajdan baslat. _egri_duzelt'ten SONRA cagrilmali."""
+    a = ankraj or _ankraj()
+    return [x for x in seri if str(x.get("ts") or "") >= a]
 
 
 def _ucret_dokum(kay, st, ankraj, artik):

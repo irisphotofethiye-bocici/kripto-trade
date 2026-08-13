@@ -484,16 +484,19 @@ async function ozetYukle(el){
       '10.000$ sıfırdan · bu botun '+(s10.islem_sayisi||0)+' işlemi · '+
       isar(s10.getiri_pct)+n2(s10.getiri_pct)+'%'],
     ['Gerçek kasa',null, para(d.equity)+'$',
-      '23 Tem 10.000$ · ESKİ bot dahil · '+isar(fark)+n1(fark/d.baslangic_bakiye*100)+'%'],
+      'kasadaki fiili tutar · fren ve boyut buna bakar'],
     ['Serbest para','marjin', para(d.serbest_bakiye)+'$', para(d.kullanilan_marjin)+'$ teminatta kilitli'],
     ['Açık kâr/zarar',null,'<span class="'+snf(d.acik_pnl_toplam)+'">'+isar(d.acik_pnl_toplam)+para(d.acik_pnl_toplam)+'$</span>',
       d.acik_pozisyonlar.length+' pozisyon (devir dahil)'],
+    /* 2026-08-13: "tüm zamanlar" ikincil etiketleri kaldırıldı — kullanıcı 23 Temmuz
+       verisinin panelde hiç görünmemesini istedi. Sunucu zaten ankraj öncesi 20 işlemi
+       süzüyor, bu yüzden k.* ile yy.* artık aynı şeyi gösteriyordu. */
     ['Kapanan işlem',null, (yy.toplam_islem!=null?yy.toplam_islem:'–'),
-      'yayından beri · tüm zamanlar '+(k.toplam_islem||0)],
+      '11 Ağustos\'tan beri'],
     ['Kazanma oranı','winrate', (yy.win_rate!=null?'%'+yy.win_rate:'–'),
-      'yayından beri · tüm zamanlar '+(k.win_rate!=null?'%'+k.win_rate:'–')],
+      'tek başına yeterli değil'],
     ['Ortalama','r','<span class="'+snf(yy.ort_r)+'">'+(yy.ort_r!=null?yy.ort_r+' R':'–')+'</span>',
-      'yayından beri · tüm zamanlar '+(k.ort_r!=null?k.ort_r+' R':'–')],
+      'risk birimi başına'],
     /* Ücret/fonlama artık YAYINDAN BERİ — state'teki kümülatif sayaçlar 23 Temmuz'dan
        beri topluyordu ve iki dönemi ayırmıyordu. */
     ['Komisyon',null, n2(uc.komisyon_toplam)+'$',
@@ -512,9 +515,10 @@ async function ozetYukle(el){
     '<div class="kart"><div class="etiket">'+(c[1]?T(c[1],null,c[0]):c[0])+'</div>'+
     '<div class="deger">'+c[2]+'</div><div class="alt">'+c[3]+'</div></div>').join('')+'</div>'+
   '<section><h2>'+T('equity',null,'Gerçek kasa eğrisi')+' <span class="sonuk" '+
-    'style="font-weight:400">— 23 Temmuz\'dan beri, ESKİ bot dahil</span></h2>'+
-    '<div class="not">Bu botun kendi eğrisi yukarıda (10.000$ sıfırdan). Buradaki eğri '+
-    'gerçek kasanın tamamı: eski %3 riskli dönem, devir işlemler, ücret ve fonlama dahil.</div>'+
+    'style="font-weight:400">— 11 Ağustos\'tan beri</span></h2>'+
+    '<div class="not">Gerçek kasanın hareketi: bu botun işlemleri + devir işlemler + '+
+    'ücret ve fonlama. Yukarıdaki eğri ise sadece bu botun kararları (10.000$ sıfırdan). '+
+    '23 Temmuz–11 Ağustos arası eski yapılandırmaya ait ve panelde hiçbir yerde yok.</div>'+
     '<div class="grafik" id="g-equity"></div></section>'+
   '<section><h2>Açık pozisyonlar</h2><div id="acikPoz"></div></section>'+
   aynaBolumu(d)+
@@ -1596,11 +1600,11 @@ async function karsYukle(el){
   /* 2026-08-12: iki defter AYNI DÖNEMİ kapsamıyor — bot 23 Temmuz'dan (eski %3 riskli
      yapılandırma dahil), "ben" 6 Ağustos'tan beri. Bot eğrisindeki kasa-sıfırlama
      sıçraması sunucuda düzeltildi ama dönem farkı duruyor; okuyan bunu bilmeli. */
-  const donemNotu = '<div class="not"><b>Dikkat — aynı dönem değil.</b> Botun karnesi '+
-    '<b>23 Temmuz</b>\'dan beri (eski %3 riskli yapılandırma dahil), senin hesabın '+
-    '<b>6 Ağustos</b>\'tan beri. Maksimum düşüş gibi ölçüler bu yüzden doğrudan '+
-    'kıyaslanamaz — botunki eski dönemin kaybını da içeriyor. Botun bugünkü hâlinin '+
-    'saf karnesi <b>Özet</b> sekmesindeki “Yayından beri” bölümünde.</div>';
+  const donemNotu = '<div class="not">Bot tarafı <b>11 Ağustos 12:48</b>\'den beri '+
+    '(bugünkü yapılandırma); eski %3 riskli döneme ait 20 işlem <b>hiçbir yerde yok</b>. '+
+    'Senin hesabın <b>6 Ağustos</b>\'tan beri — o hesap sıfırlama görmedi, hiç eski '+
+    'yapılandırma taşımadı. Dönem başlangıçları hâlâ farklı, “en kötü düşüş” gibi '+
+    'ölçülerde bunu akılda tut.</div>';
   el.innerHTML =
   (ben.var
     ? '<section><h2>Açık pozisyonlarım <span class="rozet uyari">SANAL</span></h2>'+

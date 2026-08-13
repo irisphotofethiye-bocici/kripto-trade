@@ -3605,3 +3605,35 @@ kaybediyor ve iki rejimde birden eksi.
 
 **Not:** bu ölçüm yalnızca **A+B'nin funding bacağını** kapsıyor. `MA50+ucuz` kapısı
 funding'e göre seçim yapmıyor; onun fonlama yükü ayrı ölçülmeli.
+
+### Panel tamamen 11 Ağustos'a taşındı (2026-08-13, kullanıcı)
+
+**Kullanıcı:** *"paneldeki bütün veriler 11 Ağustos'u baz alsın, 23 Temmuz verisi
+olmasın, o zamana ait 20 işlem olmasın — sayıyı kontrol et"*.
+
+**Sayı doğrulandı: tam 20.** Giriş zamanına göre ankraj öncesi 20 tam işlem var
+(23 Tem 22:33 ON'dan 11 Ağu 12:22 UMA'ya). Hepsi eski yapılandırmaya ait.
+
+**Merkezi filtre eklendi** (`_yayin_suz`, `_egri_kirp`, `_ankraj`) ve panelin bütün
+veri kaynaklarına uygulandı:
+
+| yer | önce | sonra |
+|---|---|---|
+| `son_islemler` (işlem geçmişi) | 54 kayıt, 20'si eski | **34 kayıt, 0 eski** |
+| `karne` (kart sayaçları) | 41 işlem | **21 işlem** |
+| `equity_serisi` (eğri) | 23 Tem'den, 4.500+ nokta | **11 Ağu 12:52'den, 326 nokta** |
+| "BOT vs BEN" bot tarafı | 41 işlem, 23 Tem eğrisi | **21 işlem, 11 Ağu eğrisi** |
+
+**Filtre GİRİŞ zamanına göre** — "bu bot hangi işlemleri **açmaya** karar verdi".
+Çıkışa göre süzmek RVN/ME/UMA'yı (eski botun açtığı, yeni dönemde kapanan) yanlışlıkla
+bugüne yazardı.
+
+**Süzülmeyenler ve sebebi:**
+- **"Yayından beri" bölümü** defteri kendi okuyor — devir işlemleri orada *ayrıca*
+  gösterilmesi gerekiyor (mutabakat oradan kuruluyor).
+- **`ben` hesabı** — 6 Ağustos'ta bağımsız başladı, hiç eski yapılandırma taşımadı.
+- **Gerçek kasa rakamı** — hesabın fiili tutarı; fren ve boyutlandırma ona bakıyor,
+  gizlemek yanlış olurdu. Etiketi "kasadaki fiili tutar" olarak netleştirildi.
+
+Kart etiketlerindeki "tüm zamanlar ..." ikincil satırları kaldırıldı (sunucu zaten
+süzdüğü için aynı sayıyı gösteriyorlardı).
