@@ -478,6 +478,7 @@ async function ozetYukle(el){
      kayboluyor değil, ikincil bilgi olarak duruyor. */
   const yy = d.yayin || {};
   const s10 = yy.sanal_10k || {};
+  const uc = yy.ucret || {komisyon_toplam:0, giris_ucreti:0, cikis_ucreti:0, fonlama:0};
   const kartlar = [
     ['Bakiye','equity','<span class="'+snf(s10.getiri_pct)+'">'+para(s10.guncel)+'$</span>',
       '10.000$ sıfırdan · bu botun '+(s10.islem_sayisi||0)+' işlemi · '+
@@ -493,9 +494,12 @@ async function ozetYukle(el){
       'yayından beri · tüm zamanlar '+(k.win_rate!=null?'%'+k.win_rate:'–')],
     ['Ortalama','r','<span class="'+snf(yy.ort_r)+'">'+(yy.ort_r!=null?yy.ort_r+' R':'–')+'</span>',
       'yayından beri · tüm zamanlar '+(k.ort_r!=null?k.ort_r+' R':'–')],
-    ['Ücret + fonlama',null,'<span class="'+snf(-1)+'">'+
-      n2(yy.gerceklesmis_pnl!=null?(yy.gerceklesmis_pnl-yy.islem_pnl-yy.devir_pnl):0)+'$</span>',
-      'yayından beri · işlem defterinde GÖRÜNMEZ']
+    /* Ücret/fonlama artık YAYINDAN BERİ — state'teki kümülatif sayaçlar 23 Temmuz'dan
+       beri topluyordu ve iki dönemi ayırmıyordu. */
+    ['Komisyon',null, n2(uc.komisyon_toplam)+'$',
+      'yayından beri · giriş '+n2(uc.giris_ucreti)+' + çıkış '+n2(uc.cikis_ucreti)],
+    ['Fonlama',null,'<span class="'+snf(uc.fonlama)+'">'+n2(uc.fonlama)+'$</span>',
+      'yayından beri · '+(uc.fonlama<0?'ödenen':'alınan')+' · asıl maliyet kalemi']
   ];
 
   el.innerHTML =
@@ -654,6 +658,13 @@ function yayinBolumu(y){
       isar(y.gerceklesmis_pnl-y.islem_pnl-y.devir_pnl)+
       para(y.gerceklesmis_pnl-y.islem_pnl-y.devir_pnl)+' (ücret+fonlama) &nbsp;=&nbsp; '+
       '<b>'+isar(y.gerceklesmis_pnl)+para(y.gerceklesmis_pnl)+'$</b></span>'+
+      (y.ucret?'<br><b>Ücret+fonlama açılımı (yayından beri):</b> giriş komisyonu '+
+        n2(y.ucret.giris_ucreti)+'$ + <b>fonlama '+n2(y.ucret.fonlama)+'$</b>. '+
+        'Çıkış komisyonu ('+n2(y.ucret.cikis_ucreti)+'$) buraya girmez — her işlemin '+
+        'kendi sonucuna zaten dahil. <b>Toplam komisyon '+n2(y.ucret.komisyon_toplam)+
+        '$</b>, yani kasadan çıkanın büyük kısmı komisyon değil <b>fonlama</b>. '+
+        'Karşılaştırma: yayından ÖNCE fonlama '+isar(y.ucret.onceki_fonlama)+
+        n2(y.ucret.onceki_fonlama)+'$ idi.':'')+
       (devir?'<br><span class="sonuk">devir: '+devir+'</span>':'')+
       '<br><b>Botun bugünkü hâlinin saf karnesi</b>, açıkları da katarsan: '+
       '<b class="'+snf(y.islem_pnl+y.acik_pnl_yeni)+'">'+

@@ -3471,3 +3471,48 @@ birden doğrular: bot çağrısında bildirim **gider** ve ayna **kopyalar**; g�
 çağrılarında **hiçbiri** olmaz, her biri **kendi defterine** yazar, ve çağrı sonrası
 bot **normale döner**. 14 kontrol, hepsi geçti. Paylaşılan bir fonksiyona her yeni yan
 etki eklendiğinde bu test koşturulmalı.
+
+### Ücret/fonlama da yayın dönemine ayrıldı (2026-08-13, kullanıcı)
+
+**Kullanıcı:** *"defter bize 11 Ağustos sonrası veriyi göstersin, 23 Temmuz değil —
+onun ayrımını yap"*.
+
+`kumulatif_giris_ucret` ve `kumulatif_funding` state'te **23 Temmuz'dan beri toplam**
+tutuluyordu; panelde iki dönem ayrılmıyordu. Ayrıldı.
+
+**Yöntem.** Giriş komisyonu = pozisyonun **tam notional**'i × taker. Kısmi kâr alınmış
+pozisyonlarda kayıtlar pozisyonu böldüğü için (yarı + kalan yarı) id başına notional
+**toplanıyor**, hâlâ açık olanların kalan miktarı da ekleniyor. Fonlama mutabakattan
+türüyor (`artık = −giriş ücreti + fonlama`).
+
+**Doğrulama:** bu yolla hesaplanan toplam giriş ücreti **88,15 $**, state'teki
+`kumulatif_giris_ucret` **88,16 $** — kuruş farkı yuvarlama. Fonlama toplamı da
+**−186,05** ile birebir tutuyor. Yani ayrım uydurma değil, mutabık.
+
+| | yayından ÖNCE (23 Tem–11 Ağu) | yayından BERİ |
+|---|---|---|
+| giriş komisyonu | 55,62 $ | **32,53 $** |
+| çıkış komisyonu | — | **25,63 $** *(işlem sonuçlarına zaten dahil)* |
+| **komisyon toplam** | — | **58,16 $** |
+| **fonlama** | **+3,00 $** | **−189,05 $** |
+
+### 🔴 Bulgu: asıl maliyet komisyon değil, FONLAMA
+
+Kullanıcı "221 $ komisyon 16 işlemin mi?" diye sordu. Hayır — **221,58 $**'ın yalnızca
+**32,53**'ü giriş komisyonu, **189,05**'i **fonlama**.
+
+Fonlama yayından önce **artı** (+3,00) iken yayından sonra **−189,05**'e döndü. Sebep
+yapısal: `A+B` kapısının tanımı *"funding ≤ −0,05 olan coini SHORT'la"* — negatif
+funding **short'un ödemesi** demek. Kapı botu bilerek fonlama ödeyen tarafa koyuyor.
+
+Anlık ölçüm (13 Ağustos, 8 açık pozisyon, notional 18.713 $): **günlük −100,13 $**,
+yani ~9.500 $'lık hesabın **%1'i her gün**. En ağırları KAITO −0,506 %/8s (−45,94 $/gün),
+COTI −0,370 (−17,92), RVN −0,180 (−19,60).
+
+**Neden önemli:** A+B'nin 2 yıllık ölçümünde deftere *"funding maliyeti eklenmedi"*
+diye yazmıştım. Ölçülen kenar işlem başına **+0,111 sermaye**; pozisyonlar 72 saate
+kadar tutuluyor ve %1/gün × 3 gün = **%3**. Maliyet kenardan büyük olabilir.
+
+**Bu, kapıyı kapatmak için yeterli değil** — ölçülmemiş bir kalem bulundu, o kadar.
+2 yıllık funding verisi elimizde (`scratchpad/funding_gecmis/`, 567 sembol); A+B ölçümü
+fonlama maliyeti dahil tekrar koşturulabilir. Kullanıcıya soruldu.

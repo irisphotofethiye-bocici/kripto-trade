@@ -978,6 +978,62 @@ def _px(sym, varsayilan=None):
     return _fiyatlar().get(f"{sym}USDT", varsayilan)
 
 
+def _ucret_dokum(kay, st, ankraj, artik):
+    """Ucret ve fonlamayi YAYIN DONEMINE ayirir.
+
+    [2026-08-13 kullanici: "defter bize 11 Agustos sonrasi veriyi gostersin, 23 Temmuz
+    degil — onun ayrimini yap"]. state'teki kumulatif_giris_ucret / kumulatif_funding
+    23 Temmuz'dan beri TOPLAM tutuyor; iki donemi ayirmiyordu.
+
+    YONTEM
+      giris ucreti : pozisyonun TAM notionali x taker. Kismi kar alinmis pozisyonlarda
+        kayitlar pozisyonu BOLER (yari + kalan yari), o yuzden id basina notional
+        TOPLANIR; hala acik olanlarin kalan miktari da eklenir. Dogrulama: bu yolla
+        hesaplanan TOPLAM, state'teki kumulatif_giris_ucret ile birebir tutuyor (88.16).
+      cikis ucreti : her kapanis kaydinin notional'i x taker. Bu tutar her islemin
+        sonuc_usdt'sine ZATEN dahildir — ayrica dusulmez, yalnizca gorunur kilinir.
+      fonlama      : mutabakattan turer. artik = -(giris ucreti) + fonlama."""
+    TAKER = float((_maliyet_cfg() or {}).get("taker_fee_pct", 0.045)) / 100.0
+    tam_n, once = {}, {}
+
+    def gdt(k):
+        try:
+            ts = datetime.datetime.strptime(k["ts"], "%Y-%m-%d %H:%M:%S")
+            return (ts - datetime.timedelta(hours=float(k.get("tutma_saat") or 0))
+                    ).strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            return k["ts"]
+
+    for k in kay:
+        tam_n[k["id"]] = tam_n.get(k["id"], 0.0) + k.get("notional", 0.0)
+        once[k["id"]] = gdt(k) < ankraj
+    for p in (st.get("acik_pozisyonlar") or []):
+        tam_n[p["id"]] = tam_n.get(p["id"], 0.0) + p["miktar"] * p["giris"]
+        once[p["id"]] = str(p.get("giris_ts") or "") < ankraj
+
+    g_sonra = sum(n * TAKER for i, n in tam_n.items() if not once.get(i))
+    g_once = sum(n * TAKER for i, n in tam_n.items() if once.get(i))
+    c_sonra = sum(k.get("notional", 0.0) * TAKER for k in kay if gdt(k) >= ankraj)
+    fon_sonra = artik + g_sonra
+    return {
+        "giris_ucreti": round(g_sonra, 2),
+        "cikis_ucreti": round(c_sonra, 2),
+        "komisyon_toplam": round(g_sonra + c_sonra, 2),
+        "fonlama": round(fon_sonra, 2),
+        "kasadan_dusen": round(artik, 2),          # giris ucreti + fonlama
+        "onceki_giris_ucreti": round(g_once, 2),
+        "onceki_fonlama": round(float(st.get("kumulatif_funding") or 0) - fon_sonra, 2),
+        "pozisyon_sayisi": sum(1 for i in tam_n if not once.get(i)),
+    }
+
+
+def _maliyet_cfg():
+    try:
+        return evren.cfg().get("maliyet") or {}
+    except Exception:
+        return {}
+
+
 def _egri_duzelt(seri, st):
     """Kasa sifirlamasi equity EGRISINDE bir SICRAMA birakir; grafikte bu, o an
     kazanilmis gibi gorunen sahte bir dikey atlamadir (+1005.94 $). Sifirlamadan
@@ -1127,6 +1183,9 @@ def _yayin_karnesi(st, acik):
         # yazilmiyor); o yuzden bu sayi islem kararlarinin saf karnesidir.
         "sanal_10k": _sanal_10k(yeni, eq, a_yeni),
         "devir_pnl": round(sum(k["sonuc_usdt"] for k in devir), 2),
+        "ucret": _ucret_dokum(kay, st, ankraj,
+                              ger - sum(k["sonuc_usdt"] for k in yeni)
+                              - sum(k["sonuc_usdt"] for k in devir)),
         "devir_sayisi": len([k for k in devir if not k.get("kismi")]),
         # TUM devir kayitlari (kismi dahil) — devir_pnl bunlarin toplami; yalniz tam
         # kapanislari listelemek toplamla celisen bir tablo uretiyordu.
