@@ -902,7 +902,29 @@ def tp1_efektif_hesapla(giris, stop_orijinal, tp1_yapisal, yon):
 
 
 def yonet_acik_pozisyonlar(st):
+    """Acik pozisyonlarin stop/TP/likidasyon denetimi. VERISIZ kalan pozisyon sayisini doner.
+
+    [HATA VE ONARIMI 2026-08-15 — SESSIZ STOP KACIRMA]
+      klines_since her hatayi yutup [] doner. bars bos gelince stop/TP dongusu HIC
+      calismiyordu ama son_1m_kontrol_ts yine de now_iso()'ya ilerliyordu -> o pencere
+      bir daha OKUNMUYORDU. Yani ag koptugu anda tetiklenen stop KALICI olarak kacardi.
+      OLCULDU (2026-08-14 gecesi, tur suresi olcumu eklendikten sonra): 4 tur 0.1-0.3
+      saniyede bitti, her birinde 7 pozisyon, ~30 dakikalik denetim boslugu. O gece stop
+      tetiklenmedigi icin zarar gorunmedi — sans, tasarim degil.
+
+    [IKINCI SESSIZ BOSLUK] Damga now_iso() idi; Binance startTime'i openTime'a gore
+      KAPSAYICI suzer. now=01:09:37 yazilinca 01:09 bari (openTime 01:09:00 < startTime)
+      bir daha gelmiyordu. O bar ilk okundugunda HENUZ KAPANMAMISTI: high/low eksikti.
+      Yani her turda son dakika yarim halde degerlendirilip atiliyordu.
+
+    [DUZELTME] (a) bars bossa damgaya DOKUNMA — pencere sonraki turda yeniden okunur.
+      (b) damga now degil SON BARIN ACILIS zamani — o bar sonraki turda TAM haliyle
+      tekrar okunur. Tekrar okuma zararsiz: trailing min/max ile idempotent, TP1
+      tp1_alindi ile korumali, stop tetiklerse pozisyon zaten kapanir.
+      (c) klines_since limit=500'e vurursa (>8 saatlik kesinti) damga son bara gider,
+      atlanan kisim bir sonraki turda alinir — eskiden now yazilip gerisi dusuyordu."""
     kalanlar = []
+    verisiz = 0
     zaman_stop_saat = float(_c("zaman_stop_saat", 48))
     for pos in st["acik_pozisyonlar"]:
         try:
@@ -913,6 +935,8 @@ def yonet_acik_pozisyonlar(st):
             if pos.get("atr_giriste"):
                 pos["atr_canli"] = atr_canli_al(pos["sym"])
             bars = klines_since(pos["sym"], "1m", to_ms(son_ts))
+            if not bars:
+                verisiz += 1
             kapandi = False
             for b in bars:
                 trailing_guncelle(pos, b)
@@ -948,7 +972,9 @@ def yonet_acik_pozisyonlar(st):
             funding_uygula(st, pos)
             if kapandi:
                 continue
-            pos["son_1m_kontrol_ts"] = now_iso()
+            if bars:
+                pos["son_1m_kontrol_ts"] = datetime.datetime.fromtimestamp(
+                    bars[-1]["t"] / 1000).strftime("%Y-%m-%d %H:%M:%S")
             yas_saat = (now_dt() - parse_iso(pos["giris_ts"])).total_seconds() / 3600
             if yas_saat >= zaman_stop_saat:
                 px = fiyat_fapi(pos["sym"])
@@ -958,7 +984,9 @@ def yonet_acik_pozisyonlar(st):
             kalanlar.append(pos)
         except Exception:
             kalanlar.append(pos)  # ag hatasi -> pozisyonu KAYBETME, bir sonraki cycle tekrar dener
+            verisiz += 1          # damgaya dokunulmadi; pencere sonraki turda yeniden okunur
     st["acik_pozisyonlar"] = kalanlar
+    return verisiz
 
 
 # ---------- yeni giriş arama ----------
@@ -1467,10 +1495,19 @@ def efektif_equity(st):
     return ef
 
 
-def _kilit_al(timeout_sn=240):
+def _kilit_al(timeout_sn=1250):
     """Ayni anda 2 cycle calismasin (2026-07-03 kaniti: manuel calistirma + zamanlayici cakisti,
     TLM kapanisi 2 KEZ loglandi — istatistikleri sisiriyordu). Kilit dosyasi timeout_sn'den eskiyse
-    (onceki process muhtemelen coktu/takildi) yine de devam edilir (stale-lock kurtarma)."""
+    (onceki process muhtemelen coktu/takildi) yine de devam edilir (stale-lock kurtarma).
+
+    [2026-08-15] 240 -> 1250 sn. Gorevin ExecutionTimeLimit degeri PT10M'den PT20M'ye
+      cikarildi (yavas ag: 8.7 dakikalik tur olculdu, 7 tur da yarida oldurulmustu).
+      Kilit 240 sn'de bayat sayilsaydi, 4 dakikayi asan bir tur SURERKEN elle calistirma
+      kilidi CALAR ve iki cycle ayni state uzerinde kosardi — 2026-07-03'te tam bu
+      yasanmisti. Esik yeni sinirin biraz uzerinde (1250 > 1200) tutuluyor ki once
+      Windows sureci oldursun, kilit ondan SONRA bayatlasin.
+      Zamanlayici tarafinda ayrica MultipleInstances=IgnoreNew var; bu kilit elle
+      calistirmaya karsi korumadir."""
     if os.path.exists(LOCKF):
         try:
             yas = time.time() - os.path.getmtime(LOCKF)
@@ -1562,8 +1599,14 @@ def _cycle_ic():
     #   (gerceklesmis + acik P&L), (c) ayni efektif deger boyutlandirmada da kullanilir ki
     #   acik zarar buyurken pozisyon boyutu da kuculsun.
     _t_yonet = time.time()
-    yonet_acik_pozisyonlar(st)
+    _verisiz = yonet_acik_pozisyonlar(st)
     _sure_yonet = time.time() - _t_yonet
+    if _verisiz:
+        # BOT SAGLIGI: kac pozisyon mumsuz kaldi. Artik denetim boslugu KALICI degil
+        # (damga ilerlemiyor, sonraki tur ayni pencereyi yeniden okuyor) ama sikligi
+        # bilmek gerekiyor — ag kesintisi bu kurulumda SUREKLI bir durum.
+        print(f"[{now_iso()}] VERISIZ POZISYON: {_verisiz}/{len(st['acik_pozisyonlar'])} "
+              f"— mum gelmedi, denetim penceresi KORUNDU, sonraki tur tekrar okunacak")
     # Kapanislar HEMEN diske (2026-07-14 VELVET dersi, Madde 8 bug-fix): islem kaydi pozisyon_kapat
     # icinde aninda yaziliyor ama state cycle sonunda kaydediliyordu -> arada yeni_giris_ara'nin ag
     # hatasi cycle'i oldurunce ayni kapanis her cycle'da tekrar yazildi (VELVET 5x mukerrer kayit).
@@ -1601,7 +1644,8 @@ def _cycle_ic():
                             "sure_sn": round(time.time() - _t0, 1),
                             "sure_yonet": round(_sure_yonet, 1),
                             "sure_giris": round(_sure_giris, 1),
-                            "onceki_kesildi": _onceki_kesildi})
+                            "onceki_kesildi": _onceki_kesildi,
+                            "verisiz_poz": _verisiz})
     print(f"[{now_iso()}] durum={st['durum']} equity=${st['equity']:.2f} acik={len(st['acik_pozisyonlar'])} "
           f"gun={gun_gecti:.1f}/{sure_gun}")
 
