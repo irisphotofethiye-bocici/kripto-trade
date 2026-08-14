@@ -1510,6 +1510,24 @@ def _cycle_ic():
         _save_state(st)
         telegram_gonder(f"[TESTBOT] BASLADI — baslangic bakiye ${st['baslangic_bakiye']:.0f} sanal, sure {int(_c('sure_gun', 7))} gun")
 
+    # --- TUR SURESI OLCUMU (2026-08-14, kullanici istegi) -------------------
+    # [NEDEN] Gorevin ExecutionTimeLimit degeri PT10M: turu asarsa Windows SURECI
+    #   OLDURUR. 2026-08-11'de limit PT4M iken 3 kez SCHED_S_TASK_TERMINATED (267014)
+    #   dondu — senaryo teorik degil. Oldurulen turda kapanislar guvende (state hemen
+    #   yazilir) ama YENI GIRIS ARAMASI yarida kesilir, yani firsat kacar.
+    # [SORUN] Oldurulen tur equity satiri YAZAMAZ; sadece tamamlananlara bakarak
+    #   "kac tur oldu" bilinemez. Cozum: turun BASLANGICINI da state'e yaz.
+    #   bas_ts > son_cycle_ts ise onceki tur BITMEDEN oldurulmustur.
+    _t0 = time.time()
+    _onceki_kesildi = bool(st.get("son_cycle_bas_ts") and st.get("son_cycle_ts")
+                           and st["son_cycle_bas_ts"] > st["son_cycle_ts"])
+    if _onceki_kesildi:
+        st["kesilen_tur"] = int(st.get("kesilen_tur") or 0) + 1
+        print(f"[{now_iso()}] ONCEKI TUR TAMAMLANMADI (baslangic {st['son_cycle_bas_ts']}, "
+              f"son bitis {st['son_cycle_ts']}) — toplam kesilen: {st['kesilen_tur']}")
+    st["son_cycle_bas_ts"] = now_iso()
+    _save_state(st)
+
     gun_gecti = (now_dt() - parse_iso(st["baslangic_ts"])).total_seconds() / 86400
     sure_gun = float(_c("sure_gun", 7))
     min_equity = float(_c("min_equity_dur", 50))
@@ -1543,7 +1561,9 @@ def _cycle_ic():
     # [DUZELTME] (a) pozisyonlar yonetildikten SONRA calisir, (b) EFEKTIF equity'ye bakar
     #   (gerceklesmis + acik P&L), (c) ayni efektif deger boyutlandirmada da kullanilir ki
     #   acik zarar buyurken pozisyon boyutu da kuculsun.
+    _t_yonet = time.time()
     yonet_acik_pozisyonlar(st)
+    _sure_yonet = time.time() - _t_yonet
     # Kapanislar HEMEN diske (2026-07-14 VELVET dersi, Madde 8 bug-fix): islem kaydi pozisyon_kapat
     # icinde aninda yaziliyor ama state cycle sonunda kaydediliyordu -> arada yeni_giris_ara'nin ag
     # hatasi cycle'i oldurunce ayni kapanis her cycle'da tekrar yazildi (VELVET 5x mukerrer kayit).
@@ -1562,18 +1582,26 @@ def _cycle_ic():
                             f"${ef - st['equity']:+.2f}; esik %{dusus_esik:.0f}) — YENI GIRIS "
                             f"DURDU, acik pozlar yonetiliyor. 'python testbot.py --devam' ile ac.")
 
+    _sure_giris = 0.0
     if st["durum"] == "AKTIF":
+        _t_giris = time.time()
         try:
             rejim = evren.btc_rejim()
             yeni_giris_ara(st, rejim)
         except Exception as e:
             print(f"[{now_iso()}] yeni_giris_ara hatasi (cycle devam, state korundu): {e}")
+        _sure_giris = time.time() - _t_giris
 
     st["son_cycle_ts"] = now_iso()
     _save_state(st)
     _append_jsonl(EQUITYF, {"ts": now_iso(), "equity": round(st["equity"], 2),
                             "acik_pnl": round((st.get("efektif_equity") or st["equity"]) - st["equity"], 2), "acik_sayisi": len(st["acik_pozisyonlar"]),
-                            "durum": st["durum"]})
+                            "durum": st["durum"],
+                            # tur suresi: toplam + iki agir bolumun kirilimi (2026-08-14)
+                            "sure_sn": round(time.time() - _t0, 1),
+                            "sure_yonet": round(_sure_yonet, 1),
+                            "sure_giris": round(_sure_giris, 1),
+                            "onceki_kesildi": _onceki_kesildi})
     print(f"[{now_iso()}] durum={st['durum']} equity=${st['equity']:.2f} acik={len(st['acik_pozisyonlar'])} "
           f"gun={gun_gecti:.1f}/{sure_gun}")
 
