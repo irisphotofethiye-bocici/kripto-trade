@@ -1,0 +1,108 @@
+# Ölçüm Kütüğü
+
+`fikir-defteri.md` 251 KB / 3.908 satır / 271 başlık — bağlama sığmıyor. Bu dosya
+onun **içindekiler sayfası**: *"bunu daha önce ölçtük mü?"* sorusunun tek bakışta
+cevabı.
+
+**Kural:** Yeni ölçüm bitince buraya bir satır eklenir. Yalnızca defterde **yazılı**
+olan girer; kaydı olmayan betik `kayıt yok` diye işaretlenir, uydurulmaz.
+
+**Hüküm sözlüğü**
+
+| hüküm | anlamı |
+|---|---|
+| `GEÇTİ` | ön-kayıtlı ölçütü sağladı, sisteme girdi |
+| `KALDI` | ölçütü sağlayamadı, uygulanmadı |
+| `ÇÜRÜDÜ` | iddia ölçümle yanlışlandı |
+| `KARARSIZ` | işaret dönüyor / N yetersiz → kural çıkarılmadı |
+| `KISMEN` | çekirdek amaç tuttu, kenarları tutmadı |
+| `AÇILDI` | ölçüm sonucu sisteme kapı olarak girdi |
+| `KAPATILDI` | ölçüm sonucu mevcut kapı devre dışı bırakıldı |
+
+---
+
+## Kapı kararları — sisteme giren/çıkanlar
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| R/R kapısı ayırt ediyor mu? | 08-10 | 7.119 olay | **KAPATILDI** — kazananın %62,8'ini, kaybedenin %61,8'ini kesiyor; geçirdiği grup kestiğinden kötü | `kacan_kazananlar.py` | s.916 |
+| A+B kapısı (funding ≤ −0,05 **ve** oi24 ≥ %10 → SHORT) | 08-10 | 206 olay | **AÇILDI** — kesişim +0,375 vs kontrol −0,037 | `oruntu_analiz.py` | s.1025 |
+| MA50+ucuz kapısı (fiyat ≤ $0,07 **ve** MA50 mesafesi ≥ %3,72) | 08-10 | 460 olay | **AÇILDI** — +0,84% vs kontrol −0,05% | `yon_avi.py` | s.1478 |
+| NÖTR fade dalı | 08-10 | 1.741 / 3.979 | **KAPATILDI** — açıldığı gün ölçüldü, ölçümün en kötü iki hücresine giriyordu | — | eşik notu |
+| A+B'ye sabit %10 hedef | 08-10 | 206 | **GEÇTİ** — +2,01% vs mevcut +1,24% | — | eşik notu |
+
+## Çıkış kuralları — hepsi kârı düşürdü
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| 1,5R kısmi kâr lehimize mi? | 08-12 | 13.951 | **KALDI** — geçme ölçütünü sağlayamadı | `kismi_15r.py` | s.2951 · s.3001 |
+| Hedefi oynaklığa ölçekleme | 08-12 | — | **KALDI** — 8 varyantın 8'i de | `oynak_hedef.py` | s.2587 · s.2629 |
+| TP1'de stopu başabaşa çekme | 08-12 | 11–12 Ağu pozisyonları | **KALDI** — kısmi sonrası başabaş +0,274 → +0,261 | `babas_stop_11_12.py` | eşik notu |
+| Erken müdahale (N dk'da artıda değilse kapat) | 08-13 | 44 poz | **KARARSIZ** — durum haber verici ama kural kararsız (+1.170 / −227 / +161 / −222); kural çıkarılmadı | `erken_mudahale.py` | s.3755 |
+
+> **Kalıp:** *kötü girişte sıkı çıkış kaybı keser, iyi girişte kazancı keser.*
+> Yeni çıkış kuralı önermeden önce buna bak.
+
+## Sinyal / gösterge ölçümleri
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| Kanal + StochRSI | 08-11 | — | **KALDI** — 6 varyantın 6'sı da | `kanal_stoch.py` · `kanal_ham.py` · `kanal_stopsuz.py` | s.1892 · s.1966 |
+| Scalp varyantı + rejim iddiası | 08-11 | — | **KALDI** — 6 rejim bölmesinin 6'sı da | `kanal_scalp.py` | s.2048 · s.2131 |
+| "Sinyalde bilgi yok" iddiası | 08-11 | — | **ÇÜRÜDÜ** (kendi iddiam) — karar değişmedi ama gerekçe değişti | — | s.2140 |
+| Hareket öncesi örüntü | 08-10 | — | **ÇÜRÜDÜ** — örüntü tanımlayıcı, tahmin edici değil | `oncesi_oruntu.py` · `oncesi_short.py` | s.1373 · s.1334 |
+| Yükselenlerin ortak örüntüsü | 08-10 | — | **ÇÜRÜDÜ** — işaret olarak ters | `yukselen_oruntu.py` | s.1288 · s.823 |
+| Ölü sinyallerin kaçı canlıydı? | 08-11 | arşiv | kayıt: s.2210 | `olu_sinyal_tarama.py` | s.2210 |
+| Fikir 1 adayları örneklem dışı | 08-11 | 2 yıl | **ÇÜRÜDÜ** — örneklem dışında çöktü | `long_2yil.py` | s.2284 |
+| Agresör dengesi girişte ayırıyor mu? | 08-13 | 45 → 27 | **ÇÜRÜDÜ** — kapıları geçti, karıştırıcı kontrolü çürüttü (r=+0,578 ilk saat fiyatıyla) | `agresor_ilk_saat.py` · `agresor_karistirici.py` | s.3858 |
+| "Hızlı tepe = kaybeden" | 08-12 | — | **ÇÜRÜTÜLDÜ** | `scalp_penceresi.py` | s.2825 · s.2875 |
+
+## Fonlama (funding) — projenin en pahalı dersi
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| A+B'nin funding bacağı, 2 yıl | 08-12 | 2 yıl | **KALDI** — ama MA50'den kökten farklı biçimde | `ab_funding_2yil.py` | s.2689 · s.2738 |
+| **A+B, fonlama maliyeti dahil** | 08-13 | 8.666 işlem / 497 sembol | **KALDI** — kenar +0,154 → **+0,027**; kontrol (+0,061) sinyali (−0,034) **geçti**. Fonlama kenarın **%83'ünü** yedi | `ab_funding_maliyetli.py` | s.3520 · s.3561 |
+
+> Bu iki satır projenin dönüm noktası: fonlama hariç tutulan her ölçüm yanıltıcıdır.
+
+## LONG arayışı — hâlâ kanıtlanmış arketip yok
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| F1 tarayıcı→bot köprüsü (boğa pullback) | 08-10 | 410 | **KALDI** — +0,046R vs kontrol +0,062R | `boga_bacagi_test.py` | s.24 · s.589 |
+| F3 derin-negatif funding öncül mü? | 07-15 | 14 pump + 15 kontrol | **ÇÜRÜDÜ** — 0/14; hep T0 sonrası = devam teyidi | — | s.26 |
+| LONG karar ölçütü ön-kaydı | 08-11 | — | ön-kayıt: s.1837 | — | s.1837 |
+| Gölge LONG pump tezi | 08-11 | 14/25 olay | **KARAR YOK** — pencere dolmadı (toplam −2,09R) | — | eşik notu |
+| %10 hedef ölçümü / long arayışı | 08-10 | — | kayıt: s.1101 | `hedef10.py` | s.1101 |
+| Hedef boyutu — "long hedefini %2,5 yapsak" | 08-10 | — | kayıt: s.1186 | `long25_stop.py` | s.1186 |
+
+## Rejim / altyapı
+
+| ölçüm | tarih | N | hüküm | betik | defter |
+|---|---|---|---|---|---|
+| F10 sezon+hava rejim katmanı | 07-22 | 2022–2026 | **KISMEN** — çekirdek amaç (ayı-tepki-rallisini boğa sanmama) başarılı; 2023 tabanı fazla erken TAM_BOGA | `f10_sezon_test.py` | s.80 |
+| Karar penceresi / S9 ön-kaydı | 08-11 | — | ön-kayıt: s.1807 | — | s.1762 |
+| Düşüş freni riski | 08-11 | — | kenar kendini gösteremeden bot duruyor | `fren_riski.py` | s.1692 |
+| Sistem denetimi | 08-11 | — | **9 doğrulanmış hata** → `denetim-raporu.md` | `denetim_olcum.py` | s.2371 |
+| Defter izolasyon testi | 08-13 | 14 kontrol | **GEÇTİ** — 4 defterin hepsi | `defter_izolasyon_testi.py` | s.3469 |
+| Ölçüm ağırlık hatası (ilk parti) | 08-11 | — | **düzeltildi** — ölçümün ağırlığı yanlıştı | `boyut_agirlik.py` | s.1609 |
+
+## Bekleyen — ölçülmedi
+
+| soru | neden bekliyor |
+|---|---|
+| `d_taker` — agresörün pozisyon ömrü boyunca **kayması** | Veri 2026-08-13'te toplanmaya başladı, geriye dönük üretilemez. ~27 Ağustos'ta yeterli olur |
+| `MA50+ucuz` kapısının fonlama yükü | A+B ölçümü yalnız A+B'nin fonlama bacağını kapsadı |
+| A+B kapısı kararı | 2 yıllık ölçüm "kapat" diyor, canlı 16 işlem "kapatma daha kötü olurdu" diyor. Karar verilmedi |
+| Giriş aramasının süre maliyeti | Tur süresi ölçümü 08-14'te eklendi; ortalama 138 sn giriş aramasında |
+
+---
+
+## Kütüğe girmemiş betikler
+
+`scratchpad/` altında 59 ölçüm betiği var; yukarıda **~30'u** adlandırıldı. Kalanlar
+ya yardımcı (veri indirme: `funding_indir.py`, `scalp_1m_indir.py`, `ze_veri.py`) ya
+da defterde ayrı bir sonuç bölümü olmayan ara çalışmalar. Bir betiği kullanmadan önce
+defterde karşılığı olup olmadığına bak; yoksa **sonucu yeniden üretilmeden
+güvenilmez.**
