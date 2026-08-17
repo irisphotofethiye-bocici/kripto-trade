@@ -127,6 +127,13 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   **`state`'teki `kumulatif_funding` ve `kumulatif_giris_ucret` PENCEREYE AİT DEĞİL** —
   2026-07-23'ten beri kümülatiftir; pencere maliyeti olarak kullanmak abartır.
   Güncel rakam okunmaz, **hesaplanır** (`durum.md` → pencere bölümü).
+- **Tur ORTASINDA yapılan kod değişikliği o turu ETKİLEMEZ.** Python modülü tur
+  başında yüklenir; sonraki tur başına kadar eski kod koşar. Yani değişiklikten
+  sonra açılan bir pozisyon bile yeni alanı taşımayabilir ve bu **hata gibi görünür**.
+  Gerçek vaka: `derinlik_giriste` 23:33:03'te yazıldı, ONG 23:33:49'da açıldı — 46 sn
+  sonra, ama alan yok, çünkü o tur **23:28:42'de eski modülle başlamıştı**. Doğru
+  davranış. Bir alanın eksikliğini hata saymadan önce **pozisyonun giriş anını değil,
+  turun BAŞLANGIÇ anını** kod değişikliğiyle karşılaştır (`testbot_equity.jsonl`).
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta
