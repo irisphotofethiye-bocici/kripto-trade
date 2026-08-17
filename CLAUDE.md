@@ -26,10 +26,16 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
 - **En iyi hücre seçilmez.** Tabloya bakıp en yüksek sayıyı kural yapmak bu projede
   reddedilmiş bir davranıştır (bkz. erken müdahale, `olcumler.md`).
 - **Çoklu karşılaştırma sayılır.** Çok sütun + az satır = sahte bulgu garantisi.
-- **Başarısızlık aynen raporlanır.** Bugüne kadar denenen çıkış kurallarının hepsi
-  kârı düşürdü; bunu yumuşatmak projenin değerini yok eder.
-- **Tekrarlayan bulgu:** *kötü girişte sıkı çıkış kaybı keser, iyi girişte kazancı
-  keser.* Yeni bir çıkış kuralı önerirken önce buna bak.
+- **Başarısızlık aynen raporlanır.** Çıkış tarafında **29 varyant** denendi, **1'i**
+  geçti (`olcumler.md` → sayım). Bunu yumuşatmak da şişirmek de projenin değerini
+  yok eder.
+- **Tekrarlayan bulgu — keskin hâli:** geçen tek varyant çıkışı **gevşetiyordu**
+  (sabit %10 hedef). Çıkışı **sıkılaştıran 28 varyantın 28'i de kaldı.**
+  Yeni bir çıkış kuralı önerirken önce buna bak: sıkılaştırma öneriyorsan
+  28/28'e karşı savunma yapman gerekiyor.
+- **Sayı tekrarlanmaz, sayılır.** "13 çıkış kuralı denendi" cümlesi bu projede
+  aylarca tekrarlandı ve **dayanağı yoktu**; kütük doldurulunca gerçek sayım
+  ortaya çıktı. Bir rakamı ikinci kez söylemeden önce kaynağını göster.
 
 ## MİMARİ TUZAKLAR — üçü de gerçekten ısırdı
 
