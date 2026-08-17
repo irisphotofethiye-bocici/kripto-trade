@@ -114,7 +114,14 @@ haline döndürür. Bu deseni bozma.
 
 - **Ölçüm bitince** `olcumler.md`'ye bir satır ekle (hipotez · tarih · N · hüküm ·
   betik · defter satırı).
-- **Karar alınınca / pozisyon durumu değişince** `durum.md`'yi güncelle.
+- **Karar alınınca** `durum.md`'yi güncelle — **kararı**, rakamı değil.
+- **HIZLI DEĞİŞEN RAKAM DOSYAYA YAZILMAZ.** Kasa, açık pozisyon, PnL, fonlama
+  7,5 dakikada bir değişir; yazıldığı an bayatlamaya başlar. `durum.md` bir kez bu
+  hatayı yaptı: sabah yazılan rakamlar **aynı gün öğlen** yalan söylüyordu.
+  Kural: **kaynağı ve okuma komutunu yaz, değeri yazma.** Bir anlık görüntü
+  gerekiyorsa tarihini yanına koy ve "anlık görüntü" olduğunu söyle.
+  Canlı rakam sorulunca **her zaman** `testbot_state.json` okunur — hiçbir `.md`
+  dosyası canlı kaynak değildir.
 - **Yeni bir hata sınıfı ısırınca** buraya "MİMARİ TUZAKLAR"a bir madde ekle.
 
 Güncellenmeyen indeks **yalan söyler** ve hiç olmamasından kötüdür.

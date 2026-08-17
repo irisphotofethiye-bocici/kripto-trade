@@ -1,41 +1,40 @@
 # Durum
 
-**Son güncelleme: 2026-08-17.** Rakamlar `testbot_state.json` ve defter dosyalarından
-okundu, hesaplanmadı.
+Bu dosya **yavaş değişen** şeyleri tutar: kararlar, açık kapılar, bekleyen işler,
+bilinen zayıflıklar. **Rakam tutmaz.**
+
+> 🔴 **CANLI RAKAM BURADAN OKUNMAZ.** Kasa, açık pozisyon, PnL, fonlama — bunlar
+> **7,5 dakikada bir** değişiyor. Bir kez yazılsa 7 dakika sonra yalan olur.
+> Bu ders burada öğrenildi: 2026-08-17 sabahı yazılan rakamlar **aynı gün öğlen**
+> bayattı (kasa 228 $ kaymış, 9 işlem geçmiş, bir pozisyon daha açılmıştı).
+>
+> **Kaynak `testbot_state.json`'dır.** Okumak için:
+>
+> ```bash
+> python -c "import json; s=json.load(open('testbot_state.json',encoding='utf-8')); \
+> print('kasa',round(s['equity'],2),'| efektif',s.get('efektif_equity'), \
+> '| acik',len(s['acik_pozisyonlar']),'| funding',round(s.get('kumulatif_funding',0),2))"
+> ```
+>
+> Son tur ve süre için `testbot_equity.jsonl`'in son satırı · dört defter için
+> `golge_state.json` · `benim_state.json` · `ayna_state.json` · panel için
+> `http://127.0.0.1:8787/`.
 
 > Eski `memory/kripto-proje-durumu.md` **güncel değil** (son yazım 2026-08-03; hâlâ
-> "Faz 4" ve 1000 $'lık testbot anlatıyor). Tarihsel kayıt olarak duruyor, güncel
-> durum için bu dosya esas.
+> "Faz 4" ve 1000 $'lık testbot anlatıyor). Tarihsel kayıt olarak duruyor.
 
 ---
 
-## Bot
+## Sabit çerçeve
 
 | | |
 |---|---|
-| Durum | **AKTIF** · kâğıt üstünde (gerçek emir kodu yok) |
-| Kasa (realize) | 9.980,92 $ |
-| Etkin kasa (realize + açık) | **10.159,03 $** |
-| Zirve | 10.841,02 $ |
-| Açık pozisyon | 7 — CAP · HUMA · BOME · COW · ONT · ZEREBRO · RVN |
-| Kümülatif fonlama | **−488,35 $** |
-| Kümülatif giriş ücreti | −168,55 $ |
-| Defter | 148 kayıt · sonraki id 106 |
-
-**Yayın çıpası: 2026-08-11 12:48:31.** Panel bu tarihten sonrasını gösterir; 23 Temmuz
-dönemi kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $).
-
-**Süre sınırı yok** (`sure_gun = 0`). Koruma **düşüş freni**: zirveden %25 geri
-çekilirse yeni giriş durur, açık pozisyonlar yönetilmeye devam eder.
-
-## Dört defter
-
-| defter | kasa | açık |
-|---|---|---|
-| `testbot` | 9.980,92 | 7 |
-| `golge` | 8.242,47 | 1 |
-| `benim` | 10.089,99 | 0 |
-| `ayna` | 9.824,38 | 4 |
+| Çalışma biçimi | **kâğıt üstünde** — gerçek emir gönderen kod YOK |
+| Yayın çıpası | **2026-08-11 12:48:31** — panel bundan sonrasını gösterir |
+| 23 Temmuz dönemi | kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $) |
+| Süre sınırı | yok (`sure_gun = 0`) |
+| Koruma | **düşüş freni** — zirveden %25 geri çekilirse yeni giriş durur, açık pozisyonlar yönetilmeye devam eder |
+| Defterler | `testbot` (ölçünün temeli) · `golge` · `benim` · `ayna` |
 
 ## Açık kapılar
 
@@ -118,7 +117,15 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 | Sabit %10 hedef | referans çizgisi −0,079 (s.2671) | **aynı koşturmadan** geliyor, aynı itiraz |
 | 1,5R kısmi ezmesi | mevcut −0,011 vs kısmi yok +0,038 | kısmen — ama `kismi_15r.py` evreni canlıya **daraltılmıştı** (stop medyanı %3,27), yani burada metodolojik itiraz **zayıf**, karar tercihe dayanıyor |
 
-**Hakem de aynı: canlı pencere.** Hedef 138 işlem · **84 kapandı (%61)** · kalan **54**.
+**Hakem de aynı: canlı pencere.** Hedef **138 işlem**. Doluluk sabit değil, sayılır:
+
+```bash
+python -c "import json; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
+p=[x for x in k if x['ts']>='2026-08-12' and not x.get('kismi')]; \
+print(len(p),'/138 kapandi ·',138-len(p),'kaldi')"
+```
+
+*(2026-08-17 öğlen: 84/138, kalan 54.)*
 
 **Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
 birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
@@ -172,8 +179,9 @@ kararı · MA50 fonlama yükü · gölge atomik kayıt.
 - **Radar kareleri geri GELMİYOR** — noktasal veri (score, funding, oi, comp).
   Kabaca %7–14 kare kaybı
 
-`kesilen_tur` sayacı **9** — bitmeden öldürülen tur sayısı. Tur süresi 08-14'ten beri
-equity satırında ölçülüyor (`sure_sn`, `sure_yonet`, `sure_giris`, `verisiz_poz`).
+`kesilen_tur` — bitmeden öldürülen tur sayacı; `testbot_state.json`'da yaşıyor, **artar**
+(17 Ağustos öğlen: 9). Tur süresi 08-14'ten beri equity satırında ölçülüyor
+(`sure_sn`, `sure_yonet`, `sure_giris`, `verisiz_poz`).
 
 **Ağ yavaşken tur süresi:** ortalama 191 sn, en uzun 521 sn. **Ağ normalken:** 15–25 sn.
 Yani yavaşlık tamamen dış kaynaklı.
