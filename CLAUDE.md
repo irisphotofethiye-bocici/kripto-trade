@@ -134,6 +134,14 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   sonra, ama alan yok, çünkü o tur **23:28:42'de eski modülle başlamıştı**. Doğru
   davranış. Bir alanın eksikliğini hata saymadan önce **pozisyonun giriş anını değil,
   turun BAŞLANGIÇ anını** kod değişikliğiyle karşılaştır (`testbot_equity.jsonl`).
+
+  ⚠️ **Tuzak İKİ YÖNLÜ çalışır.** Yukarıdaki vaka gerçek bir değişikliği *bozuk*
+  gösteriyordu. Tersi de oldu: keep-alive 23:43:56'da yazıldı, 23:43:42'de **başlamış**
+  tur 174,5 sn sürdü ve "hızlanma" sanıldı — eski modüldü. Üstelik olağandışı bile
+  değildi (keep-alive öncesi 542 turun 186'sı ≤180 sn). **İlgisiz bir iyileşmeyi
+  başarı gibi göstermek, gerçek bir iyileşmeyi bozuk göstermekten daha tehlikelidir:**
+  ikincisi araştırılır, birincisi kutlanır. Bir ölçümün ilk turunu almadan önce
+  `turun başlangıcı = ts − sure_sn` hesabını **her zaman** yap.
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta

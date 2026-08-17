@@ -383,6 +383,25 @@ yerel hesap birkaç sn), o yüzden 2,1 katın tamamını beklemiyorum.
 
 **GEÇME ÖLÇÜTÜ (koşturmadan önce yazıldı).** Keep-alive **kalır** ancak hepsi:
 1. Medyan `sure_sn` **anlamlı düşmeli** (≥%25) — 20 tur üzerinden
+   → **`223,6 sn` mutlak çizgi** (298,1 tabanının %25 altı)
+
+   **[DEĞİŞTİ 2026-08-17 — ölçüt SIKILAŞTIRILDI, gevşetilmedi]**
+   Örneklem süzgeci eklendi: **yalnız `acik_sayisi < 8` turlar sayılır.** Sebep:
+   `sure_sn` **iki modlu** — 8 pozisyon doluyken giriş araması hiç koşmuyor
+   (N=202, medyan **19,2 sn**), boş slot varken koşuyor (N=340, medyan **322,9**).
+   Süzgeçsiz ölçüt hızı değil **pozisyon sayısını** ölçer: pencere içinde 8'e
+   dolarsa medyan 19 sn'ye çöker ve ölçüt **yanlış sebeple** geçer.
+
+   ⚠️ **Mutlak çizgi 223,6 sn'de TUTULDU.** Süzgeçli taban 298,1 → **322,9**'a
+   çıkıyor; %25 kuralı mekanik uygulansaydı çizgi 242,3'e **gevşerdi**. Sonucu
+   gördükten sonra çizgiyi gevşetmek bu projede yasak, o yüzden eski çizgi aynen
+   duruyor — yeni tabana göre bu **−%30,7**, yani ölçüt zorlaştı.
+   *(Beklenti zaten 145–180 sn; rahat geçmeli. Geçmezse gevşetilmez, geri alınır.)*
+
+   **Örneklem kuralları:** ilk keep-alive turu **23:51:12**'de başlıyor
+   (`turun başlangıcı = ts − sure_sn`). 23:46:37'deki 174,5 sn'lik tur **HARİÇ** —
+   23:43:42'de başladı, `evren.py` 23:43:56'da yazıldı, yani **eski modül**.
+   (Ve 174,5 olağandışı değil: keep-alive öncesi 542 turun 186'sı ≤180 sn.)
 2. `verisiz_poz` artmamalı · `kesilen_tur` artmamalı
 3. 418/429 davranışı **birebir korunmalı** (testle kanıt)
 4. Dört üretim çağıranı (`radar` · `testbot` · `olcucu` · `panel`) sahte sunucuyla geçmeli
