@@ -113,7 +113,36 @@ Geri dönmek gerekirse tek satır: `tp1_efektif_hesapla` çağrısını
 `cikis_modu == "sabit_hedef"` pozisyonlarda atla. **`kismi_kar_r = 0` YAPMA** —
 neden olmadığı `CLAUDE.md`'de yazılı (TP1 anında tetikleniyor).
 
-### ⭐ Üç karar tek hakeme bağlı — ayrı ayrı tartışılmasın
+### ⭐ BEŞ İŞ TEK HAKEME BAĞLI — ayrı ayrı tartışılmasın
+
+```mermaid
+flowchart TD
+    A["1 · MA50+ucuz kapısı<br/>REDDEDİLDİ · t=−4,05<br/>yine açık (08-12 kullanıcı kararı)"]
+    B["2 · Sabit %10 hedef<br/>referans çizgisi −0,079"]
+    C["3 · Sabit hedefin MA50'ye<br/>genişletilmesi<br/>dayanağı +0,84% → çürütüldü"]
+    S["ORTAK SAVUNMA<br/>o ölçüm bir YENİDEN ÜRETİM<br/>medyan stop %1,3 · canlıda %3,4<br/>ikisi AYNI koşturmadan geliyor"]
+    D["4 · 1,5R kısmi ezmesi<br/>ölçüm 'kaldır' dedi<br/>kullanıcı 'kalsın' dedi"]
+    E["5 · A+B stop mesafesi<br/>A-stop kenarın %65'ini yiyor<br/>defterde: 'pencere sonrası İLK İŞ'"]
+    W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç ÇÖZÜLMEDİ — üç aday"}}
+    P["popülasyon itirazı DOĞRULANIR<br/>1 · 2 · 3 ayakta kalır<br/>5 yine ölçülür"]
+    M["üç savunma BİRDEN düşer<br/>1 · 2 · 3 birlikte gözden geçirilir<br/>4 zaten tercihe dayanıyordu"]
+    A --> S
+    B --> S
+    C --> S
+    S --> W
+    D -. "savunması ZAYIF:<br/>evren canlıya daraltılmıştı" .-> W
+    E --> W
+    W -- "pencere ARTI kapanırsa" --> P
+    W -- "pencere EKSİ kapanırsa" --> M
+```
+
+**Diyagramın söylediği tek şey:** 1, 2 ve 3 bağımsız kararlar değil — **aynı tek
+savunmaya** yaslanıyorlar, çünkü 1 ve 2'nin −0,079'u **aynı koşturmadan** geliyor.
+4 doğrudan hakeme bağlı ama savunması zayıf (evreni canlıya daraltılmıştı, yani
+popülasyon itirazı orada geçerli değil). 5 bir savunma değil, pencereye kilitlenmiş
+bir iş.
+
+**Pratik sonuç: pencere dolunca beş ayrı tartışma değil, TEK tartışma yapılır.**
 
 Yukarıdaki maddelerin **1, 2, 3'ü ve sabit %10 hedef** birbirinden bağımsız görünüyor.
 Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
