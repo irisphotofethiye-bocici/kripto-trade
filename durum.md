@@ -310,6 +310,11 @@ biri muhtemelen ölü ya da çakışıyor — **ayrı bir soru, araştırılmal�
 > Get-NetTCPConnection -LocalPort 8787 -State Listen |
 >   Select-Object LocalPort, OwningProcess
 > ```
+> **ÖLÇÜLDÜ 2026-08-18** — yanlışı öldürme:
+> ```
+> PID 29304 (15 Ağu 11:24)  ← 127.0.0.1:8787'yi DİNLİYOR, canlı olan bu
+> PID 17776 (14 Ağu 00:40)  ← dinlemiyor, ÖLÜ olan bu
+> ```
 > Yeniden başlatma panele keep-alive'ı da getirir → iki işi birleştirmek mantıklı.
 > Ama **ölçüm penceresi kapanana kadar bekleyebilir**; panel ölçümün parçası değil.
 

@@ -35,7 +35,7 @@ Kullanim:  python ayna.py --durum
            python ayna.py --kur       (ilk kurulum: bottan anlik kopya)
            python ayna.py --kapat SYM (elle kapatma; normalde panelden)
 """
-import json, os, sys, argparse, copy
+import json, os, sys, time, argparse, copy
 
 import testbot
 
@@ -46,6 +46,70 @@ EQUITYF = os.path.join(HERE, "ayna_equity.jsonl")
 
 if sys.stdout is None:
     sys.stdout = open(os.devnull, "w", encoding="utf-8")
+
+
+# --- KILIT (2026-08-18) --------------------------------------------------------------
+# [SORUN] kaydet() ATOMIK ama "oku -> degistir -> yaz" ISLEMI degildi. Ayna'ya iki AYRI
+#   SUREC yaziyor: tur()/aynala() testbot surecinden, kapat() panel surecinden
+#   (ThreadingHTTPServer). Kilit olmayinca iki hata sinifi dogdu ve ikisi de gerceklesti:
+#     (a) CHECK-THEN-ACT: kapat() "pozisyon acik mi" diye bakip fiyat_fapi() icin AGA
+#         cikiyordu; o saniyelerde ikinci bir istek ayni kontrolu geciyordu -> AYNI
+#         pozisyon IKI KEZ kapandi (BAS 14:51:41/14:52:26, EDEN 19:44:34/19:44:44).
+#     (b) LOST UPDATE: tur() state'i yukleyip yonetim boyunca elinde tutuyordu; bu arada
+#         kapat() kaydediyor, sonra tur() BAYAT state'ini geri yaziyordu -> kapanmis
+#         pozisyon acik listeye GERI DONUYOR, defter kaydi kaliyordu (MOVE/PLUME
+#         2026-08-15 15:40:52: taban 9.991,32'den yazildi, MOVE'un kapanisi silindi).
+#   Toplam sapma +177,84 $; mutabakat 08-13'te kurusu kurusuna tutuyordu, hata 08-14'te
+#   dogdu ve BUYUDU. Ayrinti: olcumler.md -> ayna bolumu.
+# [DERS] ATOMIK YAZIM != ATOMIK ISLEM. kaydet() ilk gunden atomikti ve yetmedi.
+# [SURE ILANI — CLAUDE.md kurali] Kilit BAYAT_SN'den eskiyse calinir. Esik, tur()'un
+#   en uzun span'inin USTUNDE olmali: yonet_acik_pozisyonlar olculdu (testbot vekili)
+#   medyan 14,2 sn · p95 20,9 · MAKS 385,6. Esik 600 sn = maksimumun ~1,6 kati.
+#   testbot'un kendi kilidi 1250 sn; ayna'ninki ondan KISA, yani takilan bir ayna
+#   kilidi testbot kilidinden once temizlenir.
+KILITF = os.path.join(HERE, ".ayna.lock")
+KILIT_BAYAT_SN = 600.0
+
+
+def _kilit_al(bayat_sn=KILIT_BAYAT_SN):
+    """Alinabildiyse True. BEKLEMEZ — cagiran taraf ne yapacagina kendi karar verir.
+
+    [ATOMIK OLUSTURMA — SART] `os.path.exists()` sonra `open(...,"w")` deseni KILITLEMEZ:
+      iki cagiran da varlik kontrolunu gecip ikisi de yazabilir. Bu tam olarak duzeltmeye
+      calistigimiz CHECK-THEN-ACT hatasinin kilit ilkelindeki hali ve testte GERCEKTEN
+      olustu (iki eszamanli kapat() ikisi de gecti, deftere 2 kayit dustu).
+      O_CREAT|O_EXCL isletim sistemi duzeyinde tek adimdir: dosya varsa HATA verir.
+    """
+    for _ in range(2):                      # 1. deneme; bayat kilit temizlenirse 2.
+        try:
+            fd = os.open(KILITF, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                yas = time.time() - os.path.getmtime(KILITF)
+            except Exception:
+                yas = bayat_sn + 1
+            if yas < bayat_sn:
+                return False                 # canli kilit -> mesgul
+            try:
+                os.remove(KILITF)            # bayat -> temizle ve TEKRAR dene
+            except Exception:
+                return False
+            continue
+        except Exception:
+            return False
+        try:
+            os.write(fd, f"{os.getpid()} {testbot.now_iso()}".encode("utf-8"))
+        finally:
+            os.close(fd)
+        return True
+    return False
+
+
+def _kilit_birak():
+    try:
+        os.remove(KILITF)
+    except Exception:
+        pass
 
 
 def yukle():
@@ -120,17 +184,27 @@ def kur(zorla=False):
 def aynala(bot_pos):
     """testbot bir GIRIS actiginda cagrilir. Pozisyonun BIREBIR kopyasini aynaya koyar.
     Fiyat/boyut/stop/TP yeniden HESAPLANMAZ — kopyalanir; yoksa 'ayni islem' olmaz."""
-    st = yukle()
-    if not st or st.get("durum") != "AKTIF":
+    # [KISIT] Bu da oku-degistir-yaz: kilitsiz calisirsa kapat() ile yarisir ve
+    #   ya kopya kaybolur ya kapanmis pozisyon geri doner. Ag cagrisi YOK, kilit
+    #   penceresi milisaniye. Alinamazsa aynalama ATLANIR (bot etkilenmez) —
+    #   sessizce basarili donmek yanlis olurdu, cagiran False'u gorur.
+    if not _kilit_al():
+        print(f"[{testbot.now_iso()}] AYNA: kilit mesgul -> {bot_pos.get('sym')} aynalanmadi")
         return False
-    if any(p["sym"] == bot_pos["sym"] for p in st["acik_pozisyonlar"]):
-        return False
-    p = copy.deepcopy(bot_pos)
-    p["ayna_kaynak"] = "bot_girisi"
-    st["acik_pozisyonlar"].append(p)
-    st["sonraki_id"] = max(st.get("sonraki_id", 1), bot_pos["id"] + 1)
-    kaydet(st)
-    equity_yaz(st)
+    try:
+        st = yukle()
+        if not st or st.get("durum") != "AKTIF":
+            return False
+        if any(p["sym"] == bot_pos["sym"] for p in st["acik_pozisyonlar"]):
+            return False
+        p = copy.deepcopy(bot_pos)
+        p["ayna_kaynak"] = "bot_girisi"
+        st["acik_pozisyonlar"].append(p)
+        st["sonraki_id"] = max(st.get("sonraki_id", 1), bot_pos["id"] + 1)
+        kaydet(st)
+        equity_yaz(st)
+    finally:
+        _kilit_birak()
     return True
 
 
@@ -138,19 +212,42 @@ def kapat(sym):
     """Kullanicinin TEK yetkisi: 'ben burada kapatirdim'. Piyasa fiyatindan kapatir.
     Bot ETKILENMEZ — botun ayni pozisyonu kendi kaderini yasamaya devam eder."""
     sym = str(sym).upper().strip()
+    # --- 1) On kontrol (kilitsiz, UCUZ) — "hic yok" hatasini aga cikmadan don ---------
     st = yukle()
     if not st:
         return False, "Ayna defteri kurulu degil."
-    pos = next((p for p in st["acik_pozisyonlar"] if p["sym"] == sym), None)
-    if not pos:
+    if not any(p["sym"] == sym for p in st["acik_pozisyonlar"]):
         return False, f"Aynada {sym} adinda acik pozisyon yok."
+
+    # --- 2) FIYAT KILIDIN DISINDA -----------------------------------------------------
+    # [KISIT] Ag cagrisi kilit icinde YAPILMAZ. Kilidi saniyeler boyunca tutmak sorunun
+    #   ta kendisiydi; kilit penceresi MILISANIYE olmali. Fiyat once alinir.
     px = testbot.fiyat_fapi(sym)
     if not px:
         return False, "Anlik fiyat alinamadi, kapatma yapilmadi."
-    kayit = _defterde(testbot.pozisyon_kapat, st, pos, px, "ELLE_KAPAT")
-    st["acik_pozisyonlar"] = [p for p in st["acik_pozisyonlar"] if p["sym"] != sym]
-    kaydet(st)
-    equity_yaz(st)
+
+    # --- 3) Kilit + YENIDEN OKU + dogrula + yaz ---------------------------------------
+    # [KISIT] Kilit alinamazsa ILERLEME. Sessiz basari cift kapanisin kaynagiydi.
+    if not _kilit_al():
+        return False, (f"Ayna defteri su an mesgul (baska bir islem yaziyor). "
+                       f"{sym} kapatilmadi — birkac saniye sonra tekrar dene.")
+    try:
+        # Kilitten SONRA yeniden oku: on kontrol ile buraya kadar gecen surede (fiyat
+        # cagrisi) baska bir istek ayni pozisyonu kapatmis olabilir. "Hala listede mi"
+        # diye TEKRAR bakmak tek basina yetmez — bu sorgu KILIT ALTINDA olmali.
+        st = yukle()
+        if not st:
+            return False, "Ayna defteri okunamadi."
+        pos = next((p for p in st["acik_pozisyonlar"] if p["sym"] == sym), None)
+        if not pos:
+            return False, (f"{sym} bu arada zaten kapanmis (baska bir islem ya da bot "
+                           f"kurallari). Ikinci kapanis YAPILMADI.")
+        kayit = _defterde(testbot.pozisyon_kapat, st, pos, px, "ELLE_KAPAT")
+        st["acik_pozisyonlar"] = [p for p in st["acik_pozisyonlar"] if p["sym"] != sym]
+        kaydet(st)
+        equity_yaz(st)
+    finally:
+        _kilit_birak()
     pnl = kayit["sonuc_usdt"] if kayit else 0.0
     return True, f"{sym} aynada kapatildi ({pnl:+.2f}$). Botun pozisyonu devam ediyor."
 
@@ -158,14 +255,24 @@ def kapat(sym):
 def tur():
     """testbot.cycle() sonunda cagrilir. Acik ayna pozisyonlarini BOTLA AYNI
     kurallarla yonetir. Yeni giris ARAMAZ — girisler yalnizca aynala()'dan gelir."""
-    st = yukle()
-    if not st:
+    # [KISIT] Kilit alinamazsa BEKLEME — bu turu ATLA. 7,5 dk sonra tekrar gelinir,
+    #   veri kaybi yok. Beklemek, takilan bir panel istegini botun TURUNA baglardi;
+    #   tur zaten 180-300 sn ve kesilen_tur sayaci var.
+    if not _kilit_al():
+        print(f"[{testbot.now_iso()}] AYNA: kilit mesgul -> bu tur atlandi "
+              f"(veri kaybi yok, sonraki turda yonetilir)")
         return
-    if st["acik_pozisyonlar"]:
-        _defterde(testbot.yonet_acik_pozisyonlar, st)
-    st["son_cycle_ts"] = testbot.now_iso()
-    kaydet(st)
-    equity_yaz(st)
+    try:
+        st = yukle()
+        if not st:
+            return
+        if st["acik_pozisyonlar"]:
+            _defterde(testbot.yonet_acik_pozisyonlar, st)
+        st["son_cycle_ts"] = testbot.now_iso()
+        kaydet(st)
+        equity_yaz(st)
+    finally:
+        _kilit_birak()
 
 
 def equity_yaz(st):

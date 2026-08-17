@@ -51,6 +51,13 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   (sabit %10 hedef). Çıkışı **sıkılaştıran 28 varyantın 28'i de kaldı.**
   Yeni bir çıkış kuralı önerirken önce buna bak: sıkılaştırma öneriyorsan
   28/28'e karşı savunma yapman gerekiyor.
+- **BİR SAPMAYI AÇIKLAYAN FORMÜL BULUNDUĞUNDA, İKİNCİ BİR ZAMANDA SINANMADAN HÜKÜM
+  YAZILMAZ.** Tek noktaya uyan formül *"donmuş kayma"* ile *"büyüyen hata"*yı
+  **ayırt edemez** — ikisi de o tek noktada aynı sayıyı verir. Gerçek vaka: `ayna`'nın
+  177,84 $ farkı için 08-12 temizliğine dayanan bir açıklama bulundu, tuttuğu için
+  *"kalıcı kayma, süregelen hata değil"* diye yazıldı. Commit commit ölçülünce fark
+  08-13'te **−0,01** çıktı, yani açıklama yanlıştı: hata 08-14'te doğmuş ve
+  **büyüyordu**. Doğru hamle formülü bulmak değil, **farkı birkaç zamanda ölçmekti.**
 - **Sayı tekrarlanmaz, sayılır.** "13 çıkış kuralı denendi" cümlesi bu projede
   aylarca tekrarlandı ve **dayanağı yoktu**; kütük doldurulunca gerçek sayım
   ortaya çıktı. Bir rakamı ikinci kez söylemeden önce kaynağını göster.
@@ -142,6 +149,22 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   başarı gibi göstermek, gerçek bir iyileşmeyi bozuk göstermekten daha tehlikelidir:**
   ikincisi araştırılır, birincisi kutlanır. Bir ölçümün ilk turunu almadan önce
   `turun başlangıcı = ts − sure_sn` hesabını **her zaman** yap.
+- 🔴 **KONTROL-ET-SONRA-YAP (check-then-act) BU PROJEDE BİR HATA SINIFIDIR.**
+  Kontrol ile eylem arasında başka bir süreç/iş parçacığı araya girer. **Üç kez** oldu:
+
+  | yer | desen | sonuç |
+  |---|---|---|
+  | `ayna.kapat` | "açık mı" → **ağ çağrısı** → yaz | aynı pozisyon iki kez kapandı |
+  | ilk kilit denemem | `os.path.exists()` → `open(...,"w")` | iki çağıran da kilidi "aldı" |
+  | `testbot._kilit_al` | aynısı | henüz ısırmadı (bkz. `olcumler.md` → Bekleyen) |
+
+  **Grep'lenebilir kural — şu ikisi şüphelidir:**
+  `os.path.exists(...)` ardından aynı yola yazma · *"hâlâ açık/var mı"* kontrolünden
+  **sonra** ağ çağrısı gelmesi.
+  **Doğrusu:** ya işletim sistemi düzeyinde tek adım (`os.O_CREAT | os.O_EXCL`), ya da
+  kilit altında **yeniden oku + doğrula**. Ağ çağrısı kilidin **dışında** kalır.
+  ⚠️ **ATOMİK YAZIM ≠ ATOMİK İŞLEM.** `ayna.kaydet` ilk günden atomikti ve yetmedi;
+  bozulan tek yazım değil, oku-değiştir-yaz bütünlüğüydü.
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta
@@ -159,6 +182,14 @@ yetmez. 2026-08-15'te sahte mum fiyatı `1.0` gerçek stop eşiğine (`0.01`) ç
 düşülmüştü. Stub'lanacaklar: `_append_jsonl` · `_save_state` · `pozisyon_kapat` ·
 `pozisyon_liq` · `pozisyon_kismi_tp1` · `telegram_gonder`. Testin sonunda
 "diske yazım: YOK" diye **doğrula**.
+
+**`python -m pyflakes *.py` — her kod değişikliğinden sonra, `py_compile`'a EK.**
+`py_compile` yalnız sözdizimine bakar; **tanımsız isim** onun için hata değil, çalışma
+anında patlar. Bu sınıf **üç kez** ısırdı: `radar.HERE` (modül düzeyinde yoktu — sessizce
+hiç çalışmadı), `ayna.time` (import edilmemişti), ve ikisi de `py_compile`'dan geçti.
+Doğrulandı: pyflakes ikisini de **isim isim** yakalıyor. Bu sınıf disiplinle değil
+**araçla** kapanır. Beklenen çıktı: `undefined name` **sıfır** (bilinen zararsız
+uyarılar: kullanılmayan import/değişken, placeholder'sız f-string).
 
 ## DÖRT DEFTER — her biri tek değişkeni yalıtır
 
