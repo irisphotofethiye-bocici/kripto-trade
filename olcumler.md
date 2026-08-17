@@ -255,6 +255,34 @@ o ana kadar defter P&L  +615,82
 toplam                8.817,00   ← yeniden kurulan değerle FARK = 0,00
 ```
 
+> 🔴 **BU TEŞHİS ÇÜRÜTÜLDÜ (2026-08-18).** Aşağıdaki 08-12 anlatısı kaymanın kaynağı
+> **değil.** Commit commit mutabakat kuruldu: 2026-08-13 23:06'ya kadar fark
+> **−0,01 $** (kuruşu kuruşuna, yani temizlikten SONRA da tamdı). Fark
+> **08-14'te doğdu** ve büyüdü: `−0,01 → −102,54 (08-14 21:10) → −177,84 (08-18)`.
+> Yani **kalıcı bir kayma değil, SÜREGELEN bir hata** — tam tersi yazılmıştı.
+>
+> **Mekanizma bulundu — geri alınan kapanış, defterden silinmedi:**
+> ```
+> ayna_equity.jsonl
+>   14:51:41   9.559,64 -> 9.664,47   (+104,83)   acik 6
+>   14:51:54   9.664,47 -> 9.559,64   (-104,83)   acik 7   <- GERI ALINDI, poz DONDU
+> ayna_islemler.jsonl
+>   14:51:41  BAS  ELLE_KAPAT  +104,83   <- kayit SILINMEDI
+>   14:52:26  BAS  ELLE_KAPAT  +103,45   <- ayni pozisyon IKINCI kez kapandi
+> ```
+> Equity doğru geri alındı, **defter kaydı kalmaya devam etti** → defterde equity'ye
+> hiç yansımamış +104,83. Kalan ~73 $ için aynı sınıftan başka olaylar aranmalı
+> (aynı gün `2Z` iki kez STOP, `EDEN` iki kez ELLE_KAPAT).
+>
+> **Sınıf tanıdık:** çok-dosyalı durumun atomik olmayan güncellenmesi — gölge
+> sızıntısı ve 314 $ olayıyla aynı aile. `ayna.py` atomik **yazıyor**, ama
+> "equity'yi geri al + defter kaydını sil" **tek işlem değil.**
+>
+> **Sonuç:** eşleşmiş `ayna`–bot kıyasının ön koşulu sanıldığından ağır. Önce
+> düzeltilmeli; düzeltme **defter mutasyonu** demek, onay ister.
+
+*(Aşağıdaki 08-12 analizi tarihsel kayıt olarak duruyor — o gün doğru sanılmıştı.)*
+
 **Yeniden kurulum `başlangıç + defter P&L` formülünü kullandı — funding terimi YOK.**
 `temizlik_notu` *"equity kararlardan yeniden kuruldu"* diyor ama **hangi formülle**
 kurulduğunu ve **fonlamanın dışarıda kaldığını** yazmıyor. Bugünkü 177,84 $ kalıntısı
