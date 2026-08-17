@@ -75,9 +75,10 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   önce dolmuş** ilan eder. Güncel sayım komutu `durum.md`'de.
 - 🔴 **SÜZGEÇ SAYMAK İÇİNDİR, TOPLAMAK İÇİN DEĞİL.** Pozisyon *sayarken*
   `not x.get("kismi")` uygulanır. **P&L *toplarken* UYGULANMAZ** — kayıtlar `id` ile
-  birleştirilir, yoksa TP1'de **realize edilmiş kâr kaybolur.** Ölçüldü:
-  `golge` gerçek −1.350,72 iken süzgeçli hâli −5.815,70 → **4.465 $ hata**;
-  `testbot`'ta 2.855 $. Süzgeç bu projede zaten bir kez yanlış toplam üretti.
+  birleştirilir, yoksa TP1'de **realize edilmiş kâr kaybolur.** Ölçüldü
+  *(2026-08-17 anlık görüntüsü — rakamlar drift eder, hata BÜYÜKLÜĞÜ kanıt olarak
+  duruyor)*: `golge` gerçek −1.350,72 iken süzgeçli hâli −5.815,70 → **~4.465 $ hata**;
+  `testbot`'ta **~2.855 $**. Süzgeç bu projede zaten bir kez yanlış toplam üretti.
 - **MUTABAKAT DENKLEMİ — hangi yöntemi kullanırsan kullan, bunu tutturmuyorsa yanlıştır:**
 
   ```

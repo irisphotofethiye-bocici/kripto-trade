@@ -240,6 +240,34 @@ kaybettiriyor *olabilir*, ama N=10 ve N=13 ile bunu kural yapmak tam olarak
 > Yukarıdakiler id-birleşik ve equity ile mutabık. Kural `CLAUDE.md`'de:
 > **süzgeç saymak için, toplamak için değil.**
 
+### `ayna` — mutabakatta 177,84 $ açıklanmamış fark vardı, KAYNAĞI BULUNDU
+
+Mutabakat denklemi ilk koşusunda bir kusur yakaladı: `golge` kuruşu tutarken (−0,07)
+`ayna` **−177,84 $** sapıyordu. İzi sürüldü:
+
+```
+2026-08-12 17:34   equity 8.420,84   (defterden türemiş)
+2026-08-12 17:42   equity 8.817,00   (gölge sızıntısı temizliğinde YENİDEN KURULDU)
+
+eski başlangıç        8.201,18
+o ana kadar defter P&L  +615,82
+                     ─────────
+toplam                8.817,00   ← yeniden kurulan değerle FARK = 0,00
+```
+
+**Yeniden kurulum `başlangıç + defter P&L` formülünü kullandı — funding terimi YOK.**
+`temizlik_notu` *"equity kararlardan yeniden kuruldu"* diyor ama **hangi formülle**
+kurulduğunu ve **fonlamanın dışarıda kaldığını** yazmıyor. Bugünkü 177,84 $ kalıntısı
+buradan geliyor; kalıcı bir kayma, süregelen bir hata değil.
+
+**Sonuç:** `ayna`'nın equity'si ile defteri **tutarlı değil** ve fark belgeli değildi.
+Eşleşmiş kıyas yapılmadan önce bu kayma açıkça düzeltilmeli ya da kıyasa dahil edilmeli
+— yoksa ayna-bot karşılaştırması 177,84 $ yanlı başlar. **Bekleyen'e eklendi.**
+
+> **Genel ders:** mutabakat denklemi **yazılmamış bir düzeltmeyi ilk koşusunda yakaladı.**
+> Denklemin değeri buydu — hangi yöntemi kullanırsan kullan, equity'yi tutturmuyorsa
+> ya hesap yanlıştır ya belgelenmemiş bir müdahale var.
+
 ### `ayna` — kıyas bugün YAPILAMAZ
 Gereken üç şey elde yok: (a) **eşleşmiş** pozisyon listesi, (b) iki tarafta **etkin**
 kasa (ikisinin de açık pozisyonu var), (c) ayna'nın farklı tabanı ve `kayip_veri_notu` /
@@ -260,6 +288,7 @@ kıyası)"* dediği hatanın **üçüncü tekrarı** olur. → Bekleyen: ön-kay
 | **Boğa-bacağı walk-forward ölçümü** — HİÇ YAPILMADI | `kazanan-bot-arastirma-raporu.md` §8.1'in 1. maddesi. **Projenin en büyük bilinen açığı** (LONG'un kanıtlanmış arketipi yok) ve **veri elde**: `scratchpad/klines_1h_uzun/` 566 sembol / 2 yıl, gerçek boğa içeriyor. Aynı raporun 3. maddesi (portföy düşüş limiti) 08-10'da uygulandı — 1. madde beklemede |
 | **K1–K6 değerlendirmesi koşturuldu mu?** | `test-degerlendirme-programi.md` ön-kaydı 2026-07-10'da yazıldı, **sonucu hiçbir yerde yok.** Ön-kayıt yazıp sonucunu yazmamak projenin kendi disiplinine aykırı. K1 eşiği ("equity > 1000 $") bugünkü 10.000 $ tabanlı bot için geçersiz; ama **koşturulup mu geçildi, atlandı mı** — bu bilinmeli. D/8 ve D/9 kuralları `CLAUDE.md`'ye taşındı |
 | **`ayna` eşleşmiş kıyası** | Ön-kayıtlı ayrı ölçüm işi — gerekçe yukarıdaki defterler bölümünde |
+| **`ayna`'nın 177,84 $ equity–defter kayması** | Kaynağı bulundu (08-12 17:42 temizliğinde equity `başlangıç + defter P&L` ile, **funding'siz** yeniden kuruldu). **Kıyastan ÖNCE** düzeltilmeli ya da kıyasa dahil edilmeli, yoksa ayna-bot karşılaştırması yanlı başlar. Ayrıntı defterler bölümünde |
 
 ---
 
