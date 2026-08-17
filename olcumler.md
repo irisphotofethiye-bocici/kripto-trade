@@ -64,8 +64,11 @@ yeniden üretimde referans çizgisi **−0,079 (t=−4,05)** çıktı. *"Örnekl
 örneklem-dışı negatif"* — LONG hücrelerinde yaşananın aynısı.
 
 **Ama "kapı öldü" denemez:** o popülasyon canlıdan uzak (medyan stop %1,3 vs canlı %3,4)
-— MA50+ucuz tartışmasındaki **aynı sınır**. İki konu birbirine bağlı; biri için verilen
-karar diğerini de etkiler.
+— MA50+ucuz tartışmasındaki **aynı sınır**, çünkü **aynı koşturmadan** geliyor.
+
+→ Bu, üç ayarı tek hakeme bağlayan yapısal bağın parçası. Tamamı `durum.md`'de
+*"Üç karar tek hakeme bağlı"* bölümünde: MA50+ucuz · sabit %10 hedef · (kısmen) 1,5R.
+**Pencere dolduğunda üçü ayrı ayrı tartışılmamalı.**
 
 ### ⭐ Genel bulgu: kısmi kâr ERKENLİĞİNDE MONOTON (s.3031)
 

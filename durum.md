@@ -103,6 +103,31 @@ Geri dönmek gerekirse tek satır: `tp1_efektif_hesapla` çağrısını
 `cikis_modu == "sabit_hedef"` pozisyonlarda atla. **`kismi_kar_r = 0` YAPMA** —
 neden olmadığı `CLAUDE.md`'de yazılı (TP1 anında tetikleniyor).
 
+### ⭐ Üç karar tek hakeme bağlı — ayrı ayrı tartışılmasın
+
+Yukarıdaki maddelerin **1, 2, 3'ü ve sabit %10 hedef** birbirinden bağımsız görünüyor.
+Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
+
+> *"O ölçüm bir yeniden üretim; popülasyonu canlıdan uzak — medyan stop %1,3,
+> canlıda %3,4. Yani 'kural geniş uygulanınca negatif' diyor, 'canlı kapı negatif'
+> demiyor."*
+
+| ayar | ölçüm ne dedi | savunma |
+|---|---|---|
+| MA50+ucuz | −0,079 · t=−4,05 · üç rejimde negatif | popülasyon itirazı |
+| Sabit %10 hedef | referans çizgisi −0,079 (s.2671) | **aynı koşturmadan** geliyor, aynı itiraz |
+| 1,5R kısmi ezmesi | mevcut −0,011 vs kısmi yok +0,038 | kısmen — ama `kismi_15r.py` evreni canlıya **daraltılmıştı** (stop medyanı %3,27), yani burada metodolojik itiraz **zayıf**, karar tercihe dayanıyor |
+
+**Hakem de aynı: canlı pencere.** Hedef 138 işlem · **84 kapandı (%61)** · kalan **54**.
+
+**Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
+birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
+doğrulanmış olur. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
+üç yüzü.
+
+Uyarı: 1,5R'nin savunması diğer ikisinden **zayıf.** Onu popülasyon itirazına
+yaslamak yanlış olur; o karar açıkça bir tercihti ve bedeli kayıtlı (−0,016/işlem).
+
 **4. `golge.py`'nin `kaydet`'i hâlâ atomik değil** — 2026-08-11'de defteri 314 $
 saptıran çift kaydın kök nedeni. `ayna.py` ve `izleyici.py` ilk günden atomik yazıyor;
 aynı desen kopyalanacak. Onarım önerildi, uygulanmadı.
