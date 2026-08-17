@@ -919,7 +919,6 @@ adayların yerini işgal eder.
 |---|---|---|---|
 | 1 | **Kırılım yönü** (Headley'nin kendi kullanımı) | Bölüm 11.5'te **geçersiz** ölçüldü — hedef girişin arkasında kaldı. Kendi çıkış kuralıyla hiç ölçülmedi. Yazarın tasarım amacı buydu. | Yeni çıkış tanımı + tekrar koşum |
 | 2 | **Gerçek boğa rejimi** | Bölüm 12.1: bu veride boğa yok (BTC +%1,1). İddia ne doğrulandı ne çürütüldü. | Rejim döndüğünde veri birikmesi |
-
 | 3 | **Çöküş sonrası pencere** | Bölüm 13.3: kenarın tamamı BTC'nin %6 düştüğü haftadan geliyor. "Keskin satış sonrası N gün" bir REJİM KAPISI olabilir — ama tek episoddan genelleme yapılamaz; ikinci bir çöküş beklenmeli. | Yeni çöküş verisi |
 
 **Not:** "nötr'de çalışır" iddiası artık **ölçüldü ve tutmadı** (bölüm 12.3) — o yüzden

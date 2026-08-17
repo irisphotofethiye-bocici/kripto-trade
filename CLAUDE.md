@@ -26,6 +26,18 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
 - **En iyi hücre seçilmez.** Tabloya bakıp en yüksek sayıyı kural yapmak bu projede
   reddedilmiş bir davranıştır (bkz. erken müdahale, `olcumler.md`).
 - **Çoklu karşılaştırma sayılır.** Çok sütun + az satır = sahte bulgu garantisi.
+- **SİNYAL, MEKANİKTEN ARINIK ÖLÇÜLÜR — ölçüm sırası şudur:**
+
+  ```
+  ham ileri getiri  →  ticaret mekaniği  →  portföy simülasyonu
+  ```
+
+  Aksi hâlde **bizim stopumuzun öldürdüğü bir kenarı "sinyal boş" diye kaydederiz.**
+  Bu hata gerçekten yapıldı (`kanal-stochrsi-analizi.md` 12.5 → 13. bölümde
+  düzeltildi). **İki bağımsız ölçüm aynı derse çıktı:** kanal/StochRSI'de ham sinyal
+  +0,243 vs kontrol +0,035 (t=+3,84) iken A-stop'la +0,051'e iniyordu; ölü sinyal
+  taramasında A-stop **A+B'nin ham kenarının %65'ini** yiyordu — MA50+ucuz'da %0.
+  Bir kapı "çalışmıyor" derken **kapının mı, stopun mu** çalışmadığı ayrılmalı.
 - **Başarısızlık aynen raporlanır.** Çıkış tarafında **29 varyant** denendi, **1'i**
   geçti (`olcumler.md` → sayım). Bunu yumuşatmak da şişirmek de projenin değerini
   yok eder.
@@ -89,6 +101,7 @@ haline döndürür. Bu deseni bozma.
 | Şu an ne açık, ne bekliyor? | **`durum.md`** |
 | O ölçümün gerekçesi neydi? | `fikir-defteri.md` (251 KB, kronolojik — satır no `olcumler.md`'de) |
 | Sistemde hangi hatalar bulundu? | `denetim-raporu.md` |
+| Kanal/StochRSI stratejisi ne oldu? | `kanal-stochrsi-analizi.md` (44 KB, 14 bölüm — 1-10 ölçümden ÖNCE yazıldı, hüküm KALDI) |
 | Canlıya geçmeden ne kapanmalı? | `memory/canliya-gecis-kontrol-listesi.md` |
 | Bileşenler ne işe yarar? | `README.md` |
 | Ölçüm betikleri | `scratchpad/*.py` (59 dosya) |

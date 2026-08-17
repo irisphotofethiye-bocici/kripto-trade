@@ -92,7 +92,7 @@ aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorun
 
 | ölçüm | tarih | N | hüküm | betik | defter |
 |---|---|---|---|---|---|
-| Kanal + StochRSI | 08-11 | — | **KALDI** — 6 varyantın 6'sı da | `kanal_stoch.py` · `kanal_ham.py` · `kanal_stopsuz.py` | s.1892 · s.1966 |
+| Kanal + StochRSI (Acceleration Bands) | 08-11 | 570 sembol / ~60 gün / 1h · N=5.488 | **KALDI** — 20+6 hücre, hepsi negatif. Bota da gölgeye de alınmadı (*"gölge defter aday havuzu değil, ölçüm bütçesidir"*). **Ama ham sinyalin 4 barlık gerçek kenarı var** (+0,243 vs kontrol +0,035, t=+3,84) — A-stop onu +0,051'e indiriyor. Kenarın tamamı **tek bir 10 günlük pencereden** (Q1 +0,579 t=+7,91; BTC'nin %6 düştüğü hafta), Q2–Q4 ≈ 0 | `kanal_stoch.py` · `kanal_ham.py` · `kanal_stopsuz.py` | **`kanal-stochrsi-analizi.md`** (44 KB, 14 bölüm) · s.1892 · s.1966 |
 | Scalp varyantı + rejim iddiası | 08-11 | — | **KALDI** — 6 rejim bölmesinin 6'sı da | `kanal_scalp.py` | s.2048 · s.2131 |
 | "Sinyalde bilgi yok" iddiası | 08-11 | — | **ÇÜRÜDÜ** (kendi iddiam) — karar değişmedi ama gerekçe değişti | — | s.2140 |
 | Hareket öncesi örüntü | 08-10 | — | **ÇÜRÜDÜ** — örüntü tanımlayıcı, tahmin edici değil | `oncesi_oruntu.py` · `oncesi_short.py` | s.1373 · s.1334 |
@@ -153,6 +153,12 @@ dikkat çekici: MA50+ucuz'un stopu kapıya uyuyor, A+B'nin uymuyor.
 
 **Defterde şöyle yazılı: "Pencere kuralı gereği ŞİMDİ UYGULANMAZ (138 işlem / 30 gün
 dolana kadar parametre donuk). Pencere sonrası İLK İŞ bu."**
+
+**İkinci, bağımsız kanıt aynı yönde:** `kanal-stochrsi-analizi.md` 13. bölümü de aynı
+derse çıktı — ham sinyal +0,243 (t=+3,84) iken A-stop'la +0,051. O belge dersi kural
+hâline getirdi (13.5) ve artık `CLAUDE.md` → YÖNTEM'de: **sinyal, kapı ölçümünden
+önce mekanikten arınık ölçülür.** İki ölçümün bağımsız olarak aynı yere varması, bunun
+tek bir kapının kusuru değil **yöntemsel bir boşluk** olduğunu gösteriyor.
 
 ## Bekleyen — ölçülmedi
 
