@@ -454,6 +454,44 @@ A kolu her çağrıda yeni bağlantı, B kolu keep-alive, aynı uç nokta, sıra
 
 **A kolu düşmüyor, yükseliyor** — ağ iyileşmiyor. Taban sağlam.
 
+### ⭐ BİRİNCİL KANIT — aritmetik kapandı (medyan düşüşü İKİNCİL)
+
+İlk `taranan_sembol` = **145**. Bununla iki rejim de önden hesaplanabiliyor:
+
+```
+cagri/tur = 145x3 (analyze) + 8x3 (pillar_d) + 3 (sabit) = 462
+uyku payi = 145 x 0,10 = 14,5 sn
+
+eski kod    462 x 0,634 (A kolu) + 14,5 = 307,4 sn   ->  gozlenen 294-300  ✓
+keep-alive  462 x 0,323 (B kolu) + 14,5 = 163,7 sn   ->  gozlenen 170-185  ✓
+```
+
+**Neden bu birincil:** medyan *"hızlandı"* der; aritmetik *"ŞU mekanizmayla hızlandı"*
+der. Sondadan ölçülen çağrı gecikmesi, sayılan çağrı adediyle çarpılınca gözlenen tur
+süresini **iki rejimde de** veriyor. Serbest parametre yok.
+
+**Havuz boyutu sorusu da kapandı:** 145, kapak olan 150'ye dayanmış — yani tur
+**küçük havuzla** hızlanmadı. Bu, `sure_sn`'in kirli vekil olmasından doğan tek
+ciddi karıştırıcıydı.
+
+### GEÇME ÖLÇÜTÜ — ÜÇ SONUÇLU (sonuç belli olmadan yazıldı)
+
+A kolu **yükseliyor** (0,614 → 0,634 → 0,781) ve bu simetrik bir risk yaratıyor:
+geçen sefer ağ *iyileşmesi* yanlış pozitif üretebilirdi, şimdi ağ *kötüleşmesi*
+yanlış negatif üretebilir. Üç sonuç:
+
+| sonuç | hüküm |
+|---|---|
+| **geçer** + A kolu sabit ya da **yükselmiş** | **keep-alive çalışıyor** — yükselen A geçişi daha da inandırıcı yapar |
+| **geçmez** + A kolu sabit | **geri al**, gerekçe buraya yazılır |
+| **geçmez** + A kolu belirgin yükselmiş | **KARARSIZ** — pencere uzatılır, geri alma yok |
+
+> Bu **bar gevşetmek değil, üçüncü bir sonuç eklemek.** Meşruiyeti şuradan:
+> yazıldığı anda **4/20 tur** gelmişti ve medyan **179,9** — yani çizginin (223,6)
+> çok altında, geçmeye gidiyor. Üçüncü dal yalnız **başarısızlık** hâlinde işe
+> yarıyor, dolayısıyla şu an eklemek kendi lehine oynamak olamaz. Sonra yazılsaydı
+> olurdu; o yüzden **şimdi** yazıldı.
+
 **2. `taranan_sembol` equity satırına eklendi** ([testbot.py](testbot.py)) — `sure_giris`'in
 **paydası**. Gerçek metrik `sure_giris / taranan_sembol`. `None` = giriş aranmadı
 (8 poz dolu / fren / makro-kapı) → hız ölçüsüne girmez. **D/8:** sayaç, karar dalına

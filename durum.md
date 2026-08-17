@@ -304,6 +304,15 @@ kararı · MA50 fonlama yükü · gölge atomik kayıt.
 (14 Ağu 00:40) ve PID 29304 (15 Ağu 11:24). İkisi de aynı portu dinleyemez, yani
 biri muhtemelen ölü ya da çakışıyor — **ayrı bir soru, araştırılmalı.**
 
+> **Çözerken ÖNCE şunu kaydet: hangi PID gerçekten portu dinliyor?** O bilgi olmadan
+> hangisinin öldürüleceği **tahmin** olur.
+> ```powershell
+> Get-NetTCPConnection -LocalPort 8787 -State Listen |
+>   Select-Object LocalPort, OwningProcess
+> ```
+> Yeniden başlatma panele keep-alive'ı da getirir → iki işi birleştirmek mantıklı.
+> Ama **ölçüm penceresi kapanana kadar bekleyebilir**; panel ölçümün parçası değil.
+
 İkinci sonucu: her ikisi de `evren.py`'yi 14/15 Ağustos'ta yükledi, yani panel hâlâ
 **eski `get`'i** kullanıyor; keep-alive'ı yeniden başlatılana kadar almayacak.
 Gerileme değil (eski davranış korunuyor) ama `keepalive_testi.py`'nin *"panel deseni"*
