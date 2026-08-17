@@ -1368,6 +1368,9 @@ def _golge(sym, yon, r, pillar, kapi, detay="", rejim_ad=None):
         return False
 
 
+_SON_TARANAN = None   # bu turda radar.analyze'a giren sembol sayisi (equity satirinin paydasi)
+
+
 def yeni_giris_ara(st, rejim):
     maks_poz = int(_c("maks_pozisyon", 4))
     if len(st["acik_pozisyonlar"]) >= maks_poz:
@@ -1398,6 +1401,18 @@ def yeni_giris_ara(st, rejim):
                               cryptos=(set(cryptos_cache.keys()) if cryptos_cache else None))[:havuz_n]
     chg24_harita = {s: chg for s, _, chg in pool}  # 24s % degisim -> blow-off filtresi icin (karar_yon)
     syms = _cikar_havuzdan([s for s, _, _ in pool], st, cooldown_saat=4)
+    # [2026-08-17] TARANAN SEMBOL SAYACI — sure_giris'in PAYDASI.
+    #   sure_sn/sure_giris tek basina hiz olcusu DEGIL: her sembol radar.analyze ile
+    #   3 ag cagrisi demek, yani sure taranan sembol sayisiyla dogru orantili. O sayi
+    #   havuz kapagi (150), $3M hacim tabani ve cooldown'a gore turdan tura oynuyor ve
+    #   HICBIR YERDE loglanmiyordu. Keep-alive olcumunde bu tam olarak isirdi: eski
+    #   kodla kosan bir tur 169,5 sn'ye indi ve "hizlandi" sanildi; A/B sondasi ise agin
+    #   iyilesmedigini gosterdi (2,0x sabit) -> farki yaratan sembol sayisiydi, ama
+    #   kanitlanamadi cunku kayit yoktu.
+    #   Gercek metrik: sure_giris / taranan_sembol.
+    # [D/8] Sayac. Karar dalina, skora, siraya, kapiya DOKUNMAZ -> pencereyi beklemez.
+    global _SON_TARANAN
+    _SON_TARANAN = len(syms)
     if not syms:
         return
     btc_chg3, _ = radar.btc_ref()  # cryptos_cache yukarida cg_universe ile dolduruldu (kripto-only + float_oran)
@@ -1737,6 +1752,8 @@ def _cycle_ic():
                             f"DURDU, acik pozlar yonetiliyor. 'python testbot.py --devam' ile ac.")
 
     _sure_giris = 0.0
+    global _SON_TARANAN
+    _SON_TARANAN = None      # tur basi sifirla: giris aranmadiysa BAYAT deger yazilmasin
     if st["durum"] == "AKTIF":
         _t_giris = time.time()
         try:
@@ -1756,7 +1773,10 @@ def _cycle_ic():
                             "sure_yonet": round(_sure_yonet, 1),
                             "sure_giris": round(_sure_giris, 1),
                             "onceki_kesildi": _onceki_kesildi,
-                            "verisiz_poz": _verisiz})
+                            "verisiz_poz": _verisiz,
+                            # 2026-08-17: sure_giris'in PAYDASI. None = giris aranmadi
+                            # (8 poz dolu / fren / makro-kapi) -> hiz olcusune GIRMEZ.
+                            "taranan_sembol": _SON_TARANAN})
     print(f"[{now_iso()}] durum={st['durum']} equity=${st['equity']:.2f} acik={len(st['acik_pozisyonlar'])} "
           f"gun={gun_gecti:.1f}/{sure_gun}")
 

@@ -300,6 +300,17 @@ kararı · MA50 fonlama yükü · gölge atomik kayıt.
 
 ## Bilinen zayıflık
 
+**⚠️ İKİ `panel_sunucu.py` süreci koşuyor** (2026-08-18'de görüldü): PID 17776
+(14 Ağu 00:40) ve PID 29304 (15 Ağu 11:24). İkisi de aynı portu dinleyemez, yani
+biri muhtemelen ölü ya da çakışıyor — **ayrı bir soru, araştırılmalı.**
+
+İkinci sonucu: her ikisi de `evren.py`'yi 14/15 Ağustos'ta yükledi, yani panel hâlâ
+**eski `get`'i** kullanıyor; keep-alive'ı yeniden başlatılana kadar almayacak.
+Gerileme değil (eski davranış korunuyor) ama `keepalive_testi.py`'nin *"panel deseni"*
+maddesi **üretimde henüz koşmuyor** — testte geçti, canlıda doğrulanmadı.
+Aynı sınıf: `CLAUDE.md` → *"tur ortasında yapılan kod değişikliği o turu etkilemez"*,
+uzun ömürlü süreçlerde bu **süreç ömrü boyunca** sürer.
+
 **İnternet/uyku kesintisi.** 13–16 Ağustos arasında toplam **~10 saat** veri akmadı
 (en uzunu 124 dk). Makine uyandığında:
 

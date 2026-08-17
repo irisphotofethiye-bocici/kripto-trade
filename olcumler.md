@@ -422,6 +422,44 @@ Geçmezse geri alınır ve gerekçe buraya yazılır.
 kullanılıyor → pencereyi beklemez. (Havuzu kısmak *hangi sembollerin* taranacağını
 değiştirir, o bekler.)
 
+### ⚠️ `sure_sn` KİRLİ BİR VEKİL — kontrol grubu şart
+
+Turun süresi **taranan sembol sayısıyla doğru orantılı** (her sembol = 3 ağ çağrısı)
+ve o sayı havuz kapağı · $3M hacim tabanı · cooldown'a göre turdan tura oynuyor —
+**hiçbir yerde loglanmıyordu.** Bu tam da bu ölçümde ısırdı: eski kodla koşan bir tur
+169,5 sn'ye indi, "hızlandı" sanıldı; A/B sondası ağın iyileşmediğini gösterdi
+(2,0× sabit) → farkı yaratan sembol sayısıydı ama **kanıtlanamadı, çünkü kayıt yoktu.**
+
+Süre verisi tek başına *"keep-alive mi, o saatte havuz mu küçüktü"* sorusunu
+**cevaplayamaz.** Bu proje aynı soruyu daha önce yaşadı ve hâlâ Bekleyen'de:
+*`MA50+ucuz`: kuralın mı, radarın ön elemesinin mi?* — ayıracak veri yoktu.
+
+**İki ek yapıldı (ikisi de ölçümü durdurmadı):**
+
+**1. A/B sondası = KONTROL GRUBU** — `scratchpad/ab_sonda.py`, kayıt
+`scratchpad/ab_sonda_kayit.jsonl`. Mekanizmayı havuz boyutundan **bağımsız** ölçer:
+A kolu her çağrıda yeni bağlantı, B kolu keep-alive, aynı uç nokta, sırayla.
+
+| ayrım kuralı | hüküm |
+|---|---|
+| turlar hızlandı **+** sonda 2,0× | **keep-alive** |
+| turlar hızlandı **+** sondanın **A kolu da düştü** | ağ iyileşmiş |
+| turlar hızlanmadı **+** sonda 2,0× | mekanizma çalışıyor, darboğaz başka yerde |
+
+| sonda | A (yeni bağlantı) | B (keep-alive) | oran |
+|---|---|---|---|
+| ilk ölçüm (uygulama öncesi) | 0,614 | 0,285 | 2,1× |
+| tekrar | 0,634 | 0,323 | 2,0× |
+| 08-18 00:13 (pencere içi 1/4) | **0,781** | 0,333 | **2,35×** |
+
+**A kolu düşmüyor, yükseliyor** — ağ iyileşmiyor. Taban sağlam.
+
+**2. `taranan_sembol` equity satırına eklendi** ([testbot.py](testbot.py)) — `sure_giris`'in
+**paydası**. Gerçek metrik `sure_giris / taranan_sembol`. `None` = giriş aranmadı
+(8 poz dolu / fren / makro-kapı) → hız ölçüsüne girmez. **D/8:** sayaç, karar dalına
+dokunmuyor → pencereyi beklemez. Pencerenin ilk turları alansız kalır, sorun değil:
+**birincil ölçüt 223,6 sn mutlak çizgisi olarak KALIR**, bu ikincil olarak eklenir.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
