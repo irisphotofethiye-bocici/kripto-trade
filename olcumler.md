@@ -97,7 +97,7 @@ aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorun
 | "Sinyalde bilgi yok" iddiası | 08-11 | — | **ÇÜRÜDÜ** (kendi iddiam) — karar değişmedi ama gerekçe değişti | — | s.2140 |
 | Hareket öncesi örüntü | 08-10 | — | **ÇÜRÜDÜ** — örüntü tanımlayıcı, tahmin edici değil | `oncesi_oruntu.py` · `oncesi_short.py` | s.1373 · s.1334 |
 | Yükselenlerin ortak örüntüsü | 08-10 | — | **ÇÜRÜDÜ** — işaret olarak ters | `yukselen_oruntu.py` | s.1288 · s.823 |
-| Ölü sinyallerin kaçı canlıydı? | 08-11 | arşiv | kayıt: s.2210 | `olu_sinyal_tarama.py` | s.2210 |
+| Ölü sinyallerin kaçı canlıydı? | 08-11 | 6.790 olay (ham: stop/hedef/maliyet yok) | **2 hücre bulundu, ikisi de LONG** — A-stopları %0,98, `asgari_stop_pct = %2,0` kapısı onları zaten tümden reddediyordu. Yani sinyal reddedildi çünkü **stop kuralımız sinyale uygun değildi.** Adaylar 2 yıllık veride çöktü (s.2284) | `olu_sinyal_tarama.py` | s.2210 · s.2259 |
 | Fikir 1 adayları örneklem dışı | 08-11 | 2 yıl | **ÇÜRÜDÜ** — örneklem dışında çöktü | `long_2yil.py` | s.2284 |
 | Agresör dengesi girişte ayırıyor mu? | 08-13 | 45 → 27 | **ÇÜRÜDÜ** — kapıları geçti, karıştırıcı kontrolü çürüttü (r=+0,578 ilk saat fiyatıyla) | `agresor_ilk_saat.py` · `agresor_karistirici.py` | s.3858 |
 | "Hızlı tepe = kaybeden" | 08-12 | — | **ÇÜRÜTÜLDÜ** | `scalp_penceresi.py` | s.2825 · s.2875 |
@@ -119,7 +119,7 @@ aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorun
 | F3 derin-negatif funding öncül mü? | 07-15 | 14 pump + 15 kontrol | **ÇÜRÜDÜ** — 0/14; hep T0 sonrası = devam teyidi | — | s.26 |
 | LONG karar ölçütü ön-kaydı | 08-11 | — | ön-kayıt: s.1837 | — | s.1837 |
 | Gölge LONG pump tezi | 08-11 | 14/25 olay | **KARAR YOK** — pencere dolmadı (toplam −2,09R) | — | eşik notu |
-| %10 hedef ölçümü / long arayışı | 08-10 | — | kayıt: s.1101 | `hedef10.py` | s.1101 |
+| %10 hedef profili + LONG arayışı | 08-10 | 7.118 olay · A+B 206 · A+B∩pump 201 · A+B∩HAZIRLANIYOR 32 | **A+B %10 hedefle daha iyi doğrulandı** (+2,19% vs tüm olaylar −0,06; iki yarı +2,05/+2,36 — 2R ölçümündeki dalgalanmadan kararlı). **LONG: 30 hücrenin hiçbirinde pozitif yok**; hareket büyüdükçe kötüleşiyor. `HAZIRLANIYOR` kesişimi +4,63% ama **N=32 → izlenim, kural yapılmadı** | `hedef10.py` · `pump10.py` | s.1101 · s.1177 |
 | Hedef boyutu — "long hedefini %2,5 yapsak" | 08-10 | — | kayıt: s.1186 | `long25_stop.py` | s.1186 |
 
 ## Rejim / altyapı
@@ -132,6 +132,27 @@ aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorun
 | Sistem denetimi | 08-11 | — | **9 doğrulanmış hata** → `denetim-raporu.md` | `denetim_olcum.py` | s.2371 |
 | Defter izolasyon testi | 08-13 | 14 kontrol | **GEÇTİ** — 4 defterin hepsi | `defter_izolasyon_testi.py` | s.3469 |
 | Ölçüm ağırlık hatası (ilk parti) | 08-11 | — | **düzeltildi** — ölçümün ağırlığı yanlıştı | `boyut_agirlik.py` | s.1609 |
+
+### ⭐ Bulgu: A+B'nin ham kenarının %65'ini KENDİ STOPUMUZ yiyor (s.2259)
+
+Ölü sinyal taramasının asıl çıktısı, aradığı şeyden büyük:
+
+| kapı | stopsuz ham | A-stop ile | kayıp |
+|---|---|---|---|
+| **A+B** | +6,10 | +2,14 | **%65** |
+| SHORT: skor yüksek | +2,58 | +0,65 | %75 |
+| SHORT: oi24 yüksek | +2,01 | +0,69 | %66 |
+| **MA50+ucuz** | +0,78 | +0,84 | **%0 — korunmuş** |
+
+Kontrol grubunda da aynı: stopsuz +0,90 (t=+5,12) → A-stopla **−0,05.** Hasarın
+büyüklüğünü tek satırda gösteriyor.
+
+**"Stopu kaldıralım" demek DEĞİL** — stopsuz kıyas kuyruk riskini yok sayar. Söylediği
+şey: **stop mesafesi A+B için yeniden ölçülmeli.** İki kapı arasındaki asimetri de
+dikkat çekici: MA50+ucuz'un stopu kapıya uyuyor, A+B'nin uymuyor.
+
+**Defterde şöyle yazılı: "Pencere kuralı gereği ŞİMDİ UYGULANMAZ (138 işlem / 30 gün
+dolana kadar parametre donuk). Pencere sonrası İLK İŞ bu."**
 
 ## Bekleyen — ölçülmedi
 

@@ -45,7 +45,7 @@ dönemi kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $).
 | MA50+ucuz (fiyat ≤ $0,07 · MA50 ≥ %3,72) | **açık** | **REDDEDİLDİ** ama kullanıcı kararıyla açık (08-12) |
 | A+B sabit %10 hedef | açık | kısmi kâr %40 payla, trailing kapalı |
 | 1,5R kısmi ezmesi | **açık** | ⚠️ ölçüm "kaldır" dedi, **kullanıcı KALSIN dedi** (08-12) — aşağıda |
-| NÖTR LONG | açık | ölçümle gerekçelendirilmedi (eşik notunda yazılı) |
+| NÖTR LONG | açık | **ölçüm bunu desteklemiyor** — kaynak `fikir-defteri.md` s.1177: *"Ölçüm bunu desteklemiyor — kayda geçer."* 30 LONG hücresinin hiçbiri pozitif değil (s.1101) |
 | Gölge LONG pump | açık | gölgede test, pencere dolmadı |
 | NÖTR fade | **kapalı** | açıldığı gün ölçülüp kapatıldı |
 | R/R kapısı | **kapalı** | ayırt etmiyordu |
@@ -124,6 +124,13 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
 doğrulanmış olur. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
 üç yüzü.
+
+**Aynı pencereye bağlı DÖRDÜNCÜ iş — ve defterde "ilk iş" diye yazılı:**
+**A+B'nin stop mesafesi yeniden ölçülecek.** Ölü sinyal taraması A+B'nin ham
+kenarının **%65'ini kendi A-stopumuzun yediğini** buldu (+6,10 → +2,14); MA50+ucuz'da
+aynı kayıp **%0**. Defterin sözü: *"Pencere kuralı gereği ŞİMDİ UYGULANMAZ
+(138 işlem / 30 gün dolana kadar parametre donuk). Pencere sonrası ilk iş bu."*
+Ayrıntı ve tablo `olcumler.md` → *"A+B'nin ham kenarının %65'i"*.
 
 Uyarı: 1,5R'nin savunması diğer ikisinden **zayıf.** Onu popülasyon itirazına
 yaslamak yanlış olur; o karar açıkça bir tercihti ve bedeli kayıtlı (−0,016/işlem).
