@@ -36,13 +36,31 @@ olan girer; kaydı olmayan betik `kayıt yok` diye işaretlenir, uydurulmaz.
 
 | ölçüm | tarih | N | hüküm | betik | defter |
 |---|---|---|---|---|---|
-| 1,5R kısmi kâr lehimize mi? | 08-12 | 13.951 | **KALDI** — geçme ölçütünü sağlayamadı | `kismi_15r.py` | s.2951 · s.3001 |
+| 1,5R kısmi kâr lehimize mi? | 08-12 | 13.951 · **karar veren alt küme 4.195** (dar stop, canlı girişlerin %30'u) | **KALDI** — mevcut (yakın olanı seç) −0,011 · niyet edilen sabit %40 +0,005 · kısmi yok **+0,038**. Ölçüt 1 düştü, iki zaman yarısında da mevcut daha kötü | `kismi_15r.py` | s.2951 · s.3001 · s.3031 |
 | Hedefi oynaklığa ölçekleme | 08-12 | — | **KALDI** — 8 varyantın 8'i de | `oynak_hedef.py` | s.2587 · s.2629 |
 | TP1'de stopu başabaşa çekme | 08-12 | 11–12 Ağu pozisyonları | **KALDI** — kısmi sonrası başabaş +0,274 → +0,261 | `babas_stop_11_12.py` | eşik notu |
 | Erken müdahale (N dk'da artıda değilse kapat) | 08-13 | 44 poz | **KARARSIZ** — durum haber verici ama kural kararsız (+1.170 / −227 / +161 / −222); kural çıkarılmadı | `erken_mudahale.py` | s.3755 |
 
 > **Kalıp:** *kötü girişte sıkı çıkış kaybı keser, iyi girişte kazancı keser.*
 > Yeni çıkış kuralı önermeden önce buna bak.
+
+### ⭐ Genel bulgu: kısmi kâr ERKENLİĞİNDE MONOTON (s.3031)
+
+Tek bir kuralın hükmünden daha değerli olan sonuç. `kismi_15r.py`, N=13.951 · 2 yıl:
+
+| kısmi eşiği | tüm olaylar | dar stop | geniş stop |
+|---|---|---|---|
+| 1,0R | +0,018 | −0,029 | +0,039 |
+| 1,5R | +0,041 | −0,011 | +0,064 |
+| 2,0R | +0,050 | +0,008 | +0,068 |
+| 3,0R | +0,065 | +0,036 | +0,077 |
+| **kısmi YOK** | **+0,065** | **+0,038** | **+0,076** |
+
+**Kısmi kâr ne kadar erken alınırsa o kadar kaybettiriyor** — üç sütunda da monoton,
+istisna yok. 3,0R "kısmi yok" ile aynı yere geliyor çünkü kısmiye ancak %13 değiyor.
+
+Yeni bir kısmi-kâr/erken-çıkış fikri gelirse **önce bu tabloya bak**: eşiği
+aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorunda.
 
 ## Sinyal / gösterge ölçümleri
 

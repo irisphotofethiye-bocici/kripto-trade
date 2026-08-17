@@ -44,6 +44,7 @@ dönemi kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $).
 | A+B (funding ≤ −0,05 · oi24 ≥ %10 → SHORT) | **açık** | **ASKIDA** — kanıtlanamadı, çürütülmedi |
 | MA50+ucuz (fiyat ≤ $0,07 · MA50 ≥ %3,72) | **açık** | **REDDEDİLDİ** ama kullanıcı kararıyla açık (08-12) |
 | A+B sabit %10 hedef | açık | kısmi kâr %40 payla, trailing kapalı |
+| 1,5R kısmi ezmesi | **açık** | ⚠️ ölçüm "kaldır" dedi, **kullanıcı KALSIN dedi** (08-12) — aşağıda |
 | NÖTR LONG | açık | ölçümle gerekçelendirilmedi (eşik notunda yazılı) |
 | Gölge LONG pump | açık | gölgede test, pencere dolmadı |
 | NÖTR fade | **kapalı** | açıldığı gün ölçülüp kapatıldı |
@@ -84,11 +85,29 @@ A+B *askıda* (kanıtlanamadı, çürütülmedi), MA50+ucuz *reddedildi* (t=−4
 negatif). Aynı torbaya konmamalı. Fonlama yükü bu kapı için hiç hesaplanmadı — A+B'yi
 bitiren hesap burada yapılmadı.
 
-**3. `golge.py`'nin `kaydet`'i hâlâ atomik değil** — 2026-08-11'de defteri 314 $
+**3. 1,5R kısmi ezmesi — ölçüm "kaldır" dedi, kullanıcı "kalsın" dedi.** Karar
+verilmiş, iş bitmiş; burada duruyor ki sonradan "gözden kaçmış" sanılmasın.
+
+`kismi_pay = 0.40` ayarı fiilen çalışmıyor: [testbot.py:933](testbot.py#L933) her
+turda yapısal TP1 ile 1,5×risk'ten **hangisi yakınsa** onu seçiyor (2026-07-04'ten
+kalma). Ayrışma sınırı stop < %2,67; `asgari_stop_pct = %2,0` olduğu için bu dar bir
+aralık değil — canlı girişlerin **%30'u** bu dilimde. Canlı kanıt: UMA'da stop %0,96
+→ 1,5R = %1,43, %40 ayarını ezdi, yarısı **−%1,4'te** satıldı.
+
+**Kullanıcı gerekçesi:** stop dar olduğunda kâr alma erken tetiklenir ve bu istenen
+davranış. **Bedeli kayda geçti:** dar-stop diliminde işlem başına −0,016 sermaye,
+`t_küme` −0,10 — yani gürültüden ayrışmıyor. Kanıt *"zararlı"* demiyor,
+*"bedava değil"* diyor.
+
+Geri dönmek gerekirse tek satır: `tp1_efektif_hesapla` çağrısını
+`cikis_modu == "sabit_hedef"` pozisyonlarda atla. **`kismi_kar_r = 0` YAPMA** —
+neden olmadığı `CLAUDE.md`'de yazılı (TP1 anında tetikleniyor).
+
+**4. `golge.py`'nin `kaydet`'i hâlâ atomik değil** — 2026-08-11'de defteri 314 $
 saptıran çift kaydın kök nedeni. `ayna.py` ve `izleyici.py` ilk günden atomik yazıyor;
 aynı desen kopyalanacak. Onarım önerildi, uygulanmadı.
 
-**4. Git geçmişi temizliği** — ilk push'tan önce zorunlu (geçmişte ~920 MB veri).
+**5. Git geçmişi temizliği** — ilk push'tan önce zorunlu (geçmişte ~920 MB veri).
 Depo bugüne kadar hiç push edilmedi.
 
 ## Zamana bağlı — ~27 Ağustos

@@ -47,6 +47,12 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   pozisyonu böler.
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
+- **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta
+  `tp_r = giriş − 0×risk = giriş` olur; [testbot.py:888](testbot.py#L888)
+  `max(yapısal, tp_r)` girişin kendisini seçer ve **TP1 anında tetiklenir.**
+  Doğru kapatma kod tarafında: `tp1_efektif_hesapla` çağrısı
+  ([testbot.py:933](testbot.py#L933) her turda, [:1145](testbot.py#L1145) girişte)
+  `cikis_modu == "sabit_hedef"` pozisyonlarda atlanır. Ayrıntı `olcumler.md`.
 
 ## TEST YAZARKEN
 
