@@ -156,6 +156,59 @@ def fiyat_fapi(sym):
         return None
 
 
+def defter_derinlik(sym, yon, notional_usdt):
+    """Giris ANINDAKI emir defteri derinligi — slipaj varsayimini sinamak icin (2026-08-17).
+
+    [NEDEN] Butun olcumler slipaji %0.02 VARSAYDI ve bu hic dogrulanmadi; A+B'nin sinirlar
+      bolumu acikca "slipaj yok sayildi; olaylar dusuk hacimli coinlerde yogunlasiyor"
+      diyor. Gercek paraya geciste kenari belirleyecek kalem bu. Veri geri uretilemez —
+      defter anlik, girisin oldugu saniyeye ait.
+    [NE HESAPLANIR] Pozisyonun notional'i defterin KARSI tarafindan yenirken olusan
+      agirlikli ortalama fiyatin en iyi fiyattan sapmasi = beklenen slipaj (%).
+      SHORT satar -> bid tarafi yenir. LONG alir -> ask tarafi.
+    [MALIYET] Pozisyon basina 1 cagri (agirlik 5). Olculdu: gunde ~14 pozisyon = tur
+      basina 0,077 cagri, mevcut ~385 cagri/tur butcesinin %0,02'si. Aday dongusune
+      DEGIL, yalnizca DOLAN girise takilir (olcumler.md -> ag cagrisi butcesi).
+    [SINIR] Yalniz dolan pozisyonda olcmek SECILIM YANLI bir orneklemdir: "bizim
+      islemlerimizde tuttu mu" sorusu icin dogru, "daha cok islem yapsak da tutar miydi"
+      icin yanlis. Genisletmeden once olcumler.md'deki sinir notunu oku.
+    [HATA] None doner; giris ETKILENMEZ (kayit alani None kalir = bilinmiyor).
+    """
+    try:
+        d = _get(f"{FAPI}/fapi/v1/depth?symbol={sym}USDT&limit=20")
+        # SHORT = satis -> alis emirleri (bids) yenir. LONG = alis -> asks yenir.
+        taraf = d.get("bids") if yon == "SHORT" else d.get("asks")
+        if not taraf:
+            return None
+        en_iyi = float(taraf[0][0])
+        kalan, maliyet, dolan = float(notional_usdt), 0.0, 0.0
+        for fiyat_s, miktar_s in taraf:
+            p, q = float(fiyat_s), float(miktar_s)
+            seviye_usdt = p * q
+            al = min(kalan, seviye_usdt)
+            maliyet += al
+            dolan += al / p
+            kalan -= al
+            if kalan <= 0:
+                break
+        if dolan <= 0:
+            return None
+        vwap = maliyet / dolan
+        # SHORT'ta defterin asagisi yenir -> vwap < en_iyi -> slipaj POZITIF (aleyhte)
+        slipaj = (en_iyi - vwap) / en_iyi * 100 if yon == "SHORT" else (vwap - en_iyi) / en_iyi * 100
+        return {
+            "en_iyi": en_iyi,
+            "vwap": round(vwap, 8),
+            "slipaj_pct": round(slipaj, 4),
+            "defter_usdt_20": round(sum(float(f) * float(m) for f, m in taraf), 2),
+            "notional": round(float(notional_usdt), 2),
+            # defter 20 seviyede tukendiyse slipaj ALT SINIRDIR (gercegi daha kotu)
+            "yetersiz": kalan > 0,
+        }
+    except Exception:
+        return None
+
+
 def klines_since(sym, interval, start_ms, limit=500):
     try:
         d = _get(f"{FAPI}/fapi/v1/klines?symbol={sym}USDT&interval={interval}&startTime={start_ms}&limit={limit}")
@@ -719,6 +772,8 @@ def pozisyon_kapat(st, pos, cikis_fiyat_piyasa, sebep):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        # 2026-08-17: giristeki defter derinligi (slipaj sinavi). None = olculemedi.
+        "derinlik_giriste": pos.get("derinlik_giriste"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
@@ -754,6 +809,8 @@ def pozisyon_liq(st, pos):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        # 2026-08-17: giristeki defter derinligi (slipaj sinavi). None = olculemedi.
+        "derinlik_giriste": pos.get("derinlik_giriste"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
@@ -806,6 +863,8 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
         "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
         "chg24_giriste": pos.get("chg24_giriste"), "range_pos_giriste": pos.get("range_pos_giriste"),
         "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        # 2026-08-17: giristeki defter derinligi (slipaj sinavi). None = olculemedi.
+        "derinlik_giriste": pos.get("derinlik_giriste"),
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
@@ -1196,6 +1255,10 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
         "chg24_giriste": r.get("chg24"), "range_pos_giriste": r.get("pos"), "stage_giriste": r.get("stage"),
         "rejim_giriste": rejim_ad or "BILINMIYOR",  # 2026-07-08: rejim x yon karne icin (hem-ayi-hem-boga olcumu)
         "son_funding_kontrol_ts": now_iso(), "son_1m_kontrol_ts": now_iso(), "sebep_giris": sebep,
+        # 2026-08-17: giristeki emir defteri derinligi (slipaj varsayimi sinavi).
+        #   None = olculemedi/bilinmiyor. Notional KESINLESTIKTEN sonra olculur ki
+        #   defterin gercekten yenecek kismi sorulsun. Bkz. defter_derinlik().
+        "derinlik_giriste": defter_derinlik(sym, yon, notional),
         # 2026-08-17: fonlama biriktiricisi. Anahtarin VARLIGI "bu pozisyon takip ediliyor"
         #   demektir; yoklugu "bilinmiyor" (bkz. _funding_dilim). Mesru 0.0 ile
         #   "olculmedi"yi ayirmanin tek yolu bu.

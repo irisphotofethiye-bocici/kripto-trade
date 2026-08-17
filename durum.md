@@ -318,5 +318,8 @@ kararı · MA50 fonlama yükü · gölge atomik kayıt.
 (17 Ağustos öğlen: 9). Tur süresi 08-14'ten beri equity satırında ölçülüyor
 (`sure_sn`, `sure_yonet`, `sure_giris`, `verisiz_poz`).
 
-**Ağ yavaşken tur süresi:** ortalama 191 sn, en uzun 521 sn. **Ağ normalken:** 15–25 sn.
-Yani yavaşlık tamamen dış kaynaklı.
+**Tur süresi.** ⚠️ *"Yavaşlık tamamen dış kaynaklı"* diye yazılıydı — **2026-08-17'de
+çürütüldü.** Ölçüldü: [evren.py:54](evren.py#L54) her çağrıda yeni bağlantı açıyor
+(düz `urlopen`, keep-alive yok); günde ~72.000 TCP+TLS el sıkışması. Keep-alive
+medyan çağrıyı 2,1 kat, medyan turu **298 → ~145 sn** indiriyor. Yavaşlığın yarısı
+**bizim**. Rakamlar ve rate-limit bütçesi → `olcumler.md` "ağ çağrısı bütçesi".
