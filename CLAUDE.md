@@ -62,12 +62,15 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
 - **Etkin kasa ≠ realize kasa.** Açık pozisyon varken yalnız `equity`'ye bakmak
   yanlış sonuç verir; bu hata **iki kez** yapıldı (fren hatası + ayna kıyası).
 - **Kazanma oranı POZİSYON başına sayılır, kayıt başına değil.** Kısmi kâr kayıtları
-  pozisyonu böler. **Somut tuzak:** ölçüm penceresinde 131 kayıt var ama **84 pozisyon**
-  — 47'si `TP1_KISMI`. Kayıt sayan biri pencereyi vaktinden önce dolmuş ilan eder.
-  `not x.get("kismi")` süzgeci **her zaman** uygulanır.
-- **Ölçüm penceresi ÜÇ KEZ ön-kayıtlandı; geçerli olan SONUNCUSU** (2026-08-12 ~01:17).
-  Defter kronolojik: sonraki ön-kayıt öncekini geçersiz kılar. İlk ikisini alıntılamak
-  yanlış sayı verir (138 / 137 / **131** kayıt). Tanım ve sayım komutu `durum.md`'de.
+  pozisyonu böler. **Somut tuzak:** ölçüm penceresinde kayıt sayısı pozisyon sayısından
+  belirgin fazladır — üç aday tabanın üçünde de fark **45–50 kayıt** civarında, çünkü
+  `TP1_KISMI` satırları pozisyonu ikiye bölüyor. Kayıt sayan biri pencereyi **vaktinden
+  önce dolmuş** ilan eder. `not x.get("kismi")` süzgeci **her zaman** uygulanır.
+  Güncel sayım komutu `durum.md`'de.
+- **Ölçüm penceresinin başlangıcı ÇÖZÜLMEDİ — üç aday var, karar kullanıcının.**
+  Pencere üç kez ön-kayıtlandı ve defter kendi içinde tutarsız. **Sayı üretmeden önce
+  `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu
+  ve çelişkinin kaynağı orada. Buraya tarih ya da rakam yazma.
 - **`sonuc_usdt` FONLAMAYI İÇERMEZ.** `funding_uygula` doğrudan `st["equity"]`'yi
   düşürüyor ([testbot.py:818](testbot.py#L818)). Deftere bakıp "pencere +1.264 $" demek
   projenin en pahalı hatasını tekrarlamaktır: fonlama −502 $ ve giriş ücreti −176 $
