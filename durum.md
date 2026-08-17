@@ -41,8 +41,8 @@ dönemi kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $).
 
 | kapı | ayar | not |
 |---|---|---|
-| A+B (funding ≤ −0,05 · oi24 ≥ %10 → SHORT) | **açık** | **Karar bekliyor** — bkz. aşağıda |
-| MA50+ucuz (fiyat ≤ $0,07 · MA50 ≥ %3,72) | **açık** | Fonlama yükü hiç ölçülmedi |
+| A+B (funding ≤ −0,05 · oi24 ≥ %10 → SHORT) | **açık** | **ASKIDA** — kanıtlanamadı, çürütülmedi |
+| MA50+ucuz (fiyat ≤ $0,07 · MA50 ≥ %3,72) | **açık** | **REDDEDİLDİ** ama kullanıcı kararıyla açık (08-12) |
 | A+B sabit %10 hedef | açık | kısmi kâr %40 payla, trailing kapalı |
 | NÖTR LONG | açık | ölçümle gerekçelendirilmedi (eşik notunda yazılı) |
 | Gölge LONG pump | açık | gölgede test, pencere dolmadı |
@@ -65,13 +65,24 @@ Bildirim: yalnız **giriş** olayı Telegram'a gider (`bildirim.olaylar = ["giri
 
 ## Bekleyen kararlar
 
-**1. A+B kapısı — açık soru.** İki yıllık ölçüm fonlama dahil edilince "kapat" diyor
-(kontrol sinyali geçti). Canlı 16 işlemlik örnek "kapatmak %1,23 daha kötü olurdu"
-diyor. Seçenekler: kapat (`ab_kapisi_acik: 0`) · fonlama-taban filtresi ekle (ölçülebilir,
-veri elde) · açık bırak. **Karar verilmedi.**
+> **ÖNCE BUNU OKU — 2026-08-12'de verilmiş bir karar var** (`fikir-defteri.md` s.2812).
+> Ölçüm `MA50+ucuz`'u kapatmayı öneriyordu (2 yıl, üç rejim, 21.830 olay, t=−4,05).
+> **Kullanıcı iki kapıyı da açık bırakmayı seçti.** Bilinçli bir karardı ve defterde
+> *"kayda geçiyor ki pencere dolduğunda 'gözden kaçmış' sanılmasın"* diye yazılı.
+> Gerekçe: o test bir **yeniden üretim** — medyan stop %1,3, canlıda %3,4. Ölçüm
+> "kural geniş uygulanınca negatif" diyor, "canlı kapı negatif" demiyor.
+> **Hakem canlı pencere:** hedef 138 işlem · 12 Ağustos'tan beri **84 pozisyon kapandı**.
 
-**2. `MA50+ucuz` fonlama yükü** hiç ölçülmedi. A+B'yi çürüten hesap bu kapı için
-yapılmadı.
+**1. A+B kapısı — nihai karar açık.** İki yıllık **fonlamalı** ölçüm "kapat" diyor
+(kontrol sinyali geçti). Fonlamasız 2 yıllık ölçüm ise "kanıtlanamadı ama çürütülmedi"
+diyordu (küme-dayanıklı t=+1,51). Canlı 16 işlemlik örnek "kapatmak %1,23 daha kötü
+olurdu" diyor. Seçenekler: kapat (`ab_kapisi_acik: 0`) · fonlama-taban filtresi ekle
+(ölçülebilir, veri elde) · pencere dolana kadar açık bırak.
+
+**2. `MA50+ucuz` — çürütüldü ama açık, bilerek.** İki kapı **aynı statüde değil**:
+A+B *askıda* (kanıtlanamadı, çürütülmedi), MA50+ucuz *reddedildi* (t=−4,05, üç rejimde
+negatif). Aynı torbaya konmamalı. Fonlama yükü bu kapı için hiç hesaplanmadı — A+B'yi
+bitiren hesap burada yapılmadı.
 
 **3. `golge.py`'nin `kaydet`'i hâlâ atomik değil** — 2026-08-11'de defteri 314 $
 saptıran çift kaydın kök nedeni. `ayna.py` ve `izleyici.py` ilk günden atomik yazıyor;
