@@ -62,7 +62,16 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
 - **Etkin kasa ≠ realize kasa.** Açık pozisyon varken yalnız `equity`'ye bakmak
   yanlış sonuç verir; bu hata **iki kez** yapıldı (fren hatası + ayna kıyası).
 - **Kazanma oranı POZİSYON başına sayılır, kayıt başına değil.** Kısmi kâr kayıtları
-  pozisyonu böler.
+  pozisyonu böler. **Somut tuzak:** ölçüm penceresinde 131 kayıt var ama **84 pozisyon**
+  — 47'si `TP1_KISMI`. Kayıt sayan biri pencereyi vaktinden önce dolmuş ilan eder.
+  `not x.get("kismi")` süzgeci **her zaman** uygulanır.
+- **Ölçüm penceresi ÜÇ KEZ ön-kayıtlandı; geçerli olan SONUNCUSU** (2026-08-12 ~01:17).
+  Defter kronolojik: sonraki ön-kayıt öncekini geçersiz kılar. İlk ikisini alıntılamak
+  yanlış sayı verir (138 / 137 / **131** kayıt). Tanım ve sayım komutu `durum.md`'de.
+- **`sonuc_usdt` FONLAMAYI İÇERMEZ.** `funding_uygula` doğrudan `st["equity"]`'yi
+  düşürüyor ([testbot.py:818](testbot.py#L818)). Deftere bakıp "pencere +1.264 $" demek
+  projenin en pahalı hatasını tekrarlamaktır: fonlama −502 $ ve giriş ücreti −176 $
+  ayrıca düşülür. **Pencere sonucu her zaman equity üzerinden türetilir.**
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta

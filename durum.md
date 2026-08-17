@@ -119,36 +119,55 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 
 **Hakem de aynı: canlı ölçüm penceresi.**
 
+> 🔴 **PENCERE ÜÇ KEZ ÖN-KAYITLANDI. Geçerli olan ÜÇÜNCÜSÜ.** Defter kronolojik
+> olduğu için sonraki öncekini geçersiz kılar. İlk ikisini alıntılamak yaygın bir
+> hata — ikisi de yapıldı, ikisi de yanlış sayı verdi.
+>
+> | # | başlangıç | sebep | kayıt | pozisyon |
+> |---|---|---|---|---|
+> | 1 | 2026-08-11 12:45 (s.1807) | S9 yürürlüğe girdi | 138 | 88 |
+> | 2 | 2026-08-11 18:42 (s.2510) | denetim düzeltmeleri | 137 | 87 |
+> | **3** | **2026-08-12 ~01:17 (s.2582)** | **cadence 10 dk → 7,5 dk** | 131 | **84** |
+>
+> Üçüncüsünün gerekçesi: *"cadence botun gördüğü fırsat sayısını değiştirir."*
+> `zirve` 8698,11 → 8381,06'ya çekildi; equity ve işlem geçmişi dokunulmadı.
+
 | | |
 |---|---|
-| **Başlangıç** | **2026-08-11 18:42** — denetim düzeltmeleri yürürlüğe girdiği an (`fikir-defteri.md` s.2510) |
-| Bitiş ölçütü | **138 kapanmış işlem VEYA 30 gün** — hangisi önce |
+| **Başlangıç** | **2026-08-12 ~01:17** (commit `0b3f3e3`, cadence sıfırlaması) |
+| Bitiş ölçütü | **138 kapanmış POZİSYON VEYA 30 gün** — hangisi önce (30 gün: 2026-09-11) |
 | GEÇTİ | toplam net > 0 **ve** ikinci yarı > 0 |
 | KALDI | toplam net < 0 **ya da** fren tetiklendi |
 | BELİRSİZ | toplam > 0 ama ikinci yarı < 0 → uzat |
 | Pencere kuralı | **parametre değişmez, kapı eklenmez, eşik oynatılmaz** |
 
-Doluluk sabit değil, sayılır:
-
 ```bash
 python -c "import json,datetime; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
-p=[x for x in k if x['ts']>='2026-08-11 18:42' and not x.get('kismi')]; \
-g=(datetime.datetime.now()-datetime.datetime(2026,8,11,18,42)).days; \
-print(len(p),'/138 islem ·',g,'/30 gun')"
+p=[x for x in k if x['ts']>='2026-08-12 01:17' and not x.get('kismi')]; \
+g=(datetime.datetime.now()-datetime.datetime(2026,8,12,1,17)).total_seconds()/86400; \
+print(len(p),'/138 POZISYON · %.1f/30 gun'%g)"
 ```
 
-*(2026-08-17 öğlen anlık görüntüsü: 87/138 işlem, 5/30 gün.)*
+*(2026-08-17 öğlen anlık görüntüsü: 84/138 pozisyon, 5,5/30 gün.)*
 
-> ⚠️ **Bu tarih ÖNEMLİ ve bir kez yanlış yazıldı.** Bu dosya pencereyi bir süre
-> "12 Ağustos'tan beri" diye saydı — 3 işlem eksik. Karışıklığın kaynağı: 12 Ağustos'ta
-> MA50 kararı verilirken *"pencere sıfırlanmadı"* denmişti; o cümle **11 Ağustos'ta
-> başlayan pencerenin devam ettiğini** söylüyor, penceresinin 12'sinde başladığını değil.
+> ⚠️ **İKİ KATLI SAYIM TUZAĞI — pencereyi vaktinden önce dolmuş ilan ettirir.**
+> 1. **Yanlış başlangıç:** 12:45'ten sayarsan kayıt sayısı **tam 138** çıkıyor.
+> 2. **Kayıt ≠ pozisyon:** o 138 kaydın **50'si `TP1_KISMI`** — kısmi kâr satırları
+>    pozisyonu bölüyor.
 >
-> **Ve şu yanlış alarm bir daha kurulmasın:** *"denetim düzeltmeleri pencerenin ortasında
-> botun davranışını değiştirdi, o yüzden pencere geçersiz"* — **hayır.** Düzeltmeler
-> 2026-08-11 18:44'te girdi ve **aynı anda pencere yeniden başlatıldı**; eski pencere
-> açıkça GEÇERSİZ ilan edildi, yeni ön-kayıt yazıldı (s.2510). Bot davranışı pencere
-> **başlamadan önce** değişti.
+> İkisi birleşince *"pencere bugün doldu"* denir. **Doğru sayı 84.** `--kismi`
+> satırları her zaman düşülür (`CLAUDE.md` → pozisyon başına sayım kuralı).
+
+> ⚠️ **Pencere kuralı bir kez İHLAL EDİLDİ ve hüküm yazılırken bu deftere geçmeli.**
+> Ön-kayıt *"hiçbir parametreye dokunulmaz"* diyor. **2026-08-12 23:02'de** kasa
+> sıfırlamasıyla equity'ye **+1.005,94 $** eklendi — ve boyutlandırma efektif
+> equity'yle ölçekleniyor ([testbot.py:1120](testbot.py#L1120)), yani pencerenin
+> ikinci yarısındaki **pozisyon boyutları büyüdü.** Bu, "tek yapılandırma" koşulunu
+> bozuyor. Pencere sıfırlanmadı (kullanıcı kararı), ama hüküm bu kesintiyi
+> **açıkça anmalı.**
+>
+> Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — onlar 08-11 18:44'te, yani
+> geçerli pencere başlamadan **önce** girdi. Bu iki şey karıştırılmasın.
 
 **Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
 birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
