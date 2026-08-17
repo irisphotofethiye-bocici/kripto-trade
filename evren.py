@@ -50,6 +50,91 @@ def esik(ad, varsayilan):
 
 _ban_until = 0.0  # Binance 418 sogutma penceresi (2026-07-08, rate-limit direnc katmani)
 
+# --- HTTP KEEP-ALIVE / BAGLANTI HAVUZU (2026-08-17) ----------------------------------
+# [SORUN] get() her cagride urllib.request.urlopen ile YENI baglanti aciyordu. Olculdu:
+#   yeni baglanti medyan 0,614 sn · keep-alive 0,285 sn -> 2,1 KAT. Bot gunde ~72.000
+#   cagri yapiyor, yani gunde ~72.000 TCP+TLS el sikismasi. Medyan tur 298 sn'nin
+#   buyuk kismi bu. "Yavaslik tamamen dis kaynakli" tespiti BU OLCUMLE CURUTULDU.
+# [NEDEN PoolManager, NEDEN requests.Session DEGIL] panel_sunucu.py ThreadingHTTPServer
+#   kullaniyor (2026-08-12'de tam bu yuzden tek-is-parcacigindan cikarildi), yani modul
+#   duzeyindeki havuz ESZAMANLI is parcaciklarindan kullanilacak. requests.Session'in
+#   thread-safe oldugu GARANTI EDILMIYOR; urllib3.PoolManager tasarimi geregi oyle ve
+#   havuzlamayi kendi yapiyor.
+# [BAYAT SOCKET] Havuzdaki bir baglanti sunucu tarafindan kapatilmis olabilir; ilk
+#   kullanimda hata atar. TEK SEFERLIK yeniden deneme sart — yoksa bugune kadar hic
+#   gorulmemis bir hata sinifi dogar. urllib3 retries=False ile kendi denemesini
+#   kapatiyoruz ki tekrar sayisi TEK yerde (asagida) yonetilsin.
+# [SOZLESME KORUNDU] Donus JSON, hatada istisna. 418 sogutma penceresi ve 429
+#   Retry-After davranisi BIREBIR ayni. Cagiranlarin hicbiri HTTPError/.code'a
+#   bakmiyor (tarandi: radar/testbot/olcucu/panel/piyasa_yapisi/tarayici/erken_analiz/
+#   veto_analiz) -> istisna TIPI serbest.
+# [FAIL-OPEN] urllib3 yoksa eski urlopen yoluna duser; bot calismaya devam eder.
+# GERI ALMA: _HAVUZ = None yaz, eski yol aynen kosar.
+try:
+    import urllib3 as _urllib3
+    _HAVUZ = _urllib3.PoolManager(
+        maxsize=8,             # host basina acik tutulan baglanti (tarama tek host'a gider)
+        block=False,           # havuz dolarsa bekleme, yeni baglanti ac (tur takilmasin)
+        retries=False,         # tekrar mantigi ASAGIDA, tek yerde
+        headers={"User-Agent": "evren/1.0", "Connection": "keep-alive"},
+    )
+    # Bayat-socket tekrarinin kapsami: YALNIZ baglanti duzeyi hatalar. TimeoutError
+    # BILEREK DISARIDA — bkz. _havuzlu_get.
+    _BAGLANTI_HATASI = (_urllib3.exceptions.ProtocolError,
+                        _urllib3.exceptions.NewConnectionError,
+                        _urllib3.exceptions.ClosedPoolError,
+                        ConnectionError)
+except Exception:              # kutuphane yok / import hatasi -> eski davranis
+    _urllib3 = None
+    _HAVUZ = None
+    _BAGLANTI_HATASI = ()
+
+
+def _havuz_iste(u, headers, timeout):
+    """PoolManager ile tek istek. Donus (durum_kodu, govde_bytes, basliklar)."""
+    r = _HAVUZ.request(
+        "GET", u,
+        headers=headers,
+        timeout=_urllib3.Timeout(connect=min(10.0, timeout), read=timeout),
+        preload_content=True,
+        redirect=True,
+    )
+    return r.status, r.data, r.headers
+
+
+def _havuzlu_get(u, bas, timeout):
+    """Havuzlu yol. 418/429 semantigi urlopen yoluyla BIREBIR ayni tutulur."""
+    global _ban_until
+    try:
+        durum, govde, hbas = _havuz_iste(u, bas, timeout)
+    except _BAGLANTI_HATASI:
+        # BAYAT SOCKET: havuzdaki baglanti sunucu tarafindan kapatilmis olabilir.
+        # TEK seferlik yeniden dene (yeni baglanti acilir). Ikinci hata cagirana gider.
+        # [DIKKAT] Yalniz BAGLANTI hatalarinda tekrar var, TIMEOUT'ta YOK. Her istisnada
+        #   tekrar deneseydik takilan bir sunucuda 25 sn -> 50 sn olurdu; tur suresini
+        #   dusurmek icin yapilan degisiklik kuyrukta tam tersini yapardi.
+        durum, govde, hbas = _havuz_iste(u, bas, timeout)
+
+    if durum == 418:
+        _ban_until = time.time() + 120.0
+        print(f"BINANCE 418 (IP BAN) -> 120sn sogutma baslatildi: {u}")
+        raise RuntimeError(f"HTTP 418: {u}")
+    if durum == 429:
+        try:
+            bekle = float(hbas.get("Retry-After", 3))
+        except Exception:
+            bekle = 3.0
+        time.sleep(bekle)
+        durum, govde, hbas = _havuz_iste(u, bas, timeout)
+        if durum == 418:
+            _ban_until = time.time() + 120.0
+        if durum >= 400:
+            print(f"BINANCE {durum} (429 sonrasi tekrar basarisiz) -> {u}")
+            raise RuntimeError(f"HTTP {durum}: {u}")
+    if durum >= 400:
+        raise RuntimeError(f"HTTP {durum}: {u}")
+    return json.loads(govde.decode("utf-8"))
+
 
 def get(u, headers=None, timeout=25):
     """Paylasimli HTTP getirici — TEK dogruluk kaynagi (radar/testbot/olcucu/piyasa_yapisi/panel buradan cagirir).
@@ -59,7 +144,10 @@ def get(u, headers=None, timeout=25):
     global _ban_until
     if _ban_until and time.time() < _ban_until:
         raise RuntimeError(f"Binance IP-ban sogutma penceresinde (kalan {_ban_until - time.time():.0f}sn) -> istek atlandi: {u}")
-    req = urllib.request.Request(u, headers=headers or {"User-Agent": "evren/1.0"})
+    bas = headers or {"User-Agent": "evren/1.0"}
+    if _HAVUZ is not None:
+        return _havuzlu_get(u, bas, timeout)
+    req = urllib.request.Request(u, headers=bas)
     try:
         return json.load(urllib.request.urlopen(req, timeout=timeout))
     except urllib.error.HTTPError as e:
