@@ -117,15 +117,38 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 | Sabit %10 hedef | referans çizgisi −0,079 (s.2671) | **aynı koşturmadan** geliyor, aynı itiraz |
 | 1,5R kısmi ezmesi | mevcut −0,011 vs kısmi yok +0,038 | kısmen — ama `kismi_15r.py` evreni canlıya **daraltılmıştı** (stop medyanı %3,27), yani burada metodolojik itiraz **zayıf**, karar tercihe dayanıyor |
 
-**Hakem de aynı: canlı pencere.** Hedef **138 işlem**. Doluluk sabit değil, sayılır:
+**Hakem de aynı: canlı ölçüm penceresi.**
+
+| | |
+|---|---|
+| **Başlangıç** | **2026-08-11 18:42** — denetim düzeltmeleri yürürlüğe girdiği an (`fikir-defteri.md` s.2510) |
+| Bitiş ölçütü | **138 kapanmış işlem VEYA 30 gün** — hangisi önce |
+| GEÇTİ | toplam net > 0 **ve** ikinci yarı > 0 |
+| KALDI | toplam net < 0 **ya da** fren tetiklendi |
+| BELİRSİZ | toplam > 0 ama ikinci yarı < 0 → uzat |
+| Pencere kuralı | **parametre değişmez, kapı eklenmez, eşik oynatılmaz** |
+
+Doluluk sabit değil, sayılır:
 
 ```bash
-python -c "import json; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
-p=[x for x in k if x['ts']>='2026-08-12' and not x.get('kismi')]; \
-print(len(p),'/138 kapandi ·',138-len(p),'kaldi')"
+python -c "import json,datetime; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
+p=[x for x in k if x['ts']>='2026-08-11 18:42' and not x.get('kismi')]; \
+g=(datetime.datetime.now()-datetime.datetime(2026,8,11,18,42)).days; \
+print(len(p),'/138 islem ·',g,'/30 gun')"
 ```
 
-*(2026-08-17 öğlen: 84/138, kalan 54.)*
+*(2026-08-17 öğlen anlık görüntüsü: 87/138 işlem, 5/30 gün.)*
+
+> ⚠️ **Bu tarih ÖNEMLİ ve bir kez yanlış yazıldı.** Bu dosya pencereyi bir süre
+> "12 Ağustos'tan beri" diye saydı — 3 işlem eksik. Karışıklığın kaynağı: 12 Ağustos'ta
+> MA50 kararı verilirken *"pencere sıfırlanmadı"* denmişti; o cümle **11 Ağustos'ta
+> başlayan pencerenin devam ettiğini** söylüyor, penceresinin 12'sinde başladığını değil.
+>
+> **Ve şu yanlış alarm bir daha kurulmasın:** *"denetim düzeltmeleri pencerenin ortasında
+> botun davranışını değiştirdi, o yüzden pencere geçersiz"* — **hayır.** Düzeltmeler
+> 2026-08-11 18:44'te girdi ve **aynı anda pencere yeniden başlatıldı**; eski pencere
+> açıkça GEÇERSİZ ilan edildi, yeni ön-kayıt yazıldı (s.2510). Bot davranışı pencere
+> **başlamadan önce** değişti.
 
 **Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
 birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
