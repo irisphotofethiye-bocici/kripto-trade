@@ -72,8 +72,21 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   pozisyonu böler. **Somut tuzak:** ölçüm penceresinde kayıt sayısı pozisyon sayısından
   belirgin fazladır — üç aday tabanın üçünde de fark **45–50 kayıt** civarında, çünkü
   `TP1_KISMI` satırları pozisyonu ikiye bölüyor. Kayıt sayan biri pencereyi **vaktinden
-  önce dolmuş** ilan eder. `not x.get("kismi")` süzgeci **her zaman** uygulanır.
-  Güncel sayım komutu `durum.md`'de.
+  önce dolmuş** ilan eder. Güncel sayım komutu `durum.md`'de.
+- 🔴 **SÜZGEÇ SAYMAK İÇİNDİR, TOPLAMAK İÇİN DEĞİL.** Pozisyon *sayarken*
+  `not x.get("kismi")` uygulanır. **P&L *toplarken* UYGULANMAZ** — kayıtlar `id` ile
+  birleştirilir, yoksa TP1'de **realize edilmiş kâr kaybolur.** Ölçüldü:
+  `golge` gerçek −1.350,72 iken süzgeçli hâli −5.815,70 → **4.465 $ hata**;
+  `testbot`'ta 2.855 $. Süzgeç bu projede zaten bir kez yanlış toplam üretti.
+- **MUTABAKAT DENKLEMİ — hangi yöntemi kullanırsan kullan, bunu tutturmuyorsa yanlıştır:**
+
+  ```
+  başlangıç bakiye + Σ P&L + funding − giriş ücreti (+ kasa sıfırlaması) ≈ equity
+  ```
+
+  Doğru yöntemde sapma **kuruş** mertebesinde çıkıyor (`golge` −0,07 · `testbot` −0,04).
+  Süzgeçli yöntemde **binlerce dolar** sapıyor. Bir P&L toplamı yazmadan önce bu
+  denklem koşturulur.
 - **Ölçüm penceresinin başlangıcı ÇÖZÜLMEDİ — üç aday var, karar kullanıcının.**
   Pencere üç kez ön-kayıtlandı ve defter kendi içinde tutarsız. **Sayı üretmeden önce
   `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu

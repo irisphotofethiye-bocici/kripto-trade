@@ -209,28 +209,36 @@ Rakamlar hızlı değişiyor → canlı state'ten okunur (`durum.md`). Burada ya
 | `ayna` | Bot girsin, çıkışa kullanıcı karar versin | 84 poz | Çalışıyor ama **kıyas henüz yapılamaz** |
 
 ### `golge` — tek soru yalıtmıyor
-| küme | N | pay |
-|---|---|---|
-| `pump_long_tezi` (hiç denenmemiş LONG tezi) | 121 | **%68** |
-| reddedilen girişler | 56 | %32 |
-| ↳ `stop_cok_dar` 25 · `long_veto` 13 · `blowoff` 10 · `taker_soguma` 5 · `onay_bekle` 3 | | |
+
+Rakamlar **`id` ile birleştirilmiş** (kısmi kayıtlar toplandı) ve **mutabakat denklemini
+tutturuyor** — sapma −0,07 $:
+
+| küme | N | kazanan | P&L | ort/poz |
+|---|---|---|---|---|
+| `pump_long_tezi` (hiç denenmemiş LONG tezi) | **122 · %69** | %57 | −1.066,43 | −8,74 |
+| **reddedilen girişler** | **56 · %31** | | **−284,29** | **−5,08** |
+| ↳ `stop_cok_dar` | 25 | %48 | −326,30 | −13,05 |
+| ↳ `long_veto` | 13 | %62 | **+25,50** | +1,96 |
+| ↳ `blowoff` | 10 | %60 | **+195,43** | +19,54 |
+| ↳ `taker_soguma` | 5 | %80 | −109,19 | −21,84 |
+| ↳ `onay_bekle` | 3 | %67 | −69,73 | −23,24 |
 
 **Cevap yönü:** bot **fazla seçici değil** — reddettiği girişler ortalamada para
-kaybettiriyor. En büyük kategori `stop_cok_dar` (asgari %2,0 stop kapısının elediği) da
-kuralı doğruluyor: bu, 11 Ağustos'ta ön-kayıtla konan kuralın **canlıdaki ilk bağımsız
-teyidi.**
+kaybettiriyor (−5,08 $/pozisyon). En büyük kategori `stop_cok_dar` (asgari %2,0 stop
+kapısının elediği) −13,05 ile kuralı doğruluyor: **11 Ağustos'ta ön-kayıtla konan
+kuralın canlıdaki ilk bağımsız teyidi.**
 
 **Ama hüküm yazılamaz:** (a) kategori başına N=3–25, hiçbiri eşiğe yakın değil;
-(b) `blowoff` ve `long_veto` pozitif **görünüyor** — N=10 ve N=13 ile bu tam olarak
-*"en iyi hücreyi seçme"* tuzağı; (c) kazanma oranı yüksekken P&L negatif → dağılım
-kuyruklu, ortalama tek başına yanıltıcı.
+(b) `blowoff` (+19,54) ve `long_veto` (+1,96) **pozitif** — yani iki veto para
+kaybettiriyor *olabilir*, ama N=10 ve N=13 ile bunu kural yapmak tam olarak
+*"en iyi hücreyi seçme"* tuzağı; (c) `taker_soguma` kazanma oranı %80 iken P&L negatif
+→ dağılım kuyruklu, ortalama tek başına yanıltıcı.
 
-> ⚠️ **Kategori P&L rakamı bilerek YAZILMADI ve buradaki iki sayı BULGU DEĞİL.**
-> İki bağımsız hesap aynı kategoride **ters işaret** verdi — `blowoff` için biri
-> **−332**, öteki **+195**. Bu iki değer yalnızca *anlaşmazlığın büyüklüğünü* gösterir;
-> **ikisi de doğrulanmadı, hiçbiri alıntılanamaz.** Muhtemel sebep: kısmi kayıtların id
-> ile birleştirilme biçimi. **Fark çözülmeden bu bölüme rakam girmez** — yanlış rakam,
-> rakamsızlıktan kötüdür.
+> ✅ **Bu rakamlar bir kez YANLIŞ hesaplandı, sebebi bulundu.** Önceki hesap
+> `not x.get("kismi")` süzgecini **toplarken** kullanıyordu ve TP1'de realize edilen kârı
+> düşürüyordu → `blowoff` için −332 (gerçek +195), gölge toplamında **4.465 $** hata.
+> Yukarıdakiler id-birleşik ve equity ile mutabık. Kural `CLAUDE.md`'de:
+> **süzgeç saymak için, toplamak için değil.**
 
 ### `ayna` — kıyas bugün YAPILAMAZ
 Gereken üç şey elde yok: (a) **eşleşmiş** pozisyon listesi, (b) iki tarafta **etkin**
@@ -246,7 +254,7 @@ kıyası)"* dediği hatanın **üçüncü tekrarı** olur. → Bekleyen: ön-kay
 |---|---|
 | `d_taker` — agresörün pozisyon ömrü boyunca **kayması** | Veri 2026-08-13'te toplanmaya başladı, geriye dönük üretilemez. ~27 Ağustos'ta yeterli olur |
 | `MA50+ucuz` kapısının **fonlama** yükü | Kapı 2 yılda ölçüldü ve çürütüldü (s.2790) ama o test fonlama maliyetini içermiyordu. A+B'yi bitiren hesap bu kapı için yapılmadı. **Beklenti A+B'nin aynısı olmamalı:** A+B fonlamayı *tanım gereği* seçiyordu (funding ≤ −0,05 → kontrolün 11 katı ödüyor), MA50+ucuz ise fiyat ve MA50 mesafesine bakıyor, fonlama terimi yok. Yine de ucuz/şişmiş altcoinlerde fonlama çarpık olabilir → **ölçülmeden bilinmez** |
-| `MA50+ucuz`: canlı artı kuralın mı, radarın ön elemesinin mi? | Ayırmanın tek yolu 2 yıllık OI verisi — yok. **Hakem canlı pencere:** başlangıç **2026-08-12 ~01:17** (üçüncü ve geçerli ön-kayıt), bitiş 138 **pozisyon** veya 30 gün. Üç ön-kayıt, sayım tuzağı ve ihlal notu → `durum.md` |
+| `MA50+ucuz`: canlı artı kuralın mı, radarın ön elemesinin mi? | Ayırmanın tek yolu 2 yıllık OI verisi — yok. **Hakem canlı ölçüm penceresi** (başlangıç **çözülmedi**, üç aday; bitiş 138 pozisyon veya 30 gün) → tanım, sayım komutu ve diyagram **`durum.md`**'de |
 | A+B kapısı kararı | 2 yıllık **fonlamalı** ölçüm "kapat" diyor, canlı 16 işlem "kapatma daha kötü olurdu" diyor. 12 Ağustos'ta kullanıcı "açık kalsın" dedi (s.2812); nihai karar hâlâ açık |
 | Giriş aramasının süre maliyeti | Tur süresi ölçümü 08-14'te eklendi; ortalama 138 sn giriş aramasında |
 | **Boğa-bacağı walk-forward ölçümü** — HİÇ YAPILMADI | `kazanan-bot-arastirma-raporu.md` §8.1'in 1. maddesi. **Projenin en büyük bilinen açığı** (LONG'un kanıtlanmış arketipi yok) ve **veri elde**: `scratchpad/klines_1h_uzun/` 566 sembol / 2 yıl, gerçek boğa içeriyor. Aynı raporun 3. maddesi (portföy düşüş limiti) 08-10'da uygulandı — 1. madde beklemede |
