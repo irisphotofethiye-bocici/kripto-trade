@@ -256,6 +256,13 @@ yaslamak yanlış olur; o karar açıkça bir tercihti ve bedeli kayıtlı (−0
 saptıran çift kaydın kök nedeni. `ayna.py` ve `izleyici.py` ilk günden atomik yazıyor;
 aynı desen kopyalanacak. Onarım önerildi, uygulanmadı.
 
+⚠️ **2026-08-17'de AĞIRLAŞTI.** Gölge pozisyonları artık `funding_toplam` ve
+`funding_yazilan` sayaçlarını taşıyor ve bu sayaçlar **yalnız state'te** yaşıyor —
+işlem defterinde karşılıkları yok. Yırtık bir yazım artık sadece equity'yi değil,
+**toplamı tutmayan fonlama dilimleri** üretebilir: `funding_yazilan` geri sararsa
+aynı dilim iki kez yazılır, ileri kalırsa dilim kaybolur. Fonlama ölçümü gölge
+defteri kapsayacaksa bu onarım **önce** yapılmalı.
+
 **5. Git geçmişi temizliği** — ilk push'tan önce zorunlu (geçmişte ~920 MB veri).
 Depo bugüne kadar hiç push edilmedi.
 
@@ -268,6 +275,20 @@ hacim/agresör topluyor (`taker_15`, `taker_60`, `d_taker`, `hacim_x`). Bu veri
 
 Önem: bugüne kadar ölçülen her şey **seviye** idi ve "erken fiyat hareketinin başka
 bir ifadesi" çıktı. `d_taker` **değişim** ölçen ilk sütun.
+
+**Pozisyon başına fonlama** (2026-08-17 eklendi). Aynı sınıf: geri üretilemez veri.
+İşlem kaydına `funding_usdt` alanı eklendi; artık "hangi pozisyon ne kadar fonlama
+ödedi" sorulabiliyor. **Bu tarihten önce açılmış pozisyonlar için cevap kalıcı
+olarak yok.** Alanın tanımı, `null`/`0.0` ayrımı ve süzgeç → **`CLAUDE.md`**.
+
+- **Neden pencere içinde yapıldı:** D/8 ölçütü — *"bu değişiklik botun hangi işlemi
+  açacağını değiştiriyor mu?"* Hayır; sayaç ve kayıt alanı, karar dalına dokunmuyor.
+  Bug-fix sınıfı, pencereyi beklemesi gerekmiyor.
+- **Neden eski pozisyonlara sayaç TAKILMADI:** girişten bugüne kadarki fonlamaları
+  kayıp; şimdi biriktirmeye başlasak **yarım ama tam görünen** bir sayı çıkardı.
+- **Ne açıyor:** kapı × fonlama kırılımı (`MA50+ucuz` fonlama yükü artık backtest'e
+  muhtaç değil), tutuş süresi × fonlama canlı doğrulaması, fonlamalı gerçek R.
+- Doğrulama: `scratchpad/funding_pozisyon_testi.py` — 15 kontrol, diske yazım YOK.
 
 ## Canlıya geçmeden
 

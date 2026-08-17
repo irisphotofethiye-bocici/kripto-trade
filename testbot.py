@@ -722,6 +722,14 @@ def pozisyon_kapat(st, pos, cikis_fiyat_piyasa, sebep):
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
+        # 2026-08-17: pozisyon basina fonlama dilimi, DOLAR. sonuc_usdt'ye DAHIL DEGILDIR
+        #   — fonlama st["equity"]'ye ayrica islenir. None = degisiklik oncesi pozisyon.
+        # [AD NEDEN "_usdt"] Bu projede `funding` ADI ZATEN DOLU ve ORAN demek (%/8s):
+        #   radar_archive.jsonl · testbot_aday_arsiv.jsonl · veto_log.jsonl hep oran yazar,
+        #   ve A+B kapisi onu esikle karsilastirir (asagida: r["funding"] <= -0.05).
+        #   Ilk planlanan olcum (kapi x fonlama) tam bu iki dosyayi BIRLESTIRECEK; orani
+        #   ve dolari ayni adla yan yana koyan bir join SESSIZCE yanlis cikardi.
+        "funding_usdt": _funding_dilim(pos),
     }
     _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
@@ -749,6 +757,7 @@ def pozisyon_liq(st, pos):
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
+        "funding_usdt": _funding_dilim(pos),      # 2026-08-17, bkz. pozisyon_kapat
     }
     _append_jsonl(_islem_defteri(), kayit)
     st["cooldown"][pos["sym"]] = now_iso()
@@ -800,6 +809,7 @@ def pozisyon_kismi_tp1(st, pos, cikis_fiyat_piyasa):
         "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
         # 2026-08-05: "elle" ise botun karnesinden DISLANIR (panel_sunucu suzuyor)
         "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
+        "funding_usdt": _funding_dilim(pos),      # 2026-08-17, bkz. pozisyon_kapat
     }
     _append_jsonl(_islem_defteri(), kayit)
     telegram_gonder(f"[TESTBOT] TP1 {pos['sym']} {pos['yon']} yari kapatildi PnL={pnl_net:+.2f}$ (stop girise cekildi)",
@@ -817,7 +827,41 @@ def funding_uygula(st, pos):
         maliyet = notional * e["rate"] * isaret  # LONG + pozitif funding = oder (equity azalir)
         st["equity"] -= maliyet
         st["kumulatif_funding"] = st.get("kumulatif_funding", 0.0) - maliyet
+        # [2026-08-17] POZISYON BASINA FONLAMA — geri uretilemez veri.
+        #   ESKIDEN: fonlama yalniz st["kumulatif_funding"]'e (defter geneli) yaziliyordu;
+        #   ne pozisyonda ne islem kaydinda alan vardi. Sonucu: "hangi pozisyon ne kadar
+        #   fonlama odedi" sorusu CEVAPLANAMIYORDU ve geriye donuk uretilemiyordu — oysa
+        #   projenin en pahali dersi "fonlama dahil edilmeden olcum yaniltici"dir
+        #   (A+B'de kenarin %83'unu fonlama yedi). Pencere sonucu bile ancak equity
+        #   farkindan dolayli turetilebiliyordu.
+        #   ISARET: st["kumulatif_funding"] ile AYNI — eksi deger = odendi.
+        # [DIKKAT] Anahtar YOKSA YARATILMAZ. Bu degisiklikten once acilmis pozisyonlarda
+        #   girisle bugun arasi fonlama kayiptir; simdi biriktirmeye baslarsak ortaya
+        #   YARIM ama TAM gorunen bir sayi cikar. Yarim sayi, hic sayi olmamasindan
+        #   kotudur — okuyan onu toplam sanar. O yuzden eski pozisyonlar "bilinmiyor"
+        #   (None) kalir; yalnizca yeni pozisyonlar olculur.
+        if "funding_toplam" in pos:
+            pos["funding_toplam"] -= maliyet
     pos["son_funding_kontrol_ts"] = now_iso()
+
+
+def _funding_dilim(pos):
+    """Bu kayda yazilacak fonlama DILIMI (kumulatif degil).
+
+    [NEDEN DILIM] Kismi kar pozisyonu ikiye boluyor ve her bolum ayri kayit yaziyor.
+    Kumulatif yazilsaydi kayitlar id ile toplanirken fonlama CIFT sayilirdi. Dilim
+    yazilinca `sum(kayitlar)` = pozisyonun toplam fonlamasi olur — `sonuc_usdt` ile
+    tam ayni muhasebe (bkz. CLAUDE.md "SUZGEC SAYMAK ICINDIR, TOPLAMAK ICIN DEGIL").
+
+    [None DONUSU] Bu degisiklikten ONCE acilmis pozisyonlarda `funding_toplam` anahtari
+    yoktur; onlarin gercek fonlamasi bilinmiyor ve uretilemez. 0.0 yazmak UYDURMA olur
+    -> None yazilir ("bilinmiyor"), mesru sifir ile karistirilmasin diye.
+    """
+    if "funding_toplam" not in pos:
+        return None
+    dilim = pos["funding_toplam"] - pos.get("funding_yazilan", 0.0)
+    pos["funding_yazilan"] = pos["funding_toplam"]
+    return round(dilim, 4)
 
 
 def atr_canli_al(sym):
@@ -1152,6 +1196,10 @@ def yeni_giris_ac(st, sym, yon, r, pillar, sebep, zorla=False, rejim_ad=None,
         "chg24_giriste": r.get("chg24"), "range_pos_giriste": r.get("pos"), "stage_giriste": r.get("stage"),
         "rejim_giriste": rejim_ad or "BILINMIYOR",  # 2026-07-08: rejim x yon karne icin (hem-ayi-hem-boga olcumu)
         "son_funding_kontrol_ts": now_iso(), "son_1m_kontrol_ts": now_iso(), "sebep_giris": sebep,
+        # 2026-08-17: fonlama biriktiricisi. Anahtarin VARLIGI "bu pozisyon takip ediliyor"
+        #   demektir; yoklugu "bilinmiyor" (bkz. _funding_dilim). Mesru 0.0 ile
+        #   "olculmedi"yi ayirmanin tek yolu bu.
+        "funding_toplam": 0.0, "funding_yazilan": 0.0,
         # trailing stop icin (2026-07-03, "piyasa donunce de TP/SL bekliyor" geri bildirimi):
         "stop_orijinal": round(stop, 6), "atr_giriste": olc.get("atr14"),
         "en_iyi_fiyat": giris_ef, "trailing_aktif": False,

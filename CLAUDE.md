@@ -92,6 +92,23 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   Pencere üç kez ön-kayıtlandı ve defter kendi içinde tutarsız. **Sayı üretmeden önce
   `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu
   ve çelişkinin kaynağı orada. Buraya tarih ya da rakam yazma.
+- **Fonlama pozisyona 2026-08-17'den İTİBAREN atfediliyor.** O tarihten önce açılmış
+  pozisyonların fonlaması **geri üretilemez**. Bu olgunun sahibi burasıdır; başka
+  dosya kopyalamaz, işaret eder.
+
+  | | |
+  |---|---|
+  | alan adı | **`funding_usdt`** — işlem defterinde, **dolar** |
+  | `null` | **bilinmiyor** (08-17 öncesi açılmış pozisyon) — sıfır DEĞİL |
+  | `0.0` | meşru sıfır (fonlama görmemiş pozisyon) |
+  | süzgeç | `r.get("funding_usdt") is not None` |
+  | toplama | **dilim**dir, kümülatif değil → `id` ile toplanır, `sonuc_usdt` ile aynı muhasebe |
+
+  ⚠️ **`funding` ADI BAŞKA ŞEYDİR — oran (%/8s).** `radar_archive.jsonl` ·
+  `testbot_aday_arsiv.jsonl` · `veto_log.jsonl` hep oranı yazar ve A+B kapısı onu
+  eşikle karşılaştırır ([testbot.py:426](testbot.py#L426)). İlk planlanan ölçüm
+  (kapı × fonlama) bu iki dosyayı **birleştirecek**; oranla doları aynı adla yan yana
+  koyan bir join **sessizce yanlış** çıkar. Ad ayrımı bu yüzden var.
 - **`sonuc_usdt` FONLAMAYI İÇERMEZ.** `funding_uygula` doğrudan `st["equity"]`'yi
   düşürüyor ([testbot.py:818](testbot.py#L818)). Defter toplamına bakıp "pencere şu kadar
   kazandı" demek projenin en pahalı hatasını tekrarlamaktır. **Pencere sonucu her zaman
