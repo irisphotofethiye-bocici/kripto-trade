@@ -38,6 +38,12 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   +0,243 vs kontrol +0,035 (t=+3,84) iken A-stop'la +0,051'e iniyordu; ölü sinyal
   taramasında A-stop **A+B'nin ham kenarının %65'ini** yiyordu — MA50+ucuz'da %0.
   Bir kapı "çalışmıyor" derken **kapının mı, stopun mu** çalışmadığı ayrılmalı.
+- **BUG İSTİSNASI — ölçüm penceresi açıkken neyin değişebileceğinin ölçütü**
+  (`test-degerlendirme-programi.md` D/8): tek soru şudur — *"bu değişiklik botun hangi
+  işlemi açacağını değiştiriyor mu?"* Değiştirmiyorsa (tasarlanmış davranışı geri getiren
+  onarım) serbest. Değiştiriyorsa pencere ya beklenir ya yeniden başlatılır.
+- **DEĞİŞİKLİK PROTOKOLÜ** (D/9): eski ölçüt **silinmez**; yanına `[DEĞİŞTİ tarih]`
+  eklenir. Kriter metni yorumlanmaz, sayı eşiği uygulanır. **Şüphede DAİMA statüko.**
 - **Başarısızlık aynen raporlanır.** Çıkış tarafında **29 varyant** denendi, **1'i**
   geçti (`olcumler.md` → sayım). Bunu yumuşatmak da şişirmek de projenin değerini
   yok eder.
@@ -57,6 +63,7 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   ayna sızıntısı · Telegram'dan sahte giriş mesajı · gölge girişlerinin aynaya düşmesi.
 - **Durum dosyaları ATOMİK yazılır** (`.tmp` + `os.replace`). Gölge defterin düz
   `json.dump`'ı 2026-08-11'de defteri **314 $** saptırdı.
+  ⚠️ **`golge.py` bu kurala HÂLÂ uymuyor** → `durum.md` madde 4.
 - **Ölçüm bota dokunmaz.** Ayrı süreç, ayrı dosya, salt-okunur. `testbot._DEFTER`
   ile oynanmaz.
 - **Etkin kasa ≠ realize kasa.** Açık pozisyon varken yalnız `equity`'ye bakmak
@@ -72,9 +79,18 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu
   ve çelişkinin kaynağı orada. Buraya tarih ya da rakam yazma.
 - **`sonuc_usdt` FONLAMAYI İÇERMEZ.** `funding_uygula` doğrudan `st["equity"]`'yi
-  düşürüyor ([testbot.py:818](testbot.py#L818)). Deftere bakıp "pencere +1.264 $" demek
-  projenin en pahalı hatasını tekrarlamaktır: fonlama −502 $ ve giriş ücreti −176 $
-  ayrıca düşülür. **Pencere sonucu her zaman equity üzerinden türetilir.**
+  düşürüyor ([testbot.py:818](testbot.py#L818)). Defter toplamına bakıp "pencere şu kadar
+  kazandı" demek projenin en pahalı hatasını tekrarlamaktır. **Pencere sonucu her zaman
+  equity üzerinden TÜRETİLİR:**
+
+  ```
+  equity farkı − kasa sıfırlaması  =  pencere realize
+  pencere realize − defter P&L     =  pencere içi fonlama + ücret
+  ```
+
+  **`state`'teki `kumulatif_funding` ve `kumulatif_giris_ucret` PENCEREYE AİT DEĞİL** —
+  2026-07-23'ten beri kümülatiftir; pencere maliyeti olarak kullanmak abartır.
+  Güncel rakam okunmaz, **hesaplanır** (`durum.md` → pencere bölümü).
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta
@@ -98,9 +114,22 @@ düşülmüştü. Stub'lanacaklar: `_append_jsonl` · `_save_state` · `pozisyon
 | defter | soru | dosya |
 |---|---|---|
 | `testbot` | Bot ne yaptı? (ölçünün temeli) | `testbot.py` |
-| `golge` | Reddettiği girişlere girseydi? | `golge.py` |
+| `golge` | **İKİ İŞ birden** — aşağıya bak | `golge.py` |
 | `benim` | Kararı kullanıcı verseydi? | `benim.py` |
 | `ayna` | Bot girsin, çıkışa kullanıcı karar versin | `ayna.py` |
+
+⚠️ **`golge` tek soru yalıtmıyor, iki farklı iş yapıyor** — "reddettiği girişlere
+girseydi?" tanımı defterin yalnızca **üçte birini** kapsıyor:
+
+| küme | pay |
+|---|---|
+| `pump_long_tezi` — hiç denenmemiş bir LONG tezinin canlı testi | ~%68 |
+| reddedilen girişler (`stop_cok_dar` · `long_veto` · `blowoff` · `taker_soguma` · `onay_bekle`) | ~%32 |
+
+**Gölge kasasına bakıp "bot iyi eliyor" DENMEZ:** kaybın büyük kısmı `pump_long_tezi`'nden
+geliyor, reddedilen girişlerden değil. Ayrıca gölge LONG ağırlıklı olduğu için fonlamayı
+**tahsil ediyor**, bot ise ödüyor → **iki kasa doğrudan kıyaslanamaz.** Kırılım
+`olcumler.md` → defterler bölümünde.
 
 Uydu defterler `testbot._DEFTER`'i geçici olarak değiştirir ve `finally` ile eski
 haline döndürür. Bu deseni bozma.
@@ -111,9 +140,13 @@ haline döndürür. Bu deseni bozma.
 |---|---|
 | Bunu daha önce ölçtük mü? | **`olcumler.md`** ← önce buraya bak |
 | Şu an ne açık, ne bekliyor? | **`durum.md`** |
-| O ölçümün gerekçesi neydi? | `fikir-defteri.md` (251 KB, kronolojik — satır no `olcumler.md`'de) |
-| Sistemde hangi hatalar bulundu? | `denetim-raporu.md` |
+| O ölçümün gerekçesi neydi? | `fikir-defteri.md` (251 kB, 287 başlık, kronolojik — satır no `olcumler.md`'de) |
+| Sistemde hangi hatalar bulundu? | `denetim-raporu.md` (9 bulgu; **durumları `olcumler.md`'de**) |
 | Kanal/StochRSI stratejisi ne oldu? | `kanal-stochrsi-analizi.md` (44 KB, 14 bölüm — 1-10 ölçümden ÖNCE yazıldı, hüküm KALDI) |
+| "Kazanan bot" nasıl bir şey? | `kazanan-bot-arastirma-raporu.md` — çerçeve dosyası, karar değil; §8.1 (boğa-bacağı ölçümü) **hiç yapılmadı** |
+| Faz kapıları ne zaman geçildi? | `faz4-test-gunlugu.md` (tarihsel; o kapı **elle işlem** içindi, bot için değil) |
+| Değerlendirme disiplini ne diyor? | `test-degerlendirme-programi.md` — D/8 ve D/9 **hâlâ bağlayıcı** (aşağıda YÖNTEM'de) |
+| Kâr tepeden ne kadar geri verildi? | `pnl-tepe-raporu.md` (N=17, gözlem — kural çıkarılmadı) |
 | Canlıya geçmeden ne kapanmalı? | `memory/canliya-gecis-kontrol-listesi.md` |
 | Bileşenler ne işe yarar? | `README.md` |
 | Ölçüm betikleri | `scratchpad/*.py` (59 dosya) |
@@ -136,7 +169,22 @@ haline döndürür. Bu deseni bozma.
   dosyası canlı kaynak değildir.
 - **Yeni bir hata sınıfı ısırınca** buraya "MİMARİ TUZAKLAR"a bir madde ekle.
 
-Güncellenmeyen indeks **yalan söyler** ve hiç olmamasından kötüdür.
+- **HER OLGUNUN TEK SAHİBİ VAR; diğer dosyalar İŞARET EDER, kopyalamaz.**
+
+  | olgu | tek sahibi |
+  |---|---|
+  | ölçüm penceresi, kasa, açık pozisyon, bekleyen kararlar | `durum.md` |
+  | ölçüm hükümleri, N, betik ve defter satırı | `olcumler.md` |
+  | kurallar ve tuzaklar | `CLAUDE.md` — **içinde rakam değil, işaretçi** |
+
+  **Neden bu kural var:** indeks kurulduktan sonra bulunan **20 hatanın çoğu** bu
+  sınıftandı — aynı olgu iki dosyada yazılıydı, biri düzeltilip diğeri unutuldu.
+  Pencere tabanı, fonlama rakamı, gölge tanımı, pozisyon sayısı, atomik yazma kuralı:
+  beşi de iki yerde duruyordu ve beşi de çelişkiye dönüştü.
+  Bir olguyu ikinci bir dosyaya yazmak üzereyken **yaz değil, işaret et.**
+
+Güncellenmeyen indeks **yalan söyler** ve hiç olmamasından kötüdür. İki yerde yazılan
+indeks ise **kaçınılmaz olarak** yalan söyler.
 
 ## İLETİŞİM
 

@@ -1,6 +1,6 @@
 # Ölçüm Kütüğü
 
-`fikir-defteri.md` 251 KB / 3.908 satır / 271 başlık — bağlama sığmıyor. Bu dosya
+`fikir-defteri.md` 251 kB / 3.908 satır / **287 başlık** — bağlama sığmıyor. Bu dosya
 onun **içindekiler sayfası**: *"bunu daha önce ölçtük mü?"* sorusunun tek bakışta
 cevabı.
 
@@ -30,7 +30,8 @@ olan girer; kaydı olmayan betik `kayıt yok` diye işaretlenir, uydurulmaz.
 | MA50+ucuz kapısı (fiyat ≤ $0,07 **ve** MA50 mesafesi ≥ %3,72) | 08-10 | 460 olay | **AÇILDI** — +0,84% vs kontrol −0,05% · ⚠️ iki gün sonra 2 yılda **ÇÜRÜTÜLDÜ**, aşağıdaki satıra bak | `yon_avi.py` | s.1478 |
 | **MA50+ucuz, 2 yılda yeniden üretim** | 08-12 | 21.830 olay | **ÇÜRÜTÜLDÜ** — −0,079, t=−4,05, **üç rejimde de negatif**. Ama testin popülasyonu canlıdan uzak (medyan stop %1,3 vs canlı %3,4) → "kural geniş uygulanınca negatif" diyor, "canlı kapı negatif" **demiyor** | `ab_funding_2yil.py` | s.2790 |
 | NÖTR fade dalı | 08-10 | 1.741 / 3.979 | **KAPATILDI** — açıldığı gün ölçüldü, ölçümün en kötü iki hücresine giriyordu | — | eşik notu |
-| A+B'ye sabit %10 hedef | 08-10 | 206 | **GEÇTİ** — +2,01% vs mevcut +1,24% | — | eşik notu |
+| A+B'ye sabit %10 hedef | 08-10 | 206 | **GEÇTİ** — +2,01% vs mevcut +1,24% | — | s.1231 · s.1249 |
+| **Sabit hedefin `MA50+ucuz`'a genişletilmesi** | 08-11 | 460 | ⚠️ **AÇIK SORU — dayanağı çürütüldü.** Genişletme koda *"ölçümü de %10 hedefle yapıldı (net +0,84%)"* diye gerekçelendirildi ([testbot.py:1179](testbot.py#L1179)); **o +0,84% ertesi gün 2 yılda −0,079 · t=−4,05 ile çürütüldü** (s.2790). 08-10 kararı *"A+B'ye özel"* demişti (s.1249). Pencere sonrası A+B kararıyla **birlikte** ele alınmalı → `durum.md` beşinci iş | — | s.1249 · s.2790 |
 
 ## Çıkış kuralları — 29 varyant, 1'i geçti
 
@@ -52,7 +53,15 @@ olan girer; kaydı olmayan betik `kayıt yok` diye işaretlenir, uydurulmaz.
 | 1,5R kısmi kâr lehimize mi? | 08-12 | 13.951 · **karar veren alt küme 4.195** (dar stop, canlı girişlerin %30'u) | **KALDI** — mevcut (yakın olanı seç) −0,011 · niyet edilen sabit %40 +0,005 · kısmi yok **+0,038**. Ölçüt 1 düştü, iki zaman yarısında da mevcut daha kötü | `kismi_15r.py` | s.2951 · s.3001 · s.3031 |
 | Hedefi oynaklığa ölçekleme (8 varyant) | 08-12 | 21.830 olay / 312 sembol / 2 yıl | **KALDI** — 8'in 8'i de; hiçbiri sabit %10'u yenemedi (2×ATR −0,088 … 6×ATR −0,091) | `oynak_hedef.py` | s.2587 · s.2629 |
 | TP1'de stopu başabaşa çekme | 08-12 | 11–12 Ağu pozisyonları | **KALDI** — kısmi sonrası başabaş +0,274 → +0,261 | `babas_stop_11_12.py` | eşik notu |
-| Erken müdahale (N dk'da artıda değilse kapat) | 08-13 | 44 poz | **KARARSIZ** — durum haber verici ama kural kararsız (+1.170 / −227 / +161 / −222); kural çıkarılmadı | `erken_mudahale.py` | s.3755 |
+| Erken müdahale (N dk'da artıda değilse kapat) | 08-13 | 44 poz | **KARARSIZ** — durum haber verici ama kural kararsız (+1.170 / −227 / +161 / −222); kural çıkarılmadı | `erken_mudahale.py` | s.3755 · s.3784 |
+
+> **Bu satırın nereden geldiği** (zincir kayıptı, eklendi): hipotez `pnl-tepe-raporu.md`
+> §2'de doğdu — *"artıda geçen süre kazananı kaybedenden ayırıyor"* (kazananlar %93,
+> kaybedenler %28, N=17). **Ertesi gün tam bu ileri-bakma tuzağı olarak teşhis edildi**
+> (s.3757): *"kazanan işlem zaten kazandığı için çoğu zaman artıdadır — bu bir tahmin
+> değil, sonucun yeniden ifadesi."* Sonra `erken_mudahale.py` ile **yalnız ilk N dakikaya
+> bakarak** doğru biçimde ölçüldü → KARARSIZ. Üç adımlı zincirin kendisi bir yöntem
+> dersi: gözlemi ölçüm sanmamak.
 
 > **Kalıp:** *kötü girişte sıkı çıkış kaybı keser, iyi girişte kazancı keser.*
 > Defterde sayaç ilerliyor: `oynak_hedef`'te "beşinci kez", `kismi_15r`'de "altıncı kez".
@@ -187,6 +196,50 @@ geriye dönük düzeltilmedi (düzeltilemez de). O eski sonuçlara bakarken ATR 
 %0,09 maliyet farkı hatırlanmalı; raporun verdiği düzeltilmiş rakamlar referanstır
 (A+B +2,29 → +2,25 · MA50+ucuz +0,82 → +0,78).
 
+## Dört defter — ne öğretti, ve neden hüküm YOK
+
+Rakamlar hızlı değişiyor → canlı state'ten okunur (`durum.md`). Burada yalnız
+**kompozisyon, N ve hükümsüzlük gerekçesi.**
+
+| defter | yalıttığı soru | N | durum |
+|---|---|---|---|
+| `testbot` | Bot ne yaptı? | ~105 poz | Ölçünün temeli; hükmü **ölçüm penceresi** verecek |
+| `golge` | ⚠️ **iki iş birden** — aşağıda | 177 poz | Reddedilenlerde işaret doğru yönde, **hüküm yok** |
+| `benim` | Kararı kullanıcı verseydi? | **6 poz** | Dört gündür hareketsiz; N=6 → **hüküm imkânsız** |
+| `ayna` | Bot girsin, çıkışa kullanıcı karar versin | 84 poz | Çalışıyor ama **kıyas henüz yapılamaz** |
+
+### `golge` — tek soru yalıtmıyor
+| küme | N | pay |
+|---|---|---|
+| `pump_long_tezi` (hiç denenmemiş LONG tezi) | 121 | **%68** |
+| reddedilen girişler | 56 | %32 |
+| ↳ `stop_cok_dar` 25 · `long_veto` 13 · `blowoff` 10 · `taker_soguma` 5 · `onay_bekle` 3 | | |
+
+**Cevap yönü:** bot **fazla seçici değil** — reddettiği girişler ortalamada para
+kaybettiriyor. En büyük kategori `stop_cok_dar` (asgari %2,0 stop kapısının elediği) da
+kuralı doğruluyor: bu, 11 Ağustos'ta ön-kayıtla konan kuralın **canlıdaki ilk bağımsız
+teyidi.**
+
+**Ama hüküm yazılamaz:** (a) kategori başına N=3–25, hiçbiri eşiğe yakın değil;
+(b) `blowoff` ve `long_veto` pozitif **görünüyor** — N=10 ve N=13 ile bu tam olarak
+*"en iyi hücreyi seçme"* tuzağı; (c) kazanma oranı yüksekken P&L negatif → dağılım
+kuyruklu, ortalama tek başına yanıltıcı.
+
+> ⚠️ **Kategori P&L rakamı bilerek YAZILMADI ve buradaki iki sayı BULGU DEĞİL.**
+> İki bağımsız hesap aynı kategoride **ters işaret** verdi — `blowoff` için biri
+> **−332**, öteki **+195**. Bu iki değer yalnızca *anlaşmazlığın büyüklüğünü* gösterir;
+> **ikisi de doğrulanmadı, hiçbiri alıntılanamaz.** Muhtemel sebep: kısmi kayıtların id
+> ile birleştirilme biçimi. **Fark çözülmeden bu bölüme rakam girmez** — yanlış rakam,
+> rakamsızlıktan kötüdür.
+
+### `ayna` — kıyas bugün YAPILAMAZ
+Gereken üç şey elde yok: (a) **eşleşmiş** pozisyon listesi, (b) iki tarafta **etkin**
+kasa (ikisinin de açık pozisyonu var), (c) ayna'nın farklı tabanı ve `kayip_veri_notu` /
+`temizlik_notu` alanlarının etkisi.
+
+Bugün kıyasa kalkışmak `CLAUDE.md`'nin *"bu hata iki kez yapıldı (fren hatası + ayna
+kıyası)"* dediği hatanın **üçüncü tekrarı** olur. → Bekleyen: ön-kayıtlı ayrı ölçüm.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
@@ -196,6 +249,9 @@ geriye dönük düzeltilmedi (düzeltilemez de). O eski sonuçlara bakarken ATR 
 | `MA50+ucuz`: canlı artı kuralın mı, radarın ön elemesinin mi? | Ayırmanın tek yolu 2 yıllık OI verisi — yok. **Hakem canlı pencere:** başlangıç **2026-08-12 ~01:17** (üçüncü ve geçerli ön-kayıt), bitiş 138 **pozisyon** veya 30 gün. Üç ön-kayıt, sayım tuzağı ve ihlal notu → `durum.md` |
 | A+B kapısı kararı | 2 yıllık **fonlamalı** ölçüm "kapat" diyor, canlı 16 işlem "kapatma daha kötü olurdu" diyor. 12 Ağustos'ta kullanıcı "açık kalsın" dedi (s.2812); nihai karar hâlâ açık |
 | Giriş aramasının süre maliyeti | Tur süresi ölçümü 08-14'te eklendi; ortalama 138 sn giriş aramasında |
+| **Boğa-bacağı walk-forward ölçümü** — HİÇ YAPILMADI | `kazanan-bot-arastirma-raporu.md` §8.1'in 1. maddesi. **Projenin en büyük bilinen açığı** (LONG'un kanıtlanmış arketipi yok) ve **veri elde**: `scratchpad/klines_1h_uzun/` 566 sembol / 2 yıl, gerçek boğa içeriyor. Aynı raporun 3. maddesi (portföy düşüş limiti) 08-10'da uygulandı — 1. madde beklemede |
+| **K1–K6 değerlendirmesi koşturuldu mu?** | `test-degerlendirme-programi.md` ön-kaydı 2026-07-10'da yazıldı, **sonucu hiçbir yerde yok.** Ön-kayıt yazıp sonucunu yazmamak projenin kendi disiplinine aykırı. K1 eşiği ("equity > 1000 $") bugünkü 10.000 $ tabanlı bot için geçersiz; ama **koşturulup mu geçildi, atlandı mı** — bu bilinmeli. D/8 ve D/9 kuralları `CLAUDE.md`'ye taşındı |
+| **`ayna` eşleşmiş kıyası** | Ön-kayıtlı ayrı ölçüm işi — gerekçe yukarıdaki defterler bölümünde |
 
 ---
 

@@ -34,7 +34,17 @@ bilinen zayıflıklar. **Rakam tutmaz.**
 | 23 Temmuz dönemi | kasa sıfırlamasıyla kapatıldı (delta +1.005,94 $) |
 | Süre sınırı | yok (`sure_gun = 0`) |
 | Koruma | **düşüş freni** — zirveden %25 geri çekilirse yeni giriş durur, açık pozisyonlar yönetilmeye devam eder |
-| Defterler | `testbot` (ölçünün temeli) · `golge` · `benim` · `ayna` |
+| Defterler | `testbot` (ölçünün temeli) · `golge` · `benim` · `ayna` — kırılım ve neden hüküm verilemediği `olcumler.md` → defterler |
+
+> ❓ **AÇIK SORU — `benim` defteri dört gündür hareketsiz.** Son işlem 2026-08-13,
+> N=6. **Bilinçli olarak mı bırakıldı, yoksa unutuldu mu — hiçbir dosyada yazmıyor.**
+> N=6 ile hiçbir şey ölçülemez; dört defterin karar verilemeyecek tek olanı bu.
+> Cevap yazılana kadar "çalışan dört defter" demek yanlış.
+
+> ⚠️ **Gölge kasasına bakıp "bot iyi eliyor" DENMEZ.** Defter iki iş yapıyor:
+> ~%68'i `pump_long_tezi` (hiç denenmemiş LONG tezi), ~%32'si reddedilen girişler.
+> Kaybın büyük kısmı birinciden. Ayrıca gölge LONG ağırlıklı olduğu için fonlamayı
+> **tahsil ediyor**, bot ödüyor → **iki kasa doğrudan kıyaslanamaz.**
 
 ## Açık kapılar
 
@@ -42,7 +52,7 @@ bilinen zayıflıklar. **Rakam tutmaz.**
 |---|---|---|
 | A+B (funding ≤ −0,05 · oi24 ≥ %10 → SHORT) | **açık** | **ASKIDA** — kanıtlanamadı, çürütülmedi |
 | MA50+ucuz (fiyat ≤ $0,07 · MA50 ≥ %3,72) | **açık** | **REDDEDİLDİ** ama kullanıcı kararıyla açık (08-12) |
-| A+B sabit %10 hedef | açık | kısmi kâr %40 payla, trailing kapalı |
+| Sabit %10 hedef — **A+B *ve* MA50+ucuz** | açık | [testbot.py:1181](testbot.py#L1181) `SABIT_HEDEF_KAPILARI = ("A+B","MA50+ucuz")`. Kısmi kâr %40 payla, trailing kapalı. ⚠️ MA50'ye genişletmenin dayanağı **çürütüldü** — aşağıda madde 3 |
 | 1,5R kısmi ezmesi | **açık** | ⚠️ ölçüm "kaldır" dedi, **kullanıcı KALSIN dedi** (08-12) — aşağıda |
 | NÖTR LONG | açık | **ölçüm bunu desteklemiyor** — kaynak `fikir-defteri.md` s.1177: *"Ölçüm bunu desteklemiyor — kayda geçer."* 30 LONG hücresinin hiçbiri pozitif değil (s.1101) |
 | Gölge LONG pump | açık | gölgede test, pencere dolmadı |
@@ -71,7 +81,8 @@ Bildirim: yalnız **giriş** olayı Telegram'a gider (`bildirim.olaylar = ["giri
 > *"kayda geçiyor ki pencere dolduğunda 'gözden kaçmış' sanılmasın"* diye yazılı.
 > Gerekçe: o test bir **yeniden üretim** — medyan stop %1,3, canlıda %3,4. Ölçüm
 > "kural geniş uygulanınca negatif" diyor, "canlı kapı negatif" demiyor.
-> **Hakem canlı pencere:** hedef 138 işlem · 12 Ağustos'tan beri **84 pozisyon kapandı**.
+> **Hakem canlı ölçüm penceresi** — tanım, üç aday taban ve sayım komutu aşağıdaki
+> *"Üç karar tek hakeme bağlı"* bölümünde. Buraya sayı yazılmaz.
 
 **1. A+B kapısı — nihai karar açık.** İki yıllık **fonlamalı** ölçüm "kapat" diyor
 (kontrol sinyali geçti). Fonlamasız 2 yıllık ölçüm ise "kanıtlanamadı ama çürütülmedi"
@@ -185,10 +196,22 @@ for b in ('2026-08-11 12:45','2026-08-11 18:42','2026-08-12 01:17')]"
 > Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — 08-11 18:44'te, iki aday
 > başlangıcın (18:42 / 01:17) ikisinden de önce ya da onlarla eşzamanlı girdiler.
 
-**Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
-birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
-doğrulanmış olur. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
-üç yüzü.
+**Sonuç: tek bir çıktı BEŞ işi birden çözer** — üç ayar kararı (MA50+ucuz · sabit %10
+hedef · kısmen 1,5R) + A+B stop mesafesi yeniden ölçümü + sabit hedefin MA50'ye
+genişletilmesi. Pencere eksi kapanırsa savunmalar birden düşer; artı kapanırsa popülasyon
+itirazı doğrulanır. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
+beş yüzü.
+
+**Aynı pencereye bağlı BEŞİNCİ iş — dayanağı çürütülmüş bir genişletme:**
+**Sabit %10 hedefin `MA50+ucuz`'a genişletilmesi.** 08-10 kararı *"A+B'ye özel, diğer
+dallar mevcut kısmi+trailing ile kalır"* idi (s.1249). 08-11'de MA50+ucuz da kapsama
+alındı ve gerekçe koda yazıldı ([testbot.py:1179](testbot.py#L1179)):
+*"ölçümü de %10 hedefle yapıldı (net **+0,84%**, A +0,99 / B +0,72)."*
+
+**O +0,84%, ertesi gün 2 yıllık veride −0,079 · t=−4,05 ile çürütülen ölçümün ta
+kendisi** (s.2790). Yani genişletmenin dayanağı çürük ve **bunu şimdiye kadar kimse
+bağlamamış.** Pencere sonrası A+B kararıyla **birlikte** gözden geçirilmeli — ayrı
+tartışılırsa aynı çürütülmüş ölçüme iki kez dayanılır.
 
 **Aynı pencereye bağlı DÖRDÜNCÜ iş — ve defterde "ilk iş" diye yazılı:**
 **A+B'nin stop mesafesi yeniden ölçülecek.** Ölü sinyal taraması A+B'nin ham
