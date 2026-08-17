@@ -92,6 +92,11 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   Pencere üç kez ön-kayıtlandı ve defter kendi içinde tutarsız. **Sayı üretmeden önce
   `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu
   ve çelişkinin kaynağı orada. Buraya tarih ya da rakam yazma.
+- **`radar_archive.jsonl` NOKTASAL veridir — kayıp kareler geri gelmez.** Bu arşivle
+  ölçüm yaparken `radar_bosluk.jsonl` de okunur (2026-08-17'den beri işaretleniyor);
+  yoksa eksik pencerede çalışıldığı fark edilmez. Oranlar `olcumler.md`'de.
+  **Arşive yeni tip kayıt KARIŞTIRILMAZ** — 6 çözümleyici okuyor, karıştırılırsa
+  onunla yapılmış tüm eski ölçümler geriye dönük geçersizleşir (`testbot.py:267`).
 - **Fonlama pozisyona 2026-08-17'den İTİBAREN atfediliyor.** O tarihten önce açılmış
   pozisyonların fonlaması **geri üretilemez**. Bu olgunun sahibi burasıdır; başka
   dosya kopyalamaz, işaret eder.

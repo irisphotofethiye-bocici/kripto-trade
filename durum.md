@@ -308,7 +308,11 @@ kararı · MA50 fonlama yükü · gölge atomik kayıt.
 - **Bot stop/TP'yi doğru yakalıyor** — geçmiş mumları geri oynatıp stop fiyatından
   kapatıyor
 - **Radar kareleri geri GELMİYOR** — noktasal veri (score, funding, oi, comp).
-  Kabaca %7–14 kare kaybı
+  Kayıp **önlenemez**, ama 2026-08-17'den beri **işaretleniyor**: radar her turda
+  önceki arşiv damgasıyla arasındaki boşluğu ölçüyor, eşiği (2× tur = 30 dk) aşarsa
+  `radar_bosluk.jsonl`'e kayıt düşüyor. Ayrı dosya — arşive karıştırılırsa onunla
+  yapılmış tüm eski ölçümler geçersizleşirdi (`testbot.py:267` ilkesi).
+  **Ölçülmüş kayıp oranları ve dönem kırılımı → `olcumler.md`.**
 
 `kesilen_tur` — bitmeden öldürülen tur sayacı; `testbot_state.json`'da yaşıyor, **artar**
 (17 Ağustos öğlen: 9). Tur süresi 08-14'ten beri equity satırında ölçülüyor

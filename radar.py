@@ -249,6 +249,70 @@ def erken_kusak_tara(cryptos, tickers, haric=None, btc_chg3=0.0):
     return out
 
 
+# --- RADAR KARE KAYBI (2026-08-17) ---------------------------------------------------
+# [SORUN] Radar 15 dakikada bir NOKTASAL goruntu aliyor (score, funding, oi, comp).
+#   Makine uyur / internet giderse o kareler GERI GELMEZ — mum verisinin aksine geriye
+#   donuk cekilemez. OLCULDU (13 Agu -> 17 Agu, radar_archive tur damgalarindan):
+#   toplam 9,3 saat akmadi, 448/476 tur = %5,9 kayip; en uzun kesintiler 14 Agu 179 dk
+#   ve 15 Agu 126 dk. Kayip ONLENEMEZ ama NEREDE oldugu bilinebilir; bugune kadar
+#   bilinmiyordu ve radar_archive ile yapilan her olcum sessizce eksik pencereyle
+#   calisiyordu. Donem kirilimi ve yontem: olcumler.md.
+# [ESIK NEDEN 2x] Olculdu: 3.501 turun medyani 15,0 dk, mod 15 (2.359 tur). Esik >30 dk
+#   86 olay veriyor; >15 dk 592 verirdi — yani tek tur gecikmesini kesinti sayardi.
+# [TASARIM] Bosluk kaydi AYRI DOSYAYA yazilir. Gerekce testbot.py'de zaten yazili:
+#   "radar_archive'a karistirilirsa o dosyanin anlami bozulur ve onunla yapilmis TUM eski
+#   olcumler geriye donuk gecersizlesir." Arsivi 6 ayri cozumleyici okuyor.
+# [DAVRANISA ETKI] YOK — okuma + ayri dosyaya ekleme. Aday secimine, skora, kapiya
+#   dokunmuyor. Yazma hatasi turu durdurmaz (try/except).
+# [DIKKAT] HERE main() icinde YEREL olarak tanimli (satir ~316). Modul duzeyindeki bu
+#   fonksiyonlar onu goremezdi; try/except yuzunden hata da vermez, SESSIZCE hic
+#   calismazdi. Modul duzeyinde ayni deger tanimlanir — main'deki yerel ayni degeri
+#   atadigi icin oradaki davranis DEGISMEZ.
+HERE = os.path.dirname(os.path.abspath(__file__))
+BOSLUK_DOSYA = "radar_bosluk.jsonl"
+BEKLENEN_TUR_DK = 15.0          # KriptoRadar zamanlayici sikligi
+BOSLUK_ESIK_KAT = 2.0           # bu katin ustu = gercek kesinti (tek tur gecikmesi degil)
+
+
+def _son_arsiv_ts(yol):
+    """radar_archive.jsonl'in SON kaydindaki ts. Dosya ~68 MB -> sondan seek edilir,
+    tamami okunmaz. Basarisizlikta None (bosluk hesabi atlanir, tur etkilenmez)."""
+    try:
+        with open(yol, "rb") as fh:
+            fh.seek(0, 2)
+            boyut = fh.tell()
+            if not boyut:
+                return None
+            oku = min(8192, boyut)
+            fh.seek(boyut - oku)
+            satirlar = fh.read(oku).decode("utf-8", "ignore").strip().split("\n")
+        return json.loads(satirlar[-1]).get("ts")
+    except Exception:
+        return None
+
+
+def _bosluk_yaz(onceki_ts, simdi_ts):
+    """Onceki arsiv damgasi ile bu tur arasindaki bosluk esigi asiyorsa kayit dusur."""
+    if not onceki_ts:
+        return
+    try:
+        f = "%Y-%m-%d %H:%M"
+        onceki = datetime.datetime.strptime(onceki_ts[:16], f)
+        simdi = datetime.datetime.strptime(simdi_ts[:16], f)
+        dk = (simdi - onceki).total_seconds() / 60.0
+        if dk <= BEKLENEN_TUR_DK * BOSLUK_ESIK_KAT:
+            return
+        kayit = {"ts": simdi_ts, "onceki_ts": onceki_ts, "bosluk_dk": round(dk, 1),
+                 "beklenen_tur_dk": BEKLENEN_TUR_DK,
+                 "kayip_tur_tahmini": max(0, int(round(dk / BEKLENEN_TUR_DK)) - 1)}
+        with open(os.path.join(HERE, BOSLUK_DOSYA), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(kayit, ensure_ascii=False) + "\n")
+        print(f"[{simdi_ts}] RADAR BOSLUGU: {round(dk)} dk "
+              f"(~{kayit['kayip_tur_tahmini']} tur kayip) -> {BOSLUK_DOSYA}")
+    except Exception:
+        pass
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=35, help="aday sayisi (asama-2)")
@@ -301,8 +365,11 @@ def main():
     # --- KALICI ARSIV (append-only): her tarama turunda TUM adaylar + sekil etiketleri + timestamp.
     # context'e yuklenmez; sadece diske. Hangi seklin gercekten kazandigini sonradan analiz icin veri seti.
     ts0 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    arsiv_yolu = os.path.join(HERE, "radar_archive.jsonl")
+    # [2026-08-17] BOSLUK TESPITI — yeni kayitlari yazmadan ONCE onceki turun damgasini al.
+    onceki_arsiv_ts = _son_arsiv_ts(arsiv_yolu)
     try:
-        with open(os.path.join(HERE, "radar_archive.jsonl"), "a", encoding="utf-8") as af:
+        with open(arsiv_yolu, "a", encoding="utf-8") as af:
             for r in rows:
                 rec = {"ts": ts0, "btc_chg3": btc_chg3, "btc_chg24": btc_chg24,
                        "sym": r["sym"], "price": r.get("price"), "score": r["score"], "stage": r["stage"],
@@ -331,6 +398,8 @@ def main():
                 af.write(json.dumps(rec, ensure_ascii=False) + "\n")
     except Exception:
         pass
+
+    _bosluk_yaz(onceki_arsiv_ts, ts0)
 
     # --- WATCH modu: onceki tarama ile kiyasla, YENI sinyalleri logla (zamanlayici icin) ---
     if a.watch:
