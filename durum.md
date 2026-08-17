@@ -119,36 +119,44 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 
 **Hakem de aynı: canlı ölçüm penceresi.**
 
-> 🔴 **PENCERE ÜÇ KEZ ÖN-KAYITLANDI. Geçerli olan ÜÇÜNCÜSÜ.** Defter kronolojik
-> olduğu için sonraki öncekini geçersiz kılar. İlk ikisini alıntılamak yaygın bir
-> hata — ikisi de yapıldı, ikisi de yanlış sayı verdi.
+> 🔴 **PENCERE BAŞLANGICI ÇÖZÜLMÜŞ DEĞİL — KULLANICI KARARI GEREKİYOR.**
+> Üç ayrı "pencere sıfırlandı" ilanı var ve **defter kendi içinde tutarsız.**
+> Bu, üç bekleyen kararın hakemi olduğu için önemli; hüküm yazılmadan netleşmeli.
 >
-> | # | başlangıç | sebep | kayıt | pozisyon |
+> | # | başlangıç | sebep | defter | bugün pozisyon |
 > |---|---|---|---|---|
-> | 1 | 2026-08-11 12:45 (s.1807) | S9 yürürlüğe girdi | 138 | 88 |
-> | 2 | 2026-08-11 18:42 (s.2510) | denetim düzeltmeleri | 137 | 87 |
-> | **3** | **2026-08-12 ~01:17 (s.2582)** | **cadence 10 dk → 7,5 dk** | 131 | **84** |
+> | 1 | 2026-08-11 12:45 | S9 yürürlüğe girdi | s.1807 | 88 |
+> | 2 | **2026-08-11 18:42** | denetim düzeltmeleri | s.2510 | **87** |
+> | 3 | 2026-08-12 ~01:17 | cadence 10 dk → 7,5 dk | s.2582 | 84 |
 >
-> Üçüncüsünün gerekçesi: *"cadence botun gördüğü fırsat sayısını değiştirir."*
-> `zirve` 8698,11 → 8381,06'ya çekildi; equity ve işlem geçmişi dokunulmadı.
+> **Çelişki:** En son *ilan edilen* sıfırlama 3 numara (cadence). **Ama projenin
+> kendi sonraki muhasebesi 2 numarayı kullanmış:** 2026-08-12 22:56'daki kasa
+> sıfırlaması notu pencereyi **"12/138"** diye yazıyor ve **12 yalnızca 18:42
+> tabanıyla çıkıyor** (01:17'den 9, 12:45'ten 13). Yani cadence için
+> *"PENCERE SIFIRLANDI"* yazılmış ama sayaç fiilen **yeniden tabanlanmamış.**
+>
+> **Fark 3 pozisyon** (87 vs 84) — hükmü tek başına çevirmez ama ön-kayıt
+> disiplini gereği başlangıç keyfî seçilemez. **Karar kullanıcının.**
+> Bu not yazılana kadar üç kez üç farklı sayı verildi; sebebi hep aynıydı:
+> hangi ön-kaydın geçerli olduğuna bakmadan sayı üretmek.
 
 | | |
 |---|---|
-| **Başlangıç** | **2026-08-12 ~01:17** (commit `0b3f3e3`, cadence sıfırlaması) |
-| Bitiş ölçütü | **138 kapanmış POZİSYON VEYA 30 gün** — hangisi önce (30 gün: 2026-09-11) |
+| Bitiş ölçütü | **138 kapanmış POZİSYON VEYA 30 gün** — hangisi önce |
 | GEÇTİ | toplam net > 0 **ve** ikinci yarı > 0 |
 | KALDI | toplam net < 0 **ya da** fren tetiklendi |
 | BELİRSİZ | toplam > 0 ama ikinci yarı < 0 → uzat |
 | Pencere kuralı | **parametre değişmez, kapı eklenmez, eşik oynatılmaz** |
 
+Üç tabanı birlikte sayan komut — **başlangıç netleşene kadar üçü birlikte okunur:**
+
 ```bash
 python -c "import json,datetime; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
-p=[x for x in k if x['ts']>='2026-08-12 01:17' and not x.get('kismi')]; \
-g=(datetime.datetime.now()-datetime.datetime(2026,8,12,1,17)).total_seconds()/86400; \
-print(len(p),'/138 POZISYON · %.1f/30 gun'%g)"
+[print(b,'->',len([x for x in k if x['ts']>=b and not x.get('kismi')]),'/138 pozisyon') \
+for b in ('2026-08-11 12:45','2026-08-11 18:42','2026-08-12 01:17')]"
 ```
 
-*(2026-08-17 öğlen anlık görüntüsü: 84/138 pozisyon, 5,5/30 gün.)*
+*(2026-08-17 öğlen: 88 / 87 / 84 — hangi taban seçilirse.)*
 
 > ⚠️ **İKİ KATLI SAYIM TUZAĞI — pencereyi vaktinden önce dolmuş ilan ettirir.**
 > 1. **Yanlış başlangıç:** 12:45'ten sayarsan kayıt sayısı **tam 138** çıkıyor.
@@ -158,16 +166,24 @@ print(len(p),'/138 POZISYON · %.1f/30 gun'%g)"
 > İkisi birleşince *"pencere bugün doldu"* denir. **Doğru sayı 84.** `--kismi`
 > satırları her zaman düşülür (`CLAUDE.md` → pozisyon başına sayım kuralı).
 
-> ⚠️ **Pencere kuralı bir kez İHLAL EDİLDİ ve hüküm yazılırken bu deftere geçmeli.**
-> Ön-kayıt *"hiçbir parametreye dokunulmaz"* diyor. **2026-08-12 23:02'de** kasa
-> sıfırlamasıyla equity'ye **+1.005,94 $** eklendi — ve boyutlandırma efektif
-> equity'yle ölçekleniyor ([testbot.py:1120](testbot.py#L1120)), yani pencerenin
-> ikinci yarısındaki **pozisyon boyutları büyüdü.** Bu, "tek yapılandırma" koşulunu
-> bozuyor. Pencere sıfırlanmadı (kullanıcı kararı), ama hüküm bu kesintiyi
-> **açıkça anmalı.**
+> ⚠️ **Pencerenin ortasında kasa büyüdü — iki tarafı da yazıyorum, karar kullanıcının.**
 >
-> Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — onlar 08-11 18:44'te, yani
-> geçerli pencere başlamadan **önce** girdi. Bu iki şey karıştırılmasın.
+> **2026-08-12 22:56'da** kasa sıfırlamasıyla equity'ye **+1.005,94 $** eklendi.
+> Boyutlandırma efektif equity'yle ölçekleniyor ([testbot.py:1120](testbot.py#L1120)),
+> yani **pencerenin ikinci yarısında yeni girişlerin boyutu büyüdü.**
+>
+> **Kararın kendi savunması** (`_kasa_sifirlama` kaydında yazılı): *"Ölçüm penceresi
+> SIFIRLANMADI: getiri R ve yüzde ile ölçülüyor, hesap büyüklüğünden bağımsızdır.
+> Açık 5 pozisyonun teminatı eski tabana göre hesaplanmıştı; onlar aynen devam eder,
+> yalnız YENİ girişler büyür."* Bu savunma geçerli — R ve yüzde ölçek-bağımsızdır.
+>
+> **Kalan çekince:** dolar cinsinden toplam ve yarı-yarı kıyaslar ölçek-bağımsız
+> **değil**; ikinci yarı daha büyük pozisyonlarla çalıştı. Ön-kayıtlı ölçüt
+> *"ikinci yarı > 0"* diyor ve o kıyas dolar üzerinden yapılırsa etkilenir.
+> **Hüküm yazılırken yarılar R ya da yüzde ile kıyaslanmalı**, dolarla değil.
+>
+> Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — 08-11 18:44'te, iki aday
+> başlangıcın (18:42 / 01:17) ikisinden de önce ya da onlarla eşzamanlı girdiler.
 
 **Sonuç: tek bir çıktı üç kararı birden çözer.** Pencere eksi kapanırsa üç savunma
 birden düşer ve üç ayar birlikte gözden geçirilir. Artı kapanırsa popülasyon itirazı
