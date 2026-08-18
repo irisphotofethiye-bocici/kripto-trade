@@ -263,7 +263,16 @@ işlem defterinde karşılıkları yok. Yırtık bir yazım artık sadece equity
 aynı dilim iki kez yazılır, ileri kalırsa dilim kaybolur. Fonlama ölçümü gölge
 defteri kapsayacaksa bu onarım **önce** yapılmalı.
 
-**5. Git geçmişi temizliği** — ilk push'tan önce zorunlu (geçmişte ~920 MB veri).
+**5. `ayna` dört defterin git'te izlenen TEK'i — muhtemelen gözden kaçmış.**
+`ayna_state.json` · `ayna_islemler.jsonl` · `ayna_equity.jsonl` izleniyor;
+`testbot_*` ve diğerleri `.gitignore`'da. **Şimdi karar verilmedi.** Diğerleri gibi
+yok sayılacaksa `git rm --cached` gerekir **ve geçmişteki anlık görüntüler yine
+kalır** → ilk push öncesi git geçmişi temizliğiyle (madde 6) **birlikte**
+düşünülmeli. Not: izlenmesinin bir faydası çıktı — 2026-08-18'deki elle defter
+düzeltmesinin tek kalıcı denetim izi git geçmişi oldu (yedek dosyaları
+`*.jsonl.yedek-*` deseniyle gitignore'da).
+
+**6. Git geçmişi temizliği** — ilk push'tan önce zorunlu (geçmişte ~920 MB veri).
 Depo bugüne kadar hiç push edilmedi.
 
 ## Zamana bağlı — ~27 Ağustos
