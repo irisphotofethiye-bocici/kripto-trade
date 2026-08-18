@@ -81,7 +81,7 @@ Bildirim: yalnız **giriş** olayı Telegram'a gider (`bildirim.olaylar = ["giri
 > *"kayda geçiyor ki pencere dolduğunda 'gözden kaçmış' sanılmasın"* diye yazılı.
 > Gerekçe: o test bir **yeniden üretim** — medyan stop %1,3, canlıda %3,4. Ölçüm
 > "kural geniş uygulanınca negatif" diyor, "canlı kapı negatif" demiyor.
-> **Hakem canlı ölçüm penceresi** — tanım, üç aday taban ve sayım komutu aşağıdaki
+> **Hakem canlı ölçüm penceresi** — tanım, taban (ÇÖZÜLDÜ 2026-08-18) ve sayım komutu aşağıdaki
 > *"Üç karar tek hakeme bağlı"* bölümünde. Buraya sayı yazılmaz.
 
 **1. A+B kapısı — nihai karar açık.** İki yıllık **fonlamalı** ölçüm "kapat" diyor
@@ -123,7 +123,7 @@ flowchart TD
     S["ORTAK SAVUNMA<br/>o ölçüm bir YENİDEN ÜRETİM<br/>medyan stop %1,3 · canlıda %3,4<br/>ikisi AYNI koşturmadan geliyor"]
     D["4 · 1,5R kısmi ezmesi<br/>ölçüm 'kaldır' dedi<br/>kullanıcı 'kalsın' dedi"]
     E["5 · A+B stop mesafesi<br/>A-stop kenarın %65'ini yiyor<br/>defterde: 'pencere sonrası İLK İŞ'"]
-    W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç ÇÖZÜLMEDİ — üç aday"}}
+    W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç 2026-08-12 01:17<br/>ÇÖZÜLDÜ 2026-08-18"}}
     P["popülasyon itirazı DOĞRULANIR<br/>1 · 2 · 3 ayakta kalır<br/>5 yine ölçülür"]
     M["üç savunma BİRDEN düşer<br/>1 · 2 · 3 birlikte gözden geçirilir<br/>4 zaten tercihe dayanıyordu"]
     A --> S
@@ -159,26 +159,42 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 
 **Hakem de aynı: canlı ölçüm penceresi.**
 
-> 🔴 **PENCERE BAŞLANGICI ÇÖZÜLMÜŞ DEĞİL — KULLANICI KARARI GEREKİYOR.**
-> Üç ayrı "pencere sıfırlandı" ilanı var ve **defter kendi içinde tutarsız.**
-> Bu, üç bekleyen kararın hakemi olduğu için önemli; hüküm yazılmadan netleşmeli.
+> ✅ **PENCERE BAŞLANGICI ÇÖZÜLDÜ [ÇÖZÜLDÜ 2026-08-18] — İKİ AYRI TABAN vardı,
+> karıştırılmışlardı.** Defter tutarsız değildi; iki farklı soruya iki doğru cevap
+> veriyordu ve ikisi tek soru sanılmıştı.
 >
-> | # | başlangıç | sebep | defter | bugün pozisyon |
-> |---|---|---|---|---|
-> | 1 | 2026-08-11 12:45 | S9 yürürlüğe girdi | s.1807 | 88 |
-> | 2 | **2026-08-11 18:42** | denetim düzeltmeleri | s.2510 | **87** |
-> | 3 | 2026-08-12 ~01:17 | cadence 10 dk → 7,5 dk | s.2582 | 84 |
+> | soru | taban | dayanağı |
+> |---|---|---|
+> | **Bot ne zaman başladı?** (muhasebe tabanı) | **2026-08-11 12:48** | Kullanıcının kendi kararı, `testbot_state.json` → `_kasa_sifirlama`: *"Eski bot (23 Tem – 11 Ağu 12:48)"*. Git: `34524ad` S9 12:46:24. Sayım: o tabandan **tam 12 pozisyon** hem açıldı hem kapandı = notun *"botun KENDİ 12 işlemi"* ifadesi |
+> | **Hakem penceresi ne zaman başlıyor?** (parametre-kararlılık tabanı) | **2026-08-12 01:17** | Pencere kuralı *"parametre değişmez"* diyor. 12:48'den sonra **iki gerçek davranış değişikliği** var: `b5123b6` kısmi kâr (08-11 22:38) ve `0b3f3e3` cadence 10→7,5 dk (08-12 01:17). Son değişiklikten önce başlayan bir pencere kendi kuralını ihlal eder |
 >
-> **Çelişki:** En son *ilan edilen* sıfırlama 3 numara (cadence). **Ama projenin
-> kendi sonraki muhasebesi 2 numarayı kullanmış:** 2026-08-12 22:56'daki kasa
-> sıfırlaması notu pencereyi **"12/138"** diye yazıyor ve **12 yalnızca 18:42
-> tabanıyla çıkıyor** (01:17'den 9, 12:45'ten 13). Yani cadence için
-> *"PENCERE SIFIRLANDI"* yazılmış ama sayaç fiilen **yeniden tabanlanmamış.**
+> **Eski üç aday (D/9 gereği silinmez):**
 >
-> **Fark 3 pozisyon** (87 vs 84) — hükmü tek başına çevirmez ama ön-kayıt
-> disiplini gereği başlangıç keyfî seçilemez. **Karar kullanıcının.**
-> Bu not yazılana kadar üç kez üç farklı sayı verildi; sebebi hep aynıydı:
-> hangi ön-kaydın geçerli olduğuna bakmadan sayı üretmek.
+> | # | başlangıç | sebep | defter |
+> |---|---|---|---|
+> | 1 | 2026-08-11 12:45 | S9 yürürlüğe girdi | s.1807 |
+> | 2 | 2026-08-11 18:42 | denetim düzeltmeleri | s.2510 |
+> | 3 | **2026-08-12 ~01:17** | cadence 10 dk → 7,5 dk | s.2582 |
+>
+> **Kaydedilen "çelişki" neydi:** *"'12/138' yalnız 18:42 tabanıyla çıkıyor"* denmişti.
+> **Yanlıştı** — o sayım yalnız *kapanan* işlemleri sayıyordu. Notun ifadesi *"botun
+> **KENDİ** işlemi"*, yani **yeni botun kendi açtığı**. Doğru sayımla:
+>
+> | taban | pencerede kapanan | **açılıp kapanan** |
+> |---|---|---|
+> | 11 Ağu 12:45/12:48 | 13 | **12** ✅ |
+> | 11 Ağu 18:42 | 12 | 9 |
+> | 12 Ağu 01:17 | 9 | 5 |
+>
+> 18:42'nin "12"si **eski yapılandırmanın açtığı** pozisyonların kapanışlarını içerir —
+> onlar tanımı gereği "botun kendi işlemi" değildir.
+>
+> **2 numaralı aday (18:42) düşer:** ne muhasebe tabanı (o 12:48), ne parametre-kararlılık
+> tabanı (o 01:17). Denetim düzeltmeleri **bug onarımıydı** (D/8: tasarlanmış davranışı
+> geri getiriyor), yeni bir pencere gerektirmiyordu.
+>
+> **Hüküm yazılırken kullanılacak taban: 2026-08-12 01:17.** Muhasebe tabanı (12:48)
+> kasanın hangi bota ait olduğunu söyler, hakem penceresini değil.
 
 | | |
 |---|---|
@@ -188,23 +204,24 @@ Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
 | BELİRSİZ | toplam > 0 ama ikinci yarı < 0 → uzat |
 | Pencere kuralı | **parametre değişmez, kapı eklenmez, eşik oynatılmaz** |
 
-Üç tabanı birlikte sayan komut — **başlangıç netleşene kadar üçü birlikte okunur:**
+Sayım komutu — **taban 2026-08-12 01:17** (hakem penceresi):
 
 ```bash
-python -c "import json,datetime; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; \
-[print(b,'->',len([x for x in k if x['ts']>=b and not x.get('kismi')]),'/138 pozisyon') \
-for b in ('2026-08-11 12:45','2026-08-11 18:42','2026-08-12 01:17')]"
+python -c "import json; k=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; ids={}; [ids.setdefault(x['id'],[]).append(x) for x in k]; print(len([i for i,v in ids.items() if any(not y.get('kismi') and y['ts']>='2026-08-12 01:17' for y in v)]),'/138 pozisyon')"
 ```
 
-*(2026-08-17 öğlen: 88 / 87 / 84 — hangi taban seçilirse.)*
+Rakam buraya **yazılmaz** — komut koşturulur. Muhasebe tabanını (2026-08-11 12:48)
+merak eden aynı komutta tarihi değiştirir; ikisi **farklı soruların** cevabıdır.
 
 > ⚠️ **İKİ KATLI SAYIM TUZAĞI — pencereyi vaktinden önce dolmuş ilan ettirir.**
-> 1. **Yanlış başlangıç:** 12:45'ten sayarsan kayıt sayısı **tam 138** çıkıyor.
-> 2. **Kayıt ≠ pozisyon:** o 138 kaydın **50'si `TP1_KISMI`** — kısmi kâr satırları
->    pozisyonu bölüyor.
+> 1. **Yanlış taban:** muhasebe tabanından (12:48) sayarsan hakem penceresinden
+>    **fazla** çıkar — hakem tabanı 01:17.
+> 2. **Kayıt ≠ pozisyon:** kayıtların yaklaşık üçte biri `TP1_KISMI` — kısmi kâr
+>    satırları pozisyonu bölüyor.
 >
-> İkisi birleşince *"pencere bugün doldu"* denir. **Doğru sayı 84.** `--kismi`
-> satırları her zaman düşülür (`CLAUDE.md` → pozisyon başına sayım kuralı).
+> İkisi birleşince *"pencere bugün doldu"* denir. `kismi` satırları **sayarken** her
+> zaman düşülür, **toplarken düşülmez** (`CLAUDE.md` → süzgeç kuralı). Güncel sayı
+> yukarıdaki komutla okunur, buraya yazılmaz.
 
 > ⚠️ **Pencerenin ortasında kasa büyüdü — iki tarafı da yazıyorum, karar kullanıcının.**
 >
@@ -222,8 +239,10 @@ for b in ('2026-08-11 12:45','2026-08-11 18:42','2026-08-12 01:17')]"
 > *"ikinci yarı > 0"* diyor ve o kıyas dolar üzerinden yapılırsa etkilenir.
 > **Hüküm yazılırken yarılar R ya da yüzde ile kıyaslanmalı**, dolarla değil.
 >
-> Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — 08-11 18:44'te, iki aday
-> başlangıcın (18:42 / 01:17) ikisinden de önce ya da onlarla eşzamanlı girdiler.
+> Buna karşılık **denetim düzeltmeleri ihlal DEĞİL** — 08-11 18:44'te, hakem
+> tabanından (2026-08-12 01:17) **önce** girdiler. Aynı şekilde kısmi kâr (08-11 22:38)
+> ve cadence (08-12 01:17) de tabandan önce ya da onunla eşzamanlı; pencere zaten
+> **son davranış değişikliğinden** başlatıldığı için içeride parametre değişimi yok.
 
 **Sonuç: tek bir çıktı BEŞ işi birden çözer** — üç ayar kararı (MA50+ucuz · sabit %10
 hedef · kısmen 1,5R) + A+B stop mesafesi yeniden ölçümü + sabit hedefin MA50'ye

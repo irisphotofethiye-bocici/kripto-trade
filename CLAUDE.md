@@ -77,9 +77,9 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   yanlış sonuç verir; bu hata **iki kez** yapıldı (fren hatası + ayna kıyası).
 - **Kazanma oranı POZİSYON başına sayılır, kayıt başına değil.** Kısmi kâr kayıtları
   pozisyonu böler. **Somut tuzak:** ölçüm penceresinde kayıt sayısı pozisyon sayısından
-  belirgin fazladır — üç aday tabanın üçünde de fark **45–50 kayıt** civarında, çünkü
-  `TP1_KISMI` satırları pozisyonu ikiye bölüyor. Kayıt sayan biri pencereyi **vaktinden
-  önce dolmuş** ilan eder. Güncel sayım komutu `durum.md`'de.
+  belirgin fazladır — fark **45–50 kayıt** mertebesinde, çünkü `TP1_KISMI` satırları
+  pozisyonu ikiye bölüyor. Kayıt sayan biri pencereyi **vaktinden önce dolmuş** ilan
+  eder. Güncel sayım komutu `durum.md`'de.
 - 🔴 **SÜZGEÇ SAYMAK İÇİNDİR, TOPLAMAK İÇİN DEĞİL.** Pozisyon *sayarken*
   `not x.get("kismi")` uygulanır. **P&L *toplarken* UYGULANMAZ** — kayıtlar `id` ile
   birleştirilir, yoksa TP1'de **realize edilmiş kâr kaybolur.** Ölçüldü
@@ -95,10 +95,14 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   Doğru yöntemde sapma **kuruş** mertebesinde çıkıyor (`golge` −0,07 · `testbot` −0,04).
   Süzgeçli yöntemde **binlerce dolar** sapıyor. Bir P&L toplamı yazmadan önce bu
   denklem koşturulur.
-- **Ölçüm penceresinin başlangıcı ÇÖZÜLMEDİ — üç aday var, karar kullanıcının.**
-  Pencere üç kez ön-kayıtlandı ve defter kendi içinde tutarsız. **Sayı üretmeden önce
-  `durum.md`'nin pencere bölümünü oku** — tarih, üç tabanı birlikte veren sayım komutu
-  ve çelişkinin kaynağı orada. Buraya tarih ya da rakam yazma.
+- **İKİ AYRI TABAN VAR; karıştırmak üç kez yanlış sayı ürettirdi.** *Muhasebe tabanı*
+  (kasa hangi bota ait) ile *hakem penceresi tabanı* (parametrelerin sabit kaldığı an)
+  farklı sorulardır. Defter tutarsız değildi — iki doğru cevabı tek soru sanmıştı.
+  **Sayı üretmeden önce `durum.md`'nin pencere bölümünü oku**; tarihler, sayım komutu
+  ve hangi tabanın hangi soruya ait olduğu orada. Buraya tarih ya da rakam yazma.
+  ⚠️ Sayarken **"kapanan" değil "açılıp kapanan"** ayrımına dikkat: bir taban
+  seçilirken *"botun KENDİ işlemi"* denmişse bu **girişi de o pencerede olan**
+  pozisyon demektir. Bu ayrımı atlamak kaydedilmiş bir çelişki üretti.
 - **`radar_archive.jsonl` NOKTASAL veridir — kayıp kareler geri gelmez.** Bu arşivle
   ölçüm yaparken `radar_bosluk.jsonl` de okunur (2026-08-17'den beri işaretleniyor);
   yoksa eksik pencerede çalışıldığı fark edilmez. Oranlar `olcumler.md`'de.
