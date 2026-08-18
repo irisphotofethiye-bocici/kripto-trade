@@ -450,6 +450,64 @@ Geçmezse geri alınır ve gerekçe buraya yazılır.
 kullanılıyor → pencereyi beklemez. (Havuzu kısmak *hangi sembollerin* taranacağını
 değiştirir, o bekler.)
 
+### 🟢 SONUÇ — GEÇTİ (2026-08-18, 20/20 tur)
+
+| ölçüt | sonuç |
+|---|---|
+| 1. medyan `sure_sn` ≤ **223,6** | **184,4** — taban 322,9'a göre **−%42,9** ✅ |
+| 2. `verisiz_poz` / `kesilen_tur` artmamalı | 0 · **9 = 9** (değişmedi) ✅ |
+| 3. 418/429 birebir korundu | test 21/21 ✅ |
+| 4. dört üretim çağıranı | test ✅ (panel **üretimde** koşmuyor — süreç eski, `durum.md`) |
+| 5. eşzamanlı iş parçacığı | 80 çağrı, hata yok ✅ |
+
+Dağılım: ort 188,9 · min 151,7 · maks 252,0 · `sure_giris` medyan 179,6 ·
+`taranan_sembol` 145–146 (17/20 turda alan var) · `sure_giris/sembol` **1,249 sn**.
+
+#### Kanıt: 12 saatlik payda-normalize seri
+
+`sure_giris / taranan_sembol` — havuz boyutundan arınmış tek metrik:
+
+| | değer |
+|---|---|
+| gözlenen (100 tur, 12 saat) | **medyan 1,117** sn/sembol · %90'ı 1,03–1,29 |
+| **tahmin — keep-alive** (3 × 0,333 + 0,10) | **1,10** ✅ |
+| tahmin — eski kod (3 × 0,620 + 0,10) | 1,96 |
+
+Seri 12 saat boyunca keep-alive tahmininde **düz**. Ağ gerçekten hızlansaydı
+keep-alive turlarının da hızlanması gerekirdi — kalmadı.
+
+#### ⚠️ Ön-kayıtlı tablonun BOŞLUĞU + 02:17 sondası GEÇERSİZ
+
+Üç sonuçlu tablo *"geçer + A kolu **düştü**"* halini saymamıştı ve 02:17 sondası
+tam onu gösterdi (A 0,781 → 0,360, oran 1,08×). **Ama o sonda geçersiz, ağ
+iyileşmesi değil:**
+
+| sonda | A | B | oran |
+|---|---|---|---|
+| 00:13 | 0,781 | 0,333 | 2,35× |
+| **02:17** | **0,360** | 0,333 | **1,08×** ← geçersiz |
+| 12:26 (12 saat sonra) | **0,615** | 0,316 | **1,95×** |
+
+**Neden geçersiz — yapısal ilişki bozuldu.** `A ≈ 2×B` beklenir (A = el sıkışma
+2 RTT + istek 1 RTT). Ağ yavaşlasa/hızlansa **ikisi de orantılı** değişir ve oran
+korunur. 02:17'de **B hiç değişmedi** (0,3331 → 0,3330), yalnız A yarılandı — bu,
+o örneklemde el sıkışmanın bedavaya geldiği anlamına gelir, ağın hızlandığı değil.
+12:26 ölçümü A'yı başlangıç seviyesinde buldu (0,615) ve oranı geri getirdi.
+
+→ **Hüküm yalnız erken yarıya dayanmıyor; 12 saatlik serinin tamamı destekliyor.**
+
+#### İKİ DERS — kontrol grubu tasarımı
+
+1. **Kontrol grubu tek sayı değil, ZAMAN SERİSİ olmalı.** Tek sonda, alındığı saate
+   göre sahte pozitif ya da sahte belirsizlik üretir.
+2. **KONTROLÜN KENDİSİNİN DE GEÇERLİLİK TESTİ OLMALI.** Sonda protokolüne kondu:
+   **A/B oranı ~2'den belirgin saparsa o örneklem ATILIR.** Gerekçe: ağ değişimi
+   oranı **korur**, ölçüm artefaktı **korumaz**. Bu kural olmasaydı 02:17 sondası
+   sağlam bir bulguyu belirsize çevirecekti.
+
+**Not:** `acik_sayisi < 8` süzgeci bu pencerede **hiçbir turu elemedi** (0 atlanan).
+Yine de doğruydu — gerçekleşmeyen bir senaryoya karşı korumaydı, sonucu değiştirmedi.
+
 ### ⚠️ `sure_sn` KİRLİ BİR VEKİL — kontrol grubu şart
 
 Turun süresi **taranan sembol sayısıyla doğru orantılı** (her sembol = 3 ağ çağrısı)

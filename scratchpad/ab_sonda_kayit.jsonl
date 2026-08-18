@@ -1,1 +1,3 @@
 {"ts": "2026-08-18 00:13:47", "n": 12, "A_yeni_baglanti_medyan": 0.7813, "B_keepalive_medyan": 0.3331, "oran": 2.35, "A_min": 0.5992, "A_maks": 1.6632, "B_min": 0.2839, "B_maks": 0.4051, "not": "keep-alive penceresi, sonda 1/4"}
+{"ts": "2026-08-18 02:17:10", "n": 12, "A_yeni_baglanti_medyan": 0.3599, "B_keepalive_medyan": 0.333, "oran": 1.08, "A_min": 0.3545, "A_maks": 0.8371, "B_min": 0.2743, "B_maks": 0.4678, "not": "pencere kapanisi, sonda 2/2"}
+{"ts": "2026-08-18 12:26:47", "n": 12, "A_yeni_baglanti_medyan": 0.6146, "B_keepalive_medyan": 0.3155, "oran": 1.95, "A_min": 0.4895, "A_maks": 0.6623, "B_min": 0.295, "B_maks": 0.4244, "not": "gecerlilik kontrolu, sonda 3"}

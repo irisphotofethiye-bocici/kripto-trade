@@ -64,27 +64,49 @@ def main():
     A = kol_a(a.n)
     B = kol_b(a.n)
     mA, mB = st.median(A), st.median(B)
+
+    # --- GECERLILIK TESTI (2026-08-18) ------------------------------------------------
+    # [NEDEN] 02:17 sondasi A=0,360 / B=0,333 -> oran 1,08x verdi ve "ag iyilesti" gibi
+    #   okundu; sagl am bir bulguyu belirsize cevirecekti. 12 saat sonra A yine 0,615
+    #   olcuLdu, yani o ornek ARTEFAKTTI.
+    # [AYIRT EDEN YAPISAL ILISKI] A ~ 2xB beklenir: A = el sikisma (2 RTT) + istek (1 RTT),
+    #   B = yalniz istek (1 RTT). AG degisirse IKISI DE orantili degisir ve ORAN KORUNUR.
+    #   Oran bozuluyorsa degisen ag degil, olcumun kendisidir (o orneklemde el sikisma
+    #   bedavaya gelmis: DNS/TLS onbellegi, oturum yeniden kullanimi vb.).
+    # [KURAL] Oran ~2'den belirgin saparsa ORNEKLEM ATILIR — hukme sokulmaz.
+    # [DERS] Kontrolun kendisinin de bir gecerlilik testi olmali. olcumler.md'de yazili.
+    oran = (mA / mB) if mB else None
+    gecerli = bool(oran is not None and 1.6 <= oran <= 2.8)
+
     kayit = {
         "ts": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "n": a.n,
         "A_yeni_baglanti_medyan": round(mA, 4),
         "B_keepalive_medyan": round(mB, 4),
-        "oran": round(mA / mB, 2) if mB else None,
+        "oran": round(oran, 2) if oran else None,
+        "gecerli": gecerli,
+        "gecerlilik_araligi": "1,6 <= A/B <= 2,8",
         "A_min": round(min(A), 4), "A_maks": round(max(A), 4),
         "B_min": round(min(B), 4), "B_maks": round(max(B), 4),
         "not": a.notu,
     }
     with open(KAYIT, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(kayit, ensure_ascii=False) + "\n")
+    damga = "GECERLI" if gecerli else "GECERSIZ -> ORNEKLEM ATILIR"
     print(f"{kayit['ts']}  A(yeni baglanti) {mA:.3f} sn | B(keep-alive) {mB:.3f} sn "
-          f"| ORAN {kayit['oran']}x   {a.notu}")
+          f"| ORAN {kayit['oran']}x  [{damga}]   {a.notu}")
+    if not gecerli:
+        print("  UYARI: A/B orani ~2'den saptI. Ag degisimi orani KORUR; artefakt korumaz.")
+        print("         Bu orneklem hukme SOKULMAZ — tekrar olc.")
 
     gecmis = [json.loads(l) for l in open(KAYIT, encoding="utf-8") if l.strip()]
     if len(gecmis) > 1:
         print("  gecmis sondalar:")
         for g in gecmis:
+            gd = g.get("gecerli")
+            im = "" if gd is None else ("  [GECERLI]" if gd else "  [GECERSIZ]")
             print(f"    {g['ts']}  A {g['A_yeni_baglanti_medyan']:.3f}  "
-                  f"B {g['B_keepalive_medyan']:.3f}  oran {g['oran']}x  {g.get('not','')}")
+                  f"B {g['B_keepalive_medyan']:.3f}  oran {g['oran']}x{im}  {g.get('not','')}")
 
 
 if __name__ == "__main__":
