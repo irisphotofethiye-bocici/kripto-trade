@@ -7,6 +7,14 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
 
 ## SERT KISITLAR — istisnasız
 
+- 🔴 **BOTA HABER VERMEDEN KARIŞILMAZ** (kullanıcı talimatı, 2026-08-18). Çalışan bota
+  ait hiçbir şey — `testbot_state.json` · açık pozisyonlar · defter dosyaları · `.py`
+  kodu · zamanlanmış görevler — **önce söylenip onay alınmadan** değiştirilmez.
+  Pozisyon elle kapatmak/açmak, stop oynatmak, state düzenlemek bu kapsamdadır.
+  **Kapsam dışı:** salt-okuma, ölçüm betikleri, `.md` belgeler.
+  **Neden bu kadar sert:** (1) ölçüm penceresi beş kararın hakemi — içine elle müdahale
+  girerse hakem kalmaz; (2) `CLAUDE.md` zaten *"ölçüm bota dokunmaz"* diyordu ama o kural
+  ölçüm süreçleri içindi, **elle karar** için ayrıca yazılması gerekti.
 - **Bot KÂĞIT ÜSTÜNDE çalışır.** Gerçek emir gönderen kod YOKTUR ve eklenmez.
 - **İzinsiz `git push` YOK.** Depo bugüne kadar hiç push edilmedi. İlk push'tan
   **önce** git geçmişi temizlenmeli (geçmişte ~920 MB veri var, `.git` ~242 MB).
