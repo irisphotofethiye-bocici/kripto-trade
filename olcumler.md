@@ -1119,8 +1119,49 @@ maliyet + **fonlama dahil**), `t_küme`.
   ihtimali baştan yazılıydı. Ayrıca çözünürlük vekil.
 
 ### Betik ve kayıt
-Betik: `scratchpad/katilim_filtresi.py` (yazılacak). Sonuç bu bölümün altına;
-**ölçüt metni sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9).
+Betik: `scratchpad/katilim_filtresi.py`. Ham çıktı: `scratchpad/katilim_filtresi_sonuc.txt`.
+**Ölçüt metni sonuç görüldükten sonra DEĞİŞTİRİLMEDİ.**
+
+### 🟡 SONUÇ — **KALDI**, ama ilk kez İKİYE AYRILDI (2026-08-19)
+
+```
+A_funding    kontrol +0,006%   kural -0,007%   fark -0,013%   <-- TERSINE
+B_ma50ucuz   kontrol -0,235%   kural -0,166%   fark +0,069%
+```
+
+**`A_funding` — hipotez tersine döndü.** Elenen dilim (`islem_x < 1,0`, N=6.372)
+**+0,035%** yani hafif POZİTİF; filtre iyi işlemleri eliyor. Dört ölçüt de başarısız.
+**Mekanizma anlaşılır:** `A+B` zaten *"short'lar kalabalık"* seçiyor — kalabalık zaten
+yüksek katılım demek. Filtre orada **fazlalık**.
+
+**`B_ma50ucuz` — beş ölçütün DÖRDÜNÜ geçti:**
+
+| ölçüt | sonuç |
+|---|---|
+| 1. işlem başına yüksek | ✅ +0,069% |
+| 2. iki yarıda da | ✅ A +0,113 / B +0,028 |
+| 3. `t_küme > +2,0` | ❌ −0,49 |
+| 4. rejimde ters işaret yok | ✅ AYI +0,049 · BOĞA +0,036 · NOTR +0,078 — **üçü de artı** |
+| 5. işlem düşüşü ≤%50 | ✅ %16,3 |
+
+Attığı dilim gerçekten kötü: **N=709 · −0,587% · t=−2,54**. `MA50+ucuz`'da
+fonlama/kalabalık terimi **yok** → filtre oraya gerçek bilgi katıyor.
+
+### ⚠️ ÖLÇÜT KUSURU — kabul ediliyor, DÜZELTİLMİYOR (D/9)
+
+**3. ölçüt (`t_küme > +2,0`) ALT-KÜME testi için iyi tanımlanmamış.**
+`ileri_rr`'de kollar **eşleşmişti** → farkın t'si hesaplanabiliyordu. Burada kural kolu
+kontrolün **alt kümesi** → eşleşmiş fark yok; raporlanan `t_küme` her kolun **mutlak
+getirisinin** t'si, *"fark anlamlı mı"* sorusunun cevabı **değil**.
+
+**Ölçüt metni değiştirilmedi**; yazıldığı gibi okununca `B_ma50ucuz` **KALIYOR**.
+⚠️ Aynı kusur **`asgari_stop` testinde de vardı** — ikisi de bu ölçütle okunmalı.
+**Sonraki alt-küme ön-kayıtlarında iki-örneklemli istatistik belirtilmeli.**
+
+### Bunun anlamı — "veride bilgi yok" cevabı artık verilemez
+Bugün ilk kez bir **katılım** sinyali dört ölçütü geçti, ve geçtiği yer **tesadüfi değil**:
+zayıf kapıya bilgi katıyor, güçlü kapıda fazlalık. ⚠️ Yine de **iki küme test edildi,
+biri tuttu** — bu bir alt-grup bulgusudur, çoklu karşılaştırma sayılır. Kural DEĞİL.
 
 ## Bekleyen — ölçülmedi
 
