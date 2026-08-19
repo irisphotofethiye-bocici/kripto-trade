@@ -1554,6 +1554,59 @@ işin girdisi** olarak gidiyor. Orada karara bağlanacak iki şey:
 1. `btc_pay` LONG penceresi `AYI` kilidinden çıkarılıp **`BOGA` hariç** yapılsın mı?
 2. Ölçütü geçemeyen `notr_long_acik` açık kalmaya devam etsin mi?
 
+## 🔍 KAYIP DOSYA DENETİMİ (2026-08-19) — 45 atıf, **canlı kural taşıyan SIFIR**
+
+**Neden yapıldı:** `btc_pay` ölçümünün dayanağı (`PARA_SONUC.md` · `CIKIS_SONUC.md`)
+kayıp olduğu için bugün bir soru **cevaplanamadı** ve vekil kurmak gerekti. Aynı sınıftan
+başka kaç açık var, sistematik tarandı.
+
+**Yöntem:** `CLAUDE.md` · `durum.md` · `olcumler.md` · `fikir-defteri.md` içindeki tüm
+`*.py` / `*.md` atıfları çıkarıldı, dosya sisteminde arandı (kök · `scratchpad/` · `arsiv/`).
+
+### Sonuç — üç katmanlı triyaj
+
+| katman | adet | durum |
+|---|---|---|
+| **Yanlış alarm** | 3 | `SKILL.md` → `.claude/skills/kripto/` altında **VAR**; `durumu.md` / `listesi.md` → tireli dosya adlarının parçaları |
+| **Yalnız `fikir-defteri.md`'de** | 41 | Kronolojik laboratuvar defteri. **Sonuçlar kayıtlı, betikler yok.** Hiçbiri kütükte hüküm taşımıyor |
+| **`olcumler.md`'de atıflı** | 2 | Aşağıda |
+
+### İndeksi ilgilendiren iki dosya — ikisi de ÇÖZÜLDÜ
+
+**1 · `PARA_SONUC.md` + `CIKIS_SONUC.md`** — `btc_pay` freni ve LONG penceresinin dayanağı.
+🟢 **BUGÜN ÇÖZÜLDÜ.** İki gösterge 2 yıllık mumlardan yeniden kuruldu ve gerçek loglarla
+doğrulandı (r=+0,680 / +0,882) → rejim koşulluluğu sorusu cevaplandı.
+
+**2 · `f10_sezon_test.py`** — F10 sezon+hava rejim katmanı ölçümü.
+🟢 **YÜK TAŞIMIYOR.** `f10` yalnız `evren.py`'de hesaplanıyor ve panelde gösteriliyor;
+**`testbot.py` ve `radar.py` onu hiç okumuyor** (grep 0). Yani **hiçbir giriş/çıkış kararı
+F10'a bağlı değil** — gözlem katmanı.
+
+### 🟢 HÜKÜM: bugün itibarıyla **canlı bir bot kuralının dayandığı kayıp dosya YOK**
+
+41 kayıp betiğin tamamı **rafta duran ya da sonucu kayıtlı** ölçümlere ait
+(`ze_*` zemin etüdü · `bt_*` backtest altyapısı · `sk_*`/`st_*`/`sg_*` otopsiler ·
+`f10_replay` · `fade_boga_test` · `beta_backtest` · `f4_basis_test` …).
+
+**Kalan risk:** rafta duran bir fikir canlanırsa betiği yeniden yazılmalı. **Maliyet,
+engel değil.**
+
+### Tekrarı zaten engellendi
+`fikir-defteri.md` s.617 (2026-08-10): *"Bu oturumdan itibaren ölçüm scriptleri projedeki
+`scratchpad/` klasörüne yazılır ve commit edilir."* O tarihten beri uygulanıyor —
+bugünkü 5 betiğin 5'i de commit'li.
+
+### ⭐ ÇÖZÜM DESENİ — bugün kanıtlandı, tekrar gerekirse buradan uygulanır
+
+> **Kayıp ölçüm, hayatta kalan veriden VEKİL kurularak ve hayatta kalan LOGLARLA
+> doğrulanarak yeniden sorulabilir.**
+
+Adımlar: (1) göstergeyi hayatta kalan ham veriden yeniden türet · (2) örtüşen dönemde
+gerçek logla **korelasyon + işaret uyuşması** eşiği koy · (3) eşikleri **getiriye
+bakmadan** kalibre et · (4) ön-kayıt yaz · (5) ölç.
+⚠️ **Vekil orijinali yeniden üretmez** — yalnız belirli bir soruyu cevaplar; bu her
+seferinde açıkça yazılır.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
