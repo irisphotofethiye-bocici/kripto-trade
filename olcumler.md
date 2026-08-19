@@ -1779,3 +1779,87 @@ olsun karar 21-22 tartismasinda kullanicidadir.
 
 **Betik:** `scratchpad/btcpay_fren_rejim.py` (bu on-kayittan SONRA yazilacak).
 
+### SONUC — FRENIN KENDISI REJIMDEN BAGIMSIZ MI? (2026-08-19, on-kayit 43d2cf5)
+
+**Betikler:** `scratchpad/btcpay_fren_rejim.py` (on-kayitli olcum) ·
+`scratchpad/fren_bogakontrol.py` + `scratchpad/ay_kumeli_denetim.py` +
+`scratchpad/tohum_kararliligi.py` (POST-HOC karistirici kontrolu).
+**Islenen sembol:** 565.
+
+#### On-kayitli olcut ne dedi
+
+```
+--- AYI    UST -1.498%  diger +0.250%   LIFT -1.748%   t=-15.33   fren HAKLI
+--- NOTR   UST -0.336%  diger +0.323%   LIFT -0.659%   t=-12.62   fren HAKLI
+--- BOGA   UST +0.196%  diger -0.621%   LIFT +0.817%   t= +6.07   fren TERS
+           A yarisi +0.571 (t=+3.08) · B yarisi +1.064 (t=+5.50)
+```
+
+On-kayitli **TERS HUKUM**'un uc ölcutu de gecti -> *"fren BOGA'da ZARARLI"*.
+
+#### KARISTIRICI KONTROLU BU HUKMU CURUTTU
+
+**CLAUDE.md zorunlu kilar:** monotonluk/isaret tek basina yetmez. Soruldu:
+*bu 2928 gozlem BAGIMSIZ mi?* **Degil.** Rejim epizotlari takvimde kumelenir;
+BOGA hucresi 2 yilda yalnizca **6 ayrik ay** iceriyor.
+
+```
+BOGA ay lifti: 2024-10 -3.89 · 2024-11 -0.08 · 2024-12 +3.00
+               2025-05 -0.26 · 2025-07 +1.20 · 2026-05 -0.29
+pozitif 2/6 · ay ortalamasi -0.054 · medyan -0.171
+BASKIN ay 2024-12 (katki +2784) ATILINCA -> lift -0.246%, t=-1.74  ISARET DONDU
+AY-KUMELI t = -0.06                                                <-- GURULTU
+```
+
+**Ham +0,817%'in TAMAMI 2024-12'den geliyor.** On-kayitli *"iki yari"* olcutu
+bunu YAKALAYAMADI cunku 2024-12 zaman ortasini **atliyor** — iki yariya da
+ayni ay bulasti.
+
+**AYNI KONTROL TUM HUCRELERE UYGULANDI** (yalniz hosa gitmeyeni elemek
+suclamasini imkansiz kilmak icin) **ve UC TOHUMDA tekrarlandi:**
+
+| olcum | rejim | ham lift | AY-KUMELI t (tohum 41 / 7 / 99) | hukum |
+|---|---|---|---|---|
+| SHORT (fren) | AYI | −1,75 | −2,95 / −4,01 / −3,29 | **AYAKTA** |
+| SHORT (fren) | NOTR | −0,66 | −2,73 / −3,38 / −2,68 | **AYAKTA** |
+| SHORT (fren) | BOGA | +0,82 | −0,06 / +0,06 / +0,26 | **GURULTU** (isaret bile sabit degil) |
+| LONG | AYI | +0,34 | −1,09 / −2,27 / −1,50 | **GURULTU** |
+| LONG | NOTR | +0,31→+0,10→+0,08 | +0,36 / −0,10 / +0,02 | **GURULTU** (saf sifir) |
+| LONG | BOGA | −2,04 | −2,39 / −2,21 / −3,01 | **AYAKTA** |
+
+#### HUKUM
+
+1. **On-kayitli soru (fren BOGA'da zararli mi):** ham olcut gecti, karistirici
+   kontrolu curuttu -> **BELIRSIZ.** On-kaydin kendi *belirsiz* dali uygulanir:
+   **fren OLDUGU GIBI kalir, rejim sinirlamasi ONERILMEZ.**
+2. **BEKLENMEYEN ve daha onemli bulgu — fren AYI ve NOTR'da GERCEK.** En sert
+   testte (ay-kumeli, uc tohum, baskin ay atilarak) ayakta kaliyor.
+   **Su anki rejim NOTR** (BTC 30g getirisi +4,83%, olcumun tanimi ±15).
+3. 🔴 **BUGUN SABAHKI LONG KARARININ DAYANAGI COKTU.** *"21 Agustos'ta btc_pay
+   LONG kilidi ACILACAK (BOGA HARIC)"* karari, LONG/NOTR lifti +0,306 (t=+3,13)
+   bulgusuna dayaniyordu. Ay-kumeli bakista **t = +0,36 / −0,10 / +0,02** —
+   saf gurultu. Ham lift bile tohuma gore **+0,306 → +0,098 → +0,080** oynuyor.
+   **Karar 21-22'de yeniden acilmalidir.**
+4. **LONG'un BOGA'da ZARARLI oldugu AYAKTA** (t −2,39/−2,21/−3,01, 0-1/4 ay
+   pozitif). Yani kararin *"BOGA HARIC"* niteleyicisi dogruydu; *"AC"* kismi degil.
+
+**NET: `btc_pay`'in SHORT bacagi gercek, LONG bacagi degil.** Ayni vekil, ayni
+mekanik, ayni tohumlar — biri gorunuyor, digeri gorunmuyor.
+
+#### KUSUR ITIRAFI — bu olcumun kendi hatalari
+
+- 🔴 **On-kayitta IKI-ORNEKLI t belirttim, KUMELENMIS t degil.** "Alt-kume
+  testinde t_kume tanimsiz" tuzagini bugun ogrenip on-kayda yazmistim; ama
+  **ayrik kumelerde de kumelenme var** (takvim) ve onu atladim. Gozlem-t
+  2928 korelasyonlu gozlemi bagimsiz sayiyor. Ust hukum bu yuzden gecti.
+- 🔴 **Faz kaydirma TEKRARLANABILIR DEGIL.** `random.seed` modul duzeyinde;
+  iki olcum ayni surecte kosunca akislar kayiyor. Ayni kod ayni gun
+  LONG/NOTR icin +0,306 (t=+3,13) ve +0,124 (t=+1,31) uretti. Ay-kumeli
+  hukumler uc tohumda sinandi ve **kararli**; ham gozlem-t **degil**.
+  Duzeltme: faz sembol adindan TURETILMELI (`hash(sym) %% 24`), rastgele degil.
+- **VEKIL siniri:** btc_d_xs vekili r=+0,680. LONG bacaginin gorunmemesi
+  (a) vekilin cok gurultulu olmasindan ya da (b) orijinal LONG bulgusunun
+  kucuk-orneklem eseri olmasindan olabilir; **bu olcum ikisini AYIRT EDEMEZ.**
+  Ancak ayni vekil SHORT bacagini net goruyor — yani vekil bu buyuklukte
+  bir etkiyi yakalayabiliyor. Kanit degil, isaret.
+

@@ -414,13 +414,35 @@ saklı dönem +0,46). **SHORT bacağı şu an devre dışı; LONG bacağı (AYI 
 Karar bu bulguya **rağmen** alındı; kullanıcının ikinci gerekçesi (*ölçüm penceresi,
 rejimde sınanmamış bir kapının kararına bağlı kalmasın*) bu ölçümden bağımsızdır.
 
-### ⚠️ Açık kalan soru — frenin kendi sınırı
+### ✅ Frenin kendi sınırı ÖLÇÜLDÜ (2026-08-19 gece, ön-kayıt `43d2cf5`)
 
-`btc_pay`'i kuran ölçümün yazılı uyarısı: *"12 ayın tamamı DÜŞEN piyasa."* BTC 18-19
-Ağustos'ta 64,5k → 69,5k kırılım yaptı. Ölçümün **LONG bacağının** BOĞA'da işaret
-çevirdiği 2026-08-19'da gösterildi (lift −2,043%, t=−9,95). **SHORT bacağı — yani
-frenin kendisi — rejime göre HİÇ sınanmadı.** Ölçülebilir; `scratchpad/btcpay_rejim.py`
-iskeleti hazır. 21-22 tartışmasının maddesi.
+**Sonuç `olcumler.md`'de.** Karar açısından üç madde:
+
+1. **Fren AYI ve NOTR'da GERÇEK.** Ay-kümeli, üç tohumda, baskın ay atılarak
+   sınandı; ayakta kaldı (t −2,7 … −4,0). **Şu anki rejim NOTR** — yani ölçüm,
+   frenin şu anda çalışması gerektiğini söylüyor. Fren 21:40'ta kapatıldı.
+2. **Frenin BOĞA'da zararlı olduğu iddiası GÜRÜLTÜ.** Ham ölçüt geçti, karıştırıcı
+   kontrolü çürüttü (tamamı tek aydan, 2024-12). Ön-kaydın *belirsiz* dalı
+   uygulandı: **rejim sınırlaması önerilmiyor.**
+3. 🔴 **BUGÜN SABAHKİ LONG KARARININ DAYANAĞI ÇÖKTÜ** → aşağıdaki maddeye bak.
+
+### 🔴 YENİDEN AÇILDI — "21 Ağustos'ta btc_pay LONG kilidi açılacak" kararı
+
+**Bu karar bugün sabah alındı**, dayanağı LONG/NOTR lifti **+0,306% (t=+3,13)** idi.
+Aynı akşam ay-kümeli bakışla sınandı: **t = +0,36 / −0,10 / +0,02** (üç tohum) —
+**saf gürültü.** Ham lift bile tohuma göre +0,306 → +0,098 → +0,080 oynuyor.
+
+**Kararın "BOĞA HARİÇ" niteleyicisi doğruydu** (LONG BOĞA'da zararlı, t −2,2…−3,0
+ayakta). **"AÇ" kısmının dayanağı yok.** 21-22 tartışmasına *karar* olarak değil
+**yeniden açık soru** olarak gidiyor.
+
+**Genel ders:** `btc_pay`'in **SHORT bacağı gerçek, LONG bacağı değil.** Aynı vekil,
+aynı mekanik, aynı tohumlar — biri görünüyor, diğeri görünmüyor.
+
+⚠️ İki kusur `olcumler.md`'de itiraf edildi: ön-kayıtta **kümelenmiş t** yerine
+iki-örnekli t belirtilmişti, ve faz kaydırma **tekrarlanabilir değil**
+(`random.seed` modül düzeyinde). Ay-kümeli hükümler üç tohumda kararlı; ham
+gözlem-t değil.
 
 ### Fren kendiliğinden ne zaman düşecekti
 
