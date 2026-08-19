@@ -910,10 +910,57 @@ kârı görmüyor.** Hüküm yazılmadan önce hangi ölçünün kullanılacağ�
 pozisyon-bazlı toplam mı, kayıt-bazlı R mi. **Bu bir ölçüt yumuşatma değil, ölçüt
 belirsizliği** — sonuç görülmeden çözülmesi gerekiyor.
 
+## ⭐ KAPI KARNESİ — canlı, pozisyon bazlı (2026-08-19, betimleyici)
+
+`pozisyon_ozet.jsonl` N=117. **Betimleyici sayım, kontrollü kıyas DEĞİL** — kapılar farklı
+piyasa anlarında tetikleniyor.
+
+```
+kapi              N   TP2%  ort P&L    toplam   MFE med  tutma  <8s pay
+A+B              28    43%   +36,12  +1.011,41  +7,87%   10,7s    39%
+NOTR              3     0%   +56,17    +168,52  +1,78%    6,0s    67%
+MA50+ucuz        72    26%    -7,11    -511,83  +3,12%    2,7s    71%
+NOTR-belirsiz    10     0%   -53,31    -533,13  +2,86%    2,3s    80%
+AYI               4     0%  -174,99    -699,94  +2,81%    1,0s   100%
+```
+
+### Son sütun sıralamayı açıklıyor
+
+`<8s pay` (ilk 8 saatte ölen oran) ile kârlılık **neredeyse monoton**:
+`A+B` %39 → **+1.011** · `MA50+ucuz` %71 → **−512** · `NOTR-belirsiz` %80 → **−533** ·
+`AYI` %100 → **−700**.
+
+Bu, iki bulguyu bağlıyor: **kayıp 0-8 saat kovasında** (yukarıdaki Bekleyen satırı) ve
+**kapılar o kovayı ne kadar doldurduklarıyla** ayrışıyor. `MFE` de aynı yönde: `A+B`
+medyan **+%7,87**, diğerleri **+%2,8–3,1** — yani `A+B`'nin seçtiği kurulumlar gerçekten
+hareket ediyor, diğerleri kıpırdayıp ölüyor.
+
+### 🔴 ÜÇÜNCÜ BAĞIMSIZ TEYİT — `MA50+ucuz` negatif
+
+```
+2 yillik ham         -0,079   t=-4,05   (s.2790)
+2 yillik fonlamali   -0,235%  t=-2,62   (ileri_rr kontrol kolu, 2026-08-19)
+canli 72 pozisyon    -511,83  TP2 %26   (bu tablo)
+```
+
+`A+B` için de iki teyit: **+0,396R** (N=201, arşiv) ve canlı **+1.011,41** (N=28).
+
+**Önemi:** `MA50+ucuz`'un savunması *"o ölçüm bir yeniden üretim, popülasyonu canlıdan
+uzak"* idi. **Artık canlı popülasyon da aynı şeyi söylüyor** → pencereye bağlı işlerin
+1. maddesinin savunması zayıfladı. Hüküm değil, **girdi**.
+
+⚠️ **UYARILAR:** N dengesiz (28 / 72 / 10 / 4 / 3). **`AYI` ve `NOTR` satırları
+anlamsız** — tek işlem tabloyu çevirir. `<8s pay` bir **teşhis göstergesi** olarak
+saklanmaya değer: hızlı ölüm üreten kapı kötü seçiyor demektir.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
 |---|---|
+| 🥇 **GECİKMELİ GİRİŞ — `ANINDA` yerine sıçrama bekle** (2026-08-19, önerilen) | ⚠️ **Yeni hipotez DEĞİL — çekmecede duran bulguyu uygulamak.** `SKILL.md:249`, arşiv analizinin doğrulanmış sonucu: *"anında-giriş short stop'a takılır → **giriş bounce'a**"*. Bot bugün `A+B` ve `MA50+ucuz`'da hâlâ `"ANINDA"` giriyor. **Doğrudan 0-8 saat kovasını hedefliyor** (aşağıya bak: kaybın TAMAMI orada, ve o pozisyonların %80'i önce artıya geçiyor). En büyük tek kaldıraç. Uygulanırsa **kapı değişikliğidir** → pencereyi etkiler |
+| **0-8 SAAT KOVASI — hangi gözlenebilir değişken hızlı ölümü öngörüyor?** (2026-08-19) | `tutma<8s` N=76 **−3.734,18 $** · `8s+` N=41 **+3.169,22 $** — kayıp tek kovada. **Totoloji değil:** hızlı ölenlerin **%80'i önce artıya geçti** (MFE medyan +%1,77), yani kötü giriş değil kötü zamanlama. Giriş anında gözlenebilir ilk aday: **`ilk_hacim_usdt` 1.740.676 vs 807.227 (2,2 kat)** — ölenler iki katı hacimle giriliyor. ⚠️ **Büyüklük vekili olabilir** (büyük coin = çok hacim), ayrıştırmadan kural çıkmaz |
+| **KAPASİTE — dolu turda ne kaçırıyoruz?** (2026-08-19) | Pencerede turların **%26,1'inde bot DOLU** (8/8) ve doluyken **giriş araması hiç koşmuyor** → neyi kaçırdığımızın **kaydı bile yok**. Önce ÖLÇ (dolu turda adayları yine tara ve arşive yaz, işlem açma), sonra "sıralama/değiştirme gerekir mi" sorusu anlamlı olur. Sayaç işi, davranış değişikliği değil |
+| ⭐ **KAPI × FONLAMA — "her kapı kazandığı R başına ne kadar fonlama ödüyor?"** (2026-08-19, önerilen İLK iş) | **Hiç sorulmadı.** Fonlama brüt kârın **%33'ünü** alıyor ve isabet oranı başabaşın yalnız **+1,3 puan** üstünde — yani fonlamanın üçte birini kurtarmak, isabet oranını 3 puan artırmaya bedel. `A+B` **tanımı gereği** negatif funding seçiyor (ödemeyi *seçiyor*); `MA50+ucuz`'da fonlama terimi yok. Eğer R başına fonlama yükleri ayrışıyorsa **kapı sıralaması değişir**. Alan `funding_usdt` 2026-08-17'den beri kayıtlı → birkaç düzine yeni pozisyon yeter. ⚠️ **İnce ayar DEĞİL, muhasebe** — tek soru, tek cevap, çoklu karşılaştırma riski yok |
 | **`btc_pay` LONG penceresi rejimden BAĞIMSIZ mı?** (2026-08-19) | Ölçüm `UST + para durgun → LONG R +0,24/+0,16` diyor ama kapı **AYI dalına** gömülü; NOTR'da erişilemiyor. Kodun kendi notu pencereyi *"T-B **piyasa-seviyesi** bir İZİN penceresidir"* diye tanımlıyor — coin seçmiyor, **rejim de seçmiyor olabilir**; AYI'ya hapsedilmesi keyfî bir daraltma olabilir. ⚠️ **Doğrulanamıyor:** dayanak dosyalar `PARA_SONUC.md` / `CIKIS_SONUC.md` **kayıp** (geçici oturum klasöründe yok oldu), ölçüm rejime koşullu muydu bilinmiyor. **Yeniden ölçülmeden genişletilmez** — 2 yıllık veri elde, betik yeniden yazılmalı |
 | **İLERİ R/R eşiği — sabit hedefe eklenmeli mi?** (2026-08-18, CEO okumasından doğdu) | Sabit %10 hedef, pozisyon ilerledikçe **ödül-risk geometrisinin tersine dönmesini** hesaba katmıyor. Canlı örnek: `BAS` SHORT +1,92R'de iken stopa %8,51, hedefe %4,97 → **ileri R/R 0,58:1**, yani 1:2 eşiğinin çok altında. ⚠️ **Bu bir sıkılaştırmadır ve 28/28'e karşı savunma gerektirir** — ön-kayıt yazılmadan ölçülmez. Ölçüm 2 yıllık veride, ham→mekanik sırasıyla; "en iyi eşik" taraması YASAK, tek eşik ön-kayıtlanır |
 | **Pozisyon boyutu neden 2 kat ayrışıyor?** (2026-08-18) | Aynı risk ayarında `PRL` risk %1,46 eq / marjin %11,6 eq iken iki SHORT %0,67-0,75 / %3,5-4,0. Ayrışmanın kaynağı bilinmiyor (kaldıraç tavanı · stop genişliği · efektif equity ölçeklemesi). **Pencere hükmünü doğrudan etkiler:** ön-kayıtlı ölçüt *"ikinci yarı > 0"* diyor ve kasa sıfırlaması zaten boyutları ortada büyütmüştü; üstüne pozisyonlar arası 2 kat fark varsa dolarla kıyas iyice geçersiz → **R/yüzde kıyası zorunlu**. 21-22 Ağustos taramasına madde |
