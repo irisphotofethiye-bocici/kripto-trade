@@ -1221,6 +1221,63 @@ Sembol başına rastgele faz kaydırmayla düzeltildi (kovalar 2.300–3.300'e d
 `asgari_stop` · `katilim_filtresi` dahil. **Saat/zaman boyutu olmayan sorularda
 zararsız**, ama **zamanla ilgili her ölçümde faz kaydırma ŞARTTIR.**
 
+### ❌ BOŞLUK 1 (devamın başarısızlığı) — KARIŞTIRICIYA YENİLDİ (2026-08-19)
+
+*"Son yeni uçtan bu yana geçen süre"* — SHORT'ta yeni dip yapmayı bırakmak dönüşün
+başlangıcı mı? İlk ölçüm noktası **dejenereydi** (+%2'ye ilk ulaşma anında SHORT zaten
+yeni dip yapıyor: 11.340 olayın 10.200'ü "0 bar"). **Sabit zamana** (12. saat) taşındı:
+
+```
+son yeni dip     N      HEDEFE varma    o anki kar%
+0-1 bar      2850        %48,0          +4,19
+2-4 bar      1754        %42,2          +3,45
+5-8 bar      1424        %40,2          +3,02
+9+ bar        426        %36,2          +2,46
+```
+
+**Mükemmel monotonik, 11,8 puanlık yayılım.** Ama sağ sütun da monotonik →
+karıştırıcı kontrolü yapıldı (kâr sabit, süre değişken):
+
+```
+kar bandi   |  0-1 bar      2-4 bar      5+ bar    |  yayilim
+  1-3       |  948 %28,8   834 %31,1  1150 %31,1  |  -2,3 puan
+  3-5       |  969 %47,9   566 %45,8   465 %44,1  |  +3,8 puan
+  5+        |  933 %67,5   354 %63,0   235 %69,4  |  -1,8 puan
+```
+
+**11,8 puan → 2-4 puana iniyor ve işaret bantlar arasında DÖNÜYOR.** Sinyal
+*"ne kadar kârdayım"*ın vekiliymiş; o zaten biliniyor.
+
+🔴 **DÖRDÜNCÜ KEZ AYNI DUVAR.** Kütüğün kendi notu: *"ölçülen her şey **seviye** idi ve
+'erken fiyat hareketinin başka bir ifadesi' çıktı."* **Dizi** sandığım şey de seviyenin
+kılığıymış. Aynı ölüm agresör dengesi ölçümünde de yaşandı (2026-08-17).
+
+### ❌ POZİSYON KOMPOZİSYONU (`top_ls − glob_ls`) — BULGU YOK (2026-08-19)
+
+**Neden denendi:** ölçtüğümüz her şey *tek bir banttan* (Binance perp'te gerçekleşmiş
+işlem) türüyor — bu yüzden hepsi fiyatın başka ifadesi çıkıyor. `glob_ls` **toplanıyor,
+arşivlenıyor, ve hiçbir karar fonksiyonunda okunmuyor** (`grep` → testbot 0 · radar 0).
+`smart` yalnızca `top_ls`'in eşiklenmiş hâli (`>=1,2 LONG · <=0,83 SHORT`). Fark ise
+**kimin hangi tarafta olduğunu** söylüyor — farklı bilgi sınıfı, ve **bedava**.
+
+Ham +24s getiri (arşiv, 8 hafta, 37.192 olayın 10.183'ü eşleşti):
+
+```
+ayrisma        N      +24s ort%   medyan%
+<-0.4        2541      -0,726    -1,007
+-0.4..-0.1   1873      +0,359    -0,223   <-- ort/medyan CELISIYOR
+-0.1..+0.1   1284      -0,937    +0,151
++0.1..+0.4   1619      -0,491    +0,225
+>+0.4        2866      -0,590    -0,888
+```
+
+Monotonluk yok; **iki uç da negatif** (yön yorumu ölür); ortalama/medyan çelişiyor
+(aykırı değer sürüklemesi). Karıştırıcı kontrolü (chg24 sabit) da tutarsız:
+`<-0,4` düşen bantta en iyi, yükselende en iyi, **yatayda en kötü**.
+
+⚠️ **Sınırlar:** %27 eşleşme oranı (arşiv örneklemesi düzensiz) · 8 hafta · tek rejim.
+**Ön-kayıt YAZILMADI** — betimleyici tarama geçilemedi.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |

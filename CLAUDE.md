@@ -46,6 +46,27 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   +0,243 vs kontrol +0,035 (t=+3,84) iken A-stop'la +0,051'e iniyordu; ölü sinyal
   taramasında A-stop **A+B'nin ham kenarının %65'ini** yiyordu — MA50+ucuz'da %0.
   Bir kapı "çalışmıyor" derken **kapının mı, stopun mu** çalışmadığı ayrılmalı.
+- 🔴 **KARIŞTIRICI KONTROLÜ ZORUNLU — monotonluk tek başına YETMEZ.** Bir sinyal
+  ön-kayıtlı kapıları geçse ve dilimleri **mükemmel sıralı** çıksa bile, *"aynı fiyat
+  hareketi içinde de ayırıyor mu"* sorusu sorulmadan hüküm yazılmaz.
+  **Bu proje bunu iki kez yaşadı:** agresör dengesi (2026-08-17, üç kapıyı geçti,
+  ilk-saat getirisi sabitlenince işaret döndü) ve *son yeni uç* (2026-08-19, 11,8 puanlık
+  monotonik yayılım kâr sabitlenince 2-4 puana indi ve işaret bantlar arasında döndü).
+- 🔴 **ÖLÇTÜĞÜMÜZ HER ŞEY TEK BANTTAN TÜRÜYOR — "yeni sinyal" çoğu zaman aynı şeydir.**
+  Fiyat · hacim · işlem sayısı · taker oranı · OI · oynaklık · sıkışma: hepsi
+  **Binance perp'te gerçekleşmiş işlemden** çıkıyor. O yüzden her yeni aday
+  *"erken fiyat hareketinin başka bir ifadesi"* çıkıyor. **Dizi** özelliği sanmak da
+  kurtarmadı (2026-08-19). Gerçekten yeni bilgi **bandın dışındadır**: emir defterinde
+  bekleyen likidite · spot-perp basis · çapraz borsa · pozisyon kompozisyonu.
+  Bunlardan `top_ls − glob_ls` bedavaydı ve **denendi, bulgu çıkmadı** (`olcumler.md`).
+- ⚠️ **`SEYRELT=24` FAZ KİLİTLER — zamanla ilgili her ölçümde faz kaydır.**
+  `klines_1h_uzun` dosyalarının hepsi aynı damgayla indirildi; 24 barlık adım her
+  sembolde girişleri **aynı UTC saatine** düşürüyor. Fonlama-saati taramasında bir kova
+  örneklemin **%62'sini** taşıdı. Saat boyutu olmayan sorularda zararsız.
+- ⚠️ **ALT-KÜME testinde `t_küme` TANIMSIZ.** Eşleşmiş testte (aynı girişler, farklı
+  çıkış) farkın t'si hesaplanır. Kural kolu kontrolün **alt kümesiyse** eşleşmiş fark
+  yoktur; raporlanan t her kolun **mutlak** getirisinin t'sidir, *"fark anlamlı mı"*nın
+  cevabı değildir. **Alt-küme ön-kayıtlarında iki-örneklemli istatistik belirtilir.**
 - **BUG İSTİSNASI — ölçüm penceresi açıkken neyin değişebileceğinin ölçütü**
   (`test-degerlendirme-programi.md` D/8): tek soru şudur — *"bu değişiklik botun hangi
   işlemi açacağını değiştiriyor mu?"* Değiştirmiyorsa (tasarlanmış davranışı geri getiren
