@@ -953,6 +953,75 @@ uzak"* idi. **Artık canlı popülasyon da aynı şeyi söylüyor** → pencerey
 anlamsız** — tek işlem tabloyu çevirir. `<8s pay` bir **teşhis göstergesi** olarak
 saklanmaya değer: hızlı ölüm üreten kapı kötü seçiyor demektir.
 
+## ⭐ ÖN-KAYIT — ASGARİ STOP EŞİĞİ (2026-08-19, KOŞTURMADAN ÖNCE yazıldı)
+
+### Nereden çıktı — hipotez üretimi (aynı gün, ayrı iş)
+20 "artıya geçip stop olan" (A) ve 20 "hedefe varan" (B) pozisyon **MFE bakımından
+eşleştirilip** ilk +%2'ye ulaştıkları anda karşılaştırıldı (o anda sonuç belli değil →
+totoloji yok). **11 alan** test edildi; medyan farkları yanıltıcı çıktı, sıra testi
+(AUC) dokuzunu eledi:
+
+```
+alan                 medyan farki   AUC     hukum
+islem_15                 +249%     83,2%   AYAKTA
+stopa_uzaklik_pct         +41%     81,3%   AYAKTA
+score / taker_60      +40 / +8%   64,1%   zayif
+oi24                     +132%     57,9%   ELENDI (aykiri deger)
+yas_saat                 +141%     47,9%   ELENDI (hic ayirmiyor)
+rel3 · d_taker · comp        —    43-51%   ELENDI
+```
+
+Ve `stopa_uzaklik` **giriş anına kadar** izlendi: A medyan **3,38%** · B medyan **5,60%**
+· AUC **77,4%**. Yani kazananlar **daha geniş stop'la** giriliyor.
+
+### Hipotez
+`asgari_stop_pct` eşiğini **2,0 → 3,0** yükseltmek (yani yapısal stop'u %3'ten dar olan
+adayı reddetmek) **net getiriyi artırır.**
+
+⚠️ **Bu bir stop GENİŞLETME değil, bir FİLTRE.** Stop'lar olduğu gibi kalır; yalnız dar
+stoplu adaylar açılmaz. Risk-bazlı boyutlandırma zaten stop genişliğiyle ölçekleniyor,
+yani işlem başına risk sabit — değişen **işlem sayısı ve kalitesi**.
+
+### Eşik: **3,0** — ve neden gözlenen ayrım noktası DEĞİL
+Gözlem A=3,38 / B=5,60 diyor. **Eşiği oraya koymak veriye uydurmak olurdu.** 3,0
+seçildi çünkü: (a) mevcut eşiğin (2,0) yarım katı — anlamlı ama uç olmayan adım,
+(b) **her iki grubun medyanının da ALTINDA**, yani gözlenen ayrımı taklit etmiyor,
+yönü muhafazakâr sınıyor. Canlı dağılımda işlemlerin **%32'sini** eler.
+**Eşik taraması (2,5 · 3,5 · 4,0 · 5,0 denemek) YASAK.**
+
+### Ölçüm yöntemi
+`ileri_rr.py` iskeleti — aynı giriş kümesi, tek fark filtre.
+- Veri: `scratchpad/klines_1h_uzun/` (2 yıl · 566 sembol)
+- Kümeler: `A_funding` (funding ≤ −0,05) ve `B_ma50ucuz` (fiyat ≤ $0,07 & MA50 ≥ %3,72)
+- Kontrol: `ASGARI_STOP = 2,0` · Kural: `ASGARI_STOP = 3,0`
+- Maliyet **fonlama + ücret + kayma DAHİL**
+- İstatistik **`t_küme`**
+- **İKİ ÖLÇÜ birden raporlanır:** işlem başına net % **ve** toplam (işlem sayısı düştüğü
+  için ikisi ters yönde çıkabilir — o durum da bir sonuçtur)
+
+### GEÇME ÖLÇÜTÜ — dördü de gerekli
+1. **İşlem başına net getiri** kontrolden yüksek
+2. **İKİ YARIDA DA** yüksek (A ve B ayrı ayrı)
+3. **`t_küme` > +2,0**
+4. Üç rejimin hiçbirinde ters işaret yok
+
+⚠️ **EK ŞART:** işlem sayısı **%50'den fazla düşerse**, işlem başına kazanç artsa bile
+KALDI sayılır — ölçüm hızı bu projede bağlayıcı kısıt ve akışı yarıya indiren bir
+kazanç net değildir.
+
+### BEKLENTİ — sonuç görülmeden yazıldı
+**KARARSIZ bekliyorum, KALDI'ya yakın.** Gerekçe: (a) bu bir **giriş filtresi**, ve
+projenin kazananları giriş tarafından çıktı — çıkış sıkılaştırmalarının 29/29 sicili
+buraya uygulanmaz; (b) ama hipotez **N=25/21 anlık görüntüden** doğdu ve **11 alan
+tarandı**, yani ikisinden biri gürültü olabilir; (c) %32 akış kaybı ek şartı zorlar.
+
+⚠️ **ÇOKLU KARŞILAŞTIRMA UYARISI:** bu hipotez 11 alan taranarak bulundu. AUC %81
+tek başına kanıt değil — 2 yıllık bağımsız veri hakemdir.
+
+### Betik ve kayıt
+Betik: `scratchpad/asgari_stop.py` (yazılacak). Sonuç bu bölümün altına; **ölçüt metni
+sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9).
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
