@@ -1278,6 +1278,47 @@ Monotonluk yok; **iki uç da negatif** (yön yorumu ölür); ortalama/medyan çe
 ⚠️ **Sınırlar:** %27 eşleşme oranı (arşiv örneklemesi düzensiz) · 8 hafta · tek rejim.
 **Ön-kayıt YAZILMADI** — betimleyici tarama geçilemedi.
 
+### 🟡 MUM ŞEKLİ (reddetme) — KARIŞTIRICIDAN SAĞ ÇIKTI ama GEÇMEDİ (2026-08-19)
+
+Trader'ın *"mum reddetti"* dediği şey: son 3 barın ortalama kapanış konumu
+`(c−l)/(h−l)`. SHORT için **yüksek = tepeye yakın kapatıyor = alıcılar reddediyor.**
+Ölçüm 12. saatte, artıdaki pozisyonlarda.
+
+```
+kapanis konumu     N      HEDEFE varma
+dusuk (<0,35)    1676        %48,9
+orta             4214        %42,9
+yuksek (>0,65)    563        %36,8      ham fark 12,1 puan = 5,1 SE
+```
+
+**Karıştırıcı kontrolü (kâr sabit):**
+
+```
+kar bandi | dusuk       orta        yuksek     | fark    SE   kac SE
+  1-3     | 611 %31,6  1980 %30,1   340 %30,0  |  +1,6   3,1    0,5
+  3-5     | 500 %45,4  1340 %47,3   160 %41,9  |  +3,5   4,5    0,8
+  5+      | 565 %70,6   894 %64,8    63 %60,3  | +10,3   6,5    1,6
+TABAKALI (kar bandlariyla agirlikli):           |  +3,3   2,4    1,4
+```
+
+### ⭐ NEDEN BU "ÖLDÜ" DEĞİL — ayrım kütüğe giriyor
+
+| | *son yeni uç* (aynı gün) | *mum şekli* |
+|---|---|---|
+| ham | monotonik 11,8 puan | monotonik 12,1 puan |
+| kâr sabitlenince | **İŞARET DÖNDÜ** (−2,3 / +3,8 / −1,8) | **İŞARET KORUNDU** (+1,6 / +3,5 / +10,3) |
+| birleşik | gürültü | **+3,3 puan · 1,4 SE** |
+
+İşaretin bantlar arasında dönmesi **gürültünün imzasıdır**; burada üç bandın üçünde de
+aynı yön (şansla 1/8) ve **etki kârla birlikte büyüyor** (mekanizma önerisi: pozisyon
+hedefe yaklaştıkça reddetme sinyali ağırlık kazanıyor — ⚠️ bu post-hoc hikâye, ölçüm değil).
+
+### HÜKÜM: **ÖN-KAYIT YAZILMADI** — 1,4 SE, kendi eşiğimin (2,0) altında
+Zayıflığın sebebi **N**, ölçümün kendisi değil: en güçlü görünen hücre (+10,3 puan)
+**en az veriye** sahip (N=63). → **Bekleyen'e "N biriktiğinde tekrar bak" notuyla.**
+
+**"Öldü" ile "yetmedi" farklı şeylerdir** — bugünün diğer altı hipotezi öldü, bu yetmedi.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
