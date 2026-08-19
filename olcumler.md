@@ -1425,6 +1425,68 @@ hücre seçilmemeli. Yalnız `>12%` kovasının N=44 ile en büyük ve en kötü
 
 ---
 
+## ⭐ ÖN-KAYIT — `btc_pay` LONG PENCERESİ REJİMDEN BAĞIMSIZ MI? (2026-08-19, KOŞTURMADAN ÖNCE)
+
+### Soru
+`btc_pay` ölçümünün LONG bacağı (`UST + para durgun → LONG R +0,24 / +0,16`, 12 ay ·
+37.271 gözlem · **gerçek holdout**) koda **`rejim_ad == "AYI"` kolunun içine** konmuş
+([testbot.py:559](testbot.py#L559)). Kodun gerekçesi: *"AYI'da başka hiçbir long yolu
+YOKTU."* — bu bir **ekleme** sebebi, **hapsetme** sebebi değil. Ölçümün kendi tanımı
+piyasa seviyesinde: *"T-B **piyasa-seviyesi** bir İZİN penceresidir."*
+
+**Sonuç:** bugün `bant=UST` ✅ `para=DURGUN` ✅ ama `rejim=NOTR` olduğu için **ölçülmüş
+kapı kapalı**; bot ölçütü geçemeyen `notr_long_acik`'ı kullanıyor.
+
+### ⚠️ Bu bir VEKİL ölçümdür — orijinali yeniden üretmez
+Dayanak dosyalar (`PARA_SONUC.md` · `CIKIS_SONUC.md`) **kayıp**. Onun yerine iki gösterge
+2 yıllık mumlardan **yeniden kuruldu** ve gerçek loglarla doğrulandı:
+
+```
+                          vekil tanimi                        r      isaret
+btc_d_xs 3g degisim   BTC_3g - sepet MEDYAN 3g              +0,680    %72
+para_rejim 7g         0,56*BTC_7g + 0,44*sepet MEDYAN 7g    +0,882    %86
+```
+Sepet: ≥8000 barlık, hacimce en büyük **60** sembol. ⚠️ **MEDYAN zorunlu** — ortalama
+denendi, sıfıra yakın fiyatlı tokenlerde patladı (r düştü **+0,025**'e, aykırı −38.275).
+
+**Geçse bile orijinal ölçümü doğrulamış olmaz** — yalnız *"rejim koşulluluğu"* sorusunu
+cevaplar.
+
+### DONDURULAN PARAMETRELER — getiriye BAKILMADAN kalibre edildi
+```
+UST_ESIK = 2,8755     gercek UST anlarinin %50'sini yakalar (N=92); tum saatlerin %26'si
+DUR_ALT  = -2,8046    gercek PARA DURGUN anlarinin %80'ini kapsar (N=50)
+DUR_UST  =  2,3766    tum saatlerin %32'si
+```
+**Bu üç sayı sonuç görüldükten sonra DEĞİŞTİRİLMEZ.**
+
+### Ölçüm
+**4 hücre:** `{AYI, NOTR} × {UST+durgun, diğer}`. LONG girişleri, **kapısız** (rejim ve
+pencere dışında filtre yok), aynalanmış mekanik (stop aşağıda · hedef **+%10** · 72s),
+**fonlama + ücret dahil**, `SEYRELT=24` + **sembol başına faz kaydırma**.
+
+### GEÇME ÖLÇÜTÜ — dördü de gerekli
+1. `NOTR × UST+durgun` net getirisi `NOTR × diğer`'den **yüksek** (lift NOTR'da da var)
+2. Bu lift **iki zaman yarısında da** pozitif
+3. **İKİ-ÖRNEKLEMLİ t > +2,0** — ⚠️ `t_küme` **kullanılmayacak**: alt-küme testinde
+   tanımsız olduğu bugün (`asgari_stop` · `katilim_filtresi`) tespit edildi. Kullanılacak
+   istatistik: `(ort₁−ort₂) / sqrt(sh₁² + sh₂²)`, sembol kümelenmesi ayrıca **raporlanır**
+4. `AYI` lifti ile `NOTR` lifti **aynı işarette** — zıt işaret çıkarsa **rejim
+   koşulluluğu DOĞRULANIR ve kilit haklıdır**
+
+### BEKLENTİ — sonuç görülmeden yazıldı
+**KARARSIZ.**
+- **Lehte:** ölçümün kendi tanımı piyasa-seviyesi; kilidin gerekçesi ölçümden değil
+  boşluğun yerinden geliyor.
+- **Aleyhte:** bugün 7 hipotezin 6'sı öldü, 1'i yetmedi. Ve bu bir **vekil** (r=0,68 —
+  iyi ama mükemmel değil); vekil gürültüsü gerçek bir farkı silebilir.
+
+### Betik ve kayıt
+`scratchpad/btcpay_rejim.py` · ham çıktı `scratchpad/btcpay_rejim_sonuc.txt`.
+Sonuç bu bölümün **altına**; ölçüt metni değiştirilmez (D/9).
+**KARAR KAPSAMI (kullanıcı, 2026-08-19): YALNIZ ÖLÇÜM — kod değişikliği YOK.**
+Kilidin açılıp açılmayacağı 21-22 tartışmasında (altıncı bağlı iş).
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
