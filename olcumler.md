@@ -194,6 +194,14 @@ sinyali **üretemiyor**: aynı dönemde korelasyon **−0,12**, işaret uyuşmas
 oynatıldı → ortalama **−1,198%**, 9'u stop. Ölçümün öngörüsü tuttu. Ayrıntı aşağıda
 ("BTC-pay SHORT freni pencerede tetiklendi").
 
+> 🔴 **SHORT BACAĞI 2026-08-19 13:44'TE DEVRE DIŞI BIRAKILDI (kullanıcı kararı).**
+> `esikler.btc_pay_short_freni: 1 → 0`. **Ölçüm çürütülmedi** — aksine aynı gün canlı
+> doğrulandı (13 aday, −1,198%, 9 stop). Kapatma gerekçesi kâr değil **ölçüm akışı**:
+> pencere 2 gün boyunca SHORT üretmiyordu. Bu bir **pencere ihlalidir** ve kullanıcı
+> pencereyi devam ettirmeyi seçti → hüküm iki dönem ayrı raporlanmalı. Karar, gerekçe,
+> geri alma ve `[DEĞİŞTİ]` notu **`durum.md`**'de (tek sahip).
+> **LONG bacağı (AYI kolu, `btc_pay_ayi_long`) DOKUNULMADI.**
+
 #### ⚠️ ÖLÇÜMÜN LONG BACAĞI VAR AMA NOTR'DA ERİŞİLEMİYOR (2026-08-19'da fark edildi)
 
 Aynı ölçüm **iki** sonuç üretti; ikisi de aynı 37.271 gözlemden ve aynı holdout'tan:
@@ -870,6 +878,10 @@ frenin 12 aylık holdout ölçümünün (bu bantta SHORT R −0,02/−0,03) söy
 
 ⚠️ **N=13 · post-hoc · ön-kayıtsız · ufuk truncated (2 olay hâlâ açık).** İzlenim,
 kanıt değil. Yön nettir ama eşik değiştirmeye YETMEZ.
+
+> 🔴 **SONRAKİ GELİŞME (2026-08-19 13:44):** fren **kullanıcı kararıyla kapatıldı.**
+> Aşağıdaki ölçüm (frenin haklı olduğu) **geçerliliğini koruyor**; kapatma kararı bu
+> ölçüme rağmen ve ölçüm akışı gerekçesiyle alındı. Ayrıntı `durum.md`.
 
 ### 🔴 ASIL BULGU — fren doğru, boşluğu dolduran yanlış
 

@@ -328,9 +328,59 @@ olarak yok.** Alanın tanımı, `null`/`0.0` ayrımı ve süzgeç → **`CLAUDE.
   muhtaç değil), tutuş süresi × fonlama canlı doğrulaması, fonlamalı gerçek R.
 - Doğrulama: `scratchpad/funding_pozisyon_testi.py` — 15 kontrol, diske yazım YOK.
 
-## 🔴 BTC-pay SHORT freni AÇIK (2026-08-18'den beri)
+## 🔴🔴 FREN KAPATILDI — PENCERE İHLALİ (2026-08-19 13:44, KULLANICI KARARI)
 
-**Durum:** SHORT girişi kapalı. Bot yalnız `NOTR-belirsiz long` kapısından girebiliyor.
+> **`esikler.btc_pay_short_freni: 1 → 0`.** Config `.gitignore`'da olduğu için bu
+> değişikliğin **git izi YOK** — tek kalıcı kaydı burası ve config içindeki
+> `_btc_pay_short_freni_not` alanı. Yedek: `kripto-config.json.yedek-20260819-134420`.
+> **Geri alma:** o alanı `1` yap.
+
+**Kullanıcının gerekçesi:** *"8 gündür fren açıktı ve bot poza giriyordu, devam etsin;
+2 gün içinde oluşan pozlardan doğru sonuç çıkmaz."* Öncül **doğrulandı** — 7-17 Ağustos
+arası **11 gün** fren hiç devreye girmedi; 18-19'da açıldı ve SHORT girişi sıfırlandı.
+
+### ⚠️ BU BİR ÖLÇÜM PENCERESİ İHLALİDİR — hüküm yazan bunu okumak zorunda
+
+Pencere kuralı: *"parametre değişmez, kapı eklenmez, eşik oynatılmaz."* Kural seti
+**92 pozisyonda** değişti. Kullanıcıya üç seçenek sunuldu (sıfırla / devam / vazgeç);
+**"pencereyi DEVAM ettir" seçildi.**
+
+**[DEĞİŞTİ 2026-08-19 — D/9, eski ölçüt SİLİNMEDİ]** Pencere artık **tek sayı olarak
+raporlanamaz.** Hüküm yazılırken iki dönem **ayrı** verilir:
+
+```
+12 Agu 01:17 - 19 Agu 13:44   FRENLI   bot   (92 pozisyon)
+19 Agu 13:44 - pencere sonu   FRENSIZ  bot   (yeni)
+```
+
+Ön-kayıtlı *"toplam net > 0 **ve** ikinci yarı > 0"* ölçütü bu yüzden **belirsiz** hâle
+geldi: "ikinci yarı" artık farklı bir botu ölçüyor. Ölçüt metni değiştirilmedi, ama
+**uygulanabilirliği tartışmalı** — 21-22 tartışmasının ilk maddesi bu olmalı.
+
+### ⚠️ Ölçüm frenin HAKLI olduğunu söylüyordu
+
+2026-08-19'da frenlenen 13 aday ileri oynatıldı: **ortalama −1,198%, 9'u STOP**
+(`olcumler.md`). Yani fren kapatmak **kaybettiren işlemleri açar.** Kullanıcı bunu
+bilerek seçti; gerekçesi kâr değil **ölçüm akışı**.
+
+Ayrıca `btc_pay`, projenin **tek gerçek out-of-sample sinyali** (12 ay · 37.271 gözlem ·
+saklı dönem +0,46). **SHORT bacağı şu an devre dışı; LONG bacağı (AYI kolu) dokunulmadı.**
+
+### Fren kendiliğinden ne zaman düşecekti
+
+**21 Ağustos.** `btc_d_xs` 17→18 Ağustos'ta tek günde +0,3022 sıçradı; sıçrama 3 günlük
+pencereden 21'inde çıkıyordu. Yani ihlal **2 günlük** bir bekleme yerine yapıldı.
+
+Kontrol komutu (rakam buraya yazılmaz, okunur):
+
+```bash
+python -c "import json,datetime; r=[json.loads(l) for l in open('btc_pay_log.jsonl',encoding='utf-8') if l.strip()]; d={x['gun']:x['btc_d_xs'] for x in r}; g=r[-1]['gun']; v=r[-1]['btc_d_xs']; ref=(datetime.date.fromisoformat(g)-datetime.timedelta(days=3)).isoformat(); print(g, round(v,4), 'degisim', round(v-d.get(ref,v),4), '-> UST(fren bandi)' if v-d.get(ref,v)>=0.287 else '-> serbest')"
+```
+
+## ~~🔴 BTC-pay SHORT freni AÇIK (2026-08-18'den beri)~~ [KAPATILDI 2026-08-19]
+
+**Eski durum (kayıt için korundu):** SHORT girişi kapalıydı; bot yalnız
+`NOTR-belirsiz long` kapısından girebiliyordu.
 
 **Ne zaman kalkar:** fren *seviyeye* değil **3 günlük değişime** bakar. `btc_d_xs`
 17→18 Ağustos'ta tek günde **+0,3022** sıçradı; sıçrama 3 günlük pencerede kaldığı
