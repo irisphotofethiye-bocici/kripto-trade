@@ -1483,9 +1483,76 @@ pencere dışında filtre yok), aynalanmış mekanik (stop aşağıda · hedef *
 
 ### Betik ve kayıt
 `scratchpad/btcpay_rejim.py` · ham çıktı `scratchpad/btcpay_rejim_sonuc.txt`.
-Sonuç bu bölümün **altına**; ölçüt metni değiştirilmez (D/9).
+**Ölçüt metni sonuç görüldükten sonra DEĞİŞTİRİLMEDİ.**
 **KARAR KAPSAMI (kullanıcı, 2026-08-19): YALNIZ ÖLÇÜM — kod değişikliği YOK.**
 Kilidin açılıp açılmayacağı 21-22 tartışmasında (altıncı bağlı iş).
+
+### 🟢 SONUÇ — **GEÇTİ** (2026-08-19, 565 sembol / 2 yıl / vekil)
+
+```
+          UST+durgun          diger              LIFT      2-ornekli t
+AYI     N=  157  +0,122%   N= 9206  -0,222%     +0,344%       +0,73
+NOTR    N= 3458  -0,079%   N=43439  -0,385%     +0,306%       +3,13
+BOGA    N=  604  -1,857%   N= 8378  +0,185%     -2,043%       -9,95
+```
+
+| ölçüt | sonuç |
+|---|---|
+| **1.** `NOTR` lifti pozitif | ✅ **+0,306%** |
+| **2.** iki yarıda da pozitif | ✅ A **+0,314** (t +2,42) · B **+0,298** (t +2,04) |
+| **3.** iki-örneklemli t > +2,0 | ✅ **+3,13** — yarılar da eşiğin üstünde |
+| **4.** `AYI` ve `NOTR` aynı işarette | ✅ +0,344 / +0,306 |
+
+**DÖRDÜ DE GEÇTİ.** Ön-kayıtlı beklenti (*"kararsız"*) tutmadı — sonuç beklediğimden
+temiz çıktı.
+
+**Yorum:** `UST + para durgun` penceresinin LONG kenarı **NOTR'da da var** ve
+`AYI`'dakiyle **aynı büyüklükte** (+0,306 vs +0,344). Kilidin `AYI`'ya hapsedilmesi
+ölçümle desteklenmiyor — kodun gerekçesi (*"AYI'da başka long yolu yoktu"*) bir ekleme
+sebebiydi, hapsetme sebebi değil. **Ölçüm bunu doğruladı.**
+
+### 🔴 ÖLÇÜTTE OLMAYAN AMA EN ÖNEMLİ BULGU — BOĞA'da pencere ZARARLI
+
+```
+BOGA   UST+durgun -1,857%   ·   diger +0,185%   ->   LIFT -2,043%   t=-9,95
+```
+
+Boğa rejiminde pencere **kenarı tersine çeviriyor** ve etki **devasa** (t=−9,95,
+iki yarıda da: −2,372 ve −1,713).
+
+⭐ **Bu, orijinal ölçümün kendi uyarısının DOĞRULANMASI.** `_btc_pay_not` şöyle diyordu:
+
+> *"SINIR: ölçülen 12 ayın TAMAMI düşen piyasa. **Yükselen piyasada ilişki tersine
+> dönebilir — ölçülmedi.**"*
+
+**Şimdi ölçüldü ve gerçekten dönüyor.** Yani kilit yanlış yerde ama **bir kilit gerekiyor**:
+`AYI` değil, **`BOGA` HARİÇ**.
+
+### ⚠️ KÜMELENME — ön-kayıtta "ayrıca raporlanır" denmişti
+
+```
+       N      ayri sembol   olay/sembol    t      t_kume (kaba ust-sinir)
+AYI    157       137           1,1       +0,73    +0,68
+NOTR  3458       495           7,0       +3,13    +1,18
+BOGA   604       304           2,0       -9,95    -7,06
+```
+
+`NOTR`'da `t_küme = +1,18` — **eşiğin altında.** Ön-kayıt iki-örneklemli t seçtiği için
+**ölçüt t üzerinden okunur ve geçmiştir**; ama gerçek değer **t ile t_küme arasındadır**
+(`olcum_ortak`: *"KABA üst-sınır düzeltmesi"*). Bu, sonucu **zayıflatan** ama
+çürütmeyen bir kayıt.
+
+### ⚠️ Bu bir VEKİL ölçümdür
+Orijinali yeniden üretmedi. `btc_d_xs` vekili r=+0,680 — vekil gürültüsü liftleri
+**küçültme** yönünde çalışır, yani gerçek etki muhtemelen ölçülenden **büyük**. Ama
+eşik kalibrasyonu da vekil üzerinden yapıldığı için hücre tanımları gerçek kapıyla
+birebir aynı değil.
+
+### Ne yapılmadı
+**Kod değiştirilmedi** (kullanıcı kararı). Bu sonuç 21-22 tartışmasına **altıncı bağlı
+işin girdisi** olarak gidiyor. Orada karara bağlanacak iki şey:
+1. `btc_pay` LONG penceresi `AYI` kilidinden çıkarılıp **`BOGA` hariç** yapılsın mı?
+2. Ölçütü geçemeyen `notr_long_acik` açık kalmaya devam etsin mi?
 
 ## Bekleyen — ölçülmedi
 
