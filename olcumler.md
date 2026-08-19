@@ -1725,3 +1725,57 @@ girmemis**; `onceki_gun` alani gercek tarihi tasidigi icin izlenebilir. Duzeltil
 **Karara etkisi:** kullanici bu bulguya RAGMEN freni ucuncu kez kapatti (21:40);
 gerekcesi gecikme degil, *olcum penceresinin kapiya bagli kalmamasi*. Kayit `durum.md`.
 
+### ON-KAYIT — FRENIN KENDISI (btc_pay SHORT bacagi) REJIMDEN BAGIMSIZ MI? (2026-08-19)
+
+**KOSTURULMADAN ONCE YAZILDI VE COMMIT EDILDI.** Olcut metni sonradan
+degistirilmez (D/9). Esik taranmaz, hucre secilmez.
+
+**NEDEN:** `btc_pay` SHORT freni su an CANLI ve bugun uc kez elle degistirildi.
+Freni kuran olcumun KENDI yazili uyarisi: *"SINIR: olcumun 12 ayinin tamami
+DUSEN piyasa. Yukselen piyasada iliski tersine donebilir."* BTC 18-19 Agustos'ta
+64,5k -> 69,5k kirilim yapti. Ayni gun olculen LONG bacaginda BOGA rejiminde
+lift **−2,043% (t=−9,95)** cikti, yani isaret DONDU. **SHORT bacagi — yani
+frenin kendisi — rejime gore HIC sinanmadi.** Bu on-kayit o boslugu kapatir.
+
+**FRENIN IDDIASI (sinanan sey):** `bant == UST` iken SHORT kenari DUSUKTUR,
+o yuzden SHORT girisi engellenmelidir. Orijinal olcum: UST ceyrek SHORT R
+kesif −0,02 / sakli −0,03; ALT ceyrek +0,27/+0,16 (temel +0,06/+0,04).
+
+**HIPOTEZ:** frenin iddiasi UC REJIMDE DE gecerlidir; ozellikle BOGA'da da
+`UST` SHORT'lari `diger`den kotudur.
+
+**VEKIL UYARISI:** dayanak dosya `PARA_SONUC.md` KAYIP. `btc_d_xs` 3g,
+2 yillik mumlardan yeniden kuruldu (BTC 3g − sepet **MEDYAN** 3g), gercek
+`btc_pay_log` ile dogrulandi: r=+0,680, isaret uyusmasi %72. **MEDYAN ZORUNLU**
+(ortalama r=+0,025'e cokuyor). Bu olcum orijinali YENIDEN URETMEZ; yalniz
+*"rejim kosulluluğu"* sorusuna cevap verir.
+
+**DONDURULMUS PARAMETRE:** `UST_ESIK = 2.8755` — `btcpay_rejim.py`'de LONG
+sinavi icin getiriye BAKILMADAN kalibre edilmisti; **aynen** kullanilir,
+yeniden kalibre EDILMEZ. `para_durgun` kosulu YOK (fren onu kullanmiyor).
+
+**OLCUM:** 6 hucre = {AYI, NOTR, BOGA} x {UST, diger}. **SHORT** girisleri,
+botun A-varyanti stop, hedef −%10, ufuk 72s, **maliyet + FONLAMA dahil**,
+`SEYRELT=24` + **sembol basina faz kaydirma**. Hucre basina asgari N=40.
+
+**GECME OLCUTU — "fren BOGA'da da hakli" hukmu icin ucu de gerekli:**
+1. `BOGA x UST` net getirisi `BOGA x diger`'den **DUSUK** (lift < 0)
+2. Bu lift **iki zaman yarisinda da** negatif
+3. **IKI-ORNEKLEMLI** t (alt-kume degil, ayrik kumeler) **< −2,0**
+
+**TERS HUKUM — fren BOGA'da ZARARLIDIR:** lift > 0 **ve** iki-ornekli t > +2,0
+**ve** iki yari da pozitif. Bu cikarsa fren `rejim != BOGA` ile sinirlandirilmali
+onerisi 21-22 tartismasina tasinir (karar orada, burada DEGIL).
+
+**BELIRSIZ:** ikisi de cikmazsa hukum "yetersiz" yazilir ve fren OLDUGU GIBI kalir.
+
+**BEKLENTI (sonuc gorulmeden yaziliyor):** LONG bacaginin BOGA'da isaret
+cevirdigi olculdu; SHORT bacaginda da cevirmesi MEKANIK OLARAK BEKLENIR
+(ayni gostergenin iki yuzu). Ama bu beklenti bir kez daha yaniltabilir —
+bugun 7 hipotezin 6'si oldu. Ayrica BOGA hucresinde N kucuk cikabilir.
+
+**KARAR YETKISI:** bu olcum HICBIR kod degisikligi TETIKLEMEZ. Sonuc ne olursa
+olsun karar 21-22 tartismasinda kullanicidadir.
+
+**Betik:** `scratchpad/btcpay_fren_rejim.py` (bu on-kayittan SONRA yazilacak).
+
