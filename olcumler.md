@@ -141,6 +141,58 @@ aşağı çekmeyi öneren her fikir bu monotonluğa karşı savunma yapmak zorun
 | Sistem denetimi | 08-11 | — | **9 doğrulanmış hata → 8 KAPANDI, 1 AÇIK.** Düzeltmeler 08-11 18:44'te girdi ve **ölçüm penceresi aynı anda yeniden başlatıldı** (s.2510). Durum dökümü aşağıda | `denetim_olcum.py` | s.2371 · s.2453 · s.2510 · `denetim-raporu.md` |
 | Defter izolasyon testi | 08-13 | 14 kontrol | **GEÇTİ** — 4 defterin hepsi | `defter_izolasyon_testi.py` | s.3469 |
 | Ölçüm ağırlık hatası (ilk parti) | 08-11 | — | **düzeltildi** — ölçümün ağırlığı yanlıştı | `boyut_agirlik.py` | s.1609 |
+| **BTC risk-payı (`btc_d_xs`) → SHORT freni** | 08-04 | 12 ay · 103 sembol · **37.271** | ⭐ **GEÇTİ — projenin TEK gerçek out-of-sample sinyali.** Aşağıda | betik KAYIP (bkz. not) | commit `4f5046a` · config `_btc_pay_not` |
+
+### ⭐⭐ BTC risk-payı freni — GERÇEK HOLDOUT'TAN GEÇEN TEK SİNYAL (2026-08-04)
+
+**Kütüğe 2026-08-19'da eklendi** — ölçüm indeks kurulmadan (08-17) önce yapıldığı için
+arada kalmıştı. *"Bunu daha önce ölçtük mü?"* sorusuna yanlış cevap verdiriyordu.
+
+**Sinyal:** `btc_d_xs` = BTC mcap ÷ (TOTAL − stablecoin mcap) — BTC'nin **risk varlıkları
+içindeki payı**. Stablecoin çıkarılır çünkü *"para kriptodan çıktı mı"* ile *"para kripto
+içinde BTC'ye mi kaydı"* farklı sorulardır; ölçülen ikincisi. **Seviye değil, 3 günlük
+PUAN değişimi.**
+
+```
+12 ay · 103 sembol · 37.271 gozlem
+GERCEK HOLDOUT:  kesif 2025-08..2026-03  |  SAKLI 2026-04..2026-08
+
+  ALT ceyrek        SHORT R  +0,27 / +0,16     (temel +0,06 / +0,04)
+  UST ceyrek        SHORT R  -0,02 / -0,03     <-- FRENLENEN BANT
+  UST + para-durgun LONG  R  +0,24 / +0,16     (rastgele -0,07 / -0,04)
+
+  kesif/sakli ayrimi  +0,45  vs  +0,46      <-- HIC BOZULMADI
+  saklida dilimler    MONOTON sirali (+1,00)
+```
+
+**Neden bu ölçüm diğerlerinden farklı:** bu projedeki çoğu ölçüm veriyi ikiye bölüp
+*"iki yarıda da tuttu mu"* diye bakar. Burada **saklı dönem gerçekten saklıydı** — keşif
+8 ayda yapıldı, sonraki 4 ay hiç görülmeden sınandı ve ayrım bozulmadı.
+
+**Eşikler İCAT EDİLMEDİ:** 365 günlük serinin çeyrekleri — ÜST %75 = **+0,287**,
+ALT %25 = **−0,318**.
+
+**Kural asimetrik, çünkü ölçüm asimetrik.** Fren **yalnız SHORT'u kapatır, hiçbir LONG
+AÇMAZ** (kodda yazılı: `[FREN LONG-NOTR]`). Mekanizma tezi: BTC pay kazanırken alt'lar
+zaten satılmış olur, short'a aşağıda alan kalmaz → kenar sıfıra iner (+0,06 → −0,02),
+işlem maliyetini bile çıkarmaz.
+
+**AYRI LOG NEDENİ — kayda değer:** mevcut `piyasa_yapisi_log` BTC.D topluyordu ama bu
+sinyali **üretemiyor**: aynı dönemde korelasyon **−0,12**, işaret uyuşması **%47**
+(yazı-tura). Sebep: o log günde ~2 kez **düzensiz saatlerde** yazıyor. Ondan beslenseydik
+**ölçülen sinyali değil gürültüyü** bağlamış olurduk → `btc_pay_log.jsonl` ayrı ve günlük.
+
+> ⚠️ **SINIR (commit mesajında yazılı):** ölçülen 12 ayın **tamamı düşen piyasa**
+> (TOTAL −%40). **Yükselen piyasada ilişki tersine dönebilir — ölçülmedi.**
+
+> ⚠️ **BETİK KAYIP.** Ölçüm, betiklerin geçici oturum klasöründe tutulduğu dönemde
+> yapıldı (s.617'deki uyarı: *"o ölçümler bugün yeniden koşulamıyor, yalnız sonuçları
+> kayıtlı"*). **Yeniden üretilemez** — rakamlar commit `4f5046a` mesajından ve config
+> `_btc_pay_not` alanından geliyor. Geri alma: `esikler.btc_pay_short_freni = 0`.
+
+**Canlı doğrulama (2026-08-19):** fren pencerede tetiklendi ve frenlediği 13 aday ileri
+oynatıldı → ortalama **−1,198%**, 9'u stop. Ölçümün öngörüsü tuttu. Ayrıntı aşağıda
+("BTC-pay SHORT freni pencerede tetiklendi").
 
 ### ⭐ Bulgu: A+B'nin ham kenarının %65'ini KENDİ STOPUMUZ yiyor (s.2259)
 
