@@ -1548,6 +1548,40 @@ Orijinali yeniden üretmedi. `btc_d_xs` vekili r=+0,680 — vekil gürültüsü 
 eşik kalibrasyonu da vekil üzerinden yapıldığı için hücre tanımları gerçek kapıyla
 birebir aynı değil.
 
+### ⚠️ KARŞI-OLGU KONTROLÜ — "kanıtlı kapı olsaydı son 3 gün farklı olur muydu?"
+
+**HAYIR, hatta biraz daha kötü.** Kullanıcı sorusu üzerine ölçüldü (2026-08-19):
+
+```
+sym    bant   stage         skor   btc_pay penceresi        gercek sonuc
+XPIN   ORTA   HAZIRLANIYOR  42,1   GECMEZ (bant, skor<45)   +79,17  <-- KAZANAN
+HOME   UST    BASLIYOR      51,2   GECER                   -154,13
+PRL    UST    BASLIYOR      68,5   GECER                   -147,56
+DOS    UST    BASLIYOR      89,1   GECER                   -148,31
+```
+
+```
+gercek (notr_long_acik)   +79,17 -154,13 -147,56 -148,31  =  -370,83
+kanitli kapi olsaydi             -154,13 -147,56 -148,31  =  -450,00
+                                                    FARK      -79,17
+```
+
+**Üç zararın üçünü de `btc_pay` penceresi de açardı** (bant UST · skor ≥45 · stage aktif ·
+taker ≥1,0 · blowoff yok — hepsi sağlanıyor). **Ve tek kazananı kaçırırdı.**
+
+**Neden şaşırtıcı değil:** iki kapı aynı kalite filtrelerini (blowoff · long_veto ·
+taker ≥1,0) ve aynı `stage` şartını kullanıyor. Farkları küçük:
+`notr_long_acik` → `smart == LONG`, eşik 40/45 · `btc_pay` → `smart != SHORT`, eşik hep 45
+**artı** bant UST + para durgun.
+
+### ⭐ DERS — bu kayıt ileride "keşke açsaydık" anlatısını önlemek için var
+
+Ölçümün söylediği şey *"bu pencerede LONG işlem başına **+0,3 puan** daha iyi"*.
+Bu **binlerce işlemde** anlamlı bir kenardır, **3 işlemde görünmez.** N=3'tür.
+
+**Kilit açma kararı hâlâ doğru — ama doğru sebeple:** 2 yıllık ölçüm `t=+3,13` diyor,
+son 3 gün değil. Aynı disiplin bugün yedi hipotezi eledi; burada da geçerli.
+
 ### Ne yapılmadı
 **Kod değiştirilmedi** (kullanıcı kararı). Bu sonuç 21-22 tartışmasına **altıncı bağlı
 işin girdisi** olarak gidiyor. Orada karara bağlanacak iki şey:
