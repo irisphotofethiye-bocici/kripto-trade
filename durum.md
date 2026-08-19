@@ -343,12 +343,22 @@ olarak yok.** Alanın tanımı, `null`/`0.0` ayrımı ve süzgeç → **`CLAUDE.
   muhtaç değil), tutuş süresi × fonlama canlı doğrulaması, fonlamalı gerçek R.
 - Doğrulama: `scratchpad/funding_pozisyon_testi.py` — 15 kontrol, diske yazım YOK.
 
-## 🔴🔴 FREN KAPATILDI — PENCERE İHLALİ (2026-08-19 13:44, KULLANICI KARARI)
+## 🔴🔴 FREN — 2026-08-19'da ÜÇ KEZ DEĞİŞTİ (hepsi KULLANICI KARARI)
 
-> **`esikler.btc_pay_short_freni: 1 → 0`.** Config `.gitignore`'da olduğu için bu
-> değişikliğin **git izi YOK** — tek kalıcı kaydı burası ve config içindeki
-> `_btc_pay_short_freni_not` alanı. Yedek: `kripto-config.json.yedek-20260819-134420`.
+> **`esikler.btc_pay_short_freni`.** Config `.gitignore`'da olduğu için bu
+> değişikliklerin **git izi YOK** — tek kalıcı kaydı burası ve config içindeki
+> `_btc_pay_short_freni_not` alanı (üç kararı da sırayla taşır).
 > **Geri alma:** o alanı `1` yap.
+
+| saat | değişiklik | gerekçe (özet) | yedek |
+|---|---|---|---|
+| 13:44 | 1 → **0** | ölçüm akışı; 2 gündür SHORT girişi yoktu | `...yedek-20260819-134420` |
+| 19:30 | 0 → **1** | ölçüm eşit ağırlıkta değil + frenlenen 13 aday −1,198% | `...yedek-20260819-192809` |
+| 21:40 | 1 → **0** | ölçüm süreci frenin kararına bağlı kalmasın | `...yedek-20260819-214013` |
+
+⚠️ **19:30 geri açma bu dosyaya 21:40'a kadar İŞLENMEMİŞTİ.** Yani `durum.md` iki
+saat boyunca frenin kapalı olduğunu söylerken fren açıktı. Kaydedilmemiş indeks
+yalan söyler — bu maddenin kendisi o kuralın kanıtı.
 
 **Kullanıcının gerekçesi:** *"8 gündür fren açıktı ve bot poza giriyordu, devam etsin;
 2 gün içinde oluşan pozlardan doğru sonuç çıkmaz."* Öncül **doğrulandı** — 7-17 Ağustos
@@ -364,9 +374,14 @@ Pencere kuralı: *"parametre değişmez, kapı eklenmez, eşik oynatılmaz."* Ku
 raporlanamaz.** Hüküm yazılırken iki dönem **ayrı** verilir:
 
 ```
-12 Agu 01:17 - 19 Agu 13:44   FRENLI   bot   (92 pozisyon)
-19 Agu 13:44 - pencere sonu   FRENSIZ  bot   (yeni)
+12 Agu 01:17 - 19 Agu 13:44   FRENLI    (92 pozisyon)
+19 Agu 13:44 - 19 Agu 19:30   FRENSIZ   (5 sa 46 dk, 4 SHORT, realize+acik -46,22)
+19 Agu 19:30 - 19 Agu 21:40   FRENLI    (2 sa 10 dk, 14 aday vetolandi)
+19 Agu 21:40 - pencere sonu   FRENSIZ   (yeni)
 ```
+
+**Pencere artık DÖRT dilim taşıyor.** Hüküm yazan bu dilimleri ayrı raporlamak
+zorundadır; tek sayı üretmek dört farklı kural setini toplamaktır.
 
 Ön-kayıtlı *"toplam net > 0 **ve** ikinci yarı > 0"* ölçütü bu yüzden **belirsiz** hâle
 geldi: "ikinci yarı" artık farklı bir botu ölçüyor. Ölçüt metni değiştirilmedi, ama
@@ -380,6 +395,32 @@ bilerek seçti; gerekçesi kâr değil **ölçüm akışı**.
 
 Ayrıca `btc_pay`, projenin **tek gerçek out-of-sample sinyali** (12 ay · 37.271 gözlem ·
 saklı dönem +0,46). **SHORT bacağı şu an devre dışı; LONG bacağı (AYI kolu) dokunulmadı.**
+
+### Fren GERÇEKTEN gecikmeli mi? — ölçüldü (2026-08-19, `scratchpad/fren_gecikme.py`)
+
+Üçüncü değişikliğin gerekçesi *"fren gecikmeli çalışıyor"* idi. 380 günlük
+`btc_pay_log` üzerinde tanımsal çözümleme yapıldı — **önerme desteklenmedi:**
+
+| soru | bulgu |
+|---|---|
+| UST günleri neyle tetikleniyor | **%44,7 bugünün kendi hareketi** · %25,5 dün · %29,8 iki gün önce |
+| fren bırakırken ne oluyor | **%83,6 gerçek düşüş** · %16,4 referans yürümesi |
+| UST serisinin ömrü | medyan **1 gün** · ortalama 1,7 · en uzun 4 |
+| kalibrasyon | UST günleri %24,9 — tasarım %25, **doğru** |
+
+**Gecikme genel değil, BU seriye özgü:** 19 Ağustos'un 3 günlük değişimi +0,4048'in
++0,3022'si 18 Ağustos adımından taşınıyor, günün kendi adımı yalnız +0,0658.
+
+Karar bu bulguya **rağmen** alındı; kullanıcının ikinci gerekçesi (*ölçüm penceresi,
+rejimde sınanmamış bir kapının kararına bağlı kalmasın*) bu ölçümden bağımsızdır.
+
+### ⚠️ Açık kalan soru — frenin kendi sınırı
+
+`btc_pay`'i kuran ölçümün yazılı uyarısı: *"12 ayın tamamı DÜŞEN piyasa."* BTC 18-19
+Ağustos'ta 64,5k → 69,5k kırılım yaptı. Ölçümün **LONG bacağının** BOĞA'da işaret
+çevirdiği 2026-08-19'da gösterildi (lift −2,043%, t=−9,95). **SHORT bacağı — yani
+frenin kendisi — rejime göre HİÇ sınanmadı.** Ölçülebilir; `scratchpad/btcpay_rejim.py`
+iskeleti hazır. 21-22 tartışmasının maddesi.
 
 ### Fren kendiliğinden ne zaman düşecekti
 

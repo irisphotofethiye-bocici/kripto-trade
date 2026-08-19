@@ -1676,3 +1676,52 @@ ya yardımcı (veri indirme: `funding_indir.py`, `scalp_1m_indir.py`, `ze_veri.p
 da defterde ayrı bir sonuç bölümü olmayan ara çalışmalar. Bir betiği kullanmadan önce
 defterde karşılığı olup olmadığına bak; yoksa **sonucu yeniden üretilmeden
 güvenilmez.**
+
+### FREN GECIKMESI — btc_pay UST bandinin devreye girme/birakma mekanigi (2026-08-19)
+
+**Tur:** tanimsal cozumleme (getiri olcumu DEGIL, on-kayit gerektirmez — hicbir esik
+taranmadi, hicbir kural onerilmedi). **Betik:** `scratchpad/fren_gecikme.py`.
+**Veri:** `btc_pay_log.jsonl`, 380 gun (2025-08-05 .. 2026-08-19), 377 karsilastirilabilir.
+
+**Soru:** kullanici *"fren gecikmeli calisiyor, karar geldiginde cok gec"* dedi. Dogru mu?
+
+```
+UST gunu: 94 / 377  (%24.9)          <-- tasarim ust ceyrek %25, KALIBRASYON DOGRU
+
+(1) DEVREYE GIRERKEN — 3g degisimini en cok hangi yastaki gunluk adim tasiyor
+    bugunun kendi hareketi : 42  (%44.7)
+    1 gun onceki           : 24  (%25.5)
+    2 gun onceki           : 28  (%29.8)
+
+(2) BIRAKIRKEN — fren kalktigi gun BTC payi ne yapmisti
+    GERCEKTEN dustu        : 46 / 55  (%83.6)
+    artti ama fren kalkti  :  9 / 55  (%16.4)   <-- referans yurumesi
+
+UST serisi: 56 adet · medyan 1 gun · ortalama 1,7 · en uzun 4
+Gunluk |adim|: medyan 0,1982 · %90 dilim 0,6709 · 08-18 sicramasi 0,3022 (%67 dilim)
+```
+
+**HUKUM: "fren GENEL OLARAK gecikmeli" onermesi DESTEKLENMEDI.** Vakalarin %44,7'sinde
+bugunun kendi hareketiyle tetikleniyor, %83,6'sinda gercek dususle birakiyor, normal
+omru **1 gun**. Gecikme SU ANKI seriye ozgu: 08-19'un 3g degisimi +0,4048'in +0,3022'si
+08-18 adimindan tasiniyor, gunun kendi adimi +0,0658.
+
+**Yan bulgu — 08-18 sicramasi olaganustu DEGIL.** 0,3022 gunluk adimlarin yalnizca
+%67. dilimi; medyan gunluk adim 0,1982. Yani 3 GUNLUK degisim icin konan +0,287 esigi,
+TEK tipik gunun hareketinin ~1,5 kati. Kapi dogasi geregi gurultulu — ama bu tasarim
+geregi (ust ceyrek), kusur degil.
+
+**Veri denetimi (ayni kosumda):** 380 gunde **eksik gun yok**; `kapsam` canli donemde
+sabit 130 (geri-doldurulan tarihsel bolumde 105 -> 130 surukleniyor, seviye farki
+belgelenmis −0,062 puan — 3 GUNLUK FARK aldigi icin sabit ofset sadelesir);
+tek zamanlama sapmasi 2026-08-14 anlik goruntusu (03:32, digerleri 00:0x).
+
+**Gizli kusur bulundu (aktif DEGIL):** `evren.btc_pay_akisi` donusunde
+`"gun_farki": gun` — yani her zaman **3** yaziyor, +-1 gun toleransi 2 ya da 4 gunluk
+bir kayitla eslesse bile. Kutukte eksik gun olmadigi icin tolerans **hic devreye
+girmemis**; `onceki_gun` alani gercek tarihi tasidigi icin izlenebilir. Duzeltilmedi
+(bota dokunmama).
+
+**Karara etkisi:** kullanici bu bulguya RAGMEN freni ucuncu kez kapatti (21:40);
+gerekcesi gecikme degil, *olcum penceresinin kapiya bagli kalmamasi*. Kayit `durum.md`.
+
