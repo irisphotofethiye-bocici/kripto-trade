@@ -1369,6 +1369,62 @@ Yeni bir aday çıktığında **ilk sorulacak test bu olmalı**: *"ters yönde t
 Ucuz, keskin, ve artefaktı gerçek mekanizmadan ayırıyor. ⚠️ Ama **geçmesi yetmez** —
 mum şekli geçti ve yine de kullanılamaz çıktı.
 
+## BTC KIRILIMI — gözlem penceresi açıldı (2026-08-19) ⏳ ÖN-KAYIT, hüküm YOK
+
+**Olay ölçüldü** (Binance perp, 1h): 44 günlük sıkışma kırıldı. Son 20 günün
+kapanışları **62.792–64.928** aralığında, yalnız **%3,4 genişlik** — akümülasyon
+iddiası veriyle doğrulandı. 08-19 **15:00 UTC** saatinde açılış 65.895 → tepe
+**70.450** → kapanış 68.523; hacim **103.352 BTC**, önceki saatlerin **~30 katı**.
+Gün içi tepe 44 günün tepesini **%5,3** aştı.
+
+**Mekanizma — squeeze DEĞİL, yeni kaldıraçlı long:**
+
+| gösterge | kırılım saati | okuma |
+|---|---|---|
+| OI | 105.230 → **110.212 BTC** (%+3,29) | **artıyor** — squeeze'de düşerdi |
+| taker alış/satış | **1,42** (60.579 / 42.773) | agresif alıcı baskın |
+| fonlama | +0,0016% → **+0,0100%** | long'lar ödemeye başladı |
+| genişlik | perp'lerin **%72'si** artıda | piyasa geneli, tek coin değil |
+
+**Dış katalizör** (web, tek kaynak değil — ölçüm değil *bağlam*): ABD Hazinesi'nin
+uzun vadeli tahvil alım açıklaması → getiriler düştü → risk varlıkları yukarı.
+Yanında spot BTC ETF'lerine ~**298 M$** net giriş (IBIT 160 M$, FBTC 112 M$) ve
+~60 günlük dağıtımdan sonra balina tarafında birikime dönüş. ⚠️ **Bu satır haber
+özetidir, ölçüm değildir; kural dayanağı yapılamaz.** Yerel olarak ölçülen tek şey
+yukarıdaki tablodur.
+
+**Neden bizi ilgilendiriyor:** bot **yapısal SHORT**. Kapanmış 121 pozisyonun
+**111'i SHORT (%92)**; tezi `MA50+ucuz` = MA50'nin çok üstündeki ucuz coinleri
+satmak, yani **ortalamaya dönüş**. Geniş bir melt-up bu tezin en kötü ortamıdır.
+Kırılım saatinde `BIO` SHORT stop oldu (**−74,93**), ve bot kırılımdan *sonra*
+`RSR` (19:01) ile `ZAMA` (19:09) SHORT'larını açtı — yani **olayı görmedi**.
+
+**ÖN-KAYIT — sonucu görmeden yazıldı** (betik: `scratchpad/kirilim_gozlem.py`,
+çıktı `scratchpad/kirilim_gozlem.jsonl`, 5 dk aralık):
+
+- **H1** — Geniş melt-up'ta `MA50+ucuz` SHORT'ları daha sık stoplanır.
+  **Ölçüt:** kırılım penceresindeki SHORT stop oranı, **tabanı ≥15 puan** aşarsa
+  H1 desteklenir. **TABAN ŞİMDİ SABİTLENDİ: %68,2 (N=110)** → eşik **%83,2**.
+- **H2** — Bot kırılımı görmez, short açmaya devam eder (yön seçiminde rejim
+  koruması yok). **Ölçüt:** kırılımdan sonraki 24 saatte açılan **LONG payı <%20**
+  ise H2 doğrudur.
+- **BEKLENTİ:** H2'nin doğru çıkması kuvvetle muhtemel (`rejim_giriste` kaydediliyor
+  ama yön seçimine **girmiyor**). H1 belirsiz — alt'lar BTC'den az yükselirse
+  SHORT'lar kurtulabilir; nitekim ilk anlık görüntüde üç short net **+15,50** idi.
+
+⚠️ **HÜKÜM YOK.** Bu bir veri toplamadır. *"En iyi hücre seçilmez"* ve *"karıştırıcı
+kontrolü zorunlu"* kuralları burada da geçerli: tek bir kırılım **N=1 olaydır**,
+istatistik değil. İkinci bir kırılımda sınanmadan kural çıkarılmaz
+(`CLAUDE.md` → *"bir sapmayı açıklayan formül ikinci bir zamanda sınanmadan..."*).
+
+**BULGU DEĞİL — kayda geçirilen negatif:** giriş anındaki `chg24` dilimlerine göre
+SHORT sonucu **monotonik değil** (`<5%` +6,63 · `5-8%` −4,48 · `8-12%` +9,42 ·
+`>12%` −11,97 ort $). Dört hücre, sıra yok → **gürültü olarak okunmalı**, en iyi
+hücre seçilmemeli. Yalnız `>12%` kovasının N=44 ile en büyük ve en kötü olması
+(−526,69 $ toplam) ayrıca izlenmeye değer, **ama tek başına kural değildir.**
+
+---
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
