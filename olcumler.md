@@ -685,9 +685,65 @@ dönemde %+0,09 ile düz, yani tek makro olay değil). Bu **gözlem**, kanıt de
 gevşetmek, projenin en açık yasağıdır.
 
 ### Betik ve kayıt
-Betik yazılacak: `scratchpad/ileri_rr.py`. Sonuç bu bölümün altına yazılır; **ölçüt
-metni sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9: değişirse eski metin silinmez,
-yanına `[DEĞİŞTİ tarih]`).
+Betik: `scratchpad/ileri_rr.py` (commit `bf2b95f`). Ham çıktı:
+`scratchpad/ileri_rr_sonuc.txt`. **Ölçüt metni sonuç görüldükten sonra
+DEĞİŞTİRİLMEDİ.**
+
+### 🔴 SONUÇ — **KALDI** (2026-08-19, 565 sembol / 2 yıl)
+
+```
+A_funding   N=20.521          B_ma50ucuz  N=4.340
+  kontrol  +0,006% (t +0,16)    kontrol  -0,235% (t -2,62)
+  kural    -0,062% (t -2,34)    kural    -0,231% (t -3,79)
+  FARK     -0,069% (t -2,35)    FARK     +0,003% (t +0,05)
+           t_kume -0,37                  t_kume +0,01
+```
+
+| ölçüt | A_funding | B_ma50ucuz |
+|---|---|---|
+| **1.** net getiri kontrolden yüksek | ❌ **−0,069%** (daha kötü) | ❌ +0,003% — `t=+0,05`, sıfırdan ayrışmıyor |
+| **2.** iki yarıda da yüksek | ❌ A **+0,020** / B **−0,158** | ❌ A **−0,089** / B **+0,095** — işaret ters |
+| **3.** `t_küme > +2,0` | ❌ **−0,37** | ❌ **+0,01** |
+| **4.** rejimde ters işaret yok | ❌ AYI +0,068 · BOĞA **−0,192** · NOTR −0,099 | ❌ AYI +0,089 · BOĞA +0,046 · NOTR **−0,020** |
+
+**Dört ölçütün dördü de, iki giriş kümesinin ikisinde de başarısız.** Kural reddedildi.
+
+**ÖN-KAYITLI BEKLENTİ TUTTU** — "KALACAK" yazılmıştı, kaldı.
+
+### Mekanizma — sayım tek başına açıklıyor
+
+```
+              KONTROL                        KURAL
+A_funding     STOP  14.282 (%69,6)           STOP  11.461 (%55,9)
+              HEDEF  4.643 (%22,6)           HEDEF     208 (%1,0)
+              SURE   1.596                   RR      8.754 (%42,7)
+
+B_ma50ucuz    STOP   3.095 (%71,3)           STOP   2.423 (%55,8)
+              HEDEF    963 (%22,2)           HEDEF      57 (%1,3)
+              SURE     282                   RR      1.853 (%42,7)
+```
+
+Kural iki şey birden yapıyor:
+- **KURTARIYOR:** stop olacak 2.821 işlem (A) artık orta noktada kârla çıkıyor
+- **ÖLDÜRÜYOR:** hedefe varacak 4.643 işlemin **4.435'i** artık %10 yerine ~%4'te kesiliyor
+
+İkincisi birinciden büyük → net negatif. Bu, projenin tekrarlayan bulgusunun
+sayısal hâli: **kötü girişte sıkı çıkış kaybı keser, iyi girişte kazancı keser** —
+ve burada ikinci etki baskın.
+
+**Kural nadir bir uç durum değil:** işlemlerin **%42,7'sini** değiştiriyor (iki kümede
+de birebir aynı oran).
+
+### Sayım güncellendi
+Çıkış tarafında **30 varyant** denendi, **1'i** geçti. Sıkılaştıran **29 varyantın
+29'u da kaldı.** Geçen tek varyant hâlâ çıkışı *gevşeten* (sabit %10 hedef).
+
+### Yan bulgu — ön-kayıtlı soru DEĞİL, not olarak
+`B_ma50ucuz` **kontrolü** (yani botun bugün koştuğu hâli) **−0,235%, t=−2,62** çıktı;
+fonlama dahil, 2 yıl, N=4.340. Bu, `MA50+ucuz` kapısının negatifliğinin **bağımsız bir
+teyidi** (önceki ölçüm: −0,079 · t=−4,05, s.2790). ⚠️ Ön-kayıtlı soru bu değildi ve
+bu satırdan **kural çıkarılmaz** — pencereye bağlı beş işin tartışmasına **girdi**
+olarak taşınır.
 
 ## Bekleyen — ölçülmedi
 

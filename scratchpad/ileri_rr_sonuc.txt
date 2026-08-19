@@ -1,0 +1,27 @@
+ILERI R/R CIKIS ESIGI - 2 yillik sinav
+==============================================================================
+ON-KAYIT: olcumler.md (commit 43833f3, kosturulmadan ONCE)
+ESIK = 1.0  (TEK deger, tarama YOK)
+Mekanik: A-stop, Wilder ATR, hedef %10.0, 72s, maliyet %0.13, FONLAMA DAHIL
+Bar ici sira: STOP(fitil) -> HEDEF(fitil) -> R/R(kapanis)
+
+islenen sembol: 565
+
+--- A_funding  (N=20521) -----------------------------------------
+  KONTROL (sabit %10 hedef) :  +0.006%  t=+0.16  t_kume=+0.03
+  KURAL   (ileri R/R < 1.0) :  -0.062%  t=-2.34  t_kume=-0.37
+  FARK (kural - kontrol)    :  -0.069%  t=-2.35  t_kume=-0.37   <-- OLCUT 1 ve 3
+    A yarisi: fark  +0.020%  t=+0.51  N=10260
+    B yarisi: fark  -0.158%  t=-3.60  N=10261
+    rejim: AYI +0.068% (N=4101) | BOGA -0.192% (N=744) | NOTR -0.099% (N=15676)
+    kural cikis tipleri: {'STOP': 11461, 'RR': 8754, 'SURE': 98, 'HEDEF': 208}
+
+--- B_ma50ucuz  (N=4340) ----------------------------------------
+  KONTROL (sabit %10 hedef) :  -0.235%  t=-2.62  t_kume=-0.69
+  KURAL   (ileri R/R < 1.0) :  -0.231%  t=-3.79  t_kume=-0.99
+  FARK (kural - kontrol)    :  +0.003%  t=+0.05  t_kume=+0.01   <-- OLCUT 1 ve 3
+    A yarisi: fark  -0.089%  t=-0.97  N=2170
+    B yarisi: fark  +0.095%  t=+1.00  N=2170
+    rejim: AYI +0.089% (N=621) | BOGA +0.046% (N=490) | NOTR -0.020% (N=3229)
+    kural cikis tipleri: {'RR': 1853, 'STOP': 2423, 'HEDEF': 57, 'SURE': 7}
+
