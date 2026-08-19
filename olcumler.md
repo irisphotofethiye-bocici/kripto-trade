@@ -633,6 +633,62 @@ sonra stop oldu**; `BAS` ise CEO "kâr al" dedikten sonra **25 dakika %0,4'lük 
 kaldı** (dönmedi). Biri isabet biri değil, **ikisi de N=1**. Birini başarı diye kaydedip
 diğerini yazmamak bu projede reddedilmiş davranıştır.
 
+## ⭐ ÖN-KAYIT — İLERİ R/R ÇIKIŞ EŞİĞİ (2026-08-19, KOŞTURMADAN ÖNCE yazıldı)
+
+### Hipotez
+Açık pozisyonun **ileri R/R**'si — *(hedefe kalan mesafe) ÷ (stopa kalan mesafe)* —
+eşiğin altına düştüğünde kapatmak, mevcut sabit %10 hedefe göre **net getiriyi artırır.**
+
+### Neden bu soru soruldu
+Sabit %10 hedef, pozisyon ilerledikçe ödül-risk geometrisinin **tersine dönmesini**
+hesaba katmıyor. Kâr biriktikçe stop sabit kalır, hedef yaklaşır; bir noktadan sonra
+pozisyon **kazanabileceğinden fazlasını riske atar.**
+
+**Tetikleyen canlı vaka (2026-08-18):** `BAS` SHORT +1,92R'de iken stopa **%8,51**,
+hedefe **%4,97** → ileri R/R **0,58:1**. Dört saat sonra stop oldu, +1,92R'nin tamamı
+geri verildi (defter: TP1 +47,52 · STOP −34,16 · toplam +13,36).
+
+### Eşik: **1,0** — ve neden tarama YAPILMAYACAK
+Tek eşik ön-kayıtlanır: **ileri R/R < 1,0 → kapat.** Gerekçe **önsel**: 1,0 geometrik
+başabaştır — altında pozisyon kazanabileceğinden fazlasını riske atar. Giriş eşiği olan
+2:1 kullanılmadı, çünkü **girmek ile tutmak farklı kararlar**; 2:1 tutma şartı
+pozisyonların çoğunu erken kapatırdı.
+
+⚠️ **Dürüstlük notu:** 1,0 eşiği `BAS` vakasını (0,58) da kapsıyor. Eşik o vakadan
+türetilmedi — geometrik başabaş olduğu için seçildi — ama **örtüşme kayda geçiyor**,
+okuyan kendi kararını versin. **Eşik taraması (0,5 · 0,8 · 1,2 · 1,5 denemek) YASAK.**
+
+### Ölçüm yöntemi
+`CLAUDE.md` sırası: **ham ileri getiri → ticaret mekaniği → portföy.** Bu kural bir
+*mekanik* olduğu için mekanik katmanında, **aynı giriş kümesi üzerinde** ölçülür.
+
+- Veri: `scratchpad/klines_1h_uzun/` (2 yıl, 566 sembol — boğa ve ayı bacağı dahil)
+- Kontrol: **mevcut sabit %10 hedef**, birebir aynı girişlerde
+- Maliyet: **fonlama + ücret + kayma DAHİL** (hariç tutulan ölçüm bu projede yanıltıcıdır)
+- İstatistik: **`t_küme`** (sembol-kümeli), ham t değil
+
+### GEÇME ÖLÇÜTÜ — dördü de gerekli
+1. Net getiri (maliyet sonrası) kontrolden **yüksek**
+2. **İKİ YARIDA DA** yüksek (A ve B ayrı ayrı) — tek yarıda geçen KALDI sayılır
+3. **`t_küme` > +2,0**
+4. Üç rejimin (AYI/NOTR/BOĞA) **hiçbirinde ters işaret yok**
+
+### BEKLENTİ — sonuç görülmeden yazıldı
+**KALACAĞINI bekliyorum.** Gerekçe: bu bir **sıkılaştırmadır** ve bu projede çıkış
+tarafında denenen **29 varyantın 28'i sıkılaştırıyordu, 28'i de kaldı**; geçen tek
+varyant çıkışı *gevşetiyordu*. Ön bilgi açıkça aleyhte.
+
+⚠️ **N=3 UYARISI — ölçütü yumuşatma gerekçesi DEĞİL.** 18-19 Ağustos'ta CEO çerçevesinin
+tavsiyesi üç pozisyonun üçünde de daha iyi sonuç verirdi (toplam **+173,64 $**; BTC aynı
+dönemde %+0,09 ile düz, yani tek makro olay değil). Bu **gözlem**, kanıt değil —
+`CLAUDE.md`: *N<25-30 = izlenim*. Sonucu gördükten sonra bu üç vakaya dayanıp ölçütü
+gevşetmek, projenin en açık yasağıdır.
+
+### Betik ve kayıt
+Betik yazılacak: `scratchpad/ileri_rr.py`. Sonuç bu bölümün altına yazılır; **ölçüt
+metni sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9: değişirse eski metin silinmez,
+yanına `[DEĞİŞTİ tarih]`).
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
