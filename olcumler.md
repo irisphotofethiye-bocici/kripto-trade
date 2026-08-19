@@ -1863,3 +1863,58 @@ mekanik, ayni tohumlar — biri gorunuyor, digeri gorunmuyor.
   Ancak ayni vekil SHORT bacagini net goruyor — yani vekil bu buyuklukte
   bir etkiyi yakalayabiliyor. Kanit degil, isaret.
 
+### KAPSAM DARALTMASI — NOTR hukmu BUGUNKU bolgeyi KAPSAMIYOR (2026-08-19 gece)
+
+**Betik:** `scratchpad/notr_keskin.py`. **Tetikleyen:** kullanici itirazi —
+*"BTC bir anda 70'e firladi, bu pek notr degil."* Rejim etiketi BTC'nin
+**30 GUNLUK** getirisine bakiyor; bugun 30g **+5,11%** (NOTR) ama 3g **+8,95%**,
+24s +6,41%. Sinuflandirici yavas — itiraz mesru.
+
+**YONTEM (esik SECILMEZ):** NOTR gozlemleri, o andaki BTC 3 gunluk getirisine
+gore **UCE** bolundu. Uc dilim de raporlanir; en iyi hucre secilmez. Istatistik
+**AY-KUMELI** (ayni gece ogrenilen ders).
+
+```
+                                AY-KUMELI lift        t (tohum 41 / 7)
+DUSUK  (BTC 3g < -2,3%)          -1,90 / -2,05     -2,99 / -3,40
+ORTA                             -0,58 / -0,51     -1,16 / -1,24   gurultu
+YUKSEK (BTC 3g > +0,9%)          -1,04 / -1,20     -2,47 / -3,26
+```
+
+Uc dilimde de isaret NEGATIF (fren yonunde). **AMA dilim bizi kapsamiyor:**
+
+```
+NOTR gozlemlerinin %99,3'u bugunkunden DUSUK bir BTC 3g getirisinde
+dagilim: %10 -5,62 · %50 -0,75 · %90 +3,98 · %95 +5,51 · en yuksek +16,70
+bugun:   +8,95                                          <-- %99,3 dilim
+```
+
+"YUKSEK" dilimi +0,9%'dan basliyor ve icindekilerin cogu %1-4 arasi.
+**Bugunku durum o dilimin ortalamasi degil, UCU.**
+
+**Gercekten bulundugumuz bolge (en yuksek %10, BTC 3g >= +3,98%):**
+
+```
+N=853/4348   ham lift +0,551%   <-- ISARET DONUYOR
+             AY-KUMELI lift -0,592%   t=-0,79   9 ay, 4/9 pozitif   GURULTU
+```
+
+**HUKUM: bu bolgede kanit YOK.** Ham isaret donuyor, kumeli t sifira yakin,
+aylar yari yariya. ⚠️ Bu *"fren zararli"* DEMEK DEGIL — 9 ay / N=853 ile ayirt
+edecek guc yok. **Kanit yoklugu, yokluk kaniti degildir.**
+
+**AYNI GECE YAZILAN HUKMUN KAPSAMI DARALIR (D/9 — eski metin SILINMEDI):**
+*"Fren AYI ve NOTR'da GERCEK"* hukmu **AYAKTA**, ama ona eklenen isletme cumlesi
+—*"su anki rejim NOTR, yani olcum frenin simdi calismasi gerektigini soyluyor"*—
+**FAZLA ILERI GITTI.** Dogrusu: **olcum NOTR ORTALAMASINDA freni destekler;
+bugunku gibi keskin-hareket kuyrugunda SUSAR.**
+
+**Karara etkisi:** frenin 21:40'ta kapatilmasina yonelttigim itiraz ZAYIFLAR.
+Olcum bugunku durumda ne "ac" ne "kapat" diyor. Karar (kullanici, olcum akisi
+gerekcesiyle) OLCUMLE CELISMIYOR.
+
+**Yontem dersi — kaydedilmeye deger:** bir hukum "X rejiminde gecerli" derken
+**X'in HANGI bolgesinde bulundugumuz** ayrica sorulmalidir. Rejim etiketi genis
+bir kumeyi tek adla anar; ortalamanin hukmu, o kumenin %99 diliminde otomatik
+olarak gecerli DEGILDIR.
+

@@ -419,8 +419,14 @@ rejimde sınanmamış bir kapının kararına bağlı kalmasın*) bu ölçümden
 **Sonuç `olcumler.md`'de.** Karar açısından üç madde:
 
 1. **Fren AYI ve NOTR'da GERÇEK.** Ay-kümeli, üç tohumda, baskın ay atılarak
-   sınandı; ayakta kaldı (t −2,7 … −4,0). **Şu anki rejim NOTR** — yani ölçüm,
-   frenin şu anda çalışması gerektiğini söylüyor. Fren 21:40'ta kapatıldı.
+   sınandı; ayakta kaldı (t −2,7 … −4,0).
+   ⚠️ **[KAPSAM DARALDI 2026-08-19 gece]** Buraya önce *"şu anki rejim NOTR, yani
+   ölçüm frenin şimdi çalışması gerektiğini söylüyor"* yazılmıştı — **fazla ileri
+   gitmiş.** BTC'nin 3 günlük getirisi bugün **+8,95%**, bu NOTR gözlemlerinin
+   **%99,3 dilimi**. O kuyrukta ölçüm **susuyor** (ham işaret dönüyor, ay-kümeli
+   t=−0,79, 9 ay). Doğrusu: **NOTR ortalamasında fren desteklenir; bugünkü keskin
+   hareket bölgesinde hüküm yoktur.** Ayrıntı `olcumler.md`. Fren 21:40'ta kapatıldı
+   ve bu karar **ölçümle çelişmiyor.**
 2. **Frenin BOĞA'da zararlı olduğu iddiası GÜRÜLTÜ.** Ham ölçüt geçti, karıştırıcı
    kontrolü çürüttü (tamamı tek aydan, 2024-12). Ön-kaydın *belirsiz* dalı
    uygulandı: **rejim sınırlaması önerilmiyor.**
