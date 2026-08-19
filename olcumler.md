@@ -194,6 +194,41 @@ sinyali **üretemiyor**: aynı dönemde korelasyon **−0,12**, işaret uyuşmas
 oynatıldı → ortalama **−1,198%**, 9'u stop. Ölçümün öngörüsü tuttu. Ayrıntı aşağıda
 ("BTC-pay SHORT freni pencerede tetiklendi").
 
+#### ⚠️ ÖLÇÜMÜN LONG BACAĞI VAR AMA NOTR'DA ERİŞİLEMİYOR (2026-08-19'da fark edildi)
+
+Aynı ölçüm **iki** sonuç üretti; ikisi de aynı 37.271 gözlemden ve aynı holdout'tan:
+
+```
+UST ceyrek                ->  SHORT R  -0,02 / -0,03   -> FREN konuldu    ✅
+UST ceyrek + para DURGUN  ->  LONG  R  +0,24 / +0,16   -> kapi konuldu    ✅
+                              (rastgele kontrol -0,07 / -0,04)
+```
+
+**Yani ölçüm dengeli** — aynı sinyal "short'u kes" derken "long'u aç" da diyor.
+
+**Ama LONG kapısı AYI dalının içine gömülü** ([testbot.py:559](testbot.py#L559):
+`btc_pay_ust and para_durgun`, `rejim_ad == "AYI"` kolunda). 2026-08-19 durumu:
+`bant = UST` ✅ · `para_rejim = PARA DURGUN` ✅ · **`rejim = NOTR`** ❌ → o kod yoluna
+hiç girilmiyor.
+
+**Sonuç:** ölçümün **+0,24/+0,16** veren kapısı kapalı; boşluğu **ölçümle
+gerekçelenmemiş** `notr_long_acik` dolduruyor (kendi notu: *"ön-kayıtlı kural BU
+ETİKETTE DE GEÇİLEMEDİ: A +0,79 / B −0,17, işaret yarıyı döndürüyor"*).
+**Bot, elinde güçlü kanıt varken zayıf kanıtla işlem açıyor.** 2026-08-18/19'daki
+3 LONG (−450,00 $) tam oradan geldi.
+
+**ASİMETRİNİN YERİ — "denge" tartışması buradan başlamalı:**
+
+| taraf | kanıt katmanı |
+|---|---|
+| **SHORT** | kapı ölçüldü (A+B +0,396R) · ikinci kapı ölçüldü (MA50+ucuz) · rejim freni **gerçek holdout** |
+| **LONG** | tek kapı, **ölçümle gerekçelenmedi**, işaret yarı döndürüyor |
+
+Dengesizlik frenin fazlalığından **değil**, LONG tarafının **kanıt standardının**
+düşüklüğünden. "Simetrik LONG freni" eklemek, ölçülmemiş makineye bir ölçülmemiş parça
+daha eklemek olur → *karmaşıklık bütçesi* ihlali. **Akılcı yön ters: LONG tarafını daha
+izinli değil, SHORT ile aynı kanıt standardına çekmek.**
+
 ### ⭐ Bulgu: A+B'nin ham kenarının %65'ini KENDİ STOPUMUZ yiyor (s.2259)
 
 Ölü sinyal taramasının asıl çıktısı, aradığı şeyden büyük:
@@ -867,6 +902,7 @@ belirsizliği** — sonuç görülmeden çözülmesi gerekiyor.
 
 | soru | neden bekliyor |
 |---|---|
+| **`btc_pay` LONG penceresi rejimden BAĞIMSIZ mı?** (2026-08-19) | Ölçüm `UST + para durgun → LONG R +0,24/+0,16` diyor ama kapı **AYI dalına** gömülü; NOTR'da erişilemiyor. Kodun kendi notu pencereyi *"T-B **piyasa-seviyesi** bir İZİN penceresidir"* diye tanımlıyor — coin seçmiyor, **rejim de seçmiyor olabilir**; AYI'ya hapsedilmesi keyfî bir daraltma olabilir. ⚠️ **Doğrulanamıyor:** dayanak dosyalar `PARA_SONUC.md` / `CIKIS_SONUC.md` **kayıp** (geçici oturum klasöründe yok oldu), ölçüm rejime koşullu muydu bilinmiyor. **Yeniden ölçülmeden genişletilmez** — 2 yıllık veri elde, betik yeniden yazılmalı |
 | **İLERİ R/R eşiği — sabit hedefe eklenmeli mi?** (2026-08-18, CEO okumasından doğdu) | Sabit %10 hedef, pozisyon ilerledikçe **ödül-risk geometrisinin tersine dönmesini** hesaba katmıyor. Canlı örnek: `BAS` SHORT +1,92R'de iken stopa %8,51, hedefe %4,97 → **ileri R/R 0,58:1**, yani 1:2 eşiğinin çok altında. ⚠️ **Bu bir sıkılaştırmadır ve 28/28'e karşı savunma gerektirir** — ön-kayıt yazılmadan ölçülmez. Ölçüm 2 yıllık veride, ham→mekanik sırasıyla; "en iyi eşik" taraması YASAK, tek eşik ön-kayıtlanır |
 | **Pozisyon boyutu neden 2 kat ayrışıyor?** (2026-08-18) | Aynı risk ayarında `PRL` risk %1,46 eq / marjin %11,6 eq iken iki SHORT %0,67-0,75 / %3,5-4,0. Ayrışmanın kaynağı bilinmiyor (kaldıraç tavanı · stop genişliği · efektif equity ölçeklemesi). **Pencere hükmünü doğrudan etkiler:** ön-kayıtlı ölçüt *"ikinci yarı > 0"* diyor ve kasa sıfırlaması zaten boyutları ortada büyütmüştü; üstüne pozisyonlar arası 2 kat fark varsa dolarla kıyas iyice geçersiz → **R/yüzde kıyası zorunlu**. 21-22 Ağustos taramasına madde |
 | `d_taker` — agresörün pozisyon ömrü boyunca **kayması** | Veri 2026-08-13'te toplanmaya başladı, geriye dönük üretilemez. ~27 Ağustos'ta yeterli olur |

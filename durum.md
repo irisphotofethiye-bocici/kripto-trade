@@ -123,7 +123,7 @@ flowchart TD
     S["ORTAK SAVUNMA<br/>o ölçüm bir YENİDEN ÜRETİM<br/>medyan stop %1,3 · canlıda %3,4<br/>ikisi AYNI koşturmadan geliyor"]
     D["4 · 1,5R kısmi ezmesi<br/>ölçüm 'kaldır' dedi<br/>kullanıcı 'kalsın' dedi"]
     E["5 · A+B stop mesafesi<br/>A-stop kenarın %65'ini yiyor<br/>defterde: 'pencere sonrası İLK İŞ'"]
-    F["6 · NOTR-belirsiz LONG kapısı<br/>ÖLÇÜMLE GEREKÇELENMEDİ<br/>fren boşluğunu doldurdu: 3 işlem −450 $"]
+    F["6 · NOTR-belirsiz LONG kapısı<br/>ÖLÇÜMLE GEREKÇELENMEDİ<br/>ölçülmüş LONG penceresi AYI'ya gömülü<br/>zayıf kanıt güçlünün yerine geçti"]
     W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç 2026-08-12 01:17<br/>ÇÖZÜLDÜ 2026-08-18"}}
     P["popülasyon itirazı DOĞRULANIR<br/>1 · 2 · 3 ayakta kalır<br/>5 yine ölçülür"]
     M["üç savunma BİRDEN düşer<br/>1 · 2 · 3 birlikte gözden geçirilir<br/>4 zaten tercihe dayanıyordu"]
@@ -248,9 +248,15 @@ merak eden aynı komutta tarihi değiştirir; ikisi **farklı soruların** cevab
 
 **Sonuç: tek bir çıktı ALTI işi birden çözer** — üç ayar kararı (MA50+ucuz · sabit %10
 hedef · kısmen 1,5R) + A+B stop mesafesi yeniden ölçümü + sabit hedefin MA50'ye
-genişletilmesi + **NOTR-belirsiz LONG kapısı** (2026-08-19 eklendi: ölçümle
-gerekçelenmemiş tek kapı, BTC-pay freni açılınca tek giriş yolu oldu ve 3 işlemde
-−450 $ verdi). Pencere eksi kapanırsa savunmalar birden düşer; artı kapanırsa popülasyon
+genişletilmesi + **NOTR-belirsiz LONG kapısı** (2026-08-19 eklendi).
+
+> **6. maddenin doğru sorusu — çerçeveyi baştan kur.** Soru *"LONG'u nasıl dengeleriz"*
+> DEĞİL. `btc_pay` ölçümü LONG için de sonuç üretmişti (`UST + para durgun → LONG R
+> +0,24/+0,16`, holdout) ama o kapı **AYI dalına gömülü**; şu an `bant=UST` ve
+> `para=DURGUN` olduğu hâlde `rejim=NOTR` olduğu için erişilemiyor. Boşluğu **ölçülmemiş**
+> `notr_long_acik` dolduruyor → 3 işlem, −450 $. Yani **elde güçlü kanıt varken zayıf
+> kanıtla işlem açılıyor.** Doğru soru: *"kanıtsız kapıyı neden açık tutuyoruz?"*
+> Ayrıntı ve asimetri tablosu `olcumler.md`. Pencere eksi kapanırsa savunmalar birden düşer; artı kapanırsa popülasyon
 itirazı doğrulanır. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
 altı yüzü.
 
