@@ -1062,6 +1062,66 @@ gerekiyor.
 Dar stopluları atınca **−0,235% → −0,159%**: iyileşiyor ama **hâlâ negatif**.
 Bu kapı için dördüncü bağımsız negatif ölçüm (ham · fonlamalı · canlı 72 poz · bu).
 
+## ⭐ ÖN-KAYIT — KATILIM FİLTRESİ (`islem_x`) (2026-08-19, KOŞTURMADAN ÖNCE yazıldı)
+
+### Nereden çıktı
+Aynı gün yapılan hipotez taramasında **en güçlü ayırıcı** buydu: ilk +%2 anında
+`islem_15` (15 dk işlem sayısı) **AUC %83,2** — kazananlarda 11.706, kaybedenlerde 3.353.
+
+⭐ **Kritik ayrıntı:** `ort_islem_usdt` (ortalama işlem BÜYÜKLÜĞÜ) **hiç ayırmıyor**
+(AUC %51,1). Yani işlemler daha *büyük* değil, daha *çok*. Bu, "geniş katılım" ile
+"birkaç büyük emir" arasındaki farkı ölçen **bağımsız bir eksen** — fiyat geometrisinde
+görünmeyen bilgi.
+
+### Hipotez
+Giriş anında **katılımı kendi normalinin altında olan** adayı reddetmek net getiriyi
+artırır.
+
+`islem_x = n(giriş barı) ÷ medyan(n, önceki 48 bar)`
+
+⚠️ **Neden GÖRELİ:** mutlak işlem sayısı **büyüklük vekilidir** (büyük coin = çok işlem).
+Mutlak eşik katılımı değil coin boyutunu seçer. Sembolün kendi tabanına oranlanmalı.
+
+### Eşik: **1,0** — sıfır serbestlik derecesi
+```
+gozlenen dagilim (N=12.984 giris olayi):
+  %10  0,74   %25  0,97   %50  1,33   %75  1,97   %90  3,22
+eleme:  1,0 -> %27   ·   1,2 -> %42   ·   1,5 -> %59   ·   2,0 -> %76
+```
+**1,0 ayarlanmış bir eşik değil, TANIMSAL sınır**: *"hareket, o sembolün kendi
+normalinin altında katılımla oluşmamış olsun."* Başka gerekçe gerektirmiyor.
+1,5 ve üstü zaten **kendi ek şartımla** (>%50 eleme → KALDI) dışlanmış durumda;
+1,2 keyfî olurdu. **Eşik taraması YASAK.**
+
+### Ölçüm yöntemi
+`asgari_stop.py` iskeleti — alt-küme testi, aynı giriş kümeleri
+(`A_funding` · `B_ma50ucuz`), aynı mekanik (A-stop · %10 hedef · 72s ·
+maliyet + **fonlama dahil**), `t_küme`.
+
+⚠️ **ÇÖZÜNÜRLÜK SINIRI — kayda geçiyor:** gözlem **15 dakikalık**, 2 yıllık veri
+**saatlik**. Yani ölçülen şey uygulanacak şeyin **vekili**. Geçse bile canlıda
+15 dk çözünürlükle yeniden doğrulanmalı.
+
+### GEÇME ÖLÇÜTÜ — dördü de gerekli + ek şart
+1. İşlem başına net getiri kontrolden **yüksek**
+2. **İKİ YARIDA DA** yüksek
+3. **`t_küme` > +2,0**
+4. Üç rejimin hiçbirinde ters işaret yok
+5. **EK:** işlem sayısı düşüşü **≤%50** (ölçüm hızı bağlayıcı kısıt)
+
+### BEKLENTİ — sonuç görülmeden yazıldı
+**KARARSIZ, KALDI'ya biraz yakın.**
+- **Lehte:** bu bir **giriş** filtresi ve projenin dört kazananı da giriş/rejim tarafından
+  çıktı (çıkışın 30/1 sicili buraya uygulanmaz). Ayrıca sinyal, `ort_islem_usdt`'nin
+  ayırmaması sayesinde **boyuttan arınık** — gerçek bir katılım ölçüsü.
+- **Aleyhte:** hipotez **N=25/21**'den ve **11 alan taranarak** doğdu; kardeş aday
+  (`stopa_uzaklik`, AUC %81,3) **aynı gün KALDI**. İkisinden birinin gürültü olma
+  ihtimali baştan yazılıydı. Ayrıca çözünürlük vekil.
+
+### Betik ve kayıt
+Betik: `scratchpad/katilim_filtresi.py` (yazılacak). Sonuç bu bölümün altına;
+**ölçüt metni sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9).
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
