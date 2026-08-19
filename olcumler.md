@@ -1019,8 +1019,48 @@ tarandı**, yani ikisinden biri gürültü olabilir; (c) %32 akış kaybı ek ş
 tek başına kanıt değil — 2 yıllık bağımsız veri hakemdir.
 
 ### Betik ve kayıt
-Betik: `scratchpad/asgari_stop.py` (yazılacak). Sonuç bu bölümün altına; **ölçüt metni
-sonuç görüldükten sonra DEĞİŞTİRİLMEZ** (D/9).
+Betik: `scratchpad/asgari_stop.py`. Ham çıktı: `scratchpad/asgari_stop_sonuc.txt`.
+**Ölçüt metni sonuç görüldükten sonra DEĞİŞTİRİLMEDİ.**
+
+### 🔴 SONUÇ — **KALDI** (2026-08-19, 565 sembol / 2 yıl)
+
+```
+A_funding    kontrol N=20.521  +0,006%    kural N=9.457  +0,142%   fark +0,135%
+B_ma50ucuz   kontrol N= 4.340  -0,235%    kural N=2.487  -0,159%   fark +0,075%
+```
+
+| ölçüt | A_funding | B_ma50ucuz |
+|---|---|---|
+| **1.** işlem başına yüksek | ✅ +0,135% | ✅ +0,075% |
+| **2.** iki yarıda da | ❌ A **−0,109%** / B +0,329% | ✅ +0,062 / +0,090 |
+| **3.** `t_küme > +2,0` | ❌ **+0,47** | ❌ **−0,40** |
+| **4.** rejimde ters işaret yok | ❌ AYI +0,615 · **BOĞA −0,301** | ❌ AYI +0,241 · **BOĞA −0,294** |
+| **ek.** işlem düşüşü ≤%50 | ❌ **%53,9** | ✅ %42,7 |
+
+**ÖN-KAYITLI BEKLENTİ TUTTU** — *"KARARSIZ, KALDI'ya yakın"* yazılmıştı.
+
+### ⭐ AMA HİPOTEZİN ÇEKİRDEĞİ DOĞRULANDI — elenen dilim ölçüldü
+
+```
+stop 2,0-3,0 arasi islemler (kuralin ATTIKLARI):
+  A_funding    N=11.064   -0,109%   t=-2,43
+  B_ma50ucuz   N= 1.853   -0,335%   t=-3,14
+```
+
+**Dar stoplu işlemler gerçekten kötü** — ikisi de anlamlı negatif. AUC bulgusu (%81,3)
+yön olarak **doğruydu.**
+
+**Kural neden yine de kaldı:** onları atmak akışın yarısını da götürüyor ve geriye kalan
+iyileşme **yarılarda ve rejimlerde tutmuyor**. `A_funding`'in ilk yarısında kural işi
+**daha kötü** yapıyor (−0,398 vs −0,289). 2. ölçüt tam bunu yakalamak için vardı.
+
+**Ders:** *"atılan dilim kötü"* ile *"atmak iyi"* aynı şey değil. Bir alt kümenin negatif
+olması, onu çıkarmanın kalanı iyileştirdiği anlamına gelmiyor — kalanın da tutarlı olması
+gerekiyor.
+
+### 🔴 DÖRDÜNCÜ TEYİT — `MA50+ucuz` filtreyle de kurtulmuyor
+Dar stopluları atınca **−0,235% → −0,159%**: iyileşiyor ama **hâlâ negatif**.
+Bu kapı için dördüncü bağımsız negatif ölçüm (ham · fonlamalı · canlı 72 poz · bu).
 
 ## Bekleyen — ölçülmedi
 
