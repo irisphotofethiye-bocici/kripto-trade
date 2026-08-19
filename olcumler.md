@@ -1313,11 +1313,61 @@ TABAKALI (kar bandlariyla agirlikli):           |  +3,3   2,4    1,4
 aynı yön (şansla 1/8) ve **etki kârla birlikte büyüyor** (mekanizma önerisi: pozisyon
 hedefe yaklaştıkça reddetme sinyali ağırlık kazanıyor — ⚠️ bu post-hoc hikâye, ölçüm değil).
 
-### HÜKÜM: **ÖN-KAYIT YAZILMADI** — 1,4 SE, kendi eşiğimin (2,0) altında
-Zayıflığın sebebi **N**, ölçümün kendisi değil: en güçlü görünen hücre (+10,3 puan)
-**en az veriye** sahip (N=63). → **Bekleyen'e "N biriktiğinde tekrar bak" notuyla.**
+### ⭐⭐ LONG SİMETRİ TESTİ — tahmin KOŞTURMADAN ÖNCE yazıldı, TUTTU
 
-**"Öldü" ile "yetmedi" farklı şeylerdir** — bugünün diğer altı hipotezi öldü, bu yetmedi.
+**Neden yapıldı:** iki amaç birden — (a) N artırma denemesi, (b) sinyalin artefakt olup
+olmadığının **keskin testi**. Mekanizma gerçekse LONG'da **ters** yönde çalışmalı
+(yüksek kapanış = alıcılar kazanıyor = LONG için **iyi**). Aynı yön çıksaydı **artefakt**
+olurdu.
+
+Kurulum: aynı evren, **kapısız** LONG girişleri, aynalanmış mekanik (stop aşağıda,
+hedef +%10), 12. saatte artıdaki pozisyonlar. N=13.818 (SHORT'un iki katı).
+
+```
+                 yuksek kapanis konumu       ham fark
+SHORT              %36,8  <  %48,9           -12,1 puan   (yuksek = KOTU)
+LONG               %47,1  >  %36,0           +11,1 puan   (yuksek = IYI)
+```
+
+🟢 **YÖN TAM TERSİNE DÖNDÜ ve büyüklükler neredeyse simetrik.** Tahmin tuttu →
+**bu bir hesaplama artefaktı DEĞİL, gerçek bir piyasa mekanizması.**
+
+### 🔴 AMA KARIŞTIRICI KONTROLÜ İKİSİNİ DE ELİYOR
+
+```
+                tabakali (kar sabit)   kac SE
+  SHORT              +3,3 puan          1,4
+  LONG               +0,84 puan         0,55     (bandlar: +1,1 / -2,3 / +7,2)
+```
+
+LONG'da işaret bantlar arasında **tutarsız** da (orta bant ters). İkisi de eşiğin altında.
+
+### HÜKÜM: **ÖN-KAYIT YAZILMADI** — mekanizma GERÇEK, sinyal ZAYIF
+
+Mumun şekli gerçekten *"kim kazandı"* bilgisini taşıyor — yön simetrisi bunu kanıtlıyor.
+Ama taşıdığı bilginin **neredeyse tamamı zaten kârda kodlanmış**; bağımsız kalan kısım
+1,4 ve 0,55 SE.
+
+### ⚠️ N ARTIRMAK KURTARMIYOR — bu test aynı zamanda o sorunun cevabı
+
+LONG testi **N=13.818** ile SHORT'un (N=6.453) iki katıydı ve sinyal **daha zayıf** çıktı
+(0,55 vs 1,4 SE). Yani daha çok veri sinyali güçlendirmiyor, **daha kesin biçimde zayıf**
+gösteriyor. *"N biriktiğinde tekrar bak"* beklentisi bu ölçümle **büyük ölçüde düştü**.
+
+### ⭐ KÜTÜĞE GİREN ASIL ŞEY — yeni ve ucuz bir geçerlilik testi
+
+**"Yön simetrisi mekanizmayı doğrular ama büyüklüğü kurtarmaz."**
+
+Bu ayrım bugün ilk kez uygulandı ve iki farklı ölüm biçimini ayırıyor:
+
+```
+1-6. hipotez  ->  isaret bandlar arasi DONUYOR      ->  GURULTU
+mum sekli     ->  yon TAM SIMETRIK, buyukluk zayif  ->  GERCEK ama KULLANILAMAZ
+```
+
+Yeni bir aday çıktığında **ilk sorulacak test bu olmalı**: *"ters yönde ters çalışıyor mu?"*
+Ucuz, keskin, ve artefaktı gerçek mekanizmadan ayırıyor. ⚠️ Ama **geçmesi yetmez** —
+mum şekli geçti ve yine de kullanılamaz çıktı.
 
 ## Bekleyen — ölçülmedi
 
