@@ -1163,6 +1163,34 @@ Bugün ilk kez bir **katılım** sinyali dört ölçütü geçti, ve geçtiği y
 zayıf kapıya bilgi katıyor, güçlü kapıda fazlalık. ⚠️ Yine de **iki küme test edildi,
 biri tuttu** — bu bir alt-grup bulgusudur, çoklu karşılaştırma sayılır. Kural DEĞİL.
 
+## 🔍 DÖRT BOŞLUK — "dönüş işaretini neden bulamıyoruz" (2026-08-19, çerçeve)
+
+**Ortak kusur:** 2026-08-19'da test edilen üç şeyin **üçü de TEK ANIN fotoğrafı**:
+`ileri R/R` (hedefe/stopa mesafe) · `asgari stop` (giriş anı) · `islem_x` (giriş barı).
+**Ama dönüş bir an değil, bir DİZİDİR** — hareket yavaşlar, agresör döner, hacim karşı
+tarafta geri gelir. Tek kareye bakıp "bu kare dönüş mü" diye sorduk.
+
+| # | boşluk | neden önemli | geriye-test edilebilir mi |
+|---|---|---|---|
+| **1** | **Devamın BAŞARISIZLIĞI ölçülmedi** — "en son ne zaman YENİ UÇ yapıldı" (ATR'ye normalize). Çalışan SHORT yeni dipler yapar; dönüş, **yeni dip yapmayı bıraktığında** başlar. Ölçtüğümüz hep *seviye*, bu bir *dizi* özelliği | En güçlü aday; "duraklama mı dönüş mü" sorusunu doğrudan hedefliyor | ✅ saatlik veriyle |
+| **2** | **Fonlama saatleri** — fonlama 8 saatte bir SABİT saatlerde kesiliyor (00/08/16 UTC); kalabalık pozisyonlar tam o anlarda tasfiye olur. Dönüşler oralarda kümeleniyor mu? **Bugünkü bulguyla örtüşüyor: kayıp 0-8 saat kovasında = tam bir fonlama periyodu** | Hiç sorulmadı; **zamana bağlı kural** hiç denenmemiş sınıf | ✅ `funding_gecmis` damgaları var |
+| **3** | **Sektör/breadth bağlamı** — `rel3` (coin vs BTC) bakıldı, ayırmadı. Sorulmayan: **bütün ucuz altcoin'ler aynı anda mı sıçradı?** Piyasa geneli sıçrama geçici, coine özel alım kalıcı | `piyasa_yapisi.py` breadth topluyor ama pozisyonlarla **hiç birleştirilmedi** | ⚠️ kısmen (log 06-26'dan) |
+| **4** | **Bekleyen likidite** — elimizdeki her değişken *olmuş bitmiş işlemlerden* türüyor (hacim · işlem sayısı · taker · OI). Hiçbiri **emir defterinde bekleyen** boyutu ölçmüyor. Dönüş tam orada olur: agresif akış duran boyutla karşılaşır | `defter_derinlik` 17 Ağu'da **yalnız girişe** eklendi, sürekli değil | ❌ **emir defteri geçmişi YOK** → yalnız ileriye |
+
+### ⚠️ VE DÜRÜST İHTİMAL: temiz bir dönüş işareti OLMAYABİLİR
+
+Bugünkü sonuçlar bunu **dışlamıyor**. `A_funding`'de katılım filtresi **tersine** döndü
+(aradığımız bilgi orada yok, hatta ters). Ve `t_küme` değerleri sürekli düşük çıkıyor —
+bulduğumuz sinyaller **az sayıda sembolde kümeleniyor**, yani genel değil. Bu projede
+30 çıkış varyantı ve 8 oynaklık varyantı zaten aynı duvara çarptı.
+
+**Eğer dönüş işareti yoksa doğru cevap onu aramak değil, dönüşe DAYANIKLI olmaktır:**
+daha geniş stop · daha az pozisyon · daha iyi kapı. Bugünkü kapı karnesi de bunu
+fısıldıyor (`A+B` %39 hızlı ölüm · `MA50+ucuz` %71).
+
+**Sıra önerisi:** önce **2** (en ucuz, en spesifik, 0-8 saat bulgusuyla örtüşüyor),
+sonra **1** (dizi özelliği). 3 ve 4 pahalı; ilk ikisinin sonucuna göre.
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
