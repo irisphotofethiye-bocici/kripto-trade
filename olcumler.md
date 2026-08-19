@@ -742,8 +742,74 @@ de birebir aynı oran).
 `B_ma50ucuz` **kontrolü** (yani botun bugün koştuğu hâli) **−0,235%, t=−2,62** çıktı;
 fonlama dahil, 2 yıl, N=4.340. Bu, `MA50+ucuz` kapısının negatifliğinin **bağımsız bir
 teyidi** (önceki ölçüm: −0,079 · t=−4,05, s.2790). ⚠️ Ön-kayıtlı soru bu değildi ve
-bu satırdan **kural çıkarılmaz** — pencereye bağlı beş işin tartışmasına **girdi**
+bu satırdan **kural çıkarılmaz** — pencereye bağlı altı işin tartışmasına **girdi**
 olarak taşınır.
+
+## BTC-pay SHORT freni pencerede tetiklendi (2026-08-19, gözlem + post-hoc ölçüm)
+
+**Ne oldu:** Fren **2026-08-18 00:01**'de açıldı. O andan itibaren SHORT girişi **sıfır**;
+`VETO:btc_pay_freni` 0 → **585 satır**. Bot boş oturmadı — `NOTR-belirsiz long` kapısı
+boşluğu doldurdu.
+
+```
+pencere kirilimi (taban 12 Agu 01:17)
+  fren ONCESI   N=89   P&L +807,48   85 SHORT / 4 LONG
+  fren SONRASI  N= 3   P&L -450,00    0 SHORT / 3 LONG
+```
+
+**Tetikleyen:** `btc_d_xs` (BTC'nin risk varlıkları içindeki payı, stablecoin hariç)
+**17→18 Ağustos'ta tek günde +0,3022 puan** sıçradı. Fren *seviyeye* değil **3 günlük
+değişime** bakar; sıçrama 3 günlük pencerenin içinde kaldığı sürece açık kalır.
+Sıçrama 21 Ağustos'ta pencereden çıkar → **fren kendiliğinden kalkar** (`btc_d_xs`
+65,60 civarında kalırsa). Hesap `durum.md`'de.
+
+### ⭐ FREN DOĞRU ÇALIŞTI — frenlenen SHORT'lar ölçüldü
+
+Fren sonrası reddedilen adaylar botun gerçek mekaniğiyle ileri oynatıldı
+(giriş = veto sonrası bar açılışı · A-stop · %10 hedef · 72s · maliyet dahil):
+
+```
+N=13 bagimsiz olay    9 STOP · 2 HEDEF · 2 hala ACIK
+ortalama -1,198%   medyan -3,004%   kazanan 3/13
+yalniz karara baglanmis: N=11, ortalama -1,927%
+```
+
+En kötüler: `GPS` −%10,09 · `RED` −%6,28 · `ACE` −%5,94.
+
+**Yani fren para KAZANDIRDI.** SHORT kapısını gevşetmek, bu 13 işlemi *almak* demek.
+Kullanıcının *"piyasada short engelleyen bir durum yok"* öncülü test edildi ve
+**çürüdü** — piyasa short'u mekanik olarak engellemiyor, **kârlı olmaktan çıkarmış**;
+frenin 12 aylık holdout ölçümünün (bu bantta SHORT R −0,02/−0,03) söylediği tam bu.
+
+⚠️ **N=13 · post-hoc · ön-kayıtsız · ufuk truncated (2 olay hâlâ açık).** İzlenim,
+kanıt değil. Yön nettir ama eşik değiştirmeye YETMEZ.
+
+### 🔴 ASIL BULGU — fren doğru, boşluğu dolduran yanlış
+
+```
+frenlenen SHORT'lar  ~ -0,4R / islem   (acilmadi)
+acilan LONG'lar       -1,01R / islem   (HOME · PRL · DOS = -450,00 $)
+```
+
+Fren **kanıtlı** tarafı kapattı, **kanıtsız** taraf doldurdu. `NOTR-belirsiz long`
+kapısının kendi metni: *"[2026-08-04 kullanıcı kararı; **ölçümle gerekçelenmedi**]"*.
+→ Pencereye bağlı **ALTINCI** iş (`durum.md`).
+
+### ⚠️ R İLE DOLAR ÇELİŞİYOR — hüküm yazılmadan çözülmeli
+
+```
+ilk yari     N=46  defter P&L +396,62  ort R -0,190
+ikinci yari  N=46  defter P&L  -39,14  ort R -0,184
+```
+
+İki yarıda da ortalama R **negatif** ama ilk yarı dolar bazında **artı**. Sebep
+`TP1_KISMI`: kısmi kâr alınıp kalan yarı −0,5R'de stop olunca kayıt `r=−0,5` gösterir,
+pozisyon dolar bazında artıda kapanır (`BAS`: toplam **+13,36** ama `r=−0,51`).
+
+**Ön-kayıt "yarılar R ya da yüzdeyle kıyaslanmalı" diyor — ama R kayıt başına ve kısmi
+kârı görmüyor.** Hüküm yazılmadan önce hangi ölçünün kullanılacağı netleşmeli:
+pozisyon-bazlı toplam mı, kayıt-bazlı R mi. **Bu bir ölçüt yumuşatma değil, ölçüt
+belirsizliği** — sonuç görülmeden çözülmesi gerekiyor.
 
 ## Bekleyen — ölçülmedi
 
@@ -762,7 +828,7 @@ olarak taşınır.
 | **`testbot._kilit_al` aynı check-then-act kusurunu taşıyor** — ⚠️ **ŞİMDİ DOKUNMA** | `os.path.exists()` → `open(...,"w")`; `ayna`'da bu desen gerçekten ısırdı ve `O_CREAT\|O_EXCL` ile düzeltildi. **Ama `testbot`'ta İKİ BAĞIMSIZ SAVUNMA var ve 45 günde ısırmadı:** (1) zamanlayıcıda `MultipleInstances=IgnoreNew`, (2) `ExecutionTimeLimit` **1200 sn**, kilidin bayatlama eşiği **1250 sn** — yani Windows süreci **önce** öldürüyor, kilit **ondan sonra** bayatlıyor. Bu sıralama bilinçli tasarlandı ve kodda yazılı ([testbot.py:1624](testbot.py#L1624)). **Ölçüm penceresi açıkken `testbot` kilidine dokunmak kusurun kendisinden büyük risk:** kilitte yeni bir hata **çift tur** demektir, o da doğrudan pencereyi bozar. Pencere kapandıktan sonra ele alınır |
 | **`ayna` eşleşmiş kıyası** | Ön-kayıtlı ayrı ölçüm işi — gerekçe yukarıdaki defterler bölümünde |
 | **Derinlik çağrısına kısa timeout (3–5 sn)** | `_get` varsayılanı **25 sn**; derinlik çağrısı onu taşıyor → ağ takılırsa açılan pozisyon başına +25 sn, turda en fazla 4 pozisyon = teorik +100 sn. ⚠️ **Keep-alive bunu ÇÖZMEZ** — keep-alive el sıkışma gecikmesini siler, timeout kuyruğunu silmez: sunucu takılırsa 25 sn yine 25 sn. İkisi **ayrı iş**. Derinlik ölçüm verisi, karar değil → kısa timeout'ta kaybetmek ucuz |
-| ⚡ **HTTP keep-alive / bağlantı havuzu** — ölçüldü, uygulanmadı | [evren.py:54](evren.py#L54) her çağrıda yeni bağlantı açıyor; keep-alive medyan çağrıyı **0,614 → 0,285 sn** (2,1 kat) indiriyor, medyan turu **298 → ~145 sn**. **Pencereye bağlı DEĞİL** — D/8: aynı uç noktalar, aynı sıra, aynı veri, aynı kararlar; yalnız socket yeniden kullanılıyor. Pencereye bağlı beş işin arkasında beklemesi gerekmiyor, ama derinliğin de önüne alınmadı. Ölçüm: yukarıdaki "ağ çağrısı bütçesi" bölümü |
+| ⚡ **HTTP keep-alive / bağlantı havuzu** — ölçüldü, uygulanmadı | [evren.py:54](evren.py#L54) her çağrıda yeni bağlantı açıyor; keep-alive medyan çağrıyı **0,614 → 0,285 sn** (2,1 kat) indiriyor, medyan turu **298 → ~145 sn**. **Pencereye bağlı DEĞİL** — D/8: aynı uç noktalar, aynı sıra, aynı veri, aynı kararlar; yalnız socket yeniden kullanılıyor. Pencereye bağlı altı işin arkasında beklemesi gerekmiyor, ama derinliğin de önüne alınmadı. Ölçüm: yukarıdaki "ağ çağrısı bütçesi" bölümü |
 | **Slipaj varsayımı tutuyor mu?** (emir defteri derinliği) — ⚙️ **veri 2026-08-17'den beri toplanıyor** | Alan `derinlik_giriste` işlem kaydında: `slipaj_pct` (notional defterin karşı tarafını yerken oluşan VWAP sapması) · `defter_usdt_20` · `yetersiz` (defter 20 seviyede tükendiyse slipaj **alt sınırdır**). `null` = ölçülemedi. Pozisyon başına **1 çağrı**, aday döngüsüne girmiyor. Ölçüm birkaç düzine pozisyon birikince ön-kayıtla yapılır. Bütün ölçümler slipajı **%0,02 varsaydı**; hiç doğrulanmadı ve A+B'nin sınırlar bölümü *"slipaj yok sayıldı; olaylar düşük hacimli coinlerde yoğunlaşıyor"* diyor. Gerçek paraya geçişte kenarı belirleyecek kalem bu. Giriş anında derinlik kaydı planlandı — **yalnız dolan pozisyonda**, reddedilen adaylarda değil (o, çağrıyı giriş arama döngüsünün içine sokar; tur süresi zaten 314–440 sn). ⚠️ **SINIR — şimdiden yazıldı:** yalnız dolan pozisyonda ölçmek **seçilim yanlı bir örneklemdir.** *"Bizim işlemlerimizde tuttu mu"* için doğru örneklem, yanlılık yok. *"Daha çok işlem yapsak da tutar mıydı"* için **yanlış** örneklem. İkincisine genişletmek isteyen bu cümleyi okumadan genişletmesin |
 | **`ayna`'nın 177,84 $ equity–defter kayması** | Kaynağı bulundu (08-12 17:42 temizliğinde equity `başlangıç + defter P&L` ile, **funding'siz** yeniden kuruldu). **Kıyastan ÖNCE** düzeltilmeli ya da kıyasa dahil edilmeli, yoksa ayna-bot karşılaştırması yanlı başlar. Ayrıntı defterler bölümünde |
 

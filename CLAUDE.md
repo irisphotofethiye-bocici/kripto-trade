@@ -88,6 +88,12 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   belirgin fazladır — fark **45–50 kayıt** mertebesinde, çünkü `TP1_KISMI` satırları
   pozisyonu ikiye bölüyor. Kayıt sayan biri pencereyi **vaktinden önce dolmuş** ilan
   eder. Güncel sayım komutu `durum.md`'de.
+- 🔴 **`r` ALANI KISMİ KÂRI GÖRMEZ — R ile dolar ters işaret verebilir.** `r` yalnız
+  kapanış kaydında var ve **kalan yarının** R'sini gösterir; TP1'de realize edilen kâr
+  onun içinde YOK. Somut: `BAS` toplam **+13,36 $** ama `r = −0,51`. Yarı-yarı kıyas
+  R üzerinden yapılırsa kısmi kâr alan pozisyonlar sistematik olarak **kötü** görünür.
+  **Pozisyon-bazlı toplam ile kayıt-bazlı R aynı şeyi ölçmez** — hangisinin
+  kullanılacağı hüküm yazılmadan ÖNCE kararlaştırılır (`durum.md` → pencere).
 - 🔴 **SÜZGEÇ SAYMAK İÇİNDİR, TOPLAMAK İÇİN DEĞİL.** Pozisyon *sayarken*
   `not x.get("kismi")` uygulanır. **P&L *toplarken* UYGULANMAZ** — kayıtlar `id` ile
   birleştirilir, yoksa TP1'de **realize edilmiş kâr kaybolur.** Ölçüldü

@@ -113,7 +113,7 @@ Geri dönmek gerekirse tek satır: `tp1_efektif_hesapla` çağrısını
 `cikis_modu == "sabit_hedef"` pozisyonlarda atla. **`kismi_kar_r = 0` YAPMA** —
 neden olmadığı `CLAUDE.md`'de yazılı (TP1 anında tetikleniyor).
 
-### ⭐ BEŞ İŞ TEK HAKEME BAĞLI — ayrı ayrı tartışılmasın
+### ⭐ ALTI İŞ TEK HAKEME BAĞLI — ayrı ayrı tartışılmasın
 
 ```mermaid
 flowchart TD
@@ -123,6 +123,7 @@ flowchart TD
     S["ORTAK SAVUNMA<br/>o ölçüm bir YENİDEN ÜRETİM<br/>medyan stop %1,3 · canlıda %3,4<br/>ikisi AYNI koşturmadan geliyor"]
     D["4 · 1,5R kısmi ezmesi<br/>ölçüm 'kaldır' dedi<br/>kullanıcı 'kalsın' dedi"]
     E["5 · A+B stop mesafesi<br/>A-stop kenarın %65'ini yiyor<br/>defterde: 'pencere sonrası İLK İŞ'"]
+    F["6 · NOTR-belirsiz LONG kapısı<br/>ÖLÇÜMLE GEREKÇELENMEDİ<br/>fren boşluğunu doldurdu: 3 işlem −450 $"]
     W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç 2026-08-12 01:17<br/>ÇÖZÜLDÜ 2026-08-18"}}
     P["popülasyon itirazı DOĞRULANIR<br/>1 · 2 · 3 ayakta kalır<br/>5 yine ölçülür"]
     M["üç savunma BİRDEN düşer<br/>1 · 2 · 3 birlikte gözden geçirilir<br/>4 zaten tercihe dayanıyordu"]
@@ -132,6 +133,7 @@ flowchart TD
     S --> W
     D -. "savunması ZAYIF:<br/>evren canlıya daraltılmıştı" .-> W
     E --> W
+    F -. "kanıtsız kapı:<br/>SHORT frenlenince<br/>tek yol o kalıyor" .-> W
     W -- "pencere ARTI kapanırsa" --> P
     W -- "pencere EKSİ kapanırsa" --> M
 ```
@@ -142,7 +144,7 @@ savunmaya** yaslanıyorlar, çünkü 1 ve 2'nin −0,079'u **aynı koşturmadan*
 popülasyon itirazı orada geçerli değil). 5 bir savunma değil, pencereye kilitlenmiş
 bir iş.
 
-**Pratik sonuç: pencere dolunca beş ayrı tartışma değil, TEK tartışma yapılır.**
+**Pratik sonuç: pencere dolunca altı ayrı tartışma değil, TEK tartışma yapılır.**
 
 Yukarıdaki maddelerin **1, 2, 3'ü ve sabit %10 hedef** birbirinden bağımsız görünüyor.
 Değil. Üçünün savunması **aynı tek argümana** yaslanıyor:
@@ -244,11 +246,13 @@ merak eden aynı komutta tarihi değiştirir; ikisi **farklı soruların** cevab
 > ve cadence (08-12 01:17) de tabandan önce ya da onunla eşzamanlı; pencere zaten
 > **son davranış değişikliğinden** başlatıldığı için içeride parametre değişimi yok.
 
-**Sonuç: tek bir çıktı BEŞ işi birden çözer** — üç ayar kararı (MA50+ucuz · sabit %10
+**Sonuç: tek bir çıktı ALTI işi birden çözer** — üç ayar kararı (MA50+ucuz · sabit %10
 hedef · kısmen 1,5R) + A+B stop mesafesi yeniden ölçümü + sabit hedefin MA50'ye
-genişletilmesi. Pencere eksi kapanırsa savunmalar birden düşer; artı kapanırsa popülasyon
+genişletilmesi + **NOTR-belirsiz LONG kapısı** (2026-08-19 eklendi: ölçümle
+gerekçelenmemiş tek kapı, BTC-pay freni açılınca tek giriş yolu oldu ve 3 işlemde
+−450 $ verdi). Pencere eksi kapanırsa savunmalar birden düşer; artı kapanırsa popülasyon
 itirazı doğrulanır. **Pencere dolduğunda bunları ayrı ayrı tartışma** — aynı sorunun
-beş yüzü.
+altı yüzü.
 
 **Aynı pencereye bağlı BEŞİNCİ iş — dayanağı çürütülmüş bir genişletme:**
 **Sabit %10 hedefin `MA50+ucuz`'a genişletilmesi.** 08-10 kararı *"A+B'ye özel, diğer
@@ -317,6 +321,31 @@ olarak yok.** Alanın tanımı, `null`/`0.0` ayrımı ve süzgeç → **`CLAUDE.
 - **Ne açıyor:** kapı × fonlama kırılımı (`MA50+ucuz` fonlama yükü artık backtest'e
   muhtaç değil), tutuş süresi × fonlama canlı doğrulaması, fonlamalı gerçek R.
 - Doğrulama: `scratchpad/funding_pozisyon_testi.py` — 15 kontrol, diske yazım YOK.
+
+## 🔴 BTC-pay SHORT freni AÇIK (2026-08-18'den beri)
+
+**Durum:** SHORT girişi kapalı. Bot yalnız `NOTR-belirsiz long` kapısından girebiliyor.
+
+**Ne zaman kalkar:** fren *seviyeye* değil **3 günlük değişime** bakar. `btc_d_xs`
+17→18 Ağustos'ta tek günde **+0,3022** sıçradı; sıçrama 3 günlük pencerede kaldığı
+sürece fren açık. **21 Ağustos'ta referans noktası 18 Ağustos olur** → sıçrama
+pencereden çıkar → fren düşer. Koşul: `btc_d_xs` bugünkü seviyesinde kalırsa
+(BTC pay kazanmaya devam ederse fren sürer).
+
+Kontrol komutu (rakam buraya yazılmaz, okunur):
+
+```bash
+python -c "import json,datetime; r=[json.loads(l) for l in open('btc_pay_log.jsonl',encoding='utf-8') if l.strip()]; d={x['gun']:x['btc_d_xs'] for x in r}; g=r[-1]['gun']; v=r[-1]['btc_d_xs']; ref=(datetime.date.fromisoformat(g)-datetime.timedelta(days=3)).isoformat(); print(g, round(v,4), 'degisim', round(v-d.get(ref,v),4), '-> FREN' if v-d.get(ref,v)>=0.287 else '-> SERBEST')"
+```
+
+**Ölçüldü — fren DOĞRU çalışıyor:** frenlenen 13 aday ileri oynatıldı, ortalama
+**−1,198%**, 9'u stop. Kapıyı gevşetmek o işlemleri almak demek. Ayrıntı ve uyarılar
+`olcumler.md`.
+
+**KARAR (2026-08-19): hiçbir şey değiştirilmedi.** Gerekçe: (a) fren ölçümle haklı,
+(b) pencere hâlâ artıda, (c) parametre değişikliği pencereyi sıfırlar ve **92
+pozisyonluk kanıt** ile altı işin hakemi kaybolur, (d) fren iki gün içinde
+kendiliğinden kalkıyor.
 
 ## Canlıya geçmeden
 
