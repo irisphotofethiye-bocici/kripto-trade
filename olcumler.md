@@ -1191,6 +1191,36 @@ fısıldıyor (`A+B` %39 hızlı ölüm · `MA50+ucuz` %71).
 **Sıra önerisi:** önce **2** (en ucuz, en spesifik, 0-8 saat bulgusuyla örtüşüyor),
 sonra **1** (dizi özelliği). 3 ve 4 pahalı; ilk ikisinin sonucuna göre.
 
+### ❌ BOŞLUK 2 (fonlama saatleri) — TARANDI, BULGU YOK (2026-08-19)
+
+Betimleyici tarama (**ön-kayıt değil**, hipotez üretimi): girişin fonlama döngüsündeki
+konumu (0 = kesim saati 00/08/16 UTC) × net getiri, 565 sembol, faz kaydırmalı örneklem.
+
+```
+konum   TUM N   ort%     A_funding        B_ma50ucuz
+  0      2649  +0,075    +0,162 EN IYI    -0,404 EN KOTU
+  3      3085  -0,176    -0,177           +0,050
+  6      3312  +0,002    -0,034           +0,260 EN IYI
+```
+
+**Kural YAZILMADI. Üç sebep:**
+1. **İki kapı ZIT yönde** — `konum 0` A'da en iyi, B'de en kötü. Gerçek mikroyapısal
+   etki olsaydı ikisi de aynı yönde olurdu. **Zıt işaret = gürültü imzası.**
+2. **Yayılım gürültü seviyesinde:** SE 0,105–0,239; gözlenen yayılım **2,4–3,0 × SE**.
+   **8 kova × 2 kapı = 16 karşılaştırma** → şansla beklenen en büyük sapma ~2,5 × SE.
+3. `+0,162`'ye bakıp kural yazmak **"en iyi hücreyi seçmek"** olurdu.
+
+### ⚠️ ÖRNEKLEME KUSURU BULUNDU — `SEYRELT=24` faz kilitliyor
+
+İlk koşumda `konum 1` tek başına **23.886 olayın 14.717'sini** taşıyordu. Sebep:
+`SEYRELT = 24` **tam 24 saat**, ve `klines_1h_uzun` dosyalarının **hepsi aynı zaman
+damgasıyla indirilmiş** → her sembolde girişler **aynı UTC saatine** düşüyor.
+Sembol başına rastgele faz kaydırmayla düzeltildi (kovalar 2.300–3.300'e dengelendi).
+
+🔴 **Bu kusur `SEYRELT=24` kullanan HER ölçümü ilgilendirir** — `ileri_rr` ·
+`asgari_stop` · `katilim_filtresi` dahil. **Saat/zaman boyutu olmayan sorularda
+zararsız**, ama **zamanla ilgili her ölçümde faz kaydırma ŞARTTIR.**
+
 ## Bekleyen — ölçülmedi
 
 | soru | neden bekliyor |
