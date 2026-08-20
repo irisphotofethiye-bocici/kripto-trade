@@ -2366,3 +2366,60 @@ Yani mevcut kapı **kenarı buluyor ama net olarak zarar ettiriyor** — kontrol
 de, aynasından da kötü. Bu, projenin en merkezî varsayımına ait ilk
 **kontrol gruplu** ölçümdür.
 
+### 🔴🔴🔴 KAPI KARNESİ — KONTROL GRUPLU, ÇİFT MEKANİKLİ (2026-08-20)
+
+**Betikler:** `Q_tum_kapilar.py` (mekanikli) · `R_ham_dogrulama.py` (ham getiri).
+Her kapı **tek tek**, diğerlerinden bağımsız: *geçen* vs *geçmeyen*.
+Aynı olay evreni **N=189.134** · 2 yıl · ay-kümeli · maliyet+fonlama dahil.
+
+#### Doğrulama katmanı (kullanıcı talebi: *"hatasız olduğundan emin ol"*)
+
+| # | kontrol | sonuç |
+|---|---|---|
+| D1 | bilinen sonucu yeniden üret (`O_kapi_kontrol` KAPI hücresi) | ✅ N=18832 · BRUT +0,2155 · fonlama −0,1519 · NET −0,1090 **birebir** |
+| D2 | geçen + geçmeyen = toplam (her kapı) | ✅ |
+| D3 | NET = BRUT − maliyet + fonlama (tolerans 1e-9) | ✅ |
+| D4 | NaN/sonsuz yok | ✅ |
+| D5 | toplam ortalama iki yoldan | ✅ −0,047304 = −0,047304 |
+
+#### Karne
+
+```
+kosul                  MEKANIKLI fark  ay-t     HAM fark   ay-t    ATR gec/gecmeyen  ISARET
+funding <= -0,05          -0,0956     -3,15     -0,5430   -4,96      1,73 / 1,69      AYNI
+MA50+ucuz                 -0,1084     -0,75     -0,1574   -0,11      2,36 / 1,67      AYNI
+fiyat <= $0,07            -0,0880     -2,44     -0,2827   -2,14      1,87 / 1,63      AYNI
+chg24 >= %20 (pump)       -0,5134     -2,14     -2,1799   -1,90      4,69 / 1,68      AYNI
+chg24 >= %40 (blowoff)    -1,3889     -2,41     -4,4757   -1,88      6,50 / 1,69      AYNI
+pos >= 0,75 (tepe)        -0,0984     -1,12     +0,0763   +0,44      1,56 / 1,74      🔴 DONDU
+pos < 0,25 (dip)          +0,1044     +0,89     +0,0558   -0,24      1,77 / 1,67      zayif
+```
+
+#### 🔴 HÜKÜM — bot NE ALMAYACAĞINI biliyor, NE ALACAĞINI bilmiyor
+
+**AÇAN kapıların ikisi de ZARARLI:**
+- `funding <= -0,05 → SHORT AÇ` : **ham fark −0,5430 (t=−4,96, 5/25 ay)**,
+  mekanikli −0,0956 (t=−3,15). **İki ölçümde de anlamlı negatif.**
+  ⚠️ Ve **oynaklık karıştırıcısı YOK** — ATR 1,73 vs 1,69 (bugün öğrenilen sınama).
+  Ham ölçüm mekanikliden **beş kat güçlü**: mekanik, kapının ne kadar kötü
+  olduğunu **maskeliyor**.
+- `MA50+ucuz → SHORT AÇ` : her iki ölçümde negatif. Fiyat bacağı (`≤$0,07`)
+  tek başına **t=−2,44 / −2,14** ile anlamlı zararlı.
+
+**ENGELLEYEN kapıların ikisi de DOĞRU:**
+- `chg24 >= %20` pump kapısı : geçenler −0,5525 (ham −2,14). Engellemek **doğru**.
+- `chg24 >= %40` blowoff : geçenler −1,4313 (ham −4,46). Engellemek **doğru**.
+  ⚠️ Bu ikisinde ATR **3-4 kat** ayrışıyor; hüküm ham ölçümle de aynı yönde
+  olduğu için ayakta, ama güveni mekanikliden okumak yanlış olur.
+
+**`pos >= 0,75` işaret DÖNDÜ** (mekanikli −0,0984 / ham +0,0763) → **hüküm yok.**
+
+#### Bunun anlamı
+
+Botun **negatif filtreleri çalışıyor**, **pozitif seçicileri çalışmıyor**.
+Aylardır ölçülen her şey bu iki açan kapının üstüne inşa edildi; **kapıların
+kendisi bugüne kadar kontrol grubuyla hiç sınanmamıştı**. Orijinal `A+B` ölçümü
+`radar_archive`'da **N=201**, kontrol grubu **yoktu**.
+
+⚠️ **Kural önerilmiyor** (kullanıcı talimatı). Bu bir teşhis kaydıdır.
+

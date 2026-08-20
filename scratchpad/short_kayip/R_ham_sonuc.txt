@@ -1,0 +1,20 @@
+olay: 189134
+
+HAM GETIRI ILE AYNI KAPILAR (stop YOK, hedef YOK)
+==============================================================================================================
+kosul                     N gecen      GECEN   GECMEYEN       FARK     ay-t   fark ay ATR gecen/gecmeyen
+funding <= -0,05            47079    -0.4047    +0.1384    -0.5430    -4.96      5/25   1.73 / 1.69
+MA50+ucuz                   10536    -0.1454    +0.0120    -0.1574    -0.11     15/25   2.36 / 1.67
+fiyat <= $0,07              54667    -0.1978    +0.0849    -0.2827    -2.14      7/25   1.87 / 1.63
+chg24 >= %20 (pump)          3031    -2.1418    +0.0381    -2.1799    -1.90     11/24   4.69 / 1.68
+chg24 >= %40 (blowoff)        678    -4.4564    +0.0192    -4.4757    -1.88      4/15   6.50 / 1.69
+pos >= 0,75 (tepe)          44030    +0.0617    -0.0146    +0.0763    +0.44     14/25   1.56 / 1.74
+pos < 0,25 (dip)            52526    +0.0435    -0.0123    +0.0558    -0.24     10/25   1.77 / 1.67
+
+MEKANIKLI olcumle (Q_tum_kapilar) KIYAS:
+   funding<=-0,05  mekanikli FARK -0,0956 (t=-3,15)
+   pump  >=%20     mekanikli FARK -0,5134 (t=-2,14)
+   blowoff>=%40    mekanikli FARK -1,3889 (t=-2,41)
+   pos<0,25 (dip)  mekanikli FARK +0,1044 (t=+0,89)
+
+ISARET AYNI ise bulgu mekanikten BAGIMSIZ; farkliysa mekanik eseri.

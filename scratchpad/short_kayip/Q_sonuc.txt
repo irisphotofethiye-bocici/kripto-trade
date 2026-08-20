@@ -1,0 +1,24 @@
+olay: 189134
+D3 (NET=BRUT-MAL+fon) OK · D4 (NaN yok) OK
+
+D1 DOGRULAMA — O_kapi_kontrol.py'nin KAPI hucresi yeniden uretiliyor
+   beklenen: N=18832 · BRUT +0,2155 · fonlama -0,1519 · NET -0,1090
+   uretilen: N=18832 · BRUT +0.2155 · fonlama -0.1519 · NET -0.1090
+   -> TUTTU
+
+====================================================================================================================
+TUM KAPILAR — GECEN vs GECMEYEN (ayni mekanik, N=189134)
+====================================================================================================================
+kosul                     N gecen     GECEN  GECMEYEN      FARK   ay-t(f)    fark ay brut fark  botun kullanimi
+funding <= -0,05            47079   -0.1191   -0.0235   -0.0956     -3.15       5/25   +0.0092  A+B kapisi -> SHORT AC
+MA50+ucuz                   10536   -0.1497   -0.0413   -0.1084     -0.75      14/25   -0.0994  kapi -> SHORT AC
+fiyat <= $0,07              54667   -0.1099   -0.0219   -0.0880     -2.44       7/25   -0.0856  MA50 kapisinin yarisi
+MA50 mesafe >= %3,72        33010   -0.1459   -0.0264   -0.1195     -0.99      11/25   -0.1112  MA50 kapisinin diger yarisi
+chg24 >= %20 (pump)          3031   -0.5525   -0.0391   -0.5134     -2.14       5/24   -0.4149  kapi -> SHORT ENGELLE
+chg24 >= %40 (blowoff)        678   -1.4313   -0.0423   -1.3889     -2.41       3/15   -1.2454  kapi -> IKISINI DE ENGELLE
+stop >= %2,0 (asgari)       70694   -0.0731   -0.0319   -0.0412     -1.16       9/25   -0.0125  kapi -> ALTINI REDDET
+pos >= 0,75 (tepe)          44030   -0.1228   -0.0244   -0.0984     -1.12      11/25   -0.1130  SHORT'ta boyle bir kapi YOK
+pos < 0,25 (dip)            52526   +0.0281   -0.0763   +0.1044     +0.89      11/25   +0.1205  LONG'da veto, SHORT'ta yok
+
+D5 DOGRULAMA — toplam ortalama iki yoldan: -0.047304 vs -0.047304 -> TUTTU
+D2 (gecen+gecmeyen=toplam) tum kapilarda OK
