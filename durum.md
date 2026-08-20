@@ -602,6 +602,29 @@ susturuluyor), ve **olay etiketi verilmez** — config'teki `"olaylar": ["giris"
 süzgeci olaysız çağrıları geçirir, böylece **botun bildirim ayarı değişmedi.**
 Sınama: `scratchpad/defter2_bildirim_testi.py` (25/25).
 
+### 🔴 DEFTER-2 YARIM RİSKLE KOŞUYOR — kıyas yazılmadan ÖNCE okunacak
+
+Ölçüldü (2026-08-20 21:57, 10 pozisyonun 10'u): **`smart_giriste` her girişte
+`LONG`**, defter2 ise yalnız SHORT açıyor. `testbot.py:1225` smart-para ters
+yöndeyse hedef riski **yarıya** indiriyor:
+
+```
+hedef risk = kasa x %1,5  = 151,96 $
+smart TERS -> YARI        =  75,98 $      <- her girişte
+```
+
+Bu istisna değil, bu evrende **kural**: evren *funding pozitif + pump yok*
+coinleri seçiyor, orada smart okuması neredeyse hep LONG çıkıyor.
+
+**Sonucu:** defter2 ile bot **aynı risk seviyesinde koşmuyor** — defter2'nin
+toplam maruziyeti tasarlananın yarısı. İki kasayı doğrudan kıyaslayan her cümleye
+bu not düşülmelidir (gölge/bot kıyasındaki fonlama asimetrisiyle aynı sınıf hata).
+Kaynak: `defter2_state.json` → `risk_usdt` · `smart_giriste`.
+
+⚠️ `defter2.durum()` **kapanan pozisyonu yanlış sayıyor** — `id` sayıyor, TP1
+kaydı almış ama hâlâ açık pozisyonları da kapanmış gösteriyor (21:57'de 7 dedi,
+gerçek 4). `CLAUDE.md`'nin kayıt/pozisyon tuzağı. Düzeltilmedi.
+
 ### Kurulum ayrıntısı
 
 ```
