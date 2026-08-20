@@ -1,0 +1,18 @@
+HACIM DILIMLERI (1 = en likit):
+   dilim 1: 113 sembol · medyan gunluk hacim ~ 22853982 $
+   dilim 2: 113 sembol · medyan gunluk hacim ~ 3616179 $
+   dilim 3: 113 sembol · medyan gunluk hacim ~ 1642174 $
+   dilim 4: 113 sembol · medyan gunluk hacim ~ 972247 $
+   dilim 5: 113 sembol · medyan gunluk hacim ~ 574228 $
+
+FUNDING KAPISININ KENARI, HACIM DILIMINE GORE
+========================================================================================================
+dilim           N       BRUT    fonlama    NET(ince)   NET(likit) ay-kumeli t   medyan $
+1            3750    +0.2375    -0.1155      -0.0506      +0.0120       -1.13     0.7186
+2            4034    +0.3662    -0.1827      +0.0108      +0.0734       -0.45     0.1601
+3            3991    +0.0969    -0.1360      -0.2117      -0.1491       -1.38     0.1298
+4            3835    +0.1609    -0.1378      -0.1495      -0.0869       -0.42     0.0954
+5            3222    +0.2132    -0.1924      -0.1518      -0.0892       -0.26     0.1631
+
+NET(ince)  = olculen gercek maliyet 0,1726 (botun bugun ticaret ettigi defterler)
+NET(likit) = 2 x (taker %0,045 + slipaj %0,010) = 0,110  (derin defter varsayimi)

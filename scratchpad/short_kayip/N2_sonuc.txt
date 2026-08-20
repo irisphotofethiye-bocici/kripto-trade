@@ -1,0 +1,25 @@
+KONTROL 1 — DAGILIM: ortalama mi medyan mi?
+====================================================================================================
+ufuk       kume            N    ort HAM     MEDYAN    ort NET    MED NET  kazanan%
+72s        KAPI        44701    +0.2540    +0.9041    -0.3932    +0.4460     52.4%
+72s        KONTROL    135789    +0.3318    +0.9848    +0.2004    +0.8794     54.5%
+
+2 hafta    KAPI        44701    +2.2265    +4.4215    +0.3977    +3.1047     57.9%
+2 hafta    KONTROL    135789    +1.2750    +5.2066    +1.1428    +5.1705     61.7%
+
+1 ay       KAPI        44701    +4.8722    +9.0442    +1.8451    +6.5347     61.9%
+1 ay       KONTROL    135789    +2.4590    +9.5303    +2.2061    +9.5056     65.6%
+
+KONTROL 2 — KAPI eksi KONTROL (kapinin KATKISI)
+====================================================================================================
+ufuk           KAPI net  KONTROL net         FARK  medyan fark
+72s             -0.3932      +0.2004      -0.5936      -0.4333
+2 hafta         +0.3977      +1.1428      -0.7450      -2.0658
+1 ay            +1.8451      +2.2061      -0.3610      -2.9708
+
+KONTROL 3 — AYKIRI SURUKLEMESI (1 ay, KAPI kumesi)
+   N=44701  ortalama +1.8451  medyan +6.5347
+   en iyi %1   (  447 islem) cikarilinca ortalama: +1.2233
+   en iyi %5   ( 2235 islem) cikarilinca ortalama: -0.5704
+   en iyi %10  ( 4470 islem) cikarilinca ortalama: -2.5641
+   en iyi 5 islem: ['+110', '+109', '+109', '+108', '+102']

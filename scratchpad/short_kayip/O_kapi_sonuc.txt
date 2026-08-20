@@ -1,0 +1,19 @@
+BOTUN CEKIRDEK KAPISI — KONTROL GRUPLU SINAV (ayni mekanik)
+========================================================================================================
+kume                          N       BRUT    fonlama        NET ay-kumeli t    poz ay
+KAPI (fund<=-0,05)        18832    +0.2155    -0.1519    -0.1090       -1.74      9/25 
+KONTROL (fund>-0,05)      49258    +0.1231    +0.0199    -0.0295       -0.35     11/25 
+
+KAPININ KATKISI: -0.0795  ->  🔴 KAPI DAHA KOTU
+AY-KUMELI fark: 25 ay · ort -0.1741 · t=-1.72 · KAPI ustun oldugu ay 10/25
+
+FONLAMA DILIMLERI (kapi esigi -0,05 nerede duruyor?)
+funding dilimi (%/8s)           N        NET
+-300.0000 .. -1.9490         8511    -0.1134
+-1.9482 .. -0.2362           8511    -0.1237
+-0.2360 .. 0.5000            8511    -0.1236
+0.5000 .. 0.5000             8511    -4.5007
+0.5000 .. 0.5000             8511    -2.6821
+0.5000 .. 0.5000             8511    +6.7607
+0.5000 .. 1.0000             8511    -1.4712
+1.0000 .. 43.5991            8513    +1.8413

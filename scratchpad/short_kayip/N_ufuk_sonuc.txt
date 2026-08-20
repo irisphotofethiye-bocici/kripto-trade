@@ -1,0 +1,21 @@
+EKSEN 1 / IS 1 — UZUN TUTMA (SHORT, funding kapisi, 2 yil)
+========================================================================================================
+Sabit maliyet: %0.1726/islem  ·  fonlama ufukla degisir
+
+ufuk              N         HAM     fonlama         NET    ham ay-t    net ay-t    poz ay
+24s           44701     +0.0984     -0.1851     -0.2592       -0.18       -3.45      7/24 
+72s           44701     +0.2540     -0.4746     -0.3932       -0.64       -2.04     11/24 
+1 hafta       44701     +1.0827     -0.9631     -0.0530       +0.02       -0.81     10/24 
+2 hafta       44701     +2.2265     -1.6562     +0.3977       +0.18       -0.59     11/24 
+1 ay          44701     +4.8722     -2.8545     +1.8451       +0.24       -0.35     13/24 
+
+OLCEKLEME — kenar ufukla nasil buyuyor?
+ufuk               HAM  sqrt(saat)   HAM/sqrt(t)  fonlama/saat
+24s            +0.0984        4.90       +0.0201      -0.00771
+72s            +0.2540        8.49       +0.0299      -0.00659
+1 hafta        +1.0827       12.96       +0.0835      -0.00573
+2 hafta        +2.2265       18.33       +0.1215      -0.00493
+1 ay           +4.8722       26.83       +0.1816      -0.00396
+
+HAM/sqrt(t) SABIT ise kenar rastgele-yuruyus gibi olcekleniyor demektir.
+ARTIYORSA uzun tutma lehine, AZALIYORSA kenar erken bitiyor.

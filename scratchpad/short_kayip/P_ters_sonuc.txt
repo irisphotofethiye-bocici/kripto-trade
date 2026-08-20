@@ -1,0 +1,13 @@
+TERS KAPI — on-kayitli sinav (SHORT, ayni mekanik, 2 yil)
+==============================================================================================================
+kume                        N       BRUT    fonlama        NET ay-kumeli t    poz ay     medyan
+MEVCUT (f<=-0,05)       18832    +0.2155    -0.1519    -0.1090       -1.74      9/25     -2.6390
+KONTROL (arasi)          1274    +0.0943    -0.0126    -0.0910       -0.99     10/22     -2.6131
+TERS (f>=+0,05)         47984    +0.1239    +0.0208    -0.0279       -0.30     11/25     -2.5954
+
+OLCUT KONTROLU
+  1-2. TERS eksi MEVCUT (f<=-0,05)    : +0.0811  OK
+  1-2. TERS eksi KONTROL (arasi)      : +0.0630  OK
+  3.   ay-kumeli t = -0.30  DUSTU
+  4a.  A yarisi +0.0131 · B yarisi -0.0689  DUSTU
+  4b.  rejim: AYI -0.1782 NOTR +0.0684 BOGA -0.3827 

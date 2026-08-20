@@ -2294,3 +2294,75 @@ ceyrek     N       BRUT     fonlama       NET     ay-t   kesinti
 
 **Fonlama zamanlaması sistemi kurtarmıyor.** Denendi, kapandı.
 
+### 🔴🔴 BOTUN ÇEKİRDEK KAPISI KONTROL GRUBUNDAN KÖTÜ (2026-08-20)
+
+**Betikler:** `N_ufuk.py` · `N2_ufuk_kontrol.py` · `O_kapi_kontrol.py` ·
+`P_ters_kapi.py` (ön-kayıtlı). SHORT · aynı mekanik (A-stop · %10 hedef · 72s ·
+maliyet 0,1726 · fonlama) · 2 yıl.
+
+#### Uzun tutma ölçümü (Eksen 1 / İş 1) — havuz artı, ay-kümeli sıfır
+
+```
+ufuk        N       HAM     fonlama       NET   ham ay-t   net ay-t   poz ay
+24s     44701   +0,0984   -0,1851   -0,2592     -0,18     -3,45      7/24
+72s     44701   +0,2540   -0,4746   -0,3932     -0,64     -2,04     11/24
+1 hafta 44701   +1,0827   -0,9631   -0,0530     +0,02     -0,81     10/24
+2 hafta 44701   +2,2265   -1,6562   +0,3977     +0,18     -0,59     11/24
+1 ay    44701   +4,8722   -2,8545   +1,8451     +0,24     -0,35     13/24
+```
+
+**Havuz-net 2 haftada artıya geçiyor — ama sahte.** Üç kontrol:
+- **Aykırı sürüklemesi:** en iyi %5 çıkarılınca **−0,5704**; %10 çıkarılınca −2,5641.
+  En iyi 5 işlem: +110, +109, +109, +108, +102 (sıfıra çöken coinler)
+- **Ay-kümeli t her ufukta NEGATİF**, pozitif ay ~yarısı
+- **Kontrol grubu daha iyi:** 1 ayda kapı +1,8451 · kapısız **+2,2061**
+
+#### 🔴 Ve asıl bulgu: kapı, KONTROL GRUBUNDAN kötü
+
+```
+kume                     N       BRUT    fonlama       NET   ay-kumeli t   poz ay
+KAPI (fund<=-0,05)   18832    +0,2155   -0,1519   -0,1090     -1,74       9/25
+KONTROL (fund>-0,05) 49258    +0,1231   +0,0199   -0,0295     -0,35      11/25
+                                          KAPININ KATKISI: -0,0795
+                          ay-kumeli fark t=-1,72 · kapi ustun 10/25 ay
+```
+
+**Kapı doğru yeri buluyor ama ödeyerek buluyor.** Brüt kenarı gerçekten yükseltiyor
+(+0,2155 vs +0,1231) — sinyal var. Ama o kenarı bulmak için **fonlama ödüyor**
+(−0,1519) iken kontrol grubu fonlama **tahsil ediyor** (+0,0199). Net etki: kapı
+**0,08 puan zarar ettiriyor**.
+
+⚠️ Orijinal kapı ölçümü `radar_archive`'da **N=201**, farklı mekanik (2R hedef),
+kontrol grubu **yoktu**. Bu ölçüm **N=68.090**, 2 yıl, **kontrol gruplu**. İkisi
+aynı şeyi ölçmüyor, ama örneklem 300 kat ve kontrol var.
+
+#### ÖN-KAYITLI TERS KAPI SINAVI — KALDI
+
+Fonlaması **pozitif** olanı shortlamak (kalabalık LONG'u fade'lemek + fonlama
+tahsil etmek). Eşik botun kendi eşiğinin aynası (±0,05), seçilmedi.
+
+```
+kume                     N       BRUT    fonlama       NET   ay-kumeli t   poz ay
+MEVCUT (f<=-0,05)    18832    +0,2155   -0,1519   -0,1090     -1,74       9/25
+KONTROL (arasi)       1274    +0,0943   -0,0126   -0,0910     -0,99      10/22
+TERS   (f>=+0,05)    47984    +0,1239   +0,0208   -0,0279     -0,30      11/25
+```
+
+| ölçüt | sonuç |
+|---|---|
+| 1. TERS > MEVCUT | ✅ +0,0811 |
+| 2. TERS > KONTROL | ✅ +0,0630 |
+| 3. ay-kümeli t > +2,0 | ❌ **−0,30** |
+| 4a. iki yarıda da pozitif | ❌ A +0,0131 / B −0,0689 |
+| 4b. rejimde ters işaret yok | ❌ AYI −0,178 · NOTR +0,068 · BOĞA −0,383 |
+
+**HÜKÜM: KALDI.** Ön-kayıtlı beklenti (*"kararsız, geçmeye yakın"*) tuttu.
+⚠️ Bu bir **dilim taramasından** çıkmıştı ve ön-kayıtla sınandı; geçemedi.
+
+#### NE ÖĞRENİLDİ
+
+**Ters kapı kâr etmiyor (−0,0279) ama mevcut kapıdan +0,0811 daha iyi.**
+Yani mevcut kapı **kenarı buluyor ama net olarak zarar ettiriyor** — kontrolünden
+de, aynasından da kötü. Bu, projenin en merkezî varsayımına ait ilk
+**kontrol gruplu** ölçümdür.
+
