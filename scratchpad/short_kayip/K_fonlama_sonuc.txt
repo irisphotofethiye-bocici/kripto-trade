@@ -1,0 +1,19 @@
+ADIM 2 — FONLAMA KOSULU: kenari mi tasiyor, maliyeti mi getiriyor?
+====================================================================================================
+kume                    N       BRUT    fonlama    maliyet        NET ay-kumeli t
+A (funding)         17836    +0.2096    -0.1479    -0.1300    -0.0683       -1.36
+A+B                   996    +0.3215    -0.2250    -0.1300    -0.0334       -0.49
+B (MA50+ucuz)        3240    -0.0301    +0.0256    -0.1300    -0.1345       -0.58
+
+GERCEK MALIYETLE (olculen slipaj %0,0499 -> toplam %0,1726):
+kume                    N        NET ay-kumeli t
+A (funding)         17836    -0.1109       -1.68
+A+B                   996    -0.0760       -0.68
+B (MA50+ucuz)        3240    -0.1771       -0.87
+
+FONLAMA ORANI ile kenar iliskisi (A kapisini gecen kume, dilimler):
+funding dilimi               N       BRUT    fonlama        NET
+-200.0000 .. -4.2950      4459    +0.6044    -0.4479    -0.0161
+-4.2928 .. -1.5943        4459    +0.0078    -0.0910    -0.2557
+-1.5941 .. -0.6066        4459    +0.1232    -0.0382    -0.0876
+-0.6066 .. -0.0500        4459    +0.1029    -0.0144    -0.0841

@@ -2194,3 +2194,66 @@ Yani stop gerçek bir sızıntı ama **tek başına yetmiyor**.
 SAYFANDAN TEYIT ET ... hesabindan OKUNMADI"*. Maliyetin %72'lik payı
 **doğrulanmamış bir varsayıma** dayanıyor.
 
+### 🔴 MALİYET DOĞRULAMASI + FONLAMA AYRIŞTIRMASI (2026-08-20)
+
+#### ADIM 1 — ücretler doğru, SLİPAJ 2,5 kat eksik
+
+Kullanıcı BNB tutuyor. İki kaynak doğrulandı: Binance USDⓈ-M futures VIP0 taban
+**maker %0,02 / taker %0,05**, BNB ile futures'ta **%10 indirim** →
+**0,018 / 0,045**. `kripto-config.json` bu değerleri **doğru** taşıyor.
+
+**Ama slipaj tahmindi ve ölçüldü** (`derinlik_giriste`, N=25 tekil):
+
+```
+olculen slipaj : medyan %0,0499 · ortalama %0,0612 · max %0,196
+VARSAYIM       : %0,0200            -> gercek 2,5 KAT
+```
+
+**Slipaj pozisyon/defter oranıyla büyüyor** (`defter_usdt_20` zaten toplanıyor):
+
+```
+poz/defter   slipaj
+  0,032      0,0335%
+  0,102      0,0565%
+  0,296      0,0761%      korelasyon r = +0,439
+```
+
+**Gerçekçi maliyet** (giriş taker+slipaj; çıkış %69,6 STOP taker+slipaj ·
+%22,4 TP maker · %8 süre): **0,1726** — varsayılan 0,130'dan **+0,0426 pahalı**.
+→ **NET −0,076 değil, −0,119.**
+
+#### ADIM 2 — fonlama HEM kenar HEM maliyet
+
+Botun iki kapısı ayrı ölçüldü (2 yıl, SHORT):
+
+```
+kume                N       BRUT    fonlama   maliyet       NET    ay-t
+A (funding)     17836    +0,2096   -0,1479   -0,1300   -0,0683   -1,36
+A+B               996    +0,3215   -0,2250   -0,1300   -0,0334   -0,49
+B (MA50+ucuz)    3240    -0,0301   +0,0256   -0,1300   -0,1345   -0,58
+```
+
+🔴 **`MA50+ucuz` kapısının BRÜT kenarı NEGATİF (−0,0301).** Maliyet öncesi bile
+kaybettiriyor. Kenarın tamamı **funding kapısından** geliyor.
+
+**Fonlama dilimlerinde kenar ve maliyet BİRLİKTE büyüyor:**
+
+```
+funding dilimi (%/8s)      N       BRUT    fonlama       NET
+-200,00 .. -4,29        4459    +0,6044   -0,4479   -0,0161
+  -4,29 .. -1,59        4459    +0,0078   -0,0910   -0,2557
+  -1,59 .. -0,61        4459    +0,1232   -0,0382   -0,0876
+  -0,61 .. -0,05        4459    +0,1029   -0,0144   -0,0841
+```
+
+**HÜKÜM: kenar ve maliyet AYNI OLGU.** Kalabalık short (derin negatif fonlama)
+geri döner — kenar budur — ama o pozisyonu taşımak için fonlama ödenir. En derin
+dilimde brüt **+0,6044**, fonlama **−0,4479** onu yer. İkisi birlikte ölçekleniyor,
+net düz kalıyor.
+
+**Buradan çıkan ölçülebilir soru (denenmedi):** fonlama **8 saatte bir** kesiliyor;
+brüt kenar ise sürekli. En derin dilimde tek fonlama kesintisi **%4,29**.
+*Fonlama saatinden kaçınan bir tutma penceresi kenarı ödemeden yakalar mı?*
+⚠️ Bu daha önce denenmiş ama ölçüm `SEYRELT=24` faz kilidine takılmıştı
+(bir kova örneklemin %62'sini taşımıştı). Faz kaydırmayla yeniden kurulabilir.
+
