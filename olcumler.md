@@ -2082,3 +2082,61 @@ stop sinyali *yaratmıyor*, **söndürüyor**.
 **Genel ders:** stop, `btc_pay` sinyalinin **üçte ikisini yiyor** (ham −4,12 →
 mekanik −1,27). Kenar var ama mekanik onu büyük ölçüde tüketiyor.
 
+### 🔴 STOPUN GERÇEK MALİYETİ ÖLÇÜLDÜ (2026-08-20, `I_stop_maliyeti.py`)
+
+**Soru:** stopu neden bu kadar pahalıya ödüyoruz? (ham etki mekaniklinin 3 katı
+çıkınca soruldu.) SHORT · botun kendi kapıları · 2 yıl · **N=22.072**.
+
+#### 1 · Stop, gürültünün İÇİNDE duruyor
+
+```
+stop mesafesi     : medyan %2,97  (ATR cinsinden 1,50 x ATR)
+72 saatlik ufkun beklenen menzili : sqrt(72) = 8,5 x ATR
+-> stop, ufkun dogal menzilinin YALNIZ %17,7'sinde
+```
+
+**Mekanizma tek cümle:** 1,5 ATR uzağa stop koyup **72 saat** bekliyoruz.
+Saf rastgele yürüyüş bile o stopa çarpar.
+
+#### 2 · Sonuç dağılımı
+
+```
+STOP    15.364  (%69,6)
+HEDEF    4.936  (%22,4)
+SURE     1.772  (% 8,0)
+```
+
+#### 3 · Stopların beşte biri YANLIŞ
+
+Stop olan işlemler, stop **olmasaydı** aynı 72 saat içinde hedefe varır mıydı:
+
+```
+stop olan                : 15.364
+hedefe varirdi           :  3.333  (%21,7)   <-- YANLIS STOP
+gercekten kotu giris     : 12.031  (%78,3)
+
+yanlis stoplarin TUM olaylara orani: %15,1
+olay basina kaba maliyet: ~1,96 puan
+```
+
+#### 4 · Yanlış stoplar ERKEN geliyor
+
+```
+tum stoplar    : medyan  6. saat
+YANLIS stoplar : medyan  4. saat
+yanlis stoplarin %64'u ILK 6 SAATTE
+```
+
+#### HÜKÜM
+
+**Kenar var, mekanik tüketiyor.** İki bağımsız ölçüm aynı yere çıktı:
+`btc_pay` ham lift −4,12 → mekanikle −1,27 (üçte biri kalıyor); ve burada
+işlemlerin **%15,1'i** kazanacakken stopla öldürülüyor.
+
+⚠️ **Bu "stopu kaldır" DEMEK DEĞİL.** Ölçülen şey maliyet tarafı; fayda tarafı
+(kalan %78,3'te kaybın sınırlanması) **ölçülmedi**. Stopsuz kayıp sınırsızdır.
+
+**Ölçülmemiş ama işaret edilen:** yanlış stopların %64'ü ilk 6 saatte geliyor,
+yani sorun stop *seviyesi* değil **erken gürültü** olabilir. Zamanla değişen
+(başta gevşek, sonra sıkı) bir stop bunu sınardı — **denenmedi, önerilmiyor.**
+

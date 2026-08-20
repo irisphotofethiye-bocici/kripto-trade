@@ -545,3 +545,33 @@ uzun ömürlü süreçlerde bu **süreç ömrü boyunca** sürer.
 (düz `urlopen`, keep-alive yok); günde ~72.000 TCP+TLS el sıkışması. Keep-alive
 medyan çağrıyı 2,1 kat, medyan turu **298 → ~145 sn** indiriyor. Yavaşlığın yarısı
 **bizim**. Rakamlar ve rate-limit bütçesi → `olcumler.md` "ağ çağrısı bütçesi".
+
+## 🔴 ÖLÇÜM YÖNTEMİNDE KUSUR BULUNDU VE DÜZELTİLDİ (2026-08-20)
+
+**Nasıl çıktı:** kullanıcı sordu — *"bu ölçümlerin doğruluğuna güvenmemi
+gerektirecek sebep ne?"* Haklı çıktı.
+
+**Kanıt:** aynı 117 işlem, ölçüm mekaniğiyle **−2.400 $**; botun gerçek sonucu
+**−489 $**. Ölçümler botu değil **başka bir sistemi** tarif ediyordu.
+
+**Kök sebep:** `CLAUDE.md`'nin *ham getiri → mekanik → portföy* sırası atlandı.
+Kural yazılıydı; eksik olan **sınamaydı**. Sınama artık `CLAUDE.md`'de:
+*karşılaştırılan hücrelerde stop genişliği eşit mi?*
+
+### Karara etkisi — üç grup
+
+| grup | durum |
+|---|---|
+| `chg24` bant hükümleri | **DÜZELTİLDİ** — `>40 LONG` yanlış öldürülmüştü; `0..20 SHORT` hükmü kaldırıldı. Ayrıntı `olcumler.md` |
+| `btc_pay` hükümleri (dün gece) | ✅ **DENETİMDEN GEÇTİ** — hücreler oynaklıkta yalnız 1,2 kat ayrışıyor, ham getiri üç rejimde de aynı işaret. Tek düzeltme: *"BOĞA'da gürültü"* → **"aynı yönde ama zayıf"** |
+| Canlı defter analizleri | ✅ **etkilenmedi** — gerçek sonuçlar kullanıldı, replay değil |
+
+### Ortaya çıkan asıl soru — 21-22 tartışmasına
+
+**Stop, sinyalin üçte ikisini yiyor.** Ölçüldü (`olcumler.md`): stop 1,5 ATR
+uzakta, 72 saatlik ufkun doğal menzilinin **%17,7'si**; işlemlerin **%15,1'i**
+kazanacakken stopla ölüyor ve bunların **%64'ü ilk 6 saatte**.
+
+Proje 30 çıkış varyantı denedi, hepsi **hedef** ve **kısmi kâr** tarafındaydı.
+**Stopun kendisi hiç sorgulanmadı.** Bu, altı bağlı işin yanına yedinci olarak
+gidiyor — **karar değil, açık soru.**

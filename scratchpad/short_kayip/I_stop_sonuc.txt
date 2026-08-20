@@ -1,0 +1,28 @@
+IZ I — STOPUN GERCEK MALIYETI (SHORT, botun kapilari, 2 yil)
+====================================================================================
+olay: 22072
+
+1) STOP NEREDE DURUYOR
+   mesafe %          : medyan 2.97 · %25 2.42 · %75 3.94
+   ATR CINSINDEN     : medyan 1.50 x ATR · %25 1.24 · %75 1.50
+   72 saatlik rastgele yuruyusun beklenen menzili ~ sqrt(72) = 8.5 x ATR
+   -> stop, ufkun beklenen menzilinin %17.7'i kadar uzakta
+
+2) SONUC DAGILIMI
+   STOP    15364  (%69.6)
+   HEDEF    4936  (%22.4)
+   SURE     1772  (%8.0)
+
+3) YANLIS STOP — stop olmasaydi hedefe varacak olanlar
+   stop olan               :  15364
+   bunlarin HEDEFE varirdi :   3333  (%21.7)  <-- YANLIS STOP
+   gercekten kotu giris    :  12031  (%78.3)
+
+   yanlis stoplarin toplam olaya orani: %15.1
+   kaybedilen: 3333 islem x (+10% hedef + stop kaybi) 
+   -> olay basina kaybedilen kaba deger: 1.958 puan
+
+4) STOP NE KADAR ERKEN GELIYOR
+   tum stoplar   : medyan 6. saat · %25 2 · %75 16
+   YANLIS stoplar: medyan 4. saat · %25 1 · %75 9
+   yanlis stoplarin %64'i ilk 6 SAATTE geliyor
