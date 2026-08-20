@@ -602,8 +602,25 @@ dosyalar : defter2_state.json · defter2_islemler.jsonl · defter2_equity.jsonl
            defter2_veto.jsonl   (botun veto_log'una SIZMASIN diye AYRI)
 gorev    : KriptoDefter2 · PT7M30S · baslangic 2026-07-02T18:03:41
            testbot ile AYNI periyot, +5 dk kaydirilmis -> faz sabit
-kasa     : 10.000 $ sanal
+kasa     : 10.000 $ sanal  ·  bir tur ~6 saniye
 ```
+
+#### ⚠️ ZAMANLANMIŞ GÖREV KURARKEN İKİ TUZAK — ikisi de ısırdı, ikisi de düzeltildi
+
+`New-ScheduledTaskSettingsSet`/`New-ScheduledTaskTrigger` **varsayılanları
+mevcut görevlerinkinden farklı.** Görev "kuruldu, Ready" göründü ama **koşmadı**:
+
+| ayar | PowerShell varsayılanı | çalışan görevlerde | sonuç |
+|---|---|---|---|
+| `Repetition.Duration` | **boş** | `P3650D` | tekrar hiç olmuyor |
+| `DisallowStartIfOnBatteries` | **True** | `False` | makine bataryadayken görev `Queued`'da takılıyor |
+
+**Teşhis yolu:** `LastTaskResult = 0` ve `State = Ready` **yanıltıcıydı** —
+görevin gerçekten koştuğunun tek kanıtı `defter2_state.json`'ın **mtime**'ı.
+`State` alanı `Queued` görülünce sebep anlaşıldı.
+
+📌 **Yeni görev kurulurken referans olarak `Export-ScheduledTask -TaskName
+"KriptoTestBot"` alınmalı ve XML karşılaştırılmalı.**
 
 🔴 **`testbot.py` dahil hiçbir bot dosyasına DOKUNULMADI** — `git diff` boş.
 Defter aday arşivini **salt okur**, kendi sürecinde koşar, botun kilidini almaz.
