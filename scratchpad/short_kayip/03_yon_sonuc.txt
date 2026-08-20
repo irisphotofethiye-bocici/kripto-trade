@@ -1,0 +1,58 @@
+YON KARISIMI — kapilar bogayi algiladi mi?
+============================================================================================
+Aday kaydi: 11520  (2026-08-11 00:02 .. 2026-08-20 12:23)
+
+### KATMAN 1 — HAM KAPI KARARI (veto ONCESI)
+gun            LONG  SHORT  long pay     fren  long_veto     aday not
+2026-08-11        4     20     % 17        0          4     1150 
+2026-08-12        7     24     % 23        0         19     1245 
+2026-08-13        5     50     %  9        0         20     1187 
+2026-08-14        0     82     %  0        0          3      620 
+2026-08-15        3     25     % 11        0         21      957 
+2026-08-16        0     25     %  0        0         22      720 
+2026-08-17        2     38     %  5        0         16     1097 
+2026-08-18        5      0     %100      399         23     1868 <-- fren aktif, long payi SISIRILMIS
+2026-08-19       18     59     % 23      204          0     1768 <-- fren aktif, long payi SISIRILMIS
+2026-08-20       12     38     % 24        0          0      908 
+
+### FREN HIC CALISMAYAN GUNLER — tek adil karsilastirma
+  sicrama ONCESI   7 gun · LONG  21 · SHORT 264 · long pay %7.4   (gunler: 08-11, 08-12, 08-13, 08-14, 08-15, 08-16, 08-17)
+  sicrama SONRASI  1 gun · LONG  12 · SHORT  38 · long pay %24.0   (gunler: 08-20)
+
+### KATMAN 3 — ACILAN POZISYON (giris gunune gore)
+  2026-08-11   LONG  1 · SHORT  5 · long pay % 17
+  2026-08-12   LONG  0 · SHORT  9 · long pay %  0
+  2026-08-13   LONG  2 · SHORT 18 · long pay % 10
+  2026-08-14   LONG  0 · SHORT 14 · long pay %  0
+  2026-08-15   LONG  1 · SHORT 17 · long pay %  6
+  2026-08-16   LONG  0 · SHORT 16 · long pay %  0
+  2026-08-17   LONG  1 · SHORT 12 · long pay %  8
+  2026-08-18   LONG  2 · SHORT  0 · long pay %100   <-- fren aktifti
+  2026-08-19   LONG  3 · SHORT  8 · long pay % 27   <-- fren aktifti
+  2026-08-20   LONG  4 · SHORT  4 · long pay % 50
+
+### ADAY HAVUZU — 'kapi mi degisti, piyasa mi?'
+gun             aday   chg24 med  yukselen % >%10 yukselen
+2026-08-11      1150      +0.51         58%         32%
+2026-08-12      1245      +5.97         68%         42%
+2026-08-13      1187      +5.83         58%         41%
+2026-08-14       620      +0.13         50%         34%
+2026-08-15       957      +5.35         58%         39%
+2026-08-16       720      +0.22         51%         16%
+2026-08-17      1097      +2.80         61%         33%
+2026-08-18      1868      +1.11         53%         34%
+2026-08-19      1768      +3.98         66%         27%
+2026-08-20       908     +13.80         84%         60%
+
+### SANS OLCUMU — '%9 -> %24 sicramasi rastgele ne siklikla olur?'
+Yontem: HER aday karari (LONG/SHORT) havuza atilir, gun etiketleri
+1000 kez KARISTIRILIR, ayni 'son 2 gun vs oncesi' farki yeniden olculur.
+  GERCEK fark (long payi, sonrasi - oncesi): +16.6 puan
+  karistirilmis 1000 turda ortalama -0.1 · sapma 4.5
+  bu kadar veya daha buyuk fark SANS ESERI: 2/1000  ->  p = 0.002
+  -> SANS ILE ACIKLANAMIYOR (p<0.05)
+
+  UYARI (pesinen yazildi): LONG kararlari gunde 0-18 arasi. N kucuktur;
+  sonuc ne cikarsa ciksin ISARETTIR, kanit degil.
+
+bot dosyalarina yazim: YOK

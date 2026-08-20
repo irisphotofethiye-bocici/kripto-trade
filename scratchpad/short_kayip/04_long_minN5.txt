@@ -1,0 +1,13 @@
+LONG N=14  toplam +249.43  kosul 65  (MIN_N=5 e dusuruldu)
+
+  1-li  (43 kural)
+    GERCEK en iyi :  +718.34  -> a_last3>=10.6
+    SAHTE en iyi  : ortalama  +647.39 · en yuksek  +946.36
+    p = 0.302  -> SANSTAN AYIRT EDILEMIYOR
+    zarar etmeyen kural: gercek 28 · sahtede ortalama 26
+
+  2-li  (27 kural)
+    GERCEK en iyi :  +537.95  -> a_glob_ls>=1.2 & a_pos>=1.21
+    SAHTE en iyi  : ortalama  +564.61 · en yuksek  +948.56
+    p = 0.535  -> SANSTAN AYIRT EDILEMIYOR
+    zarar etmeyen kural: gercek 22 · sahtede ortalama 16

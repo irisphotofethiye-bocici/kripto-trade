@@ -1,0 +1,169 @@
+
+========================================================================================
+TABAN: muhasebe_11agu   (pozisyon 117)
+========================================================================================
+
+### SHORT  (N=103)
+  TUMU                   N=103  toplam   -488.94  ort   -4.75  MEDYAN  -65.52  kazanan 44 (%43)
+                         en iyi 3 cikinca  -1344.00  ·  en kotu 3 cikinca     +9.96
+  sicrama ONCESI         N= 91  toplam   +183.41  ort   +2.02  MEDYAN  -14.94  kazanan 42 (%46)
+                         en iyi 3 cikinca   -671.65  ·  en kotu 3 cikinca   +682.31
+  sicrama SONRASI        N= 12  toplam   -672.35  ort  -56.03  MEDYAN  -72.73  kazanan  2 (%17)
+                         en iyi 3 cikinca   -655.21  ·  en kotu 3 cikinca   -448.18
+
+  -- gun gun (giris gunu)
+     2026-08-11  N= 5  gun   -220.92   kumulatif   -220.92
+     2026-08-12  N= 9  gun   +157.84   kumulatif    -63.08
+     2026-08-13  N=18  gun   -178.98   kumulatif   -242.06
+     2026-08-14  N=14  gun    -30.86   kumulatif   -272.92
+     2026-08-15  N=17  gun   +828.17   kumulatif   +555.25
+     2026-08-16  N=16  gun   -353.44   kumulatif   +201.81
+     2026-08-17  N=12  gun    -18.40   kumulatif   +183.41
+     2026-08-19  N= 8  gun   -393.21   kumulatif   -209.80
+     2026-08-20  N= 4  gun   -279.14   kumulatif   -488.94
+
+  -- KAPI kirilimi
+     A+B & MA50     N=101  toplam   -200.03  medyan  -64.16  kazanan %44
+     diger          N=  1  toplam   -159.44  medyan -159.44  kazanan %0
+     MA50+ucuz      N=  1  toplam   -129.47  medyan -129.47  kazanan %0
+
+  -- CIKIS tipi
+     STOP           N= 71  toplam  -5181.59  medyan  -74.49
+     TP1_KISMI      N=  1  toplam    +33.16  medyan  +33.16
+     ZAMAN_STOP     N=  2  toplam    +93.54  medyan  +46.77
+     TP2            N= 29  toplam  +4565.95  medyan +144.79
+
+  -- OLUM SURESI (tutma saati)
+     <1 sa    N= 24  toplam  -1537.92  medyan  -75.36  kazanan %12
+     1-2 sa   N= 14  toplam   -937.13  medyan  -75.87  kazanan %14
+     2-4 sa   N= 18  toplam   -430.58  medyan  -68.00  kazanan %39
+     4-8 sa   N=  9  toplam   +125.41  medyan  -66.99  kazanan %44
+     8-24 sa  N= 29  toplam  +1733.06  medyan  +41.39  kazanan %69
+     >24 sa   N=  9  toplam   +558.22  medyan  +13.36  kazanan %89
+
+### LONG  (N=14)
+  TUMU                   N= 14  toplam   +249.43  ort  +17.82  MEDYAN   +5.36  kazanan  9 (%64)
+                         en iyi 3 cikinca   -422.32  ·  en kotu 3 cikinca   +699.43
+  sicrama ONCESI         N=  5  toplam   +199.44  ort  +39.89  MEDYAN   +4.97  kazanan  4 (%80)
+  sicrama SONRASI        N=  9  toplam    +49.99  ort   +5.55  MEDYAN   +5.75  kazanan  5 (%56)
+                         en iyi 3 cikinca   -562.35  ·  en kotu 3 cikinca   +499.99
+
+  -- gun gun (giris gunu)
+     2026-08-11  N= 1  gun   -139.55   kumulatif   -139.55
+     2026-08-13  N= 2  gun   +257.05   kumulatif   +117.50
+     2026-08-15  N= 1  gun     +2.77   kumulatif   +120.27
+     2026-08-17  N= 1  gun    +79.17   kumulatif   +199.44
+     2026-08-18  N= 2  gun   -301.69   kumulatif   -102.25
+     2026-08-19  N= 3  gun   +241.49   kumulatif   +139.24
+     2026-08-20  N= 4  gun   +110.19   kumulatif   +249.43
+
+  -- KAPI kirilimi
+     NOTR-belirsiz  N= 14  toplam   +249.43  medyan   +5.36  kazanan %64
+
+  -- CIKIS tipi
+     STOP           N= 14  toplam   +249.43  medyan   +5.36
+
+  -- OLUM SURESI (tutma saati)
+     <1 sa    N=  6  toplam   +529.70  medyan  +99.21  kazanan %83
+     1-2 sa   N=  2  toplam   -285.63  medyan -142.81  kazanan %0
+     2-4 sa   N=  4  toplam    +73.75  medyan  +15.38  kazanan %75
+     8-24 sa  N=  2  toplam    -68.39  medyan  -34.20  kazanan %50
+
+### ARTIYA GECIP GERI VERDI MI?  (5dk mumdan MFE/MAE)
+  SHORT oncesi   N= 91  MFE medyan  +4.22%  MAE medyan  -3.80%
+        %2'den fazla artiya gecip ZARARLA kapanan: 16/91 (%18)
+  SHORT sonrasi  N= 12  MFE medyan  +0.98%  MAE medyan  -3.03%
+        %2'den fazla artiya gecip ZARARLA kapanan: 2/12 (%17)
+  LONG  oncesi   N=  5  MFE medyan  +4.63%  MAE medyan  -1.76%
+        %2'den fazla artiya gecip ZARARLA kapanan: 0/5 (%0)
+  LONG  sonrasi  N=  9  MFE medyan  +4.33%  MAE medyan  -2.93%
+        %2'den fazla artiya gecip ZARARLA kapanan: 2/9 (%22)
+
+### FONLAMA — defterde olculu olan 23/117 pozisyon
+  SHORT N=14  toplam    +1.19  (pozitif = defter TAHSIL etti)
+  LONG  N= 9  toplam    +9.00  (pozitif = defter TAHSIL etti)
+  UYARI: alan 2026-08-17'de eklendi; oncesi geri uretilemez.
+
+========================================================================================
+TABAN: hakem_12agu   (pozisyon 110)
+========================================================================================
+
+### SHORT  (N=97)
+  TUMU                   N= 97  toplam   -203.86  ort   -2.10  MEDYAN  -65.52  kazanan 42 (%43)
+                         en iyi 3 cikinca  -1058.92  ·  en kotu 3 cikinca   +295.04
+  sicrama ONCESI         N= 85  toplam   +468.49  ort   +5.51  MEDYAN  -13.33  kazanan 40 (%47)
+                         en iyi 3 cikinca   -386.57  ·  en kotu 3 cikinca   +967.39
+  sicrama SONRASI        N= 12  toplam   -672.35  ort  -56.03  MEDYAN  -72.73  kazanan  2 (%17)
+                         en iyi 3 cikinca   -655.21  ·  en kotu 3 cikinca   -448.18
+
+  -- gun gun (giris gunu)
+     2026-08-12  N= 8  gun   +222.00   kumulatif   +222.00
+     2026-08-13  N=18  gun   -178.98   kumulatif    +43.02
+     2026-08-14  N=14  gun    -30.86   kumulatif    +12.16
+     2026-08-15  N=17  gun   +828.17   kumulatif   +840.33
+     2026-08-16  N=16  gun   -353.44   kumulatif   +486.89
+     2026-08-17  N=12  gun    -18.40   kumulatif   +468.49
+     2026-08-19  N= 8  gun   -393.21   kumulatif    +75.28
+     2026-08-20  N= 4  gun   -279.14   kumulatif   -203.86
+
+  -- KAPI kirilimi
+     diger          N=  1  toplam   -159.44  medyan -159.44  kazanan %0
+     A+B & MA50     N= 96  toplam    -44.42  medyan  -49.53  kazanan %44
+
+  -- CIKIS tipi
+     STOP           N= 67  toplam  -4721.61  medyan  -74.41
+     TP1_KISMI      N=  1  toplam    +33.16  medyan  +33.16
+     ZAMAN_STOP     N=  2  toplam    +93.54  medyan  +46.77
+     TP2            N= 27  toplam  +4391.05  medyan +162.47
+
+  -- OLUM SURESI (tutma saati)
+     <1 sa    N= 24  toplam  -1537.92  medyan  -75.36  kazanan %12
+     1-2 sa   N= 12  toplam   -743.50  medyan  -75.87  kazanan %17
+     2-4 sa   N= 16  toplam   -164.23  medyan  -35.28  kazanan %44
+     4-8 sa   N=  9  toplam   +125.41  medyan  -66.99  kazanan %44
+     8-24 sa  N= 27  toplam  +1558.16  medyan  +33.54  kazanan %67
+     >24 sa   N=  9  toplam   +558.22  medyan  +13.36  kazanan %89
+
+### LONG  (N=13)
+  TUMU                   N= 13  toplam   +388.98  ort  +29.92  MEDYAN   +5.75  kazanan  9 (%69)
+                         en iyi 3 cikinca   -282.77  ·  en kotu 3 cikinca   +838.98
+  sicrama ONCESI         N=  4  toplam   +338.99  ort  +84.75  MEDYAN  +42.07  kazanan  4 (%100)
+  sicrama SONRASI        N=  9  toplam    +49.99  ort   +5.55  MEDYAN   +5.75  kazanan  5 (%56)
+                         en iyi 3 cikinca   -562.35  ·  en kotu 3 cikinca   +499.99
+
+  -- gun gun (giris gunu)
+     2026-08-13  N= 2  gun   +257.05   kumulatif   +257.05
+     2026-08-15  N= 1  gun     +2.77   kumulatif   +259.82
+     2026-08-17  N= 1  gun    +79.17   kumulatif   +338.99
+     2026-08-18  N= 2  gun   -301.69   kumulatif    +37.30
+     2026-08-19  N= 3  gun   +241.49   kumulatif   +278.79
+     2026-08-20  N= 4  gun   +110.19   kumulatif   +388.98
+
+  -- KAPI kirilimi
+     NOTR-belirsiz  N= 13  toplam   +388.98  medyan   +5.75  kazanan %69
+
+  -- CIKIS tipi
+     STOP           N= 13  toplam   +388.98  medyan   +5.75
+
+  -- OLUM SURESI (tutma saati)
+     <1 sa    N=  6  toplam   +529.70  medyan  +99.21  kazanan %83
+     1-2 sa   N=  1  toplam   -146.08  medyan -146.08  kazanan %0
+     2-4 sa   N=  4  toplam    +73.75  medyan  +15.38  kazanan %75
+     8-24 sa  N=  2  toplam    -68.39  medyan  -34.20  kazanan %50
+
+### ARTIYA GECIP GERI VERDI MI?  (5dk mumdan MFE/MAE)
+  SHORT oncesi   N= 85  MFE medyan  +4.22%  MAE medyan  -3.80%
+        %2'den fazla artiya gecip ZARARLA kapanan: 15/85 (%18)
+  SHORT sonrasi  N= 12  MFE medyan  +0.98%  MAE medyan  -3.03%
+        %2'den fazla artiya gecip ZARARLA kapanan: 2/12 (%17)
+  LONG  oncesi   N=  4  MFE medyan  +6.63%  MAE medyan  -1.25%
+        %2'den fazla artiya gecip ZARARLA kapanan: 0/4 (%0)
+  LONG  sonrasi  N=  9  MFE medyan  +4.33%  MAE medyan  -2.93%
+        %2'den fazla artiya gecip ZARARLA kapanan: 2/9 (%22)
+
+### FONLAMA — defterde olculu olan 23/110 pozisyon
+  SHORT N=14  toplam    +1.19  (pozitif = defter TAHSIL etti)
+  LONG  N= 9  toplam    +9.00  (pozitif = defter TAHSIL etti)
+  UYARI: alan 2026-08-17'de eklendi; oncesi geri uretilemez.
+
+bot dosyalarina yazim: YOK

@@ -1,0 +1,22 @@
+KOSULLU TEST — kapi mi degisti, girdi mi?
+====================================================================================
+fren-sifir gunlerdeki LONG/SHORT karari: 335
+  oncesi N=285  long payi %7.4
+  sonrasi N=50  long payi %24.0
+
+### chg24 KOVALARINDA long orani (ayni girdi, iki donem)
+kova                       ONCESI                SONRASI   fark
+dusen       N oncesi  80 / sonrasi   0  -> N yetersiz
+0-5%        N oncesi  34 / sonrasi   0  -> N yetersiz
+5-10%       N= 84 long %  4.8      N= 25 long %  0.0       -4.8 puan
+10-20%      N= 79 long %  1.3      N= 15 long % 13.3      +12.1 puan
+>20%        N=  8 long %100.0      N= 10 long %100.0       +0.0 puan
+
+### AYNI KOVA DAGILIMIYLA yeniden agirliklandirma
+(sonrasi'nin kova dagilimi, ONCESI'nin kova-ici long oranlariyla)
+  ONCESI kapi davranisi + SONRASI havuzu  ->  beklenen long payi %22.8
+  GERCEK sonrasi long payi                ->                     %24.0
+  aciklanamayan artik                     ->                     +1.2 puan
+
+  YORUM: artik ~0 ise KAPI DEGISMEDI, yalniz havuz degisti.
+         artik buyukse kapi ayni girdide farkli davranmis demektir.

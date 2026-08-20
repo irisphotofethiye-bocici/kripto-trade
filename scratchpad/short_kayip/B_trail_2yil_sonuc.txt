@@ -1,0 +1,23 @@
+IZ B-2 — TAKIP EDEN STOP, 2 yillik sinav (30. cikis varyanti)
+==============================================================================================
+islenen sembol: 565 · giris kumesi: botun SABIT HEDEF kapilari (A+B / MA50+ucuz)
+ESLESMIS test: ayni girisler, ayni baslangic stopu, FARKLI cikis
+
+mod               N  islem ort     ay ort      ay-t   poz ay
+sabit         22072     -0.076     -0.154     -1.33    11/25   <-- KONTROL (botun bugunku hali)
+trail0.5      22072     +0.047     +0.022     +0.78    16/25 
+trail1.0      22072     -0.118     -0.150     -3.81     5/25   <-- ON-KAYITLI KURAL
+trail1.5      22072     -0.122     -0.185     -2.81     9/25 
+
+ESLESMIS FARK (trail1.0 - sabit), ayni giris sirasi:
+  N=22072  ortalama fark -0.0411%  medyan +0.8302%  pozitif 14705 (%67)
+  AY-KUMELI: 25 ay · ortalama +0.0043 · t=+0.04 · pozitif 14/25
+
+OLCUT 2 — IKI ZAMAN YARISI:
+  A yarisi: fark -0.0580%  (N=11036)
+  B yarisi: fark -0.0242%  (N=11036)
+
+OLCUT 4 — REJIM:
+  AYI   fark +0.1802%  (N=4319)
+  NOTR  fark -0.1149%  (N=16634)
+  BOGA  fark +0.2019%  (N=1119)

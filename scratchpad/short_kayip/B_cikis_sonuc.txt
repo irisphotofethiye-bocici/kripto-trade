@@ -1,0 +1,42 @@
+IZ B — CIKIS MEKANIGI (ayni girisler, ayni %3 baslangic stopu)
+============================================================================================
+UYARI: sabit hedef 29 cikis varyantindan gecen TEK varyant (olcumler.md).
+Bu test onu sorguluyor; ters cikarsa GERILIM raporlanir, kural onerilmez.
+
+--- SHORT TUM (N=103, gercek -488.94 $)
+    sabit hedef %10         -2284.75 $  islem basi -0.887%  kazanan 20/103 (%19)
+    takip eden stop %3       -663.88 $  islem basi -0.258%  kazanan 36/103 (%35)
+    sabit + TP1'de yari     -1959.44 $  islem basi -0.761%  kazanan 33/103 (%32)
+    ikisi birden             -636.09 $  islem basi -0.247%  kazanan 36/103 (%35)
+
+--- SHORT sicrama ONCESI (N=91, gercek +183.41 $)
+    sabit hedef %10         -1472.78 $  islem basi -0.647%  kazanan 19/91 (%21)
+    takip eden stop %3       -278.79 $  islem basi -0.123%  kazanan 33/91 (%36)
+    sabit + TP1'de yari     -1147.47 $  islem basi -0.504%  kazanan 32/91 (%35)
+    ikisi birden             -250.99 $  islem basi -0.110%  kazanan 33/91 (%36)
+
+--- SHORT sicrama SONRASI (N=12, gercek -672.35 $)
+    sabit hedef %10          -811.97 $  islem basi -2.707%  kazanan  1/12 (%8)
+    takip eden stop %3       -385.09 $  islem basi -1.284%  kazanan  3/12 (%25)
+    sabit + TP1'de yari      -811.97 $  islem basi -2.707%  kazanan  1/12 (%8)
+    ikisi birden             -385.09 $  islem basi -1.284%  kazanan  3/12 (%25)
+
+--- LONG TUM (N=14, gercek +249.43 $)
+    sabit hedef %10          +717.08 $  islem basi +2.049%  kazanan  6/14 (%43)
+    takip eden stop %3       +489.52 $  islem basi +1.399%  kazanan  7/14 (%50)
+    sabit + TP1'de yari      +414.01 $  islem basi +1.183%  kazanan  6/14 (%43)
+    ikisi birden             +701.85 $  islem basi +2.005%  kazanan  7/14 (%50)
+
+--- LONG sicrama ONCESI (N=5, gercek +199.44 $)
+    sabit hedef %10          +583.22 $  islem basi +4.666%  kazanan  3/ 5 (%60)
+    takip eden stop %3       +459.63 $  islem basi +3.677%  kazanan  3/ 5 (%60)
+    sabit + TP1'de yari      +395.72 $  islem basi +3.166%  kazanan  3/ 5 (%60)
+    ikisi birden             +671.96 $  islem basi +5.376%  kazanan  3/ 5 (%60)
+
+--- LONG sicrama SONRASI (N=9, gercek +49.99 $)
+    sabit hedef %10          +133.86 $  islem basi +0.595%  kazanan  3/ 9 (%33)
+    takip eden stop %3        +29.89 $  islem basi +0.133%  kazanan  4/ 9 (%44)
+    sabit + TP1'de yari       +18.29 $  islem basi +0.081%  kazanan  3/ 9 (%33)
+    ikisi birden              +29.89 $  islem basi +0.133%  kazanan  4/ 9 (%44)
+
+bot dosyalarina yazim: YOK

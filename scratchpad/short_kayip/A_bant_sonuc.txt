@@ -1,0 +1,21 @@
+IZ A — %20-40 BANDI, 2 yillik sinav (botun kor noktasi)
+================================================================================================
+Bot: chg24>=20 -> SHORT yasak · chg24>=40 -> LONG da yasak
+     20-40 arasi SADECE LONG acilabiliyor. O bandin LONG tarafi hic olculmedi.
+Mekanik: A-stop · hedef 10.0% · 72s · maliyet+FONLAMA · faz kaydirmali
+
+islenen sembol: 565
+
+bant      yon           N     ort %  ay ort %     ay-t    ay poz  botun davranisi
+<-40      SHORT       150    -0.592    ay kirilimi yok           acik
+<-40      LONG        151    -0.153    ay kirilimi yok           acik (filtreli)
+-40..0    SHORT     46365    -0.010    -0.080    -0.51    11/25   acik
+-40..0    LONG      24588    -0.133    -0.112    -0.76    10/25   acik (filtreli)
+0..20     SHORT     21575    -0.002    +0.014    +0.14    16/25   acik
+0..20     LONG      37525    -0.417    -0.406    -4.11     4/25   acik (filtreli)
+20..30    SHORT      1409    -0.210    -0.223    -0.77     9/20   SHORT YASAK
+20..30    LONG       1697    -0.070    -0.030    -0.11     9/23   acik
+30..40    SHORT       558    -0.546    -0.726    -1.80     5/13   SHORT YASAK
+30..40    LONG        604    +0.146    +0.104    +0.27     9/14   acik
+>40       SHORT       637    -1.486    -1.661    -2.55     2/14   yasak
+>40       LONG        677    +0.514    +0.776    +1.43     9/15   yasak

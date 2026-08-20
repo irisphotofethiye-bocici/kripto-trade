@@ -1,0 +1,29 @@
+IZ H — btc_pay HUCRELERI OYNAKLIKTA AYRISIYOR MU? (SHORT bacagi)
+================================================================================================
+SORU 1 — mekanik esit mi?
+rejim  bant           N  stop genis  ATR/fiyat  stop olma
+AYI    UST         3301       3.44%      2.71%      79.6%
+AYI    diger       7566       3.11%      2.45%      67.7%
+
+NOTR   UST        20345       2.99%      2.23%      71.8%
+NOTR   diger      31648       2.83%      2.20%      67.9%
+
+BOGA   UST         2928       3.09%      2.36%      69.4%
+BOGA   diger       4906       2.97%      2.51%      76.7%
+
+SORU 2 — HAM getiriyle ayni hukum cikiyor mu?
+rejim  bant           N  HAM ay ort     ham t  MEK ay ort     mek t
+AYI    UST         3301     -4.162     -3.73     -1.850     -5.08
+AYI    diger       7566     -0.038     -0.04     -0.580     -1.66
+
+NOTR   UST        20345     -1.223     -1.29     -0.285     -1.14
+NOTR   diger      31648     +1.992     +2.65     +0.637     +2.52
+
+BOGA   UST         2928     -2.040     -1.21     +0.160     +0.18
+BOGA   diger       4906     -0.564     -0.43     +0.174     +0.32
+
+LIFT (UST - diger) — frenin iddiasi NEGATIF olmasi:
+rejim        HAM lift   MEKANIK lift ayni yon mu
+AYI            -4.124         -1.270 EVET
+NOTR           -3.214         -0.922 EVET
+BOGA           -1.476         -0.015 EVET

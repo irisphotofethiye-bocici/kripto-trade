@@ -1,0 +1,122 @@
+TABAN: hakem_12agu
+
+============================================================================================
+SHORT — TUM DONEM   N=97   toplam -203.86   kosul 77
+============================================================================================
+
+--- 1'li kural  (MIN_N>=15 gecen: 71 · uretim 0.1 sn)
+  GERCEK en iyi :  +2420.40   ->  d_notional<1437
+  SAHTE en iyi  : ortalama  +1195.15 · medyan  +1176.64 · en yuksek  +2359.83  (1000 karistirma)
+  gercek >= sahte olma sayisi: 0/1000   ->  p = 0.000
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 29 · sahtede ortalama 31
+  en iyi 5:
+      +2420.40  N= 32  medyan +100.71  kazanan %88   d_notional<1437
+      +1736.47  N= 32  medyan  +19.30  kazanan %59   a_funding<-0.05507
+      +1429.29  N= 33  medyan   +4.07  kazanan %58   a_top_ls 1.13-1.57
+      +1032.29  N= 32  medyan   +4.76  kazanan %56   a_oi3 0.7229-3.311
+      +1027.27  N= 27  medyan  +26.55  kazanan %52   a_smart=NOTR
+
+--- 2'li kural  (MIN_N>=15 gecen: 738 · uretim 0.4 sn)
+  GERCEK en iyi :  +2239.07   ->  a_stage=izle & d_notional<1437
+  SAHTE en iyi  : ortalama  +1352.19 · medyan  +1322.20 · en yuksek  +2381.66  (1000 karistirma)
+  gercek >= sahte olma sayisi: 2/1000   ->  p = 0.002
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 319 · sahtede ortalama 335
+  en iyi 5:
+      +2239.07  N= 31  medyan  +99.76  kazanan %87   a_stage=izle & d_notional<1437
+      +2239.07  N= 31  medyan  +99.76  kazanan %87   d_notional<1437 & d_stage_giriste=izle
+      +2076.26  N= 26  medyan +106.54  kazanan %88   a_dip_yakit=False & d_notional<1437
+      +2036.81  N= 30  medyan  +99.14  kazanan %87   d_kaldirac 3-4 & d_notional<1437
+      +1765.06  N= 25  medyan  +99.76  kazanan %84   a_ayrisma=False & d_notional<1437
+
+--- 3'li kural  (MIN_N>=15 gecen: 2192 · uretim 0.3 sn)
+  GERCEK en iyi :  +2239.07   ->  a_stage=izle & d_notional<1437 & d_stage_giriste=izle
+  SAHTE en iyi  : ortalama  +1364.93 · medyan  +1350.66 · en yuksek  +2012.10  (100 karistirma)
+  gercek >= sahte olma sayisi: 0/100   ->  p = 0.000
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 901 · sahtede ortalama 1003
+  en iyi 5:
+      +2239.07  N= 31  medyan  +99.76  kazanan %87   a_stage=izle & d_notional<1437 & d_stage_giriste=izle
+      +1894.93  N= 25  medyan +106.21  kazanan %88   a_dip_yakit=False & a_stage=izle & d_notional<1437
+      +1894.93  N= 25  medyan +106.21  kazanan %88   a_dip_yakit=False & d_notional<1437 & d_stage_giriste=izle
+      +1855.48  N= 29  medyan  +98.51  kazanan %86   a_stage=izle & d_kaldirac 3-4 & d_notional<1437
+      +1855.48  N= 29  medyan  +98.51  kazanan %86   d_kaldirac 3-4 & d_notional<1437 & d_stage_giriste=izle
+
+============================================================================================
+SHORT — sicrama ONCESI   N=85   toplam +468.49   kosul 77
+============================================================================================
+
+--- 1'li kural  (MIN_N>=15 gecen: 71 · uretim 0.1 sn)
+  GERCEK en iyi :  +2159.25   ->  d_notional<1368
+  SAHTE en iyi  : ortalama  +1389.05 · medyan  +1366.33 · en yuksek  +2328.11  (1000 karistirma)
+  gercek >= sahte olma sayisi: 6/1000   ->  p = 0.006
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 42 · sahtede ortalama 44
+  en iyi 5:
+      +2159.25  N= 28  medyan +100.71  kazanan %89   d_notional<1368
+      +1325.57  N= 29  medyan  +13.36  kazanan %66   a_glob_ls>=1.36
+      +1318.17  N= 28  medyan   -8.36  kazanan %46   d_notional 1368-2378
+      +1312.19  N= 28  medyan  +10.31  kazanan %64   a_oi3 0.6678-3.214
+      +1142.13  N= 28  medyan   +3.05  kazanan %54   a_funding<-0.07403
+
+--- 2'li kural  (MIN_N>=15 gecen: 568 · uretim 0.3 sn)
+  GERCEK en iyi :  +2159.25   ->  d_kaldirac 3-4 & d_notional<1368
+  SAHTE en iyi  : ortalama  +1489.92 · medyan  +1463.08 · en yuksek  +2360.03  (1000 karistirma)
+  gercek >= sahte olma sayisi: 11/1000   ->  p = 0.011
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 362 · sahtede ortalama 335
+  en iyi 5:
+      +2159.25  N= 28  medyan +100.71  kazanan %89   d_kaldirac 3-4 & d_notional<1368
+      +1977.92  N= 27  medyan  +99.76  kazanan %89   a_stage=izle & d_notional<1368
+      +1977.92  N= 27  medyan  +99.76  kazanan %89   d_notional<1368 & d_stage_giriste=izle
+      +1815.11  N= 22  medyan +106.54  kazanan %91   a_dip_yakit=False & d_notional<1368
+      +1702.69  N= 22  medyan +100.71  kazanan %86   a_ayrisma=False & d_notional<1368
+
+--- 3'li kural  (MIN_N>=15 gecen: 1406 · uretim 0.2 sn)
+  GERCEK en iyi :  +1977.92   ->  a_stage=izle & d_kaldirac 3-4 & d_notional<1368
+  SAHTE en iyi  : ortalama  +1522.11 · medyan  +1502.57 · en yuksek  +2399.48  (100 karistirma)
+  gercek >= sahte olma sayisi: 4/100   ->  p = 0.040
+  HUKUM: sanstan farkli (p<0.05)
+  'zarar etmeyen' (toplam>=0) kural sayisi -> gercek 890 · sahtede ortalama 826
+  en iyi 5:
+      +1977.92  N= 27  medyan  +99.76  kazanan %89   a_stage=izle & d_kaldirac 3-4 & d_notional<1368
+      +1977.92  N= 27  medyan  +99.76  kazanan %89   a_stage=izle & d_notional<1368 & d_stage_giriste=izle
+      +1977.92  N= 27  medyan  +99.76  kazanan %89   d_kaldirac 3-4 & d_notional<1368 & d_stage_giriste=izle
+      +1815.11  N= 22  medyan +106.54  kazanan %91   a_dip_yakit=False & d_kaldirac 3-4 & d_notional<1368
+      +1702.69  N= 22  medyan +100.71  kazanan %86   a_ayrisma=False & d_kaldirac 3-4 & d_notional<1368
+
+============================================================================================
+GERCEK HOLDOUT — kural 85 islemde ARANIR, 12 islemde SINANIR
+============================================================================================
+UYARI (pesinen yazildi): test kumesi N=12. Bu sayi neredeyse hicbir seyi dogrulayamaz.
+
+--- 1'li  (egitimde en iyi 5, sonra TESTTE ne yaptigi)
+     egitim  +2159.25 (N= 28)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  d_notional<1368
+     egitim  +1325.57 (N= 29)  ->  TEST   -377.08 (N= 8)   [test tumu   -672.35]  a_glob_ls>=1.36
+     egitim  +1318.17 (N= 28)  ->  TEST   -337.42 (N= 6)   [test tumu   -672.35]  d_notional 1368-2378
+     egitim  +1312.19 (N= 28)  ->  TEST   -216.03 (N= 3)   [test tumu   -672.35]  a_oi3 0.6678-3.214
+     egitim  +1142.13 (N= 28)  ->  TEST     +0.00 (N= 0)   [test tumu   -672.35]  a_funding<-0.07403
+
+--- 2'li  (egitimde en iyi 5, sonra TESTTE ne yaptigi)
+     egitim  +2159.25 (N= 28)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  d_kaldirac 3-4 & d_notional<1368
+     egitim  +1977.92 (N= 27)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  a_stage=izle & d_notional<1368
+     egitim  +1977.92 (N= 27)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  d_notional<1368 & d_stage_giriste=izle
+     egitim  +1815.11 (N= 22)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  a_dip_yakit=False & d_notional<1368
+     egitim  +1702.69 (N= 22)  ->  TEST    +33.16 (N= 1)   [test tumu   -672.35]  a_ayrisma=False & d_notional<1368
+
+============================================================================================
+LONG - N=13  [!] KOMBINASYON ARAMASI BU N'DE ANLAMLI SONUC VEREMEZ.
+Yine de ayni yontemle kosturuluyor — amac kural bulmak DEGIL,
+aramanin bu N'de ne kadar kolay yanilttigini GOSTERMEK.
+============================================================================================
+
+============================================================================================
+LONG — TUM DONEM   N=13   toplam +388.98   kosul 63
+============================================================================================
+
+--- 1'li kural: MIN_N=15 altinda hepsi elendi
+
+--- 2'li kural: MIN_N=15 altinda hepsi elendi
+
+bot dosyalarina yazim: YOK

@@ -1,0 +1,17 @@
+MEKANIK BIASI BANT BANT ESIT MI?
+================================================================================================
+bant      yon           N     stop%    hedef%     sure%  stop genis  ATR/fiyat
+-40..0    LONG      24588     73.1%     21.3%      5.6%       2.86%      2.50%
+-40..0    SHORT     46365     70.1%     22.5%      7.3%       2.93%      2.16%
+
+0..20     LONG      37525     76.5%     20.2%      3.2%       2.86%      2.13%
+0..20     SHORT     21575     71.4%     21.8%      6.8%       2.86%      2.43%
+
+20..40    LONG       2301     61.8%     37.6%      0.6%       5.88%      4.27%
+20..40    SHORT      1967     65.0%     33.2%      1.8%       5.17%      4.52%
+
+>40       LONG        677     50.1%     49.5%      0.4%       9.31%      6.50%
+>40       SHORT       637     63.0%     37.0%      0.0%       7.82%      6.71%
+
+YORUM: stop-olma orani ve stop genisligi bantlar arasi FARKLIYSA,
+       'mekanik her hucrede ayni' savunmasi gecersizdir.

@@ -46,6 +46,28 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   +0,243 vs kontrol +0,035 (t=+3,84) iken A-stop'la +0,051'e iniyordu; ölü sinyal
   taramasında A-stop **A+B'nin ham kenarının %65'ini** yiyordu — MA50+ucuz'da %0.
   Bir kapı "çalışmıyor" derken **kapının mı, stopun mu** çalışmadığı ayrılmalı.
+- 🔴 **KURAL İHLAL EDİLDİ (2026-08-20) — "mekanikten arınık ölç" yetmiyor, ARANACAK
+  BİR SINAMA gerek.** Yukarıdaki sıra kuralı yazılıydı ve yine atlandı: `chg24` bant
+  ölçümleri doğrudan A-stop + %10 hedefle yapıldı, ham getiri hiç bakılmadı. Sonuç:
+  `>40 LONG` hücresi **"gürültü, öldü" diye gömüldü** — ham getiride **+2,284**,
+  takip eden stopla **+2,379 (t=+3,24, 15 ayın 12'si)**. Ölen sinyal değil, stopumuzdu.
+  **Somut sınama — hüküm yazmadan önce koştur:** karşılaştırdığın hücrelerde
+  *stop genişliği* ve *stop-olma oranı* eşit mi? Ölçüldü, DEĞİL:
+
+  | bant | stop genişliği | ATR/fiyat | stop olma |
+  |---|---|---|---|
+  | `-40..0` | %2,86 | %2,50 | %73,1 |
+  | `0..20` | %2,86 | %2,13 | %76,5 |
+  | `20..40` | %5,88 | %4,27 | %61,8 |
+  | `>40` | %9,31 | %6,50 | %50,1 |
+
+  Stop genişliği **3,3 kat** değişiyor. *"Mekanik her hücrede aynı, sıralamayı
+  bozmaz"* savunması bu tabloyla **çöker**. Kural: **hücreler oynaklıkta ayrışıyorsa
+  ham getiri ZORUNLU**; ayrışmıyorsa mekanikli ölçüm tek başına yeter.
+  ⚠️ Ayrıca **güven de şişiyor**: `0..20 LONG` ham t=−0,90 iken A-stop'la t=−4,11.
+  Stop varyansı kırdığı için anlamlılık büyüyor — **yön aynı, güven yalan.**
+  Bu proje doğru yöntemi zaten uygulamıştı (pump kapısı notu: *"ham fiyat"*,
+  [testbot.py:418](testbot.py#L418)); eksik olan disiplin değil, **sınamaydı.**
 - 🔴 **KARIŞTIRICI KONTROLÜ ZORUNLU — monotonluk tek başına YETMEZ.** Bir sinyal
   ön-kayıtlı kapıları geçse ve dilimleri **mükemmel sıralı** çıksa bile, *"aynı fiyat
   hareketi içinde de ayırıyor mu"* sorusu sorulmadan hüküm yazılmaz.

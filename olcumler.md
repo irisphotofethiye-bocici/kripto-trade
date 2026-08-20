@@ -1972,3 +1972,113 @@ gerekcesiyle) OLCUMLE CELISMIYOR.
 bir kumeyi tek adla anar; ortalamanin hukmu, o kumenin %99 diliminde otomatik
 olarak gecerli DEGILDIR.
 
+### 🔴 DÜZELTME — `chg24` BANT HÜKÜMLERİ MEKANİK YÜKLÜYDÜ, HAM GETİRİYLE YENİDEN (2026-08-20)
+
+**Neden düzeltme:** kullanıcı sordu — *"bu ölçümlerin doğruluğuna güvenmemi
+gerektirecek sebep ne?"* Doğrulandı: aynı 117 işlem benim replay mekaniğimle
+**−2.400 $**, botun gerçek sonucu **−489 $**. Yani ölçüm başka bir sistemi tarif
+ediyordu. `CLAUDE.md`'nin *ham → mekanik → portföy* sırası atlanmıştı.
+
+**Betik:** `scratchpad/short_kayip/F_ham.py` — aynı bantlar **üç** mekanikle.
+
+```
+### LONG
+bant      olcum          N       ay ort     ay-t   poz ay
+-40..0    HAM        96523      -0.005    -0.01    12/25
+-40..0    A-stop     24588      -0.112    -0.76    10/25
+-40..0    trailing   24588      -0.011    -0.12    10/25
+
+0..20     HAM        89429      -0.390    -0.90    10/25
+0..20     A-stop     37525      -0.406    -4.11     4/25
+0..20     trailing   37525      -0.210    -5.01     2/25
+
+20..40    HAM         2353      +0.196    +0.19     9/24
+20..40    A-stop      2301      +0.028    +0.14    11/23
+20..40    trailing    2301      +0.091    +0.61    14/23
+
+>40       HAM          678      +2.284    +0.77     8/15
+>40       A-stop       677      +0.776    +1.43     9/15
+>40       trailing     677      +2.379    +3.24    12/15
+
+### SHORT
+0..20     A-stop     21575      +0.014    +0.14    16/25
+0..20     trailing   21575      -0.095    -2.26     6/25
+>40       HAM          678      -2.284    -0.77     7/15
+>40       A-stop       637      -1.661    -2.55     2/14
+>40       trailing     637      -1.144    -2.29     3/14
+```
+
+#### DÜZELTİLEN HÜKÜMLER
+
+| hüküm | eski | **düzeltilmiş** |
+|---|---|---|
+| `0..20 LONG` kötü | *"t=−4,11, sağlam"* | **yön AYAKTA** (üç mekanikte de negatif, −0,21…−0,41) ama **güven ŞİŞİKTİ** — ham t=**−0,90**, anlamlı değil |
+| `>40 LONG` | *"öldü, t=+0,23 gürültü"* | 🔴 **YANLIŞ ÖLDÜRÜLDÜ.** Ham **+2,284**, trailing **+2,379 (t=+3,24, 12/15 ay)**. Ölen sinyal değil, A-stop'tu |
+| `0..20 SHORT` | *"tek iyi SHORT bandı"* | **HÜKÜM YOK** — mekaniğe göre işaret dönüyor (+0,014 → −0,095, t=−2,26) |
+| `>40 SHORT` kötü | t=−2,55 | **AYAKTA** — üç ölçümde de negatif (−2,284 / −1,661 / −1,144) |
+| `-40..0` | — | **HÜKÜM YOK** — üçünde de sıfıra yakın |
+
+#### KAPSAM DENETİMİ — hangi ölçümler etkilendi
+
+**Betik:** `scratchpad/short_kayip/G_kapsam.py`. Savunma (*"mekanik her hücrede
+aynı, sıralamayı bozmaz"*) **çürütüldü**:
+
+```
+bant      stop genisligi  ATR/fiyat  stop olma
+-40..0        2,86%         2,50%      73,1%
+0..20         2,86%         2,13%      76,5%
+20..40        5,88%         4,27%      61,8%
+>40           9,31%         6,50%      50,1%
+```
+
+Stop genişliği **3,3 kat** ayrışıyor. **Kural: hücreler oynaklıkta ayrışıyorsa
+ham getiri ZORUNLU.**
+
+| durum | ölçümler |
+|---|---|
+| ❌ **etkilendi** | bugünkü `chg24` bant hükümleri · trailing testi (tek mekanik tabanı) |
+| ✅ **temiz** | `top_ls` ölümü (ham 72s getiri) · 117 canlı pozisyon analizi (gerçek defter) · mutabakat · kapı karnesi · yön karışımı · 30 hücrelik ızgara (zaten mekanik taraması) · kombinasyon araması (gerçek P&L) |
+| ⚠️ **bakılacak** | `btc_pay` rejim testleri · `asgari_stop` · `katilim_filtresi` · `ileri_rr` — hepsi A-stop+%10 kullandı, hücrelerin oynaklık ayrışması ÖLÇÜLMEDİ |
+
+### ✅ DENETİM — `btc_pay` hükümleri AYAKTA (2026-08-20, `H_btcpay_denetim.py`)
+
+Bant hükümlerini çürüten kusur `btc_pay` testlerini de vurdu mu? **Hayır.**
+
+**SORU 1 — hücreler oynaklıkta ayrışıyor mu?**
+
+```
+rejim  bant   stop genis  ATR/fiyat  stop olma
+AYI    UST      3,44%      2,71%      79,6%
+AYI    diger    3,11%      2,45%      67,7%
+NOTR   UST      2,99%      2,23%      71,8%
+NOTR   diger    2,83%      2,20%      67,9%
+BOGA   UST      3,09%      2,36%      69,4%
+BOGA   diger    2,97%      2,51%      76,7%
+```
+
+Stop genişliği **2,83–3,44%** — yalnız **1,2 kat** yayılım.
+(Karşılaştır: `chg24` bantlarında **3,3 kat**.) **Mekanik burada neredeyse eşit.**
+
+**SORU 2 — ham getiriyle aynı hüküm mü?**
+
+```
+LIFT (UST - diger)        HAM       MEKANIK    ayni yon
+AYI                     -4,124      -1,270      EVET
+NOTR                    -3,214      -0,922      EVET
+BOGA                    -1,476      -0,015      EVET
+```
+
+**Üç rejimde de aynı işaret.** Üstelik **ham etki mekaniklinin ~3 KATI** — yani
+stop sinyali *yaratmıyor*, **söndürüyor**.
+
+#### Hükümlere etkisi
+
+| dün geceki hüküm | denetim sonucu |
+|---|---|
+| Fren AYI'da gerçek | ✅ **güçlendi** — ham lift −4,12 (mekanik −1,27) |
+| Fren NOTR'da gerçek | ✅ **güçlendi** — ham lift −3,21 (mekanik −0,92) |
+| Fren BOĞA'da gürültü | ⚠️ **yeniden okunmalı** — ham lift −1,476, diğerleriyle **aynı yönde**; mekanikte sıfıra yakın çıkması stop sönümlemesi olabilir. *"İşaret dönüyor"* demek artık desteklenmiyor; doğrusu **"aynı yönde ama zayıf/az güçlü"** |
+
+**Genel ders:** stop, `btc_pay` sinyalinin **üçte ikisini yiyor** (ham −4,12 →
+mekanik −1,27). Kenar var ama mekanik onu büyük ölçüde tüketiyor.
+

@@ -1,0 +1,206 @@
+
+================================================================================================
+SHORT — TUM DONEM   N=103
+GERCEK sonuc: -488.94 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2         -1222 (-0.32)   -2131 (-0.55)   -2690 (-0.70)   -2708 (-0.70)   -3453 (-0.89)
+%3         -1112 (-0.43)   -1706 (-0.66)   -2105 (-0.82)   -2401 (-0.93)   -2973 (-1.15)
+%4          -980 (-0.51)   -1241 (-0.64)   -1859 (-0.96)   -1671 (-0.87)   -2168 (-1.12)
+%5          -935 (-0.61)    -875 (-0.57)   -1120 (-0.72)   -1076 (-0.70)   -1984 (-1.28)
+%6          -856 (-0.67)   -1109 (-0.86)   -1350 (-1.05)   -1314 (-1.02)   -2282 (-1.77)
+%8          -411 (-0.43)    -336 (-0.35)    -837 (-0.87)   -1023 (-1.06)   -1317 (-1.36)
+
+  EN IYI 3 hucre:
+     stop %8 · hedef %5  ->    -336.27 $  (islem basi -0.348%, N=103)
+     stop %8 · hedef %3  ->    -411.24 $  (islem basi -0.426%, N=103)
+     stop %8 · hedef %7  ->    -837.41 $  (islem basi -0.867%, N=103)
+  EN KOTU 1: stop %2 · hedef %15 -> -3452.69 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): -2400.69 $
+
+--- SHORT — TUM DONEM : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)      -2400.69 $   islem basi -0.932%   kazanan 19/103 (%18)  N=103
+   +15 dk GECIKMELI giris            -2986.22 $   islem basi -1.160%   kazanan 17/103 (%17)  N=103
+   +30 dk GECIKMELI giris            -2212.63 $   islem basi -0.859%   kazanan 20/103 (%19)  N=103
+   +60 dk GECIKMELI giris            -2967.51 $   islem basi -1.152%   kazanan 18/103 (%17)  N=103
+   1 saatte kosulsuz KAPAT             -68.18 $   islem basi -0.026%   kazanan 42/103 (%41)  N=103
+   2 saatte kosulsuz KAPAT            -343.25 $   islem basi -0.133%   kazanan 43/103 (%42)  N=103
+   4 saatte kosulsuz KAPAT            -435.35 $   islem basi -0.169%   kazanan 39/103 (%38)  N=103
+   8 saatte kosulsuz KAPAT           -1639.98 $   islem basi -0.637%   kazanan 30/103 (%29)  N=103
+   24 saatte kosulsuz KAPAT          -1571.42 $   islem basi -0.610%   kazanan 25/103 (%24)  N=103
+   YON CEVIRME (ters islem)           +182.11 $   islem basi +0.071%   kazanan 26/103 (%25)  N=103
+
+================================================================================================
+SHORT — sicrama ONCESI   N=91
+GERCEK sonuc: +183.41 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2          -639 (-0.19)   -1174 (-0.34)   -1733 (-0.51)   -1751 (-0.51)   -2496 (-0.73)
+%3          -624 (-0.27)    -894 (-0.39)   -1293 (-0.57)   -1589 (-0.70)   -2161 (-0.95)
+%4          -446 (-0.26)    -613 (-0.36)   -1217 (-0.71)   -1030 (-0.60)   -1526 (-0.89)
+%5          -391 (-0.29)    -256 (-0.19)    -490 (-0.36)    -446 (-0.33)   -1354 (-0.99)
+%6          -321 (-0.28)    -512 (-0.45)    -744 (-0.65)    -707 (-0.62)   -1675 (-1.47)
+%8           +77 (+0.09)    +199 (+0.23)    -295 (-0.35)    -480 (-0.56)    -774 (-0.91)
+
+  EN IYI 3 hucre:
+     stop %8 · hedef %5  ->    +198.90 $  (islem basi +0.233%, N=91)
+     stop %8 · hedef %3  ->     +77.40 $  (islem basi +0.091%, N=91)
+     stop %5 · hedef %5  ->    -256.29 $  (islem basi -0.188%, N=91)
+  EN KOTU 1: stop %2 · hedef %15 -> -2495.87 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): -1588.72 $
+
+--- SHORT — sicrama ONCESI : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)      -1588.72 $   islem basi -0.698%   kazanan 18/91 (%20)  N=91
+   +15 dk GECIKMELI giris            -2169.17 $   islem basi -0.953%   kazanan 16/91 (%18)  N=91
+   +30 dk GECIKMELI giris            -1384.08 $   islem basi -0.608%   kazanan 19/91 (%21)  N=91
+   +60 dk GECIKMELI giris            -2187.12 $   islem basi -0.961%   kazanan 17/91 (%19)  N=91
+   1 saatte kosulsuz KAPAT            +128.37 $   islem basi +0.056%   kazanan 37/91 (%41)  N=91
+   2 saatte kosulsuz KAPAT            +142.08 $   islem basi +0.062%   kazanan 40/91 (%44)  N=91
+   4 saatte kosulsuz KAPAT             +14.43 $   islem basi +0.006%   kazanan 35/91 (%38)  N=91
+   8 saatte kosulsuz KAPAT            -909.61 $   islem basi -0.400%   kazanan 29/91 (%32)  N=91
+   24 saatte kosulsuz KAPAT           -759.45 $   islem basi -0.334%   kazanan 24/91 (%26)  N=91
+   YON CEVIRME (ters islem)          -1292.30 $   islem basi -0.568%   kazanan 17/91 (%19)  N=91
+
+================================================================================================
+SHORT — sicrama SONRASI   N=12
+GERCEK sonuc: -672.35 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2          -583 (-1.29)    -957 (-2.13)    -957 (-2.13)    -957 (-2.13)    -957 (-2.13)
+%3          -488 (-1.63)    -812 (-2.71)    -812 (-2.71)    -812 (-2.71)    -812 (-2.71)
+%4          -535 (-2.38)    -628 (-2.79)    -642 (-2.85)    -642 (-2.85)    -642 (-2.85)
+%5          -544 (-3.02)    -619 (-3.44)    -630 (-3.50)    -630 (-3.50)    -630 (-3.50)
+%6          -535 (-3.57)    -597 (-3.98)    -607 (-4.05)    -607 (-4.05)    -607 (-4.05)
+%8          -489 (-4.34)    -535 (-4.76)    -542 (-4.82)    -542 (-4.82)    -542 (-4.82)
+
+  EN IYI 3 hucre:
+     stop %3 · hedef %3  ->    -487.88 $  (islem basi -1.626%, N=12)
+     stop %8 · hedef %3  ->    -488.64 $  (islem basi -4.343%, N=12)
+     stop %4 · hedef %3  ->    -534.56 $  (islem basi -2.376%, N=12)
+  EN KOTU 1: stop %2 · hedef %5 -> -956.81 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): -811.97 $
+
+--- SHORT — sicrama SONRASI : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)       -811.97 $   islem basi -2.707%   kazanan  1/12 (%8)  N=12
+   +15 dk GECIKMELI giris             -817.05 $   islem basi -2.723%   kazanan  1/12 (%8)  N=12
+   +30 dk GECIKMELI giris             -828.56 $   islem basi -2.762%   kazanan  1/12 (%8)  N=12
+   +60 dk GECIKMELI giris             -780.39 $   islem basi -2.601%   kazanan  1/12 (%8)  N=12
+   1 saatte kosulsuz KAPAT            -196.55 $   islem basi -0.655%   kazanan  5/12 (%42)  N=12
+   2 saatte kosulsuz KAPAT            -485.32 $   islem basi -1.618%   kazanan  3/12 (%25)  N=12
+   4 saatte kosulsuz KAPAT            -449.78 $   islem basi -1.499%   kazanan  4/12 (%33)  N=12
+   8 saatte kosulsuz KAPAT            -730.37 $   islem basi -2.435%   kazanan  1/12 (%8)  N=12
+   24 saatte kosulsuz KAPAT           -811.97 $   islem basi -2.707%   kazanan  1/12 (%8)  N=12
+   YON CEVIRME (ters islem)          +1474.41 $   islem basi +4.915%   kazanan  9/12 (%75)  N=12
+
+================================================================================================
+LONG — TUM DONEM   N=14
+GERCEK sonuc: +249.43 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2           +17 (+0.03)    +205 (+0.39)    +579 (+1.10)    +926 (+1.76)     -54 (-0.10)
+%3           -38 (-0.11)    +112 (+0.32)    +411 (+1.17)    +717 (+2.05)    +143 (+0.41)
+%4          +101 (+0.39)    +269 (+1.03)    +569 (+2.17)    +911 (+3.47)    +625 (+2.38)
+%5          +132 (+0.63)    +282 (+1.34)    +371 (+1.77)    +645 (+3.07)    +386 (+1.84)
+%6           +59 (+0.34)    +308 (+1.76)    +395 (+2.26)    +511 (+2.92)    +271 (+1.55)
+%8            +1 (+0.01)    +188 (+1.43)    +235 (+1.79)    +321 (+2.45)    +103 (+0.79)
+
+  EN IYI 3 hucre:
+     stop %2 · hedef %10  ->    +925.62 $  (islem basi +1.763%, N=14)
+     stop %4 · hedef %10  ->    +910.80 $  (islem basi +3.470%, N=14)
+     stop %3 · hedef %10  ->    +717.08 $  (islem basi +2.049%, N=14)
+  EN KOTU 1: stop %2 · hedef %15 -> -53.51 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): +717.08 $
+
+--- LONG — TUM DONEM : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)       +717.08 $   islem basi +2.049%   kazanan  6/14 (%43)  N=14
+   +15 dk GECIKMELI giris             +344.47 $   islem basi +0.984%   kazanan  5/14 (%36)  N=14
+   +30 dk GECIKMELI giris             +202.55 $   islem basi +0.579%   kazanan  4/14 (%29)  N=14
+   +60 dk GECIKMELI giris             +931.69 $   islem basi +2.662%   kazanan  6/14 (%43)  N=14
+   1 saatte kosulsuz KAPAT            +202.36 $   islem basi +0.578%   kazanan  7/14 (%50)  N=14
+   2 saatte kosulsuz KAPAT            +406.84 $   islem basi +1.162%   kazanan  8/14 (%57)  N=14
+   4 saatte kosulsuz KAPAT            +646.44 $   islem basi +1.847%   kazanan  6/14 (%43)  N=14
+   8 saatte kosulsuz KAPAT            +717.08 $   islem basi +2.049%   kazanan  6/14 (%43)  N=14
+   24 saatte kosulsuz KAPAT           +717.08 $   islem basi +2.049%   kazanan  6/14 (%43)  N=14
+   YON CEVIRME (ters islem)           -284.23 $   islem basi -0.812%   kazanan  3/14 (%21)  N=14
+
+================================================================================================
+LONG — sicrama ONCESI   N=5
+GERCEK sonuc: +199.44 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2           -25 (-0.13)    +125 (+0.67)    +275 (+1.47)    +500 (+2.67)    -406 (-2.17)
+%3           +58 (+0.47)    +208 (+1.67)    +358 (+2.87)    +583 (+4.67)     +58 (+0.46)
+%4          +136 (+1.45)    +286 (+3.05)    +436 (+4.65)    +661 (+7.05)    +319 (+3.40)
+%5          +214 (+2.85)    +364 (+4.85)    +334 (+4.45)    +514 (+6.85)    +210 (+2.79)
+%6          +178 (+2.85)    +303 (+4.85)    +266 (+4.25)    +416 (+6.65)    +137 (+2.19)
+%8          +134 (+2.85)    +228 (+4.85)    +181 (+3.85)    +293 (+6.25)     +47 (+0.99)
+
+  EN IYI 3 hucre:
+     stop %4 · hedef %10  ->    +661.38 $  (islem basi +7.055%, N=5)
+     stop %3 · hedef %10  ->    +583.22 $  (islem basi +4.666%, N=5)
+     stop %5 · hedef %10  ->    +513.83 $  (islem basi +6.851%, N=5)
+  EN KOTU 1: stop %2 · hedef %15 -> -405.97 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): +583.22 $
+
+--- LONG — sicrama ONCESI : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)       +583.22 $   islem basi +4.666%   kazanan  3/ 5 (%60)  N=5
+   +15 dk GECIKMELI giris             +578.99 $   islem basi +4.632%   kazanan  3/ 5 (%60)  N=5
+   +30 dk GECIKMELI giris             +578.99 $   islem basi +4.632%   kazanan  3/ 5 (%60)  N=5
+   +60 dk GECIKMELI giris             +581.03 $   islem basi +4.648%   kazanan  3/ 5 (%60)  N=5
+   1 saatte kosulsuz KAPAT            +147.25 $   islem basi +1.178%   kazanan  2/ 5 (%40)  N=5
+   2 saatte kosulsuz KAPAT            +172.46 $   islem basi +1.380%   kazanan  3/ 5 (%60)  N=5
+   4 saatte kosulsuz KAPAT            +512.59 $   islem basi +4.101%   kazanan  3/ 5 (%60)  N=5
+   8 saatte kosulsuz KAPAT            +583.22 $   islem basi +4.666%   kazanan  3/ 5 (%60)  N=5
+   24 saatte kosulsuz KAPAT           +583.22 $   islem basi +4.666%   kazanan  3/ 5 (%60)  N=5
+   YON CEVIRME (ters islem)           -389.34 $   islem basi -3.115%   kazanan  0/ 5 (%0)  N=5
+
+================================================================================================
+LONG — sicrama SONRASI   N=9
+GERCEK sonuc: +49.99 $
+================================================================================================
+STOP/HEDEF IZGARASI — risk her hucrede SABIT 75 $/islem
+(hucre = toplam $ · parantez: islem basina net %%)
+
+stop\hed              %3              %5              %7             %10             %15
+%2           +42 (+0.13)     +80 (+0.24)    +304 (+0.90)    +426 (+1.26)    +352 (+1.04)
+%3           -97 (-0.43)     -97 (-0.43)     +53 (+0.23)    +134 (+0.59)     +85 (+0.38)
+%4           -35 (-0.21)     -17 (-0.10)    +132 (+0.78)    +249 (+1.48)    +307 (+1.82)
+%5           -82 (-0.61)     -83 (-0.61)     +37 (+0.28)    +131 (+0.97)    +176 (+1.31)
+%6          -119 (-1.06)      +5 (+0.05)    +130 (+1.15)     +95 (+0.85)    +133 (+1.19)
+%8          -133 (-1.57)     -39 (-0.47)     +54 (+0.64)     +28 (+0.34)     +57 (+0.67)
+
+  EN IYI 3 hucre:
+     stop %2 · hedef %10  ->    +425.78 $  (islem basi +1.262%, N=9)
+     stop %2 · hedef %15  ->    +352.47 $  (islem basi +1.044%, N=9)
+     stop %4 · hedef %15  ->    +306.51 $  (islem basi +1.816%, N=9)
+  EN KOTU 1: stop %8 · hedef %3 -> -132.70 $
+  BOTUN mekanigine yakin (stop %3 · hedef %10): +133.86 $
+
+--- LONG — sicrama SONRASI : FILTRE OLMAYAN diger degisiklikler
+   stop %3 hedef %10 (referans)       +133.86 $   islem basi +0.595%   kazanan  3/ 9 (%33)  N=9
+   +15 dk GECIKMELI giris             -234.52 $   islem basi -1.042%   kazanan  2/ 9 (%22)  N=9
+   +30 dk GECIKMELI giris             -376.43 $   islem basi -1.673%   kazanan  1/ 9 (%11)  N=9
+   +60 dk GECIKMELI giris             +350.66 $   islem basi +1.558%   kazanan  3/ 9 (%33)  N=9
+   1 saatte kosulsuz KAPAT             +55.11 $   islem basi +0.245%   kazanan  5/ 9 (%56)  N=9
+   2 saatte kosulsuz KAPAT            +234.38 $   islem basi +1.042%   kazanan  5/ 9 (%56)  N=9
+   4 saatte kosulsuz KAPAT            +133.86 $   islem basi +0.595%   kazanan  3/ 9 (%33)  N=9
+   8 saatte kosulsuz KAPAT            +133.86 $   islem basi +0.595%   kazanan  3/ 9 (%33)  N=9
+   24 saatte kosulsuz KAPAT           +133.86 $   islem basi +0.595%   kazanan  3/ 9 (%33)  N=9
+   YON CEVIRME (ters islem)           +105.12 $   islem basi +0.467%   kazanan  3/ 9 (%33)  N=9
+
+bot dosyalarina yazim: YOK

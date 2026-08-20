@@ -1,0 +1,25 @@
+72 saatlik ufku TAM olan olay: 1312
+
+KONTROL 1 — gun gun kirilim (tek gune mi dayaniyor?)
+gun            N_NOTR   NOTR r72   N_LONG   LONG r72     fark    N_hepsi
+2026-08-11         79      -7.37      115      +2.33    -9.70        196
+2026-08-12         82     -12.53      138      -0.33   -12.20        223
+2026-08-13         73     -15.46      139      -5.82    -9.64        231
+2026-08-14         51     -11.28       79      -3.35    -7.93        144
+2026-08-15         82     -24.18      125      -5.46   -18.72        219
+2026-08-16         54     -15.00      110      +2.89   -17.89        171
+2026-08-17         16      -9.08      108      -2.58    -6.49        128
+
+   GUN-KUMELI fark (NOTR - LONG): 7 gun · ort -11.80 · t=-6.52 · negatif 7/7
+
+KONTROL 2 — chg24 SABITLENINCE duruyor mu?
+(NOTR adaylari zaten pumplamis olabilir; o zaman dusus etiketten degil pumptan)
+chg24        N_NOTR   NOTR r72   N_LONG   LONG r72      fark
+dusen           209     -14.33      305      -0.74    -13.59
+0-10%            69      -2.35      255      +4.91     -7.26
+10-25%           45     -14.15      151      -3.53    -10.62
+>25%            114     -21.56      103     -19.32     -2.24
+
+KONTROL 3 — SANS OLCUMU (gun ici etiket karistirma, 2000 tur)
+   NOTR -14.31 · diger -1.50 · FARK -12.81
+   sahte ort -0.26 (sd 1.49) · p = 0.0000  -> SANSTAN FARKLI
