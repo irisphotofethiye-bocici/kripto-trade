@@ -47,6 +47,10 @@ import json, os, sys, argparse, datetime
 
 import testbot
 import evren
+# Kapanis bildirimi icin GERCEK gonderici. testbot.telegram_gonder
+# _defterde() icinde SUSTURULUYOR; buraya dogrudan alinir ki takastan
+# etkilenmesin. Botun bildirim ayari DEGISTIRILMEDI.
+from nobetci import telegram_gonder as _tg
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATEF = os.path.join(HERE, "defter2_state.json")
@@ -241,18 +245,71 @@ def equity_yaz(st):
         pass
 
 
+# --- KAPANIS BILDIRIMI (kullanici istegi, 2026-08-20) ----------------------
+# NEDEN BURADA VE _defterde DISINDA: takas sirasinda telegram susturuluyor
+# (bota ait olmayan hareket "[TESTBOT] ..." diye gitmesin). Bildirim takas
+# GERI ALINDIKTAN sonra, nobetci'den dogrudan alinan fonksiyonla gider.
+#
+# olay ETIKETI VERILMEZ: config'te "olaylar": ["giris"] var, yani "kapanis"
+# etiketli cagrilar suzuluyor. nobetci._olay_izinli olaysiz cagrilari HER ZAMAN
+# geciriyor -> boylece BOTUN bildirim ayarina dokunmadan bu defter bildirebiliyor.
+
+def _defter_kayitlari():
+    """defter2 islem defterinin tamami. Yoksa []. (salt okuma)"""
+    try:
+        with open(ISLEMLERF, encoding="utf-8") as f:
+            return [json.loads(l) for l in f if l.strip()]
+    except Exception:
+        return []
+
+
+def kapanis_bildir(yeni, st):
+    """Bu turda deftere DUSEN kayitlari bildirir.
+
+    TP1_KISMI de bildirilir — pozisyonun yarisinin gercekten kapanmasidir.
+    TOPLAM hesabinda kismi kayitlar DAHIL EDILIR (CLAUDE.md: "suzgec saymak
+    icindir, toplamak icin degil" — suzmek TP1'de realize edilen kari yok eder).
+    POZISYON SAYISI ise kismi kayitlari HARIC tutar."""
+    if not yeni:
+        return
+    satir = []
+    for k in yeni:
+        kismi = bool(k.get("kismi"))
+        satir.append("%s %s %s %+.2f$ (%s%s, %.1f sa)"
+                     % ("YARIM" if kismi else "KAPANDI", k.get("sym"), k.get("yon"),
+                        k.get("sonuc_usdt") or 0.0, k.get("sebep"),
+                        "" if k.get("r") is None else " R=%.2f" % k["r"],
+                        k.get("tutma_saat") or 0.0))
+    tum = _defter_kayitlari()
+    toplam = sum(t.get("sonuc_usdt") or 0 for t in tum)
+    kapanan = len({t.get("id") for t in tum if not t.get("kismi")})
+    msg = ("[DEFTER-2] " + " | ".join(satir)
+           + "\nkasa $%.2f | acik %d/%d | kapanan poz %d | defter toplami %+.2f$"
+             " (fonlama HARIC; kasa farkina dahil)"
+           % (st["equity"], len(st["acik_pozisyonlar"]), MAKS_POZ, kapanan, toplam))
+    print(msg)
+    try:
+        _tg(msg)
+    except Exception:
+        pass
+
+
 def tur():
     """Bir tur: acik pozisyonlari BOTLA AYNI kurallarla yonet, sonra yeni giris ara.
     Kasa yoksa HICBIR SEY yapmaz (dosya olusturmaz) — --baslat gerekir."""
     st = yukle()
     if not st:
         return False
+    yeni_kayit = []
     if st["acik_pozisyonlar"]:
+        n0 = len(_defter_kayitlari())
         _defterde(testbot.yonet_acik_pozisyonlar, st)
+        yeni_kayit = _defter_kayitlari()[n0:]   # bu turda dusen kapanis/TP1 kayitlari
     giris_ara(st)
     st["son_cycle_ts"] = testbot.now_iso()
     kaydet(st)
     equity_yaz(st)
+    kapanis_bildir(yeni_kayit, st)             # state YAZILDIKTAN sonra bildir
     return True
 
 
