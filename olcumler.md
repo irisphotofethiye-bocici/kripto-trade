@@ -2423,3 +2423,73 @@ kendisi bugüne kadar kontrol grubuyla hiç sınanmamıştı**. Orijinal `A+B` �
 
 ⚠️ **Kural önerilmiyor** (kullanıcı talimatı). Bu bir teşhis kaydıdır.
 
+### 🟡 KÂR EDEN YAPILANDIRMA VAR MI? — kademeli yığın (2026-08-20)
+
+**Betikler:** `S_yigin.py` · `S2_aykiri.py`.
+⚠️ **ÖRNEKLEM İÇİ İNŞA** — bileşenler sonuçlara bakılarak seçildi. Tek geçerli
+hakem **zaman bölünmesi**.
+
+#### SHORT — her bileşen katkı yapıyor (2 yıl, ay ortalaması)
+
+```
+adim                          N       net(ay)   ay-t   poz ay   erken-stop
+0. HAM EVREN (kapisiz)    70694       -0,1097  -0,86   11/25      -0,0340
+1. + pump engeli (<%20)   68090       -0,0949  -0,73   11/25      -0,0153
+2. + ucuz disla (>$0,07)  45175       -0,0453  -0,36   12/25      +0,0301
+3. + funding kapisi KALK  32427       +0,0106  +0,08   14/25      +0,0904
+4. + btc_pay UST disla    19766       +0,2340  +1,33   15/25      +0,3416
+```
+
+**Monoton iyileşme.** Her adım katkı yapıyor; işlem sayısı 70.694 → 19.766 (**−%72**).
+
+#### LONG — her adımda daha kötü
+
+```
+0. HAM EVREN  -0,3229 (t=-4,14)  ...  4. tam yigin  -0,5292 (t=-4,53)
+```
+
+**Bu evrende LONG anlamlı biçimde zararlı.** Beş adımın hepsinde t < −4.
+
+#### HAKEM — zaman bölünmesi
+
+```
+SHORT normal stop   A yarisi +0,2376 (t=+0,75)  ·  B yarisi +0,2814 (t=+1,53)
+SHORT erken-stop    A yarisi +0,3433 (t=+0,96)  ·  B yarisi +0,4018 (t=+1,87)
+```
+
+**İki yarıda da artı**, ve ikinci yarı daha iyi.
+
+#### Aykırı ve yoğunlaşma kontrolü
+
+```
+N=19.766 · ortalama +0,2745 · MEDYAN -2,5365 · kazanan %32,4
+en iyi %1 cikarilinca +0,1756 · %5 cikarilinca -0,2343
+en iyi 5 islem: +11,3 +10,8 +10,8 +10,7 +10,6   <-- bunlar HEDEF vuruslari
+ayrik sembol 454 · en cok katkili sembolun payi %1,0
+pozitif ay 15/25 · EN IYI AY atilinca +0,2362
+```
+
+⚠️ **"En iyi %5 çıkınca negatif" burada kırmızı bayrak DEĞİL.** Sistem tasarımı
+gereği %32 kazanma oranı + 3:1 ödeme; kazançların tamamı hedef vuruşlarından
+gelir. En iyi %5 = ~988 işlem, birkaç aykırı değil. **Sembol yoğunlaşması yok**
+(454 sembol, en büyüğü %1,0), en iyi ay atılınca **hâlâ pozitif**.
+
+#### HÜKÜM — 🟡 UMUT VERİCİ AMA ANLAMLI DEĞİL
+
+| ölçüt | sonuç |
+|---|---|
+| iki zaman yarısında da pozitif | ✅ +0,343 / +0,402 |
+| ay-kümeli t > +2,0 | ❌ **+1,33** |
+| pozitif ay | 🟡 15/25 |
+| aykırı/sembol yoğunlaşması | ✅ yok |
+| en iyi ay atılınca | ✅ +0,236 |
+
+**Kural ÇIKARILMIYOR.** Bu bir *örneklem içi inşadır* ve ön-kayıtlı değildir.
+2 yıllık verinin tamamı kullanıldığı için **geriye kalan tek geçerli hakem
+İLERİ ZAMANDIR.**
+
+**Ne söylüyor:** botun bugünkü net'i **−0,119**; bu yapılandırma **+0,34**.
+Fark ~0,46 puan/işlem. Ve farkın kaynağı **yeni bir sinyal değil** — üç zararlı
+şeyin kaldırılması (funding kapısı, ucuz coinler, UST bandı) artı ölçülmüş bir
+stop onarımı.
+
