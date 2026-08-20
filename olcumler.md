@@ -1412,6 +1412,60 @@ Kırılım saatinde `BIO` SHORT stop oldu (**−74,93**), ve bot kırılımdan *
   ama yön seçimine **girmiyor**). H1 belirsiz — alt'lar BTC'den az yükselirse
   SHORT'lar kurtulabilir; nitekim ilk anlık görüntüde üç short net **+15,50** idi.
 
+### SONUÇ — 12 saat, 145 anlık görüntü (2026-08-20 07:20'de kapandı)
+
+🔴 **ÖNCE KENDİ ÖLÇÜTÜMÜN KUSURU: `STOP` ETİKETİ "KAYIP" DEMEK DEĞİL.**
+H1'i *"SHORT stop oranı"* üzerine kurdum. Yanlış vekil: bu bot TP1'den sonra stopu
+**takip ettiriyor**, yani `STOP` kaydı **kârda** da kapanabiliyor. Tabanda ölçtüm —
+SHORT stop'larının **%20'si (74'ün 15'i)** kârla kapanmış, LONG stop'larının **%50'si**.
+Yani "stop oranı" *öldürülme* ile *kâr kilitleme*yi tek kovaya atıyor.
+
+**Düzeltilmiş ölçü — zararla kapanan SHORT oranı:**
+
+| | N | zararla kapanan | oran |
+|---|---|---|---|
+| taban (kırılım öncesi) | 109 | 60 | **%55,0** |
+| pencere | **5** | 5 | **%100** |
+
+Ön-kayıtlı eşik (taban +15 puan) **her iki ölçüde de aşıldı**. ⚠️ **Ama N=5.**
+Taban p=0,55 iken 5/5'in olasılığı **%5,0**; orijinal p=0,682 ile **%14,7**.
+**Bu bir kanıt değil, bir gözlemdir.** H1 "geçti" diye yazmak, bu projenin
+reddettiği davranış olur.
+
+**H2 YANLIŞ ÇIKTI — beklentim tutmadı.** *"Bot kırılımı görmez, short açmaya devam
+eder"* dedim ve *"kuvvetle muhtemel"* diye yazdım. Gerçek: kırılımdan sonra açılan
+**13 pozisyonun 5'i LONG (%38,5)**, ölçüt <%20 idi. Bot yön değiştirdi.
+*(24 saatlik pencere 08-20 18:00'de doluyor; eşiğin altına inmesi için kalan sürede
+13 ardışık SHORT gerekir — pratikte çürütülmüş sayılır.)*
+
+**ASIL BULGU — yön her şeydi, ve LONG'lar pencereyi kurtardı:**
+
+| yön | N | sonuç | ayrıntı |
+|---|---|---|---|
+| SHORT | 5 | **−368,74** | 5/5 zararda stop, hepsi ≈ **−1,02R** |
+| LONG | 4 | **+423,53** | 4/4 "stop" ama **dördü de kârda** (TP1 + takip eden stop) |
+
+Realize **+87,95**; açıklarla birlikte **+149,56**. Etkin kasa **9.587,47 → 9.779,54**
+(**+192,07**). Yani bot melt-up'ta **kazandı** — short olmasına *rağmen* değil,
+**açtığı LONG'lar sayesinde.**
+
+**Piyasa bağlamı (145 anlık görüntüden):** BTC 68.631 → 69.343. Perp'lerin yükselen
+payı %73 → **%81**, ama BTC'yi geçen pay yalnız %8 → **%17**. Yani alt'lar yükseldi
+*ama BTC'den az* — BTC pay kazanmaya devam etti. `btc_pay` freninin aradığı hâl tam
+buydu ve frenlenmiş olması gereken 5 SHORT'un 5'i de zarar etti (−368,74).
+⚠️ **Frenin haklılığı bununla KANITLANMADI** — N=5, ve aynı pencerede LONG'lar
+daha çok kazandırdı. Fren yalnız SHORT bacağını kapatıyor, LONG'lara dokunmuyordu.
+
+**ÇIKARILMAYAN KURAL:** tek kırılım **N=1 olaydır**. Ne "melt-up'ta short açma" ne
+"fren geri açılsın" hükmü bu veriden çıkarılamaz. İkinci bir kırılımda sınanmadan
+yazılmaz. Kaydedilen: **ölçüt tasarımı dersi** (aşağıda) ve rakamlar.
+
+**DERS — vekil değişken seçilirken etiketin ANLAMI doğrulanır.** `STOP` alanını
+"kayıp" sandım; kodu değil adı okumuşum. Bu, `r` alanının kısmi kârı görmemesiyle
+(`CLAUDE.md`) **aynı hata sınıfı**: defterdeki bir alanın adı, muhasebesini anlatmıyor.
+Ön-kayıt yazarken **vekil değişkenin tabandaki dağılımına önce bakılmalıydı** — 30
+saniyelik bir kontrol, ölçütü kurtarırdı.
+
 ⚠️ **HÜKÜM YOK.** Bu bir veri toplamadır. *"En iyi hücre seçilmez"* ve *"karıştırıcı
 kontrolü zorunlu"* kuralları burada da geçerli: tek bir kırılım **N=1 olaydır**,
 istatistik değil. İkinci bir kırılımda sınanmadan kural çıkarılmaz
