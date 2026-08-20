@@ -2140,3 +2140,57 @@ işlemlerin **%15,1'i** kazanacakken stopla öldürülüyor.
 yani sorun stop *seviyesi* değil **erken gürültü** olabilir. Zamanla değişen
 (başta gevşek, sonra sıkı) bir stop bunu sınardı — **denenmedi, önerilmiyor.**
 
+### 🔴 ERKEN GÜRÜLTÜ SINAVI + KENAR/SÜRTÜNME AYRIŞTIRMASI (2026-08-20)
+
+**Ön-kayıt** `J_erken_gurultu.py` içinde, koşturulmadan önce. SHORT · botun
+kapıları · 2 yıl · **N=22.072** · eşleşmiş (aynı girişler, farklı mekanik).
+
+#### Ayırıcı sınav — hangi açıklama doğru?
+
+```
+kol                        islem ort  eslesmis f.  ay-kumeli t   A yari    B yari
+K0 KONTROL (bugunku)         -0,076        -            -           -         -
+K1 ERKEN-GEN (ilk 6s x2)     -0,019     +0,0572      +2,32     +0,0086   +0,1057
+K2 SQRT-GEN (sqrt(1+t/6))    -0,054     +0,0223      -0,63     -0,1061   +0,1508
+K3 UFUK 6 saat               -0,121     -0,0441      -0,22     +0,0724   -0,1607
+K4 UFUK 12 saat              -0,118     -0,0415      -0,49     +0,0198   -0,1028
+```
+
+**TEŞHİS DOĞRULANDI: sorun ERKEN GÜRÜLTÜ.** Ön-kayıtlı ayırıcı okumaya göre
+`K1 >> K0` ve `K1 > K2` → ölçek uyumsuzluğu değil, **ilk saatlerin dalgalanması**.
+Ufku kısaltmak (K3/K4) işi **kötüleştiriyor** — yani 72 saat sorun değil.
+
+⚠️ **Kendi beklentim TUTMADI**: K3/K4'ün kazanmasını yazmıştım, kaybettiler.
+
+#### Ama KURAL geçemedi
+
+| ölçüt | K1 |
+|---|---|
+| 1. işlem başına yüksek | ✅ −0,019 vs −0,076 |
+| 2. iki yarıda da | ✅ +0,009 / +0,106 |
+| 3. ay-kümeli t > +2,0 | ✅ **+2,32** |
+| 4. üç rejimde ters işaret yok | ❌ **BOĞA −0,1134** |
+
+**HÜKÜM: KALDI** (ölçüt 4). Not: düşüren hücre **güçsüz** — BOĞA t=−0,48,
+8 ayın 2'si, N=1.111. NOTR ise güçlü: **t=+3,47, 25 ayın 19'u**, N=16.704.
+Ölçüt metni sonuçtan sonra **değiştirilmedi** (D/9).
+
+#### 🔴 ASIL BULGU — kenar var, sürtünme yiyor
+
+```
+BRUT  (stop/hedef sonrasi, maliyet ONCESI)  : +0,1795 puan
+fonlama                                     : -0,1259   (brut kenarin %70'i)
+maliyet (2 x [taker %0,045 + slipaj %0,02]) : -0,1300   (brut kenarin %72'si)
+--------------------------------------------------------
+NET                                         : -0,0764
+```
+
+**Giriş kenarı VAR (+0,18). Sürtünme onun %142'sini yiyor.**
+
+Stop onarımı (+0,057) uygulansa bile net **−0,019** — hâlâ negatif.
+Yani stop gerçek bir sızıntı ama **tek başına yetmiyor**.
+
+⚠️ `kripto-config.json → maliyet._teyit`: *"BU SAYILARI BINANCE FEE-RATE
+SAYFANDAN TEYIT ET ... hesabindan OKUNMADI"*. Maliyetin %72'lik payı
+**doğrulanmamış bir varsayıma** dayanıyor.
+
