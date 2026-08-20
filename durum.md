@@ -575,3 +575,71 @@ kazanacakken stopla ölüyor ve bunların **%64'ü ilk 6 saatte**.
 Proje 30 çıkış varyantı denedi, hepsi **hedef** ve **kısmi kâr** tarafındaydı.
 **Stopun kendisi hiç sorgulanmadı.** Bu, altı bağlı işin yanına yedinci olarak
 gidiyor — **karar değil, açık soru.**
+
+## 🆕 DEFTER-2 KURULDU VE BAŞLATILDI (2026-08-20 17:28, KULLANICI KARARI)
+
+**Soru:** *"Mevcut bot yanlış evrende mi avlanıyor?"*
+
+**Neden ayrı defter — mevcut bota EKLENEMEZ.** Ölçüldü: botun **117 gerçek
+pozisyonunun %100'ü** bu yapılandırmadan geçemezdi. Botun iki giriş kapısı
+**tam olarak** bu evreni dışlıyor (`A+B → funding ≤ −0,05` · `MA50+ucuz →
+fiyat ≤ $0,07`). Filtreleri bota eklemek onu *hiç işlem açmayan bot* yapar.
+
+| | bot | defter2 |
+|---|---|---|
+| evren | funding ≤ −0,05 **veya** fiyat ≤ $0,07 | fiyat > $0,07 · funding > −0,05 · chg24 < %20 · btc_pay ≠ UST |
+| yön | LONG + SHORT | **yalnız SHORT** |
+| çıkış kuralları | — | **birebir aynı** (bilinçli) |
+| pozisyon limiti | 8 | 8 |
+| ilk gün açtıkları | `EDEN $0,057` `MOODENG $0,041` `BIO $0,031` `MEGA $0,038` `PENGU $0,007` | `BEAT $0,137` `KAITO $0,368` |
+
+**Sıfır örtüşme** — aynı piyasada, aynı anda, tamamen ayrı coinler.
+
+### Kurulum ayrıntısı
+
+```
+dosyalar : defter2_state.json · defter2_islemler.jsonl · defter2_equity.jsonl
+           defter2_veto.jsonl   (botun veto_log'una SIZMASIN diye AYRI)
+gorev    : KriptoDefter2 · PT7M30S · baslangic 2026-07-02T18:03:41
+           testbot ile AYNI periyot, +5 dk kaydirilmis -> faz sabit
+kasa     : 10.000 $ sanal
+```
+
+🔴 **`testbot.py` dahil hiçbir bot dosyasına DOKUNULMADI** — `git diff` boş.
+Defter aday arşivini **salt okur**, kendi sürecinde koşar, botun kilidini almaz.
+
+### Doğrulama (kullanıcı: *"çakışma olmasın, öbür bot akışını değiştirme"*)
+
+| kontrol | sonuç |
+|---|---|
+| `scratchpad/defter2_testi.py` | **30/30 geçti**, "diske yazım: YOK" |
+| import yan etkisi | yok (dosya değişmedi/oluşmadı) |
+| kilit çekişmesi | yok — `defter2` `_kilit_al` çağırmaz, ayrı süreç |
+| ad çakışması | yok |
+| ilk canlı tur sonrası bot dosyaları | **10/10 dosya AYNI** (md5) |
+| `veto_log.jsonl` sızıntısı | yok |
+
+### ⚠️ Bilinen zayıflıklar — bilerek kayda geçiyor
+
+1. **Sıralama ölçülmedi.** 8 slot olduğu için adaylar **skora göre** sıralanıyor.
+   Ama `A+B` notu *"skor eklemek düşürüyor"* diyor (+0,396 → +0,338). Bu bir
+   kapı değil **kapasite kuyruğu**; hüküm yazarken not düşülmeli.
+   📌 **Kullanıcı kararı (2026-08-20): "sonra duruma göre değiştiririz."**
+2. **Dayanak anlamlı değil.** Geçmiş ölçüm ay-kümeli **t=+1,33** ve
+   **örneklem içi inşa**. 2 yılın tamamı kullanıldı → tek geçerli hakem
+   **ileri zaman**. Bu defter o hakemdir.
+3. **Stop onarımı KONMADI** (ölçülmüş +0,057). Konsaydı fark iki kaynaktan
+   gelir ve ayrılamazdı.
+
+### Yan bulgu — `golge.py`'de SIZINTI (düzeltilmedi, bildirildi)
+
+`_veto_logla` modül düzeyindeki `VETO_LOGF`'e **korumasız** yazar. `golge.ac`
+canlı-aday kapılarında `zorla=False` kullandığı için `rr_veto` tetikleyip
+**botun `veto_log.jsonl`'ine** kayıt düşürebiliyor. Dosyada 18 `rr_veto` kaydı
+var ve kaynak alanı yok — ayırt edilemiyorlar. `defter2` bu hatayı yapmıyor
+(dördüncü takas). **`golge.py`'ye dokunulmadı.**
+
+### Ne zaman hüküm yazılır
+
+Karşılaştırma **eşzamanlı** olduğu için rejim farkı yok. Ölçüt sayısı ve
+penceresi **henüz belirlenmedi** — 21-22 tartışmasının maddesi.
