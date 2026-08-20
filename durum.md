@@ -595,6 +595,13 @@ fiyat ≤ $0,07`). Filtreleri bota eklemek onu *hiç işlem açmayan bot* yapar.
 
 **Sıfır örtüşme** — aynı piyasada, aynı anda, tamamen ayrı coinler.
 
+**Kapanış bildirimi açık (2026-08-20, kullanıcı isteği).** Pozisyon kapanınca
+ve TP1'de yarısı kapanınca Telegram'dan mesaj gelir. İki tuzak bilinçli geçildi:
+bildirim `_defterde` takasının **dışında** gönderilir (içeride telegram
+susturuluyor), ve **olay etiketi verilmez** — config'teki `"olaylar": ["giris"]`
+süzgeci olaysız çağrıları geçirir, böylece **botun bildirim ayarı değişmedi.**
+Sınama: `scratchpad/defter2_bildirim_testi.py` (25/25).
+
 ### Kurulum ayrıntısı
 
 ```
