@@ -2493,3 +2493,68 @@ Fark ~0,46 puan/işlem. Ve farkın kaynağı **yeni bir sinyal değil** — üç
 şeyin kaldırılması (funding kapısı, ucuz coinler, UST bandı) artı ölçülmüş bir
 stop onarımı.
 
+
+---
+
+### ❌ MAJÖRLERDE "HACİM PATLIYOR, FİYAT KIMILDAMIYOR" İZİ — GEÇMEDİ (2026-08-21)
+
+**Ön-kayıt:** `scratchpad/poz_yol/ON_KAYIT_major_iz.md` (koşumdan önce commit `9edaad7`)
+**Betik:** `scratchpad/poz_yol/06_major_iz.py`
+**Veri:** `scratchpad/major_5dk/{BTC,ETH}.json` — 5 dk, **210.241 bar**, 2024-08-21 → 2026-08-21, 25 ay
+
+**Soru (kullanıcı):** *"Majörlerdeki patlamayı önceden okuyabilirsek piyasanın o an ne
+yöne gideceğini tespit etme ihtimalimiz yüksek. Böyle bir sıçrama olunca piyasa LONG'a
+döner ve biz SHORT'ta squeeze'de kalırız."*
+
+**İz tanımı (ön-kayıt):** 3 barlık (15 dk) pencerede `hacim_x ≥ 5,0` **VE**
+`|getiri| ≤ 0,5 × ATR`. N: BTC **151** · ETH **165**.
+
+#### H1 — oynaklık: iz sonrası mutlak hareket büyür mü?
+
+```
+        BTC                              ETH
+ufuk    iz/kontrol   oran      p         iz/kontrol   oran      p
++1sa    0,205/0,207  0,99x  0,96495      0,368/0,234  1,57x  0,00185
++2sa    0,441/0,309  1,43x  0,00510      0,443/0,368  1,20x  0,09185
++4sa    0,554/0,409  1,36x  0,02260      0,704/0,552  1,28x  0,05085
+```
+
+**Eşik `p < 0,000833` (Bonferroni, 12 karşılaştırma) — hiçbir ufuk geçemedi.**
+En iyisi ETH +1sa (0,00185), eşiğin **2 katı** üstünde. Üstelik BTC'nin en iyi
+ufku (+2sa) ile ETH'ninki (+1sa) **farklı**.
+
+#### H2 — yön: izin içindeki taker alış payı yönü söyler mi?
+
+BTC en iyi p=0,04510 · ETH hepsi p>0,45 · ay tutarlılığı 2/3 ve 2/4 (kullanılamaz).
+**Açıkça geçmedi** — ön-kayıtta zaten beklenmiyordu.
+
+#### 🔴 Asıl çürüten: karıştırıcı kontrolleri İKİ ENSTRÜMANDA TERS
+
+```
+"iz", duz yuksek hacimden daha mi iyi? (+2sa |getiri|)
+  BTC  iz 0,4413  vs  hacimli-HAREKETLI 0,3846   -> iz DAHA IYI
+  ETH  iz 0,4426  vs  hacimli-HAREKETLI 0,5586   -> iz DAHA KOTU
+
+ATR dilimi icinde oran (iz/kontrol)
+  BTC  dusuk 0,89x  ·  orta 1,69x  ·  yuksek 1,14x
+  ETH  dusuk 1,53x  ·  orta 1,04x  ·  yuksek 0,87x
+```
+
+BTC'de ortada tepe yapıp uçlarda düşüyor, ETH'de **tam tersi** — düşükten yükseğe
+monoton azalıyor ve yüksek ATR'de **1'in altına** iniyor. İki bağımsız enstrüman
+aynı olguya zıt cevap veriyorsa olgu yoktur.
+
+#### ⚠️ Hipotezi doğuran vaka, tanıma UYMUYOR — koşumdan önce tespit edildi
+
+19 Ağustos'un hiçbir penceresi "iz" değil; fiyat her pencerede ATR'nin
+**3-4,4 katı** oynamış (15:45'te hacim 11,3× ama getiri 4,4×ATR). Yani
+motive eden olay `hacim yüksek + fiyat KIMILDADI` grubunda — ki o grup da
+yukarıdaki kontrolde iki enstrümanda ters çıktı.
+
+**HÜKÜM: öncü gösterge YOK.** Bota kural eklenmedi, eklenmeyecek.
+
+**Yan bulgu (ölçülmedi, gözlem):** 19 Ağustos kırılmasında altlarda
+`fiyat +1,777% · OI −0,315% · taker alış payı 0,488 (kontrol 0,489)` —
+yükselişi alıcılar değil kapanan pozisyonlar üretmiş görünüyor. Tek vaka,
+hüküm değil. Bot tam o barın içinde SHORT açtı (BIO ~18:09) ve 12 dakikada
+stop oldu.
