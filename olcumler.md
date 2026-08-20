@@ -2257,3 +2257,40 @@ brüt kenar ise sürekli. En derin dilimde tek fonlama kesintisi **%4,29**.
 ⚠️ Bu daha önce denenmiş ama ölçüm `SEYRELT=24` faz kilidine takılmıştı
 (bir kova örneklemin %62'sini taşımıştı). Faz kaydırmayla yeniden kurulabilir.
 
+### ❌ FONLAMA ZAMANLAMASI — BULGU YOK (2026-08-20)
+
+**Hipotez:** fonlama 8/4 saatte bir kesiliyor, brüt kenar sürekli. Kesintiden
+kaçınan bir giriş zamanlaması kenarı ödemeden yakalar mı?
+
+#### İlk deneme HATALIYDI — karıştırıcı bulundu ve giderildi
+
+*"Fonlamaya kalan saat"* değişkeni zamanlamayı değil **sembolün periyodunu**
+ölçüyordu. Ölçüldü: **418 sembol 4 saatlik**, **147 sembol 8 saatlik**, 2 sembol
+1 saatlik fonlama kullanıyor. 4 saatlikler yalnız `kalan 0-3`'e düşüyor →
+kovalar karışıktı (bir kova %22,2, diğeri %3,7).
+
+#### Düzeltilmiş ölçüm — periyot ayrık, zamanlama oransal
+
+```
+4 SAATLIK semboller (N=14.026)
+ceyrek     N       BRUT     fonlama       NET     ay-t   kesinti
+1       1996    +0,4667    -0,3213   -0,0272    +0,35     9,25
+2       3669    +0,2009    -0,2305   -0,2022    -2,55     7,43
+3       3143    +0,2054    -0,1440   -0,1112    -0,66     5,88
+4       5218    +0,0798    -0,1307   -0,2235    -2,22     5,36
+
+8 SAATLIK semboller (N=4.501)
+1        766    -0,0701    -0,0426   -0,2853    -1,21     4,11
+2       1160    -0,4185    -0,0446   -0,6357    -3,48     3,98
+3       1101    -0,4629    -0,0357   -0,6712    -2,98     3,54
+4       1474    +0,0618    -0,0266   -0,1374    -1,25     3,21
+```
+
+**HÜKÜM: BULGU YOK.**
+1. **Hiçbir hücre pozitif değil** — en iyisi 4s/1. çeyrek −0,0272
+2. Desen iki periyot grubunda **tutarsız** (4s'de azalan, 8s'de U)
+3. **Artık karıştırıcı duruyor:** `kesinti` sayısı çeyrekler arası 9,25 → 5,36
+   değişiyor, yani çeyrek hâlâ tutma süresiyle ilişkili (hayatta kalan uzun tutar)
+
+**Fonlama zamanlaması sistemi kurtarmıyor.** Denendi, kapandı.
+

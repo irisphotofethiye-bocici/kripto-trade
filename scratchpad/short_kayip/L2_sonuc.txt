@@ -1,0 +1,18 @@
+ADIM 3 DUZELTILMIS — periyot ayrilmis, zamanlama ORANSAL
+====================================================================================================
+
+### 4 SAATLIK fonlama sembolleri  (N=14026)
+dongude kalan           N    pay%       BRUT    fonlama        NET ay-kumeli t   kesinti
+1. ceyrek            1996   14.2%    +0.4667    -0.3213    -0.0272       +0.35      9.25
+2. ceyrek            3669   26.2%    +0.2009    -0.2305    -0.2022       -2.55      7.43
+3. ceyrek            3143   22.4%    +0.2054    -0.1440    -0.1112       -0.66      5.88
+4. ceyrek            5218   37.2%    +0.0798    -0.1307    -0.2235       -2.22      5.36
+   (1. ceyrek = kesintiye EN YAKIN · 4. ceyrek = EN UZAK)
+
+### 8 SAATLIK fonlama sembolleri  (N=4501)
+dongude kalan           N    pay%       BRUT    fonlama        NET ay-kumeli t   kesinti
+1. ceyrek             766   17.0%    -0.0701    -0.0426    -0.2853       -1.21      4.11
+2. ceyrek            1160   25.8%    -0.4185    -0.0446    -0.6357       -3.48      3.98
+3. ceyrek            1101   24.5%    -0.4629    -0.0357    -0.6712       -2.98      3.54
+4. ceyrek            1474   32.7%    +0.0618    -0.0266    -0.1374       -1.25      3.21
+   (1. ceyrek = kesintiye EN YAKIN · 4. ceyrek = EN UZAK)
