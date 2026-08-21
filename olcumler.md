@@ -2613,3 +2613,37 @@ yönlü belirsiz — 2 yıl "zararlı", holdout "faydalı" dedi ve holdout'un ce
 
 ⚠️ `defter2` bu SHORT yığını üzerine kurulmuştu; dayanağı bu ölçümle zayıfladı.
 Defterin kendisi ileri zamanda sınanmaya devam ediyor — kapatılmadı.
+
+---
+
+### ❌ ALTLAR BTC'Yİ HABER VERİYOR MU — HAYIR (2026-08-21, `05_btc_olay.py`)
+
+**Veri:** `perp_seri/` 63 alt sembol + BTC, 5 dk, 07-23 → 08-21.
+**Olay:** BTC'de 30 dk içinde ≥ 2,0×ATR. Yukarı **235** · aşağı **199** · kontrol **859**.
+
+#### BTC hareketinden ÖNCEKİ 60 dk — altların toplu görünümü
+
+```
+                 alt_d_fiyat  alt_hacim_x  alt_taker_pay  alt_d_oi
+BTC YUKARI (235)    -0,047       1,036        0,4915       -0,010
+BTC ASAGI  (199)    +0,000       1,041        0,4918       -0,019
+KONTROL    (859)    -0,055       1,029        0,4912       -0,025
+```
+
+**Üç grup ayırt edilemiyor.** `taker_pay` farkı 4. ondalıkta. Karıştırıcı kontrolü
+(BTC'nin kendi pencere-içi hareketi sabitlenince) üç bantta da aynı: yukarı ve
+aşağı olayları birbirinden **ayrılmıyor**.
+
+**HÜKÜM: öncü gösterge yok.** Bu, bu oturumdaki **dördüncü** bağımsız deneme ve
+dördü de negatif (majör iz · hacim→yön · taker dengesi · altlar→BTC).
+
+#### 🟡 Yan bulgu — altların aşağı betası yukarı betasından büyük
+
+```
+BTC yukari sonrasi 60 dk : altlar  +0,096   (kontrol -0,045)
+BTC asagi  sonrasi 60 dk : altlar  -0,134   (kontrol -0,045)
+```
+
+Altlar BTC düşerken **1,4 kat daha sert** düşüyor. Gözlem, hüküm değil —
+ama SHORT'un neden düşüşte daha kolay para kazandığını, boğada neden
+zorlandığını açıklayan yapısal bir asimetri.
