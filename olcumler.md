@@ -2942,3 +2942,69 @@ kapatıyor.
 kuralı üretmiyor. Ayıda ölçüp boğaya taşınan her kural ters işaret riski taşıyor.
 Bu, 2 yıllık veri için ölçülen şeyin (`16_rejim_kosullu.py`) **kendi verimizde
 tekrarı** — üçüncü kez, farklı pencerede.
+
+---
+
+### 🟡 TOTAL1/2/3 — EŞ ANLI, ÖNCÜ DEĞİL (2026-08-21, `22_total123.py`)
+
+**Veri:** `scratchpad/gecko/` 98 coin × günlük mcap × 365 gün.
+`TOTAL1` = top-98 toplamı · `TOTAL2` = −BTC · `TOTAL3` = −BTC−ETH ·
+`TOTAL3X` = stablecoin'ler de hariç.
+
+#### Tespit kalitesi — taban oran %24,2
+
+```
+kural                              kesinlik  kapsama  gecikme-med  kacirilan
+ALT PAYI artiyor (3g > +0,2)         23,0%    26,7%     2,0 gun       0/20
+TOTAL3X 3g > %+5                     22,5%    10,5%     4,0 gun       0/20
+TOTAL2 3g > %+2 (BTC haric)          22,4%    22,1%     3,5 gun       0/20
+TOTAL3X 3g > %+2                     21,5%    26,7%     3,0 gun       0/20
+TOTAL1 3g > %+2                      20,8%    23,3%     4,0 gun       0/20
+TOTAL3 3g > %+2                      20,5%    19,8%     3,0 gun       0/20
+```
+
+**Sekiz kuralın sekizi de taban oranın ALTINDA.** Yön tahmin etmiyorlar.
+
+#### 🔴 Belirleyici olan: çapraz korelasyon
+
+```
+kaydirma   korelasyon   yorum
+k=-3        -0,0622     TOTAL3X 3 gun ONCE
+k=-2        -0,0339     TOTAL3X 2 gun ONCE
+k=-1        +0,0129     TOTAL3X 1 gun ONCE
+k= 0        +0,7419     ES ANLI        <<<
+k=+1        +0,0612     TOTAL3X 1 gun SONRA
+k=+2        -0,0621
+k=+3        -0,0661
+```
+
+**Korelasyon yalnız k=0'da var (0,742); diğer bütün kaydırmalarda sıfır.**
+TOTAL3X, BTC'yi **öncelemiyor** — aynı anda hareket ediyor. Öncü olsaydı
+k=−1 veya k=−2'de anlamlı bir değer görülürdü; **0,013 ve −0,034.**
+
+Yani TOTAL3X ayrı bir bilgi değil, **aynı hareketin başka bir ölçüsü**.
+
+#### Son 8 gün — ve BTC-önderliğinde ralli
+
+```
+gun        T3X 3g%   alt payi%
+08-18       +1,13      19,42
+08-19       +6,61      19,36    <- boga kirildi (18:15), AYNI GUN
+08-20       +8,29      19,23
+08-21      +15,47      19,06
+```
+
+TOTAL3X kırılmayla **aynı gün** döndü — önceden değil.
+⚠️ Ve **alt payı DÜŞÜYOR** (19,42 → 19,06) TOTAL3X %15 artarken: altlar
+yükseliyor ama **BTC daha hızlı**. BTC-önderliğinde ralli, altlar geride.
+
+#### HÜKÜM
+
+TOTAL1/2/3 **yön tahmin etmiyor** (dokuz göstergenin dokuzu şansın altında) ve
+**öncü değil** (korelasyon yalnız eş anlı). Ama:
+- **hiçbir epizodu kaçırmıyor** (0/20 · bot etiketi 36/49 kaçırıyor)
+- gecikme 2-4 gün (bot etiketi 8 gün)
+
+**Doğru kullanım: gerçek zamanlı termometre.** "Şu an neredeyiz" sorusunu
+doğru ve hızlı cevaplıyor; "ne olacak" sorusunu cevaplamıyor. Bu, rejim
+göstergeleri için **dördüncü** bağımsız kaynaktan aynı sonuç.
