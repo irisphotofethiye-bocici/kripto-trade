@@ -2703,3 +2703,68 @@ neden işe yaramadığını açıklıyor.
 
 **SONUÇ: rejim bir KAPI değil, ÖLÇÜMÜN TABANIDIR.** Rejime koşullamayan her
 ölçüm, zıt davranışları ortalayıp sıfır bulur. Bu proje 2 yıldır bunu yapıyordu.
+
+---
+
+### 🔴 REJİM ETİKETİ 8 GÜN GEÇ VE 49 YÜKSELİŞİN 36'SINI KAÇIRIYOR (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/17_etiket_kalitesi.py` · BTC günlük, 741 gün, 2 yıl
+
+**Yöntem değişikliği — kullanıcının itirazı üzerine.** *"Koşullar aynı olmayacak,
+negatif çıkacak."* Haklıydı: iki etiketi **getiri** üzerinden kıyaslamak yine
+karışım üretirdi (bkz. rejim-koşullu ölçüm). Bu yüzden soru değişti:
+
+```
+ESKI (tuzakli): "hangi etiket daha cok kazandirir?"
+YENI (temiz)  : "etiket, BOGA oldugunu ne kadar DOGRU ve ZAMANINDA soyluyor?"
+```
+
+Ölçülen şey **sayım istatistiği** (gecikme · kapsama · yanlış alarm), ortalama
+getiri değil → yoğunlaşma ve karışım sorunu bulaşmıyor.
+**Gerçek "yükseliş günü" tanımı etiketten bağımsız:** BTC'nin sonraki 7 günlük
+getirisi ≥ +%3. Taban oran: **220/734 gün = %30**.
+
+#### Tespit kalitesi
+
+```
+kural                    kesinlik  kapsama  acik gun%  yanlis+  kacan
+MEVCUT (sezon VE hava)      8,4%     4,5%     14,1%      76      147
+ONERI  (yalniz sezon)      22,5%    29,9%     34,8%     158      108
+sezon VE ham hava (hist.yok) 15,9%   8,4%     14,0%      69      141
+```
+
+#### Gecikme — 49 gerçek yükseliş epizodu
+
+```
+kural                    gecikme-medyan  ortalama  hemen yakalanan  kacirilan
+MEVCUT (sezon VE hava)        8,0 gun     7,2 gun        2/49          36/49
+ONERI  (yalniz sezon)         0,0 gun     3,8 gun       11/49          30/49
+sezon VE ham hava             7,0 gun     6,8 gun        5/49          32/49
+```
+
+**Mevcut etiket 49 yükselişin 36'sını hiç görmüyor; gördüğü 13'ünde medyan
+8 gün geç.** Epizot 7 günlük bir hareketle tanımlandığı için **8 gün gecikme,
+hareket bittikten sonra açılmak demektir.**
+
+#### Canlı doğrulama — bu hafta
+
+```
+08-18  sezon AYI   hava NOTR  ham NOTR  | MEVCUT DIGER  ONERI DIGER
+08-19  sezon BOGA  hava NOTR  ham BOGA  | MEVCUT DIGER  ONERI BOGA   <- boga kirildi
+08-20  sezon BOGA  hava NOTR  ham BOGA  | MEVCUT DIGER  ONERI BOGA
+08-21  sezon BOGA  hava BOGA  ham BOGA  | MEVCUT BOGA   ONERI BOGA   <- 2 gun sonra
+```
+
+Bot o iki günde SHORT'taydı; BTC **+%7,6** yaptı.
+
+#### ⚠️ AMA HİÇBİRİ TABAN ORANI GEÇMİYOR
+
+Taban oran %30; kesinlikler **%8,4 · %22,5 · %15,9** — üçü de altında.
+**Mevcut etiket BOĞA dediğinde, o günün yükseliş günü olma ihtimali rastgele bir
+günden DÜŞÜK** (%8,4 vs %30). Yani etiket bir yükseliş *habercisi* değil;
+en iyi hâlde geriye dönük bir *durum tarifi*.
+
+**HÜKÜM:** `izin = sezon` önerisi üç ölçütte de mevcut kuraldan iyi (gecikme
+8→0 gün · kapsama %4,5→%29,9 · kesinlik %8,4→%22,5). Ama **hiçbiri yükseliş
+tahmin etmiyor.** Etiket yön SEÇMEK için kullanılmamalı; olsa olsa
+maruziyet/şiddet ayarı için kullanılabilir.
