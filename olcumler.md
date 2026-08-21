@@ -3068,3 +3068,66 @@ Ayırt etmek için boğa rejiminde biriktirilecek veri gerekiyor — bugün baş
 - **TOTAL etiketi yön seçmek için BOTA KONMAYACAK.**
 - Değeri duruyor ama başka yerde: gerçek zamanlı durum tarifi (0/20 epizot
   kaçırmıyor, bot etiketi 36/49 kaçırıyor).
+
+---
+
+### 🟢🔴 TOPARLANMA BACAĞI (2025-04/05) — GÜN-KÜMELİ BAKINCA İŞARETLER **TUTUYOR** (2026-08-21)
+
+**Kullanıcının seçtiği pencere:** 2025-04-03 → 05-14. Doğru seçim: ayıdan ATH'ye
+giden toparlanma bacağı, bugünün analoğu, ama **42 günü var** (bugünkü bacağın 2
+gününe karşı).
+
+```
+2025-04-03..05-14   85.623 -> 103.500  %+20,88   zirveden -25,2% -> -5,9%
+2026-08-19..simdi   64.547 ->  73.658  %+14,11   zirveden -45,3% -> -41,6%
+```
+
+#### 🔴 ÖNCE BİR DÜZELTME — `21_boga_kesiti.py`'nin hükmü YANLIŞTI
+
+O ölçümde *"4-6 alanın işareti rejimle dönüyor"* yazmıştım. **Havuzlanmış
+(pooled) farka bakmıştım ve gün-kümesi hesaplamamıştım** (BOGA penceresi 2 gündü,
+zaten hesaplanamıyordu).
+
+Havuzlanmış fark, **seviye kaymasını ilişkiyle karıştırıyor**: boğada bütün ileri
+getiriler pozitif; yüksek-`pos` coinler o günlerde daha sık olursa havuz
+"yüksek pos → yüksek getiri" der. Gün-kümesi bunu kaldırır.
+
+#### Gün-kümeli ölçüm — 42 gün vs 56 gün, +24 saat
+
+```
+alan       TOPARLANMA (42g)      AYI (56g)      isaret
+           fark      gun-t      fark    gun-t
+chg24    -0,2074    -3,23    -0,3964   -2,73    AYNI
+pos      +0,4425    -3,06    -0,2503   -2,95    AYNI (gun-t'ye gore)
+rel3     +0,3124    -2,81    -0,1144   -1,64    AYNI
+last3    +0,1955    -4,19    -0,1294   -1,95    AYNI
+vol_x    +0,5055    +1,27    +0,0027   +0,50    AYNI
+funding  +0,2135    +0,11    +0,2312   +1,57    AYNI
+```
+
+**Gün-kümeli bakınca ALTI ALANIN ALTISI DA aynı işarette.**
+Havuzlanmış farka bakınca üçü "dönmüş" görünüyor — o bir yapaylık.
+
+```
+evren ortalamasi:  TOPARLANMA +1,0961%  ·  AYI -0,2216%  ·  BUGUN +4,6110%
+```
+Değişen şey **seviye**, ilişki değil.
+
+#### İlk rejim-KARARLI ilişki
+
+```
+yuksek chg24 / pos / last3 / rel3  ->  DUSUK ileri getiri
+gun-kumeli |t|: 2,81 · 3,06 · 3,23 · 4,19   (ikisi 3,0 esigini asiyor)
+Iki rejimde de ayni yon.
+```
+
+Yani **kesitsel ortalamaya dönüş**: son dönemde çok koşan, sonraki 24 saatte
+görece geri kalıyor — hem ayıda hem toparlanmada.
+
+⚠️ **Bu bir YÖN kuralı değil, GÖRECELI sıralama kuralı.** Toparlanmada herkes
+kazanıyor (+1,10 ortalama); "düşük chg24" kolu daha çok kazanıyor. Ayıda herkes
+kaybediyor; "düşük chg24" kolu daha az kaybediyor.
+
+**HÜKÜM:** Bu, bu oturumda bulunan **ilk rejim-kararlı ilişki**. `21_boga_kesiti`
+hükmü düzeltildi (havuz yapaylığı). Kural yazılmadan önce üçüncü bir rejimde
+(ATH bölgesi) sınanmalı — henüz yapılmadı.
