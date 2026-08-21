@@ -3188,3 +3188,91 @@ tepesinde, en kötü çeyrekte** alıyor.
 
 **Bu, oturumdaki ilk rejim-kararlı bulgu.** Kural yazılmadan önce mekanikli
 ölçüm ve ön-kayıtlı ileri sınav gerekir.
+
+---
+
+### 🟢🔴 TAVAN ÖLÇÜMÜ — ödül BÜYÜK, ama yakından görünmüyor (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/36_tavan.py`
+**Kullanıcının sorusu:** *"Bu kadar veri çektik, hiçbir veri sinyal vermiyor mu?"*
+
+Şimdiye kadar hep *"şu kural işe yarıyor mu"* soruldu (9 çıkış fikri düştü).
+Bu ölçüm **hiç sorulmayan** soruyu sorar: **aranacak şey ne kadar var?**
+
+**Tasarım — sızıntı önlendi.** `32_rastgele_kontrol.py`'nin rastgele çıkışı
+pozisyonun **ömrünü biliyordu**. Burada her pozisyon aynı `N` barlık pencereye
+kırpılır, sabit-bar kolu her pozisyonda **aynı `j`**'de çıkar. Ömür bilgisi
+hiçbir kola sızmaz. Pencereden önce kapanan pozisyon **elenmez**, kapanış
+değerinde sabitlenir (yoksa 86 → 26 pozisyona düşüyordu = hayatta-kalma yanlılığı).
+
+`pnl_pct` = **kaldıraçsız, yön düzeltilmiş fiyat yüzdesi** ([izleyici.py:127](izleyici.py#L127))
+→ aşağıdaki puanlar brüt kenar ölçüsüyle aynı birimde. Her kolda tam 1 giriş +
+1 çıkış var, **maliyet mesafeyi değiştirmez.**
+
+**N = 86 pozisyon** (58 notr/ayı · 28 boğa), `pozisyon_izleme.jsonl`, ≥13 görüntü.
+
+#### 1 · Aranabilir mesafe, mevcut kenarın 10-20 katı
+
+```
+pencere    ZAMANLAMA mesafesi (tepe-tut)     SECIM mesafesi (kaybedeni acma)
+           A notr/ayi      B boga            A notr/ayi      B boga
+ 1 sa        +1,184        +1,082              +0,630        +0,649
+ 2 sa        +1,790        +2,753              +1,084        +1,631
+ 6 sa        +2,393        +3,802              +1,074        +1,956
+12 sa        +3,307        +4,701              +1,540        +2,399
+```
+
+Kıyas: `funding` kapısının brüt kenarı **+0,2096**, net **−0,0683**
+(bu dosya → maliyet doğrulaması). **Ödül yokluğu problem değil.**
+
+#### 2 · Öngörü merdiveni — tavanın ne kadarı ne kadar ileri görmekle alınıyor
+
+`k` = kaç bar ileri gören kâhin. Tavanın yüzdesi:
+
+```
+                        A) NOTR/AYI                B) BOGA
+                   1sa   2sa   6sa  12sa      1sa   2sa   6sa  12sa
+en iyi SABIT bar   %18   %15    %0   %4        %0   %40   %43   %46
+kahin k=1  ( 5dk)  %31   %23  -%10 -%10       -%2   %35   %39   %43
+kahin k=3  (15dk)  %81   %58   %16   %9       %39   %51   %51   %53
+kahin k=6  (30dk)  %92   %86   %44  %29       %64   %68   %63   %62
+kahin k=12 (60dk)  %96   %97   %63  %43       %79   %90   %80   %76
+```
+
+🔴 **`k=1` (5 dakika ileri) neredeyse hiçbir şey satın almıyor** — A'da uzun
+ufuklarda **negatif** (−%10: yerel tepede çıkmak, asıl hareketi kaçırtıyor).
+Tavanı almak için **30-60 dakika** ileri görmek gerekiyor.
+
+**Anlamı:** aranan bilgi *"şu anda ne oluyor"* değil, *"önümüzdeki yarım saatte
+ne olacak"*. 78 alanın hepsi birincisini ölçüyor.
+
+#### 3 · Ve iki kümede çıkışın yönü TERS
+
+```
+A (notr/ayi)  tut = +1,379 (6sa)   en iyi sabit bar j=71 = pencerenin SONU  -> TUT
+B (boga)      tut = -1,243 (6sa)   en iyi sabit bar j=12 = 60 dk           -> CIK
+```
+
+B'de **hiçbir sinyal olmadan**, sadece *"60 dakika sonra çık"* diyen sabit kural
+tavanın **%43-46'sını** alıyor. A'da aynı kural **sıfır** alıyor.
+Bu, `35_stopsuz.py`'nin bulgusuyla **bağımsız olarak aynı yere çıkıyor**:
+değişken stop değil **süre**, ve doğru süre rejime göre ters.
+
+#### 4 · Seçim ekseni vs zamanlama ekseni
+
+Zamanlama mesafesi daha büyük **ama kümeye ve ufka göre 4 kat oynuyor ve işareti
+dönüyor**. Seçim mesafesi daha küçük ama **iki kümede de aynı işaret ve benzer
+büyüklük** (+0,63 … +2,40).
+
+🟢 Ve elimizdeki **tek rejim-kararlı sinyal** (`pos`/`chg24`/`last3`/`rel3`,
+5/5 pencere, bu dosya) tam olarak **seçim ekseninde** duruyor.
+
+#### Sınırlar
+
+- N=86 (58/28) · 8 gün · gün-kümeli t hesaplanmadı, bunlar **ortalama**dır.
+- Kâhin kolları **tanımı gereği** ulaşılamaz; ölçülen şey ödülün büyüklüğü,
+  bir kuralın performansı değil.
+- Pencere kırpması pozisyonun gerçek çıkışını değil, sabit ufku ölçer.
+- B kümesi 28 pozisyon — mesafe rakamları geniş güven aralığı taşır.
+
+**HÜKÜM YAZILMADI.** Bot dosyalarına yazım: YOK.
