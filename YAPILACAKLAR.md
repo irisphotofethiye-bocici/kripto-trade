@@ -40,24 +40,40 @@ Bot **çalışmaya devam ediyor**, hiçbir dosyasına dokunulmadı.*
 
 ## ⏭️ SIRADAKİ İŞLER
 
-### A · BOĞA REJİMİ CANLI GÖZLEM  🔴 en yüksek öncelik, kaçırılırsa geri gelmez
-- Bot 29 günde ilk kez BOĞA dalında. Her BOĞA pozisyonu ayrı kaydedilecek.
-- Ölçülecek: BOĞA'daki LONG/SHORT karnesi · `chg24@giriş` dağılımı ·
-  `blowoff` vetosunun kaç LONG'u kestiği · stop davranışı.
+### A · BOĞA REJİMİ CANLI GÖZLEM  🟡 gözlemci kuruldu, birikiyor
+`scratchpad/poz_yol/14_boga_gozlem.py` — istendiği zaman çalıştırılır, birikimi gösterir.
+
+**İlk okuma (03:25-03:33, 20 aday):**
+```
+BOGA   aday    20 · karar   4 (LONG   4 · SHORT   0) · LONG payi %100
+NOTR   aday 19695 · karar 527 (LONG  98 · SHORT 429) · LONG payi  %19
+```
+BOĞA dalı yön eğilimini **%19 LONG → %100 LONG**'a çeviriyor. 29 günde hiç
+görülmemiş davranış. `ONT LONG chg24 %27,9` açık, kapanan yok.
+- [ ] Pencere kapanana kadar düzenli okunacak (`14_boga_gozlem.py`)
 - **Hiçbir şey değiştirilmeyecek**, sadece kaydedilecek.
 
-### B · VERİ TEMELİNİ TAMAMLA (holdout'un önkoşulu)
-- [ ] `klines_1h_uzun` → 08-11'den bugüne güncelle (567 sembol)
-- [ ] `funding_gecmis` → 08-11'den bugüne güncelle
-- [ ] `radar_bosluk.jsonl` geriye dönük harita (86 boşluk, `kaynak:"geriye_donuk"`)
+### B · VERİ TEMELİ  ✅ BİTTİ
+- [x] `klines_1h_uzun` → 08-21 (566 dosya, **+129.220 bar**)
+- [x] `funding_gecmis` → 08-21 (567 dosya, **+27.192 kayıt**)
+- [x] `radar_bosluk.jsonl` geriye dönük harita — **86 kayıt**, %31,8 kayıp tur işaretlendi
 - [ ] Alan-doluluk haritasını `olcumler.md`'ye yaz (gizli seçilim bulgusu)
 
-### C · 11-20 AĞUSTOS HOLDOUT  (B bitmeden başlayamaz)
-2 yıllık veri **tam 08-11'de bitiyor** → o 10 gün gerçek holdout.
-- [ ] Ön-kayıt yaz + commit
-- [ ] Sınanacaklar: SHORT yığını (+0,2340) · funding kapısı zararlı (−0,5430) ·
-      pump engeli · `>40 LONG` + trailing (+2,379) · btc_pay · erken-stop (+0,057)
-- [ ] Sınır baştan yazılacak: 10 gün ≈ tek epizot → *çürütebilir, doğrulayamaz*
+### C · HOLDOUT  ✅ BİTTİ — 🔴 DÖRT HÜKMÜN DÖRDÜ DE AYAKTA KALMADI
+- [x] Ön-kayıt (`ON_KAYIT_holdout.md`, commit `b146cc3`, koşumdan önce)
+- [x] Koşuldu (`12_holdout.py` · `13_holdout_saglamlik.py`), N=53.354, 8 gün
+
+```
+hukum                                2 yil      holdout    3 sembol CIKINCA
+1 SHORT yigini                      +0,2340    +0,1798        -0,2777  ISARET DONDU
+2 funding kapisi ZARARLI          fark +0,54  fark -1,14      +0,0439  sifirlandi
+3 pump engeli DOGRU                  -2,18      +0,9106       -0,0252  sifirlandi
+4 >40 LONG + trailing               +2,379     -1,6660        -2,9154
+```
+**Üçü ters döndü, dördü de yoğunlaşma kontrolünde çöktü.** Boğa bacağı
+test EDİLEMEDİ (72 saat ufuk şartı 08-19 sonrasını eledi, `BOGA N=0`).
+→ `olcumler.md`'ye yazıldı. `funding` kapısının zararlı olduğu iddiası artık
+**iki yönlü belirsiz**. `defter2`'nin dayanağı zayıfladı (defter kapatılmadı).
 
 ### D · AYIDAN ÇIKIŞ EPİZOTLARI — genişlet
 3 epizot az. Eşik `dd ≤ −30%` → `−20%` gevşetilirse 5-6 epizot olur,
