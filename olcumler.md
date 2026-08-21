@@ -2558,3 +2558,58 @@ yukarıdaki kontrolde iki enstrümanda ters çıktı.
 yükselişi alıcılar değil kapanan pozisyonlar üretmiş görünüyor. Tek vaka,
 hüküm değil. Bot tam o barın içinde SHORT açtı (BIO ~18:09) ve 12 dakikada
 stop oldu.
+
+---
+
+### 🔴🔴 HOLDOUT (11-18 AĞUSTOS) — DÖRT HÜKMÜN DÖRDÜ DE AYAKTA KALMADI (2026-08-21)
+
+**Ön-kayıt:** `scratchpad/poz_yol/ON_KAYIT_holdout.md` (koşumdan önce, commit `b146cc3`)
+**Betikler:** `12_holdout.py` · `13_holdout_saglamlik.py`
+**Veri:** `klines_1h_uzun` 08-11 → 08-21'e uzatıldı (+129.220 bar, +27.192 fonlama)
+
+**Neden holdout:** 2 yıllık veri **tam 2026-08-11 11:00'de** bitiyordu; ondan çıkan
+her hüküm bu günleri hiç görmedi. N=53.354 aday giriş, 8 gün.
+
+#### İşaret testi (ön-kayıtlı ölçüt)
+
+| hüküm | 2 yıl | holdout (gün-ort) | işaret |
+|---|---|---|---|
+| 1 · SHORT yığını | +0,2340 | **+0,1798** | tuttu |
+| 2 · `funding ≤ −0,05` kapısı ZARARLI | fark +0,5430 | fark **−1,1369** | 🔴 **TERS** |
+| 3 · pump ≥%20 engeli DOĞRU | geçenler −2,18 | geçenler **+0,9106** | 🔴 **TERS** |
+| 4 · `>40 LONG` + trailing | +2,379 | **−1,6660** | 🔴 **TERS** |
+
+#### 🔴 Sağlamlık: dördü de birkaç sembolden geliyor
+
+```
+hukum  N      ortalama   en iyi 3 sembolun payi   3 sembol CIKINCA
+1     4279    +0,1038          %342                 -0,2777   <- ISARET DONDU
+2     1568    +1,1353           %97                 +0,0439   <- sifirlandi
+3      798    +0,5202          %104                 -0,0252   <- sifirlandi
+4      274    -0,5578         -%262                 -2,9154   <- daha kotu
+```
+
+**Hüküm 1 dahil hiçbiri ayakta kalmıyor.** SHORT yığınının artısı 138 sembolün
+**3'ünden** geliyor (BEAT +762 · SKYAI +427 · LAB +330); onlar çıkınca **−0,2777**.
+En iyi gün çıkınca **−0,0034**.
+
+#### ⚠️ Boğa bacağı test edilmedi — `BOGA (08-19+): N=0`
+
+72 saatlik ufuk şartı, 08-19 sonrası tüm girişleri eledi. Bu ön-kayıtta
+**baştan yazılmıştı**; yine de sonuç şu: holdout yalnızca **boğa öncesi 8 günü**
+ölçtü. Boğa penceresi hâlâ ölçülmemiş durumda.
+
+#### HÜKÜM
+
+**Holdout hiçbir şeyi doğrulamadı ve SHORT yığınını aktif olarak zayıflattı.**
+Tüm |t| < 1,6 — ön-kayıt gereği anlamlılık iddia edilmiyor, ama işaret testinin
+kendisi de yoğunlaşma kontrolünden geçmedi.
+
+**Somut sonuç:** `funding ≤ −0,05` kapısının **zararlı olduğu iddiası** artık iki
+yönlü belirsiz — 2 yıl "zararlı", holdout "faydalı" dedi ve holdout'un cevabı
+3 sembolden geliyor. **Hiçbir yönde kanıt yok.** 2026-08-20 tarihli
+*"botun çekirdek kapısı kontrol grubundan kötü"* hükmünün yanına bu not düşülür
+(D/9: eski ölçüt silinmez).
+
+⚠️ `defter2` bu SHORT yığını üzerine kurulmuştu; dayanağı bu ölçümle zayıfladı.
+Defterin kendisi ileri zamanda sınanmaya devam ediyor — kapatılmadı.
