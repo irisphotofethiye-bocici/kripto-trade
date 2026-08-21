@@ -2822,3 +2822,58 @@ olması (tabanın 3,5 katı altında) buradaki asıl bulgudur.
 kaldırıyor. Bu bir *kazanç* değil, bir *hasar onarımı*.
 **Eyleme dönük tek çıkarım:** USDT.D ve TOTAL şu an günde 2 kez kaydediliyor;
 sıklaştırılırsa 6 ay sonra sınanabilir hâle gelir. Şimdi sınanamaz.
+
+---
+
+### 🟡 USDT.D / TOTAL / BTC.D SINANDI — mevcut etiketten hızlı, şanstan değil (2026-08-21)
+
+**Kullanıcı onayı ile CoinGecko'dan çekildi** (demo anahtar, ücretsiz katman).
+**Betikler:** `scratchpad/gecko_dominans_indir.py` · `poz_yol/19_dominans_testi.py`
+**Veri:** 98 coin × günlük mcap × **365 gün** (2025-08-22 → 2026-08-21)
+
+#### Uç sınırları (ölçüldü)
+```
+/global/market_cap_chart      -> HTTP 401  UCRETLI katman
+/coins/{id}/market_chart      -> demo anahtarla OK, AZAMI 365 GUN (366 -> 401)
+```
+TOTAL bu yüzden **top-98 mcap toplamı** olarak kuruldu (gerçeğin ~%95'i, yaklaşıklık).
+
+#### Tespit kalitesi — taban oran **%24,2** · 20 epizot
+
+```
+kural                            kesinlik  kapsama  gecikme-med  kacirilan
+BTC.D DUSUYOR (3g < -0,2)          24,8%    31,4%     1,5 gun       0/20
+STABLE.D DUSUYOR (3g < -0,2)       23,6%    24,4%     4,0 gun       0/20
+USDT.D DUSUYOR (3g < -0,1)         20,8%    25,6%     4,0 gun       0/20
+TOTAL ARTIYOR (3g > %+2)           20,8%    23,3%     4,0 gun       0/20
+BTC.D ARTIYOR (3g > +0,2)          20,6%    24,4%     3,0 gun       0/20
+USDT.D dus VE TOTAL art            21,7%    23,3%     4,0 gun       0/20
+------------------------------------------------------------------------
+MEVCUT BOT ETIKETI                  8,4%     4,5%     8,0 gun      36/49
+```
+
+#### Üç sonuç
+
+**1 · Hiçbiri şansı geçmiyor.** Dokuz kuralın hepsi taban oranın (%24,2)
+**altında veya eşitinde** (en iyi %27,8, ve o N=5 ile). Kullanıcının önerdiği
+göstergeler **yükseliş tahmin etmiyor.**
+
+**2 · Ama mevcut etiketten kat kat iyi.** Kesinlik %8,4 → %21-25 · gecikme
+8 gün → 1,5-4 gün · kaçırılan **36/49 → 0/20**. Yani hiçbir epizodu kaçırmıyorlar.
+
+**3 · Bugünkü okuma tarihsel olarak uç.**
+```
+08-18  TOTAL 2,236 T$ (+1,72%)   USDT.D 8,18 (-0,14)   BTC.D 57,86
+08-19  TOTAL 2,240    (+2,95%)   USDT.D 8,17 (-0,24)   BTC.D 57,93
+08-20  TOTAL 2,406    (+9,74%)   USDT.D 7,61 (-0,74)   BTC.D 57,91
+08-21  TOTAL 2,630   (+17,64%)   USDT.D 6,96 (-1,23)   BTC.D 59,37 (+1,52)
+```
+**3 günde TOTAL +%17,6, USDT.D −1,23 puan.** Göstergeler hareketi **tarif
+ediyor**, önceden söylemiyor — 4 günlük gecikme bunu zaten gösteriyordu.
+
+**HÜKÜM:** USDT.D/TOTAL/BTC.D **yön tahmin etmiyor** (şansın altında), ama
+mevcut etiketin **anti-haberci** zararını kaldırıyor ve hiçbir epizodu
+kaçırmıyor. Aynı sonuç, üçüncü bağımsız veri kaynağından: **rejim göstergeleri
+durum tarif eder, gelecek söylemez.**
+
+⚠️ Sınır: 365 gün, 20 epizot, taban %24,2 (pencere ağırlıklı ayı). Kısa.
