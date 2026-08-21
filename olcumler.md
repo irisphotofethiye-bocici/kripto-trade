@@ -2768,3 +2768,57 @@ en iyi hâlde geriye dönük bir *durum tarifi*.
 8→0 gün · kapsama %4,5→%29,9 · kesinlik %8,4→%22,5). Ama **hiçbiri yükseliş
 tahmin etmiyor.** Etiket yön SEÇMEK için kullanılmamalı; olsa olsa
 maruziyet/şiddet ayarı için kullanılabilir.
+
+---
+
+### 🟡 AKIŞ TABANLI REJİM VEKİLLERİ — mevcut etiketten ÇOK İYİ, tabandan değil (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/18_akis_vekilleri.py` · 567 sembol × 2 yıl → günlük endeks
+**Kullanıcı fikri:** *"BTC/ETH hareketi, TOTAL'e giren para, USDT.D, BTC.D bize rejimi verir."*
+
+#### Neyi test edebildik, neyi edemedik
+
+| vekil | 2 yıllık veriden kurulabildi mi |
+|---|---|
+| **BTC.D** (BTC getirisi − alt medyan, 3 gün) | ✅ |
+| **Para girişi** (evren toplam USDT hacmi, 3g/7g ivme) | ✅ |
+| **Genişlik** (yükselen sembol oranı) | ✅ |
+| **USDT.D** | ❌ stablecoin **arzı** gerekiyor, elimizde yok |
+| **TOTAL ($)** | ❌ tarihsel mcap yok |
+
+⚠️ Kullanıcının **özellikle saydığı iki gösterge** (USDT.D, TOTAL) tam da
+kuramadığımız ikisi. `piyasa_yapisi_log` onları tutuyor ama **2026-06-26'dan beri,
+107 kayıt, günde 2 kez** — sınama için yetersiz.
+
+#### Tespit kalitesi (taban oran %29,6 · 726 gün)
+
+```
+kural                          kesinlik  kapsama  acik gun%  gecikme-medyan  kacirilan
+BTC ONDE (btc_pay_3g > 0)        29,1%    65,6%     66,8%       0,0 gun          0/49
+ALTLAR ONDE (btc_pay_3g < 0)     30,7%    34,4%     33,2%       2,0 gun          0/49
+PARA GIRISI (hacim_ivme>1,2)     30,8%    22,8%     21,9%       2,0 gun          2/49
+GENISLIK 3g > %55                26,7%    32,6%     36,1%       3,0 gun          0/49
+hacim>1,2 VE altlar onde         30,9%     7,9%      7,6%       7,0 gun         17/49
+---------------------------------------------------------------------------------
+MEVCUT ETIKET (sezon VE hava)     8,4%     4,5%     14,1%       8,0 gun         36/49
+```
+
+#### Üç ayrı sonuç, karıştırılmamalı
+
+**1 · Vekiller mevcut etiketten KAT KAT iyi.** Kesinlik %8,4 → %29-31,
+gecikme 8 gün → 0-2 gün, kaçırılan 36/49 → 0/49. Mevcut etiketin **anti-haberci**
+olması (tabanın 3,5 katı altında) buradaki asıl bulgudur.
+
+**2 · Ama hiçbiri tabanı anlamlı geçmiyor.** En iyisi %30,9 vs taban %29,6 —
+**1,3 puan**. `BTC ONDE` günlerin %66,8'inde açık ve kesinliği tam tabanda
+(%29,1): bilgi değil, geniş bir süzgeç.
+
+**3 · Kullanıcının asıl önerdiği iki gösterge SINANMADI.** USDT.D ve TOTAL
+2 yıllık veride yok. 2 aylık kayıtta ikisi de **doğru günde** döndü
+(08-19 23:00: `usdt_d 8,01→7,59` · `total 2,284→2,411 T$`) — botun etiketi
+2 gün sonra döndü. Ama 107 kayıtla hüküm yazılmaz.
+
+**HÜKÜM:** Akış vekilleri **yön tahmin etmiyor**, ama mevcut etiketin zararını
+kaldırıyor. Bu bir *kazanç* değil, bir *hasar onarımı*.
+**Eyleme dönük tek çıkarım:** USDT.D ve TOTAL şu an günde 2 kez kaydediliyor;
+sıklaştırılırsa 6 ay sonra sınanabilir hâle gelir. Şimdi sınanamaz.
