@@ -2647,3 +2647,59 @@ BTC asagi  sonrasi 60 dk : altlar  -0,134   (kontrol -0,045)
 Altlar BTC düşerken **1,4 kat daha sert** düşüyor. Gözlem, hüküm değil —
 ama SHORT'un neden düşüşte daha kolay para kazandığını, boğada neden
 zorlandığını açıklayan yapısal bir asimetri.
+
+---
+
+### 🔴🔴🔴 2 YILLIK ORTALAMA HİÇBİR GERÇEK KOŞULA KARŞILIK GELMİYOR (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/16_rejim_kosullu.py` · N=145.678 işlem, 25 ay
+**Kullanıcının teşhisi:** *"Çünkü 2 yılla test ediyoruz ve koşullar aynı değil."*
+**Ölçüldü: doğru.**
+
+Aynı kapılar, BTC drawdown rejimine göre **ayrı ayrı**:
+
+```
+                          ATH_BOLGESI   DUZELTME   DERIN_AYI   KARISIM(2 yil)
+funding <= -0,05 (kapi)      +0,2944     -0,7298     -0,0459      -0,1692
+funding >  -0,05 (kontrol)   +0,7991     -0,7231     -0,2033      +0,0607
+chg24 >= %20 (engellenen)    +0,8306     -0,3002     -0,4077      +0,1417
+chg24 <  %20                 +0,6454     -0,7367     -0,1493      -0,0054
+fiyat > $0,07                +0,6601     -0,6659     -0,1667      +0,0080
+SHORT yigini                 +0,7996     -0,6272     -0,1631      +0,0953
+```
+
+**Altı kapının altısında da işaret rejimler arasında dönüyor.** 2 yıllık
+"ortalama" (+0,0953 gibi), `+0,80` ile `−0,63`'ün karışımıdır — **hiçbir gerçek
+piyasa koşuluna karşılık gelmez.**
+
+#### 🔴 Yoğunlaşma sorununun gerçek sebebi bu
+
+```
+SHORT yigini · ATH_BOLGESI : top3 payi  %6  ·  3 sembol cikinca +0,3450  (SAGLAM)
+SHORT yigini · KARISIM     : top3 payi %12  ·  3 sembol cikinca +0,1060  (zayif)
+funding>-0,05 · ATH        : top3 payi  %5  ·  cikinca +0,3099          (SAGLAM)
+```
+
+**Tek rejim içinde sonuçlar yoğunlaşmaya DAYANIKLI.** Karışımda çöküyorlar,
+çünkü karışım zıt işaretli rejimleri ortalıyor ve kalan şey birkaç gözlemin
+tuttuğu gürültü. Holdout'ta dört hükmün birden çökmesinin sebebi buydu.
+
+#### Ortaya çıkan yapısal olgu
+
+**SHORT, piyasa ZİRVEDEYKEN çalışıyor; düşerken çalışmıyor.**
+Altı ölçümün altısında sıralama aynı: `ATH pozitif · DÜZELTME en kötü · DERİN AYI hafif negatif`.
+Sezgiye ters ama tutarlı: zirvede uzamış altları fade etmek işe yarıyor,
+düzeltmede sıçramalar shortu sıkıştırıyor.
+
+⚠️ Bot **07-23'ten beri DERİN AYI ve ondan çıkışta** koşuyor — yani SHORT'un
+en zayıf olduğu bölgede. Canlı karnesi bunu doğruluyor: `NOTR SHORT −770,42`.
+
+#### Sınırlar
+
+Rejim-içi t değerleri hâlâ zayıf (en yüksek +1,70), ay sayısı 11-15.
+**Anlamlılık iddia edilmiyor.** Bulgu, *işaretin rejimle dönmesi* ve
+*rejim-içi yoğunlaşma dayanıklılığı*dır — ikisi birlikte, karışım ölçümünün
+neden işe yaramadığını açıklıyor.
+
+**SONUÇ: rejim bir KAPI değil, ÖLÇÜMÜN TABANIDIR.** Rejime koşullamayan her
+ölçüm, zıt davranışları ortalayıp sıfır bulur. Bu proje 2 yıldır bunu yapıyordu.
