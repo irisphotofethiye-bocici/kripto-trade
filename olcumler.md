@@ -3131,3 +3131,60 @@ kaybediyor; "düşük chg24" kolu daha az kaybediyor.
 **HÜKÜM:** Bu, bu oturumda bulunan **ilk rejim-kararlı ilişki**. `21_boga_kesiti`
 hükmü düzeltildi (havuz yapaylığı). Kural yazılmadan önce üçüncü bir rejimde
 (ATH bölgesi) sınanmalı — henüz yapılmadı.
+
+---
+
+### 🟢 İLK REJİM-KARARLI İLİŞKİ — 5 pencerenin 5'inde aynı işaret (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/24_rejim_kararliligi.py`
+**Kullanıcının uyarısı:** *"Seçtiğin dönem yine yanlış, durum aynı değil ama ölç."*
+Uyarı yerinde — ATH bölgesinde fonlama tavanda (%55-63), bugün tabanda (0,0050).
+Yine de ölçüldü ve **aynı çıktı.**
+
+#### Beş farklı rejim, aynı kesitsel ilişki
+
+Gün-kümeli `t` **|** etki (üst çeyrek eksi alt çeyrek, ileri +24 saat):
+
+```
+alan     ATH 24-09/12   ATH 25-06/10   TOPARL 25-04   D.AYI 26-01   AYI 26-06   ayni
+         (90-91 gun)     (136 gun)      (42 gun)      (74 gun)     (56 gun)
+chg24   -7,29 | -2,310  -5,14 | -1,307 -3,23 | -1,884 -1,84 |-0,510 -2,73 |-0,649  5/5
+pos     -8,08 | -2,241  -6,04 | -1,466 -3,06 | -2,048 -2,78 |-0,728 -2,95 |-0,561  5/5 <<<
+last3   -7,20 | -1,397  -6,53 | -1,077 -4,19 | -1,539 -4,08 |-0,848 -1,95 |-0,314  5/5
+rel3    -4,33 | -0,919  -5,12 | -0,794 -2,81 | -0,939 -1,46 |-0,248 -1,64 |-0,248  5/5
+vol_x   +1,31 | +0,258  +0,21 | +0,030 +1,27 | +0,451 +1,74 |+0,410 +0,50 |+0,086  5/5
+funding -0,29 | -0,036  -0,72 | -0,089 +0,11 | +0,022 +1,40 |+0,197 +1,57 |+0,244  2/5
+```
+
+Pencerelerin evren ortalamaları taban tabana zıt:
+`ATH +? · TOPARLANMA +1,0961 · DERİN AYI −0,4490 · AYI −0,2216`
+**Seviye değişiyor, ilişki değişmiyor.**
+
+#### Ne söylüyor
+
+**Son dönemde çok koşan, sonraki 24 saatte GÖRECE geri kalıyor.** Beş rejimde de.
+En güçlüsü **`pos`** (20 barlık aralıktaki konum): beş pencerenin **beşinde de
+|t| ≥ 2**, ATH'de −8,08.
+
+Etki büyüklüğü: aralığın tepesindekiler dibindekilerden **24 saatte 0,56–2,24
+puan geride**. Rejime göre 4 kat değişiyor ama işaret hiç dönmüyor.
+
+⚠️ **YÖN kuralı değil, SIRALAMA kuralı.** Boğada herkes kazanır, düşük-`pos`
+daha çok; ayıda herkes kaybeder, düşük-`pos` daha az.
+
+#### 🔴 Bot tam tersini yapıyor
+
+Bugün 11:00 ölçümü: radar medyanı `pos = 0,93` ve bot o anda **LONG** açtı
+(`GAS · CRV · SPK · POL · SSV`, `chg24@giriş` +8…+25,5). Yani **aralığın
+tepesinde, en kötü çeyrekte** alıyor.
+
+#### Sınırlar
+
+- `funding` **kararlı DEĞİL** (2/5) — ATH'de negatif, ayıda pozitif.
+- `vol_x` işareti kararlı ama **hiçbir pencerede |t| ≥ 2** — zayıf.
+- BUGÜN penceresi 2 gün, gün-kümesi hesaplanamadı.
+- Bu bir **kesit** ilişkisi; mekanik (stop/hedef/maliyet) dahil edilmedi.
+  `CLAUDE.md` sırası: **ham → mekanik → portföy.** Ham aşama bitti, mekanik yok.
+
+**Bu, oturumdaki ilk rejim-kararlı bulgu.** Kural yazılmadan önce mekanikli
+ölçüm ve ön-kayıtlı ileri sınav gerekir.
