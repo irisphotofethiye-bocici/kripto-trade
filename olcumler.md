@@ -2877,3 +2877,68 @@ kaçırmıyor. Aynı sonuç, üçüncü bağımsız veri kaynağından: **rejim 
 durum tarif eder, gelecek söylemez.**
 
 ⚠️ Sınır: 365 gün, 20 epizot, taban %24,2 (pencere ağırlıklı ayı). Kısa.
+
+---
+
+### 🔴🔴 HİÇBİR ALANIN İŞARETİ REJİMDE SABİT DEĞİL — bizim veride kanıtlandı (2026-08-21)
+
+**Betik:** `scratchpad/poz_yol/21_boga_kesiti.py`
+**Kullanıcının önceden söylediği:** *"İyi de zaten ayı-nötr o veri. Son 3 güne
+bakarsan o tutmaz. Ayıda her şey aşağı yönlü, şimdi her şey yukarı döndü."*
+**Ölçüldü: aynen öyle.**
+
+`20_bizim_veri.py`'nin penceresi **2026-06-24 → 08-18** — boğanın kırıldığı günün
+(08-19 18:15) **bir gün öncesi.** Yani %100 ayı/nötr.
+
+#### Evren ortalaması komple döndü (+6 saat ufuk)
+
+```
+AYI/NOTR (54 gun, N=155.258)  ->  -0,1548%
+BOGA     ( 2 gun, N=  8.344)  ->  +1,5283%
+```
+
+#### İşaret karşılaştırması
+
+```
+alan       AYI/NOTR      BOGA        durum
+chg24       -0,4961    +1,8814    *** DONDU ***
+score       -0,3214    +0,1394    *** DONDU ***
+oi24        +0,1136    -0,9197    *** DONDU ***
+last3       -0,1131    +0,3098    *** DONDU ***
+pos         +0,1459    +1,2359    ayni
+vol_x       +0,0764    +1,4883    ayni
+comp        +0,1598    +0,9053    ayni
+funding     +0,1044    +0,1292    ayni
+rel3        -0,0388    -0,5284    ayni
+oi3         +0,0684    +0,3889    ayni
+
++6 saat ufukta isaret donen: 4/10   ·   +3 saat ufukta: 6/10
+```
+
+#### 🔴 Bir saat önce yazdığım bulgu, ayı yapaylığıymış
+
+`20_bizim_veri.py`'de *"fırlamış coinleri shortla — chg24 en güçlü ayırıcı
+(fark −3,7571, yoğunlaşmaya dayanıklı)"* yazmıştım.
+
+Boğada **tam tersi**: yüksek `chg24` +%2,28 / düşük `chg24` +%0,40 →
+fark **+1,8814**. Üstelik ayıdaki farktan (−0,4961) **büyük**.
+
+Yani o bulgu *"fırlamışı shortla"* değil, ***"ayıda her şey düşer"***in başka
+bir ifadesiydi. Kullanıcı bunu **ölçümden önce** söyledi.
+
+#### Sabit kalanlar — ve neden yetmiyorlar
+
+`pos` · `vol_x` · `comp` · `funding` · `rel3` · `oi3` işaretini korudu. Ama:
+- büyüklükleri 8-19 kat değişiyor (`vol_x` +0,076 → +1,488)
+- en sabit olan `funding` (+0,104 → +0,129) ve **çok küçük**
+- `rel3` iki rejimde de negatif: BTC'nin gerisinde kalanlar daha iyi gidiyor
+  (zayıf ama tutarlı — tek not edilmeye değer olan)
+
+⚠️ **BOGA N=2 gün, 8.344 kayıt.** Gün-kümeli t hesaplanamıyor. Bu bir ÖLÇÜM
+değil, **yön kanıtı** — ama farkın büyüklüğü (chg24 −0,50 → +1,88) tartışmayı
+kapatıyor.
+
+**HÜKÜM:** Bizim verideki alanlardan **hiçbiri** rejimden bağımsız bir seçim
+kuralı üretmiyor. Ayıda ölçüp boğaya taşınan her kural ters işaret riski taşıyor.
+Bu, 2 yıllık veri için ölçülen şeyin (`16_rejim_kosullu.py`) **kendi verimizde
+tekrarı** — üçüncü kez, farklı pencerede.
