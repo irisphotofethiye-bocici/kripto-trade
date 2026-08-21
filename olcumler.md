@@ -3008,3 +3008,63 @@ TOTAL1/2/3 **yön tahmin etmiyor** (dokuz göstergenin dokuzu şansın altında)
 **Doğru kullanım: gerçek zamanlı termometre.** "Şu an neredeyiz" sorusunu
 doğru ve hızlı cevaplıyor; "ne olacak" sorusunu cevaplamıyor. Bu, rejim
 göstergeleri için **dördüncü** bağımsız kaynaktan aynı sonuç.
+
+---
+
+### 🔴 TOTAL ETİKETİYLE YÖN SEÇMEK — ÖLÇÜM ÖNERİYİ ÇÜRÜTTÜ (2026-08-21)
+
+**Öneri (kullanıcı):** *"Rejim ayağında TOTAL kullanılacak en büyük aday. Rejim
+etiketi koymadan bot yönü seçemiyor, bunu 2 gündür short açıp kaybetmesinden
+anlıyoruz."*
+
+**Öneriyi doğuran vaka gerçek ve büyük:**
+```
+19-21 Agustos:  SHORT N=28  -1.555,24 $  kazanan 4 (%14)
+                LONG  N=12    +258,20 $  kazanan 7 (%58)
+gune gore SHORT:  08-19 -261,24 · 08-20 -999,93 · 08-21 -294,07
+
+ETIKETLER:  08-19  T3X 3g +6,61  -> TOTAL: BOGA   BOT: NOTR
+            08-20  T3X 3g +8,29  -> TOTAL: BOGA   BOT: NOTR
+            08-21  T3X 3g +15,47 -> TOTAL: BOGA   BOT: BOGA
+```
+TOTAL etiketi **2 gün önce** dönerdi; o iki günde SHORT **−1.261,17 $** kaybetti.
+
+#### Ama 365 günde ölçünce ters çıkıyor
+
+Etiket açıkken BTC'nin **ileri** getirisi:
+
+```
+etiket                     gun   ileri 1g   ileri 3g   ileri 7g   poz 7g
+TOTAL BOGA (T3X 3g>+2)     107     -0,291     -1,034     -1,378     44%
+TOTAL BOGA (T3X 3g>+5)      40     -0,278     -0,877     -0,783     38%
+TOTAL NOTR (-2..+2)        117     -0,011     -0,308     -0,358     46%
+TOTAL AYI  (T3X 3g<-2)     131     -0,126     +0,019     -0,805     49%
+TUM GUNLER                 355     -0,138     -0,406     -0,830     46%
+```
+
+🔴 **BOĞA etiketi açıkken ileri getiri −1,378% — tüm günler ortalamasından
+(−0,830%) DAHA KÖTÜ.** Yani etiket LONG dediğinde piyasa ortalamanın altında
+gidiyor; **SHORT için ise en iyi anı işaret ediyor** (+1,378 kazanç).
+
+Etiketle yön seçmek, **yönü ters seçmek** olurdu.
+
+Mekanizma: `T3X 3g > +2` "altlar son 3 günde koştu" demek. Koşan geri veriyor —
+ortalamaya dönüş. Termometre doğru ama **okunuşu ters.**
+
+#### ⚠️ Bu ölçüm de rejim kirli — ve bu bilinerek yazılıyor
+
+365 günlük pencere ağırlıklı **ayı** (taban oran %24,2, tüm günler ileri
+getirisi −0,830%). Ayıda her ralli geri verir; bulgu kısmen bunun ifadesi
+olabilir. Kullanıcının iki kez haklı çıktığı aynı kirlilik.
+
+**Dolayısıyla:** öneri **desteklenmedi**, ama **temiz biçimde çürütülmedi** de.
+Ayırt etmek için boğa rejiminde biriktirilecek veri gerekiyor — bugün başladı.
+
+#### HÜKÜM
+
+- 2 günlük vaka **gerçek**: etiket gecikmesi ölçülebilir para kaybettirdi (−1.261 $).
+- 365 günlük taban **tersini** söylüyor: etiket açıkken LONG ortalamanın altında.
+- `CLAUDE.md`: tek vaka ile taban oran çelişirse **taban oran kazanır.**
+- **TOTAL etiketi yön seçmek için BOTA KONMAYACAK.**
+- Değeri duruyor ama başka yerde: gerçek zamanlı durum tarifi (0/20 epizot
+  kaçırmıyor, bot etiketi 36/49 kaçırıyor).
