@@ -85,3 +85,35 @@ scratchpad/kacan_olaylar.json
 scratchpad/hedef10_olaylar.json
 scratchpad/gainer_olaylar.json
 scratchpad/gainer_listesi.json
+
+# Perp 5dk serileri — 30 gunluk pencereden cekilir, BUYUK, yeniden uretilebilir
+scratchpad/perp_seri/
+
+# Major 5dk mumlar (BTC/ETH 2 yil)
+scratchpad/major_5dk/
+
+# CoinGecko dominans/mcap onbellegi
+scratchpad/gecko/
+
+# short_kayip olcum ailesinin kendi onbellekleri
+scratchpad/short_kayip/fonlama/
+scratchpad/short_kayip/mumlar/
+
+# poz_yol ara veri kumeleri
+scratchpad/poz_yol/*.json
+
+# 5dk scalp onbellegi
+scratchpad/scalp_5m/
+
+# Perp seri indirici gunluk logu
+scratchpad/perp_seri_indir.log
+
+# Ayna defteri runtime — diger dort defterle tutarli olsun (2026-08-24)
+ayna_state.json
+ayna_islemler.jsonl
+ayna_equity.jsonl
+
+# Defter2 runtime
+defter2_state.json
+defter2_islemler.jsonl
+defter2_equity.jsonl

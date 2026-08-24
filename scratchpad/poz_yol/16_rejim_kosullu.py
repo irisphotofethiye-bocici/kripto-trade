@@ -119,7 +119,7 @@ if __name__ == "__main__":
             k = bisect.bisect_right(ft, x["t"]) - 1
             if k < 0:
                 continue
-            fund = fr[k]["r"] * 100
+            fund = fr[k]["r"]   # 2026-08-21: r ZATEN yuzde (funding_indir.py:67)
             if not b[si - 24]["c"]:
                 continue
             chg24 = (x["c"] - b[si - 24]["c"]) / b[si - 24]["c"] * 100

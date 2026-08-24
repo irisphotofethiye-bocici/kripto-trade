@@ -30,7 +30,7 @@ def yukle(p):
 b = yukle(os.path.join(SCRATCH, "major_5dk", "BTC.json"))
 fd = yukle(os.path.join(SCRATCH, "funding_gecmis", "BTC.json"))
 fts = [x["t"] for x in fd]
-frs = [x["r"] * 100 for x in fd]
+frs = [x["r"] for x in fd]
 
 
 def fon(t0, t1):

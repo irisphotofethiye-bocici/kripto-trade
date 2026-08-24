@@ -136,6 +136,27 @@ def sembol_indir(sym, bas_dt, bit_dt, yeniden=False):
                 continue
         d = _klines(sym, bas_ms, bit_ms) if uc == "kline" else _cek(uc, sym, bas_ms, bit_ms)
         if d:
+            # [2026-08-24 ONARIM] ESKIDEN: os.replace ile UZERINE YAZIYORDU.
+            #   Bu, dar pencereyle yeniden calistirildiginda ESKI VERIYI SILIYORDU ve
+            #   futures/data uclari 30 GUN tuttugu icin silinen kisim GERI GETIRILEMIYORDU.
+            #   Gercek kayip: 58 sembolde 07-23..07-26 arasi OI/long-short/taker.
+            # SIMDI: var olan dosyayla ZAMAN DAMGASINA gore BIRLESTIR.
+            zaman = "t" if uc == "kline" else UCLAR[uc][1]
+            birlesik = {}
+            if os.path.exists(yol):
+                try:
+                    with open(yol, encoding="utf-8") as f:
+                        for x in json.load(f):
+                            birlesik[int(x[zaman])] = x
+                except Exception:
+                    pass
+            eski_n = len(birlesik)
+            for x in d:
+                birlesik[int(x[zaman])] = x
+            d = [birlesik[k] for k in sorted(birlesik)]
+            if eski_n and len(d) < eski_n:
+                raise RuntimeError("BIRLESTIRME KAYIP URETTI: %s %s (%d -> %d)"
+                                   % (sym, uc, eski_n, len(d)))
             tmp = yol + ".tmp"
             with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(d, f)
@@ -190,6 +211,11 @@ def bot_sembolleri():
                 syms.add(p["sym"])
     except Exception:
         pass
+    # [2026-08-24] BTC/ETH HER ZAMAN dahil. Bot bu ikisinde islem acmiyor, bu yuzden
+    #   --bot listesine hic girmiyorlardi ve gunluk gorev onlari TAZELEMIYORDU.
+    #   Ikisi de rejim referansi (btc_rejim · rel3 · ayrisma) -> serileri sart.
+    #   Yakalandi: ETH dosyasi 08-21'de kalmisti, digerlerinin hepsi 08-24'teydi.
+    syms.update(("BTC", "ETH"))
     return sorted(syms)
 
 

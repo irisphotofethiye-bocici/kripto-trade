@@ -39,7 +39,7 @@ def fonlama(sym):
     if not os.path.exists(p):
         return [], []
     d = yukle(p)
-    return [x["t"] for x in d], [x["r"] * 100 for x in d]      # YUZDE / 8 saat
+    return [x["t"] for x in d], [x["r"] for x in d]      # YUZDE / 8 saat
 
 
 def fon_deger(ts, rs, t):

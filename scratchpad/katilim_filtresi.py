@@ -65,7 +65,7 @@ def kostur():
             hedefler = []
             if ft:
                 k = bisect.bisect_right(ft, x["t"]) - 1
-                if k >= 0 and fr[k]["r"] * 100 <= ir.FUND_ESIK:
+                if k >= 0 and fr[k]["r"] <= ir.FUND_ESIK:   # 2026-08-21: r ZATEN yuzde (funding_indir.py:67)
                     hedefler.append("A_funding")
             if ma50[i] and ma50[i] > 0 and x["c"] <= ir.UCUZ_FIYAT:
                 if (x["c"] / ma50[i] - 1) * 100 >= ir.MA50_MESAFE:

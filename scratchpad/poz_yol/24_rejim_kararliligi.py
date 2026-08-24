@@ -68,7 +68,7 @@ def topla():
                 with open(fp, encoding="utf-8") as f:
                     d = json.load(f)
                 ft = [x["t"] for x in d]
-                fr = [x["r"] * 100 for x in d]
+                fr = [x["r"] for x in d]
             except Exception:
                 pass
         for i in range(48, len(b) - UFUK - 2, ADIM):

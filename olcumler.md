@@ -3276,3 +3276,209 @@ büyüklük** (+0,63 … +2,40).
 - B kümesi 28 pozisyon — mesafe rakamları geniş güven aralığı taşır.
 
 **HÜKÜM YAZILMADI.** Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔴 HATA — FONLAMA 100 KAT BÜYÜK HESAPLANDI (2026-08-21, bulan: ölçümün kendisi)
+
+**Kök neden:** [funding_indir.py:67](scratchpad/funding_indir.py#L67) indirirken
+**zaten yüzdeye çeviriyor**:
+
+```python
+out += [{"t": int(x["fundingTime"]), "r": float(x["fundingRate"]) * 100} for x in d]
+```
+
+14 ölçüm betiği okurken **bir kez daha** `× 100` uyguladı.
+Doğru kullanım `ab_funding_maliyetli.py:86`'da duruyordu: `fr[k]["r"]`, çarpımsız.
+
+**Nasıl yakalandı:** `37_pos_mekanik.py` derin ayıda LONG alt kol için
+**+7,145 net/işlem** verdi. Stop %5 · hedef %10 ile bir işlemin net'i fonlama
+hariç **en fazla ≈ +4,04** olabilir (üst sınır hesabı `38_ayristir.py` başında).
+Sınırın aşılması veriye değil **alete** işaret etti. Doğrulama: `funding_gecmis`
+içinde tam `−2,00000` değerleri var — bu Binance'in **%−2 fonlama tavanı**,
+yani `r` zaten yüzde.
+
+#### Etkilenen betikler — iki sınıf
+
+**A) Fonlamayı MALİYET olarak kullananlar → sonuç BOZUK, yeniden koşulmalı**
+
+```
+asgari_stop.py · ileri_rr.py · katilim_filtresi.py (kontrol edilmeli)
+poz_yol/ 09_boga_bacagi · 11_ayidan_cikis · 12_holdout · 28_cikis_taramasi
+         29_pump_yon · 35_stopsuz · 37 · 38  (37/38 DUZELTILDI ve yeniden kosuldu)
+```
+
+Tipik bozulma: 24 saatte 3 dilim × ~0,005 medyan × 100 = **±1,5 puan** sahte
+maliyet/kredi. LONG'da sahte maliyet, SHORT'ta sahte kredi.
+
+⚠️ **Bu, `28_cikis_taramasi`'nın *"46 varyantın hiçbiri iki kümede artı değil"*
+hükmünü ve `35_stopsuz`'un tablosunu ŞÜPHELİ yapar.** İkisi de yeniden koşulmadan
+alıntılanmaz.
+
+**B) Fonlamayı ALAN (dilim değişkeni) olarak kullananlar → ETKİLENMEDİ**
+
+```
+poz_yol/16_rejim_kosullu · 24_rejim_kararliligi · 23_toparlanma_bacagi (alan kısmı)
+```
+
+Çeyrek bölmesi ve t **sıra tabanlıdır**; `×100` monotondur, sıralamayı değiştirmez.
+🟢 **`pos` için 5/5 rejim bulgusu AYAKTA.**
+
+**Ders (`CLAUDE.md` → mimari tuzaklar adayı):** bir birim dönüşümü **indirici ile
+okuyucu arasında iki kez** uygulanabilir. `py_compile` ve `pyflakes` bunu görmez.
+Yakalayan şey **büyüklük mantığı** oldu: *"bu sayı mekanik olarak mümkün mü?"*
+Her ölçümde bir **üst sınır hesabı** yapılırsa bu sınıf kapanır.
+
+---
+
+### 🟡 `pos` MEKANİK AŞAMASI — A GEÇTİ, B DÜŞTÜ (2026-08-21)
+
+**Ön-kayıt:** `scratchpad/poz_yol/ON_KAYIT_pos_mekanik.md`, commit **cdbc4b5**,
+koşumdan **önce** yazıldı. Ölçütler değiştirilmedi.
+**Betikler:** `37_pos_mekanik.py` · `38_ayristir.py` (tanı) · `39_b2.py` (B2)
+**N:** 636.475 aday · 5 pencere · 567 sembol · fonlama düzeltmesi dahil
+
+#### Sonuç — LONG, stop %5, maliyet %0,1726, fonlama dahil
+
+```
+pencere            HAM fark   MEKANIK fark  gun-t   ALT kol net  UST kol net
+ATH 24-09/12        +2,241       +1,726     +6,58     +1,069       -0,656
+ATH 25-06/10        +1,466       +1,081     +5,97     +0,459       -0,623
+TOPARLANMA 25-04    +2,048       +1,100     +2,89     +0,728       -0,372
+DERIN-AYI 26-01     +0,728       +0,488     +2,43     -0,240       -0,728
+AYI 26-06/08        +0,561       +0,420     +3,96     -0,144       -0,564
+```
+
+#### Kapılar
+
+| kapı | ölçüt | sonuç |
+|---|---|---|
+| A1 | fark > 0, ≥4/5 | **5/5 ✅** |
+| A2 | gün-kümeli t ≥ +2,0, ≥3/5 | **5/5 ✅** |
+| A3 | üç stopta da ≥4/5 | **✅** |
+| A4 | en iyi 3 sembol çıkınca ≥4/5 | **5/5 ✅** (fark neredeyse hiç düşmüyor) |
+| **KAPI A** | | **GEÇTİ** |
+| B1 | alt kol net > 0, ≥3/5 | 3/5 ✅ |
+| B2 | alt kolun kendi t'si ≥ +2,0, ≥2/5 | **1/5 ❌** (en iyi ikinci: +1,97) |
+| **KAPI B** | B1 ∧ B2 | **DÜŞTÜ** |
+| C1 | SHORT'ta ters işaret, ≥4/5 | **5/5 ✅** |
+
+#### Zorunlu tanı (ön-kayıtta şart koşulmuştu)
+
+Stop-olma oranı alt/üst: `31,7/29,8` · `33,7/28,1` · `38,4/29,8` · `39,7/35,8` ·
+`28,9/29,7` → **en fazla 1,29 kat.** Eşik 1,5'ti → **mekanik iki kolu eşit ölçüyor.**
+
+Ve stop, kenarın **kaynağı değil**: alt kolda stop ortalamada **zarar ettiriyor**
+(ATH 24: −0,172 · TOPARLANMA: −0,750 puan). Sinyal stopa rağmen kazanıyor.
+
+Fonlama farkı (düzeltilmiş): **+0,007 … +0,038 puan** — ihmal edilebilir.
+`pos` fonlamanın vekili **değil**.
+
+#### HÜKÜM — ön-kayıt karar tablosundan aynen
+
+**A ✓ · B ✗ · C ✓ → "Sinyal gerçek, tek başına YÖN KURALI DEĞİL."**
+
+İlişki mekanikten sağ çıktı (5/5, t 2,43–6,58) ama düşük-`pos` kolu **kendi başına
+güvenilir biçimde kâr etmiyor**: boğa/toparlanmada artı, iki ayı penceresinde eksi.
+
+**Bu bir sıralama/süzgeç sinyalidir, yön sinyali değil.**
+Süzgeç olarak sınanması **ayrı ön-kayıt** gerektirir. **Bot değişmez.**
+
+⚠️ Not: bu ölçüm **portföy aşamasını kapsamaz** (8 pozisyon sınırı, boyutlandırma,
+kuyruk sırası). `CLAUDE.md` sırasının üçüncü aşaması yapılmadı.
+
+---
+
+### 🔴 FONLAMA HATASININ GERÇEK KAPSAMI — daha DAR çıktı (2026-08-24)
+
+2026-08-21'de *"14 betik etkilendi"* yazmıştım ve `short_kayip/` ailesini de
+şüpheli ilan etmiştim. **Yanlıştı.** Denetlendi:
+
+```
+scratchpad/funding_gecmis/        r = YUZDE    (funding_indir.py:67 zaten *100 yapiyor)
+scratchpad/short_kayip/fonlama/   r = ONDALIK  (short_kayip/ortak.py:82 ham birakiyor)
+```
+
+**İki ayrı önbellek, aynı alan adı `r`, FARKLI BİRİM.**
+
+- `funding_gecmis` okuyan betikler `*100` uygularsa **100 kat şişer** → hata buradaydı.
+- `short_kayip/ortak.py:100` `*100` uygular ama kendi ondalık önbelleğini okur → **DOĞRU**.
+
+Doğrulama: `KAPI KARNESİ`nin D1 kontrolü fonlamayı **−0,1519** raporlamıştı; 100 kat
+şişik olsaydı ≈ −15 çıkardı.
+
+#### Ayakta kalan hükümler (yanlışlıkla şüpheli ilan edilmişti)
+
+```
+KAPI KARNESI [:2369] · CEKIRDEK KAPI [:2297] · STOP MALIYETI [:2085]
+ERKEN GURULTU [:2143] · MALIYET DOGRULAMASI [:2197]   -> HEPSI AYAKTA
+```
+
+#### Gerçekten etkilenenler
+
+`funding_gecmis` okuyup `*100` uygulayanlar: `asgari_stop` · `ileri_rr` ·
+`katilim_filtresi` · `poz_yol/09` · `11` · `12` · `16` · `23` · `24` · `28` · `29` ·
+`35` · `37` · `38`. **Hepsi düzeltildi.**
+
+**Ders — `CLAUDE.md` tuzak adayı:** *aynı ada sahip iki önbellek farklı birimde
+olabilir.* Alan adı (`r`) birimi taşımıyordu. Yakalayan şey **üst sınır hesabı** oldu.
+Kural önerisi: fonlama okuyan her betik, ilk kaydın büyüklüğünü **iddia etsin**
+(`assert abs(median) < 0.5` gibi) — birim karışması sessiz kalmasın.
+
+---
+
+### 🔴 DÜZELTİLMİŞ FONLAMAYLA YENİDEN KOŞUM — iki hüküm DEĞİŞTİ (2026-08-24)
+
+#### 1 · `35_stopsuz` — ESKİ HÜKÜM YANLIŞTI
+
+```
+A) NOTR/AYI N=111   stop%3   stop%5   stop%8   STOP YOK   (liq%)
+1sa                 -0,034   -0,116   -0,119    +0,005     2
+4sa                 +0,081   +0,036   +0,169    +0,628     3
+8sa                 -0,159   +0,084   +0,292    +0,769     6
+24sa                -0,088   +0,152   +0,137    +1,087    12
+72sa                -0,582   -0,325   -0,269    +1,472    21
+```
+
+Eski (hatalı) tabloyla *"her iki kümede de uzun tutma monoton olarak kötü"* denmişti.
+**Düzeltilmiş veride TERSİ:** stopsuz kol her ufukta artı ve süreyle **monoton artıyor**.
+72 saatte stoplu-stopsuz farkı **2,05 puan**.
+
+⚠️ Bedeli: likidasyon %2 → **%21**. Ve **B (BOĞA) kümesi ölçülemedi** — `perp_seri`
+2026-08-21'de bitiyor (55 saat bayat). Tek kümelik bulgu.
+
+#### 2 · `12_holdout` — HÜKÜM 2 ÖLÇÜLMEMİŞ, HÜKÜM 1 DÖNDÜ
+
+```
+HUKUM 1  SHORT yigini    N=4833  gun=8  +0,1660  t 0,56  5/8  -> henuz CURUTULMEDI
+HUKUM 2  funding kapisi  OLCULEMEDI (N=107, gun=2)
+HUKUM 3  pump engeli     -> COKTU
+HUKUM 4  chg24>%40 LONG  -> COKTU
+```
+
+🔴 **Kayıtlı *"dört hükmün dördü de ayakta kalmadı"* yanlıştı.** Doğru sayım:
+**iki çöktü, biri henüz çürütülmedi, biri hiç ölçülemedi.**
+
+Hüküm 2'nin eski sonucu **100 kat gevşek bir kapıyla** üretilmişti — botun gerçek
+kapısı 8 günlük holdout'ta yalnız **107 kez** tetikleniyor, ölçüm için yetersiz.
+
+#### 3 · `16_rejim_kosullu` — kapı kontrolden İYİ çıktı (ama anlamsız)
+
+```
+funding <= -0,05 (KAPI)     TUM 2 YIL  N= 9714  ay-ort +0,0585  t +0,62
+funding >  -0,05 (KONTROL)  TUM 2 YIL  N=135964 ay-ort -0,0100  t -0,08
+```
+
+Rejim kırılımı işareti **döndürüyor** (ATH +0,5150 · DÜZELTME +0,0485 ·
+DERİN-AYI −0,0519) → *"2 yıllık ortalama hiçbir gerçek koşula karşılık gelmiyor"*
+hükmü [:2653] **güçlendi**.
+
+#### 4 · `ileri_rr` — R/R çıkış kuralı hükmü DEĞİŞMEDİ
+
+```
+A_funding  N=4327  kontrol +0,082  kural +0,009  fark -0,073  t_kume -0,30
+B_ma50ucuz N=4443  kontrol -0,227  kural -0,222  fark +0,004  t_kume +0,02
+```
+Kural hâlâ kontrolü geçemiyor. N 17.836 → 4.327'ye düştü (kapı artık gerçek eşikte).
+
+**HÜKÜM YAZILMADI** (35 ve 12 için yeni ön-kayıt gerekir). Bot dosyalarına yazım: YOK.

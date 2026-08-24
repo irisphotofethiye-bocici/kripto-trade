@@ -165,6 +165,30 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   yoksa eksik pencerede çalışıldığı fark edilmez. Oranlar `olcumler.md`'de.
   **Arşive yeni tip kayıt KARIŞTIRILMAZ** — 6 çözümleyici okuyor, karıştırılırsa
   onunla yapılmış tüm eski ölçümler geriye dönük geçersizleşir (`testbot.py:267`).
+- 🔴 **İKİ SINIF VERİ VAR: KALICI ve 30 GÜNLÜK. Karıştırmak KALICI KAYIP üretti.**
+  Binance iki farklı uç sınıfı sunuyor ve ikisi aynı `fapi` altında duruyor:
+
+  | sınıf | uçlar | geçmiş |
+  |---|---|---|
+  | **kalıcı** | `/fapi/v1/klines` · `/fapi/v1/fundingRate` | istendiği an 2 yıl geriye |
+  | **30 gün** | `/futures/data/openInterestHist` · `topLongShortPositionRatio` · `globalLongShortAccountRatio` · `takerlongshortRatio` | **yalnız 30 gün** (ölçüldü: 29g → N=500, 31g → HTTP 400) |
+
+  İkinci sınıf **çekilemez, ancak ARŞİVLENİR.** *"Hepsini indiririz"* bu sınıf için
+  yanlıştır: o veri yalnızca **o an kaydediyorsan** vardır. `radar_archive` için
+  yazılı olan *"noktasal veridir, kayıp kareler geri gelmez"* kuralı **aynen
+  `perp_seri` için de geçerlidir.**
+  ⚠️ **`perp_seri_indir.py` ZAMANLANMIŞ GÖREV DEĞİLDİR** — elle koşulan kurtarma
+  betiğidir. Koşulmadığı her gün 30 günlük pencerenin kuyruğundan bir gün düşer.
+- 🔴 **YENİDEN İNDİRME ESKİYİ SİLEBİLİR — indiriciler BİRLEŞTİRMELİ, EZMEMELİ.**
+  Gerçek kayıp (2026-08-24): `perp_seri_indir.py --bot` 07-26'dan başlayan bir
+  pencere istedi; `sembol_indir` var olan dosyayı `os.replace` ile **ezdi**.
+  **58 sembolde 07-23…07-26 arası OI/long-short/taker kalıcı olarak gitti**
+  (30 günlük pencere oraya artık ulaşmıyor, `perp_seri` git'te takipli değil).
+  Betikte `_kapsiyor_mu()` vardı ve *"dosya varsa atla"* hatasını çözüyordu — ama
+  **ezme** yolunu hiç kapatmıyordu; iki ayrı hata sanılmıştı.
+  **Kural:** arşiv dosyasına yazan her indirici (a) var olanı okur, (b) zaman
+  damgasına göre birleştirir, (c) **sonuç eskisinden KISAysa hata fırlatır.**
+  Onarım `perp_seri_indir.py:sembol_indir` içinde; deseni kopyala.
 - **Fonlama pozisyona 2026-08-17'den İTİBAREN atfediliyor.** O tarihten önce açılmış
   pozisyonların fonlaması **geri üretilemez**. Bu olgunun sahibi burasıdır; başka
   dosya kopyalamaz, işaret eder.

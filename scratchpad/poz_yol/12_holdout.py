@@ -128,7 +128,7 @@ def topla():
             k = bisect.bisect_right(ft, x["t"]) - 1
             if k < 0:
                 continue
-            fund = fr[k]["r"] * 100
+            fund = fr[k]["r"]   # 2026-08-21: r ZATEN yuzde (funding_indir.py:67)
             chg24 = (x["c"] - b[si - 24]["c"]) / b[si - 24]["c"] * 100 if b[si - 24]["c"] else None
             if chg24 is None:
                 continue

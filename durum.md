@@ -68,6 +68,14 @@ bilinen zayıflıklar. **Rakam tutmaz.**
 | KriptoNobetci | 5 dk |
 | KriptoIzleyici | 5 dk |
 | KriptoPiyasa | günlük |
+| KriptoPerpSeri | **günlük 03:30** · `ExecutionTimeLimit` PT3H · log `scratchpad/perp_seri_indir.log` |
+
+🔴 **`KriptoPerpSeri` neden var (2026-08-24 kullanıcı kararı):** Binance
+`futures/data` uçları (OI · top/global long-short · taker) **yalnız 30 gün** tutuyor.
+Bu seriler *çekilemez, ancak arşivlenir* — koşulmadığı her gün pencerenin kuyruğundan
+bir gün **kalıcı olarak** düşer. Görev kurulmadan önce bu gerçekten yaşandı: 58
+sembolde 07-23…07-26 arası gitti (ayrıntı `CLAUDE.md` → mimari tuzaklar).
+Kalıcı uçlar (`klines` · `fundingRate`) bu kapsamda **değil**, onlar her zaman çekilir.
 
 Bildirim: yalnız **giriş** olayı Telegram'a gider (`bildirim.olaylar = ["giris"]`).
 
