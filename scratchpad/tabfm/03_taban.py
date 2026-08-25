@@ -48,7 +48,10 @@ sat = []
 print("\n%-12s %5s %6s   %-22s %-22s" % ("gun", "ctx", "tst", "skor(isaretli)", "en iyi tek alan"))
 print("-" * 100)
 for g in TEST:
-    ctx, tst = df[df["gun"] < g], df[df["gun"] == g]
+    # AMBARGO (bkz. 02_olcum.py) — model ve taban AYNI kuralla yarisir
+    onceki = [x for x in GUNLER if x < g]
+    ctx = df[df["gun"].isin(onceki[:-1])] if len(onceki) > 1 else df[df["gun"] < g]
+    tst = df[df["gun"] == g]
     if len(tst) < 20 or len(ctx) < 200:
         continue
     yc, yt = ctx["y"].to_numpy(float), tst["y"].to_numpy(float)

@@ -84,7 +84,11 @@ if A.gun:
     TEST_GUN = [A.gun]
 
 for gi, g in enumerate(TEST_GUN):
-    ctx = df[df["gun"] < g]
+    # AMBARGO: etiket ufku +24s oldugu icin son baglam gununun etiketi TEST
+    # gunune bakiyor (baglamin %4-12si). Ozellik sizmiyor ama SONUC siziyor.
+    # Bulundu 2026-08-25, kosumdan ONCE. Olcut esikleri DEGISMEDI.
+    onceki = [x for x in GUNLER if x < g]
+    ctx = df[df["gun"].isin(onceki[:-1])] if len(onceki) > 1 else df[df["gun"] < g]
     tst = df[df["gun"] == g]
     if len(tst) < 20 or len(ctx) < 200:
         print("  %s ATLANDI (ctx=%d tst=%d)" % (g, len(ctx), len(tst)))
@@ -181,6 +185,25 @@ gecti = ((m > 0 and t >= 2.0) and t2 >= 2.0 and t3 >= 1.5 and oran >= 60 and ayn
 print("\n" + "=" * 96)
 print("HUKUM: %s" % ("GECTI - tum olcutler" if gecti else "DUSTU"))
 print("=" * 96)
+# ---------------------------------------------------------------- IKINCIL
+# HUKME GIRMEZ. S1..S5 on-kayitli ve YUKARIDA karara baglandi.
+# "Olay seviyesi" gorunumu: getirinin %91'i GUN ICI, coinler arasi yasiyor.
+# "Ayiriyor mu" 3.598 sembol-saatte olculur; "zamanda tutuyor mu" 13 gunde.
+print("\n" + "-" * 96)
+print("IKINCIL - olay seviyesi (HUKME GIRMEZ)")
+print("-" * 96)
+_tp, _ty = [], []
+for _s in sat:
+    _p = np.array(_s["pred"], float); _y = np.array(_s["y"], float)
+    _tp.append(_p - _p.mean()); _ty.append(_y - _y.mean())   # gun ort. ARINDIRILDI
+_tp = np.concatenate(_tp); _ty = np.concatenate(_ty)
+print("  gun-ici arindirilmis havuz rho : %+.4f   N=%d sembol-saat" % (rho(_tp, _ty), len(_tp)))
+print("  gun-rho dagilimi               : min %+.3f . medyan %+.3f . max %+.3f"
+      % (np.nanmin(rt), np.nanmedian(rt), np.nanmax(rt)))
+print("  pozitif gun                    : %d/%d" % (sum(1 for x in rt if x > 0), len(rt)))
+print("  NOT: havuz rho'nun t'si gun-kumelemesini YOK SAYAR -> guveni SISIRIR.")
+print("       Karar yukaridaki gun-kumeli olcutlerle verildi.")
+
 print("\nsecilen en iyi tek alan (gun gun):")
 for s in sat:
     print("   %s  %s" % (s["gun"], s["alan"]))
