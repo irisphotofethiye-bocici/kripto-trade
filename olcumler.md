@@ -4866,3 +4866,56 @@ değiştirmek bu projede reddedilmiş davranıştır — **kısa ufka BİLEREK b
 baştan kuruluyordu, yani açık haftanın kapanışı o haftanın **son** günüydü. Etiketi
 kaydırıyordu (7 geçiş → 5, `2025-05-06 → 05-11`). Onarımdan sonra geçiş sayısı
 ön-kayıtla uyuştu. Ölçüt **değiştirilmedi**.
+
+### ❌ HAREKET BİTİNCE TERS YÖN (SHORT) — **DÜŞTÜ** (2026-08-25)
+
+**Ön-kayıt:** `ON_KAYIT_hareket_bitisi_short.md`, commit `d9cbdd7` — koşumdan **önce**.
+**Hipotez (kullanıcı):** *"hareketin bittiği nokta 2. yönü gösterir."*
+**Betik:** `scratchpad/hareket_bitisi_short.py` · N=18.402 pump olayı · 546 sembol ·
+2024-12-23 → 2026-08-25 · 21 ay kümesi · aşama **HAM** (stop/hedef/fonlama yok).
+
+Kollar: **A** = hareket-bitiş barı (son M=6 saatte yeni tepe yok) · **B** = aynı olayda
+hâlâ yeni tepe yapan barlar (kova-eşleşmeli) · **C** = tetik barında hemen SHORT.
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| H1 · `A−C` | ≥ +0,5 **ve** t ≥ +2,5 | ❌ **−0,065** · t = **−0,35** · 9/21 ay |
+| H2 · devam kuyruğu kesildi mi | `A/C ≤ 0,60` | ❌ **0,723** (%5,17 → %3,73) |
+| H3 · 🔴 **BELİRLEYİCİ** karıştırıcı | ≥%60 kova + t ≥ +2,0 | ❌ **7/13 kova (%54)** · N-ağırlıklı **−0,154** · t = **−1,28** |
+| H4 · şans (rastgele bar) | p ≤ 0,05 | ✅ p = **0,0020** |
+| H5 · maliyet sonrası | net > 0 | ✅ A +0,042% · **C +0,099%** |
+
+**HÜKÜM: DÜŞTÜ** (H3 belirleyiciydi).
+
+🔴 **Asıl bulgu: detektör bir SEÇİCİ değil, sadece bir GECİKME.** Olayların
+**%99,96'sı** (18.394/18.402) 48 saat içinde *"6 saattir yeni tepe yok"* koşulunu
+sağlıyor; *"hâlâ sürüyor"* oranı **%0,0**. Bunların **%79'u 7-12. saatte** tetikliyor
+(M=6 ile en erken mümkün an 7. saat). Yani kural *"hareket bitmiş olanları seç"*
+değil, *"her pump'ta ~7-12 saat bekle"* demek — ve beklemek **kaybettiriyor**.
+
+**Mekanizma açık:** *"son 6 saatte yeni tepe yok"* tanımı gereği fiyatın tepeden
+gelmiş olması demek → SHORT'a **daha kötü (daha düşük) fiyattan** giriliyor. Kuyruk
+korumasının bedeli, girişin kendisi. M uzadıkça kötüleşiyor: `M=3 −0,107` ·
+`M=6 −0,065` · `M=12 −0,194` — **üçü de C'nin altında.**
+
+**H2 kısmen çalıştı ama iki taraflı:** devam felaketi %5,17 → %3,73 kesildi (−%28),
+**ama jackpot da** %2,76 → %2,40 kesildi. Kuyruk simetrik budanıyor.
+
+**H4 geçti ve yanlış okunmamalı:** `A` (+0,388) rastgele bardan (medyan +0,187,
+p=0,002) **iyi**. Yani *bekleyeceksen* bitiş anı iyi bir zamanlama — ama
+**hiç beklememek (C +0,444) hepsinden iyi.**
+
+⚠️ **EN İYİ HÜCRE SEÇİLMEDİ.** H3 tablosunda gerçek yapı var: `7-12 sa × kazanç>%15`
+→ A +4,976 vs B +0,340 (**+4,636**); `13-24 × >%15` → +1,401. Ama kütlenin çoğu
+`kazanç<0` kovalarında ve orada A **kaybediyor** (`7-12 × -5..0`: N=6.807, −0,515).
+Bu hücreyi kural yapmak bu projede reddedilmiş davranıştır; **aday olarak bile
+yazılmıyor** — ayrı ön-kayıt ister.
+
+**Beklenti tutmuştu:** ön-kayıt ~%20 vermiş ve *"H3'ün düşmesini en olası tek sonuç"*
+demişti. **Dördüncü kez aynı duvar** değil ama akrabası: sinyal seviyenin vekili
+çıkmadı, **hiç sinyal olmadığı** çıktı — koşul neredeyse her olayda sağlanıyor.
+
+**Yan olgu (hüküm değil):** `C` = pump'ı tetikte shortlamak, ham +0,444%,
+maliyet sonrası **+0,099%** — fonlama HARİÇ ve fonlama SHORT lehine olurdu.
+Ama kapı karnesinin *"ters kapı sınavı"* (fonlaması pozitif olanı shortla) zaten
+**KALDI** (NET −0,0279). Bu satır bir kural önerisi DEĞİLDİR.
