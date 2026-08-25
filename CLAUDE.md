@@ -16,8 +16,21 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   girerse hakem kalmaz; (2) `CLAUDE.md` zaten *"ölçüm bota dokunmaz"* diyordu ama o kural
   ölçüm süreçleri içindi, **elle karar** için ayrıca yazılması gerekti.
 - **Bot KÂĞIT ÜSTÜNDE çalışır.** Gerçek emir gönderen kod YOKTUR ve eklenmez.
-- **İzinsiz `git push` YOK.** Depo bugüne kadar hiç push edilmedi. İlk push'tan
-  **önce** git geçmişi temizlenmeli (geçmişte ~920 MB veri var, `.git` ~242 MB).
+- **İzinsiz `git push` YOK.** ~~Depo bugüne kadar hiç push edilmedi. İlk push'tan
+  **önce** git geçmişi temizlenmeli (geçmişte ~920 MB veri var, `.git` ~242 MB).~~
+  **[DEĞİŞTİ 2026-08-25]** Bu iki olgunun **ikisi de yanlışmış** — ölçüldü:
+  **push YAPILMIŞ** (`origin/main` = `169c24a`, 2026-07-22) ve **geçmiş zaten temiz**
+  (`.git` 13 MB · en büyük nesne 0,28 MB · `kripto-config.json` ve `kripto_portfoy.json`
+  geçmişte **0 commit**). Yani *"ilk push'tan önce temizle"* koşulu **karşılanmış
+  durumda** — engel kalmadı. **Kuralın kendisi aynen geçerli: onaysız push YOK.**
+  ⚠️ Buradaki rakamlar **okunmaz, doğrulanır** (üçü de bir kez yalan söyledi):
+  `git log -1 --format='%h %cd' origin/main` · `du -sh .git` ·
+  `git log --all --oneline -- kripto-config.json | wc -l` → **0** beklenir.
+  ⚠️ `origin/main` bir **yerel önbellektir**; 07-22'den beri `fetch` yok (`FETCH_HEAD`
+  dosyası hiç oluşmamış). Uzağın gerçek ucunu görmeden hüküm yazma → önce `git fetch`.
+  ⚠️ Dal reflog'ları **boş** (`.git/logs/refs/heads/main` 0 satır), o yüzden push'un
+  **tam anı kanıtlanamaz**; 2026-07-22 20:02 o ucun *commit* tarihidir, push o an
+  ya da sonrasındadır.
 - **`kripto-config.json` ve `kripto_portfoy.json` asla commit edilmez.** İçlerinde
   CoinGecko/Telegram/Apify/Coinalyze anahtarları var. `.gitignore`'da kalırlar.
 - **`.gitignore`'a satır-içi yorum yazma.** Kalıbı bozuyor (`dosya.json  # not` çalışmaz).

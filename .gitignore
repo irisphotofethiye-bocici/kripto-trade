@@ -117,3 +117,34 @@ ayna_equity.jsonl
 defter2_state.json
 defter2_islemler.jsonl
 defter2_equity.jsonl
+
+# Olay seviyesi olcum ailesinin ara veri kumesi
+scratchpad/olay_seviyesi/*.json
+
+# TimesFM sanal ortami (ayri venv — botun global Python'una DOKUNMAZ)
+scratchpad/tfm_venv/
+
+# TimesFM kapsama testi ham ciktisi (buyuk, yeniden uretilebilir)
+scratchpad/tfm/ham_sonuc.json
+
+# Stop carpani olcumunun ara veri kumesi
+scratchpad/stop_carpani/*.json
+
+# Genislik olcumunun ara veri kumesi
+scratchpad/genislik/*.json
+
+# Fonlama onarimi oncesi yedek (2026-08-25, birim kirilmasi)
+scratchpad/funding_yedek_20260825/
+
+# Defter2 veto kutugu - defter3'te vardi, defter2'de UNUTULMUSTU (2026-08-25)
+defter2_veto.jsonl
+
+# fonlama_rejim ara olay kumesi (2 MB, yeniden uretilebilir)
+# NOT: ayni klasordeki seri.json TAKIPTE kalir - zaten commit edilmisti
+scratchpad/fonlama_rejim/olaylar.json
+
+# Defter3 runtime (defter2 evreni + iki yon, 2026-08-25)
+defter3_state.json
+defter3_islemler.jsonl
+defter3_equity.jsonl
+defter3_veto.jsonl
