@@ -2,7 +2,7 @@
 """PIYASA GENELI FONLAMA SERISI — 8 saatlik kovalarda kesitsel ozet.
 Fonlama = pozisyon kompozisyonu; fiyatin kendisi DEGIL.
 Birim: YUZDE/8sa (CLAUDE.md kurali geregi assert ile korunur). SALT OKUMA."""
-import json, glob, os, collections, statistics as sx, datetime
+import json, glob, os, sys, collections, statistics as sx, datetime
 
 PROJE = r"c:\Users\alper\Desktop\kripto trade"
 FUND = os.path.join(PROJE, "scratchpad", "funding_gecmis")
@@ -10,19 +10,24 @@ KL = os.path.join(PROJE, "scratchpad", "klines_1h_uzun")
 CIK = os.path.join(PROJE, "scratchpad", "fonlama_rejim", "seri.json")
 SLOT = 8*3600*1000
 
+# [2026-08-25] fonlama_oku ile okunur — birim dogrulamasi ARACA devredildi.
+#   Ham json.load kullanilmaz: 2026-08-12 birim kirilmasi tam bu betikte
+#   yakalandi (kritik pencere OLU gorundu). Ayrinti: olcumler.md.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import fonlama_oku as FO
+
 kova = collections.defaultdict(list)
 n = 0
 for f in sorted(glob.glob(os.path.join(FUND, "*.json"))):
-    try: d = json.load(open(f, encoding="utf-8"))
-    except Exception: continue
+    sym = os.path.basename(f)[:-5]
+    ft, fr = FO.yukle(sym)          # BirimHatasi firlatirsa betik COKER (istenen)
+    if not ft: continue
     n += 1
-    for x in d:
-        if "r" in x and "t" in x:
-            kova[(x["t"]//SLOT)*SLOT].append(x["r"])
+    for t, r in zip(ft, fr):
+        kova[(t//SLOT)*SLOT].append(r)
 
 hep = [r for v in kova.values() for r in v]
 med = sx.median([abs(r) for r in hep])
-assert med < 0.5, "FONLAMA BIRIM HATASI: medyan |r|=%.4f" % med
 print("sembol %d   kova %s   kayit %s   medyan |r| %.4f%%/8sa"
       % (n, format(len(kova), ","), format(len(hep), ","), med))
 
