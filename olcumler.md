@@ -4221,3 +4221,56 @@ B hücresi −935; yani **birçok varyant botu geçiyor ama hiçbiri kâra geçm
 **HÜKÜM YAZILMADI** — bunlar bozuk aletin düzeltme koşumudur, gözlemdir.
 Hüküm için ileri sınav gerekir: `ON_KAYIT_sure_rejim.md`.
 Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔴 SIZINTILI KIYAS ÖLÇÜTÜ ONARILDI — hüküm ayakta, KANITI değişti (2026-08-25)
+
+**Betik:** `scratchpad/poz_yol/42_cikis_yeniden.py`
+
+#### Onarılan hata
+
+`32/33/34`'ün "rastgele çıkış" kolu:
+
+```python
+aday = range(2, len(pnl) - 1)          # len(pnl) = POZISYONUN OMRU
+rast = pnl[random.choice(aday)] - pnl[-1]
+```
+
+Kol, pozisyonun **kaç bar yaşayacağını bilerek** çıkış seçiyordu — kısa ömürlüde
+erken, uzun ömürlüde geç. Gerçek zamanda o bilgi yok. Kıyas ölçütü şişikti.
+
+#### Sızıntısız tasarım
+
+```
+SABIT UFUK H=48 bar (4 saat) · kapanan pozisyon ELENMEZ, kapanis degerinde SABITLENIR
+BELLEKSIZ CIKIS  : her barda p olasilikla cik (geometrik) — omur bilgisi YOK
+ESLESMIS TUTMA   : p, kuralin ORTALAMA cikis barina esitlendi
+SABIT BAR        : ayrica herkes ayni j'de cikan ongorusuz taban
+```
+
+N=141 pozisyon (72'si ufuktan kısa, dolduruldu · 69 tam), Monte Carlo 200 tekrar.
+
+#### Sonuç
+
+```
+kural                        N    bar   kural  belleksiz    FARK      z
+blowoff                     18    8,6  -0,413    +0,424    -0,837  -2,00
+herhangi bir veto           23   10,9  -0,653    +0,161    -0,814  -2,49
+artik bu yonde almazdi     117   12,4  +0,000    +0,040    -0,040  -0,43
+smart POZUN TERSINE         63    2,2  +0,097    +0,115    -0,018  -0,38
+taker_soguma / long_veto / ters aday / smart-ayristi : N YETERSIZ
+```
+
+🟢 **Hüküm AYAKTA:** hiçbir çıkış kuralı sızıntısız ölçütü de geçemiyor. İkisi
+**anlamlı biçimde kötü** (z −2,00 ve −2,49), ikisi ayırt edilemez.
+
+🔴 **Ama eski kanıt yanlıştı:** sızıntılı ölçüt **+1,789** puan veriyordu;
+sızıntısız ölçüt **+0,04 … +0,42**. Yani eski kıyas tabanı yaklaşık **40 kat**
+şişikti. *"Rastgele çıkmak +1,789 kazandırıyor"* cümlesi **geri çekilir** —
+o rakam bir sızıntı yapaylığıydı, bulgu değil.
+
+⚠️ Dört kuralın N'i yetersiz (1-9 gözlem); onlar hakkında hüküm **yok**, "denendi
+ve düştü" diye **sayılamaz**. Gerçek sayım: **4 kural sınandı, 4'ü de geçemedi.**
+
+**HÜKÜM YAZILMADI.** Bot dosyalarına yazım: YOK.
