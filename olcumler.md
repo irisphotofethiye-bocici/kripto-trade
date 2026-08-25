@@ -3482,3 +3482,742 @@ B_ma50ucuz N=4443  kontrol -0,227  kural -0,222  fark +0,004  t_kume +0,02
 Kural hâlâ kontrolü geçemiyor. N 17.836 → 4.327'ye düştü (kapı artık gerçek eşikte).
 
 **HÜKÜM YAZILMADI** (35 ve 12 için yeni ön-kayıt gerekir). Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔬 OLAY SEVİYESİ ÖRNEKLEME + YÖN/OYNAKLIK AYRIMI (2026-08-24)
+
+> **HÜKÜM YAZILMADI.** Aşağıdakilerin hiçbiri ön-kayıtlı değildir; tasarım tek
+> geçişte seçildi. Bunlar **yöntem gösterimi ve betimleyici ölçüm**dür. Kural
+> adayı olmaları için ön-kayıt + holdout + mekanik aşaması gerekir.
+> Betikler: `scratchpad/olay_seviyesi/01..04`. Bot dosyalarına yazım: **YOK**.
+
+#### A · Olay seviyesi örnekleme — "N küçük" çoğu zaman bir TANIM hatası
+
+Kullanıcı tespiti: *"son bir hafta nötrken ralli yapması 2 yılda sadece 2 kere
+olmuş, biz bunu yanlış rejimin örneğiyle kıyaslıyoruz."* **Tespit doğru çıktı** —
+ama kıtlık verinin değil, **gözlem biriminin** içindeydi.
+
+Aynı durum (`7 gün yatay → 1 saatte +%5 sıçrama`) iki ayrı birimde sayıldı.
+Eşikler `01_kalibre.py` dağılımlarından, **sonuca bakmadan** seçildi
+(alt ~%30 dilim: `|7g getiri| ≤ %5` · `168sa saatlik std ≤ %0,80`).
+
+```
+PIYASA-TAKVIM SEVIYESI  (endeks_gunluk.json, 741 gun)
+    7 satir -> ardisik gunler birlestirilince  4 BAGIMSIZ OLAY
+    son 13 ayda: 1 olay                        -> hicbir istatistik kurulamaz
+
+SEMBOL-OLAY SEVIYESI    (klines_1h_uzun, 566 sembol, 7.010.384 bar)
+    ham sicrama (>= +%5, tek saat)      37.242
+    OLAY    (sicrama + onu SAKIN)          476     251 bagimsiz gun · 274 sembol
+    KONTROL (sicrama + onu sakin DEGIL) 19.621
+    (ayni sembolde 24 bar bekleme -> ortusen pencereler elendi)
+```
+
+**4 → 476.** Yeni veri toplanmadı, yeni araç kullanılmadı; yalnız soru
+*"piyasa haftada ne yaptı"* yerine *"coin saatinde ne oldu"* diye soruldu.
+
+Yoğunlaşma denetimi: en büyük **sembol payı %1,3** · en büyük **gün payı %2,7**
+→ tek sembol/gün taşımıyor.
+
+Karne (gün-kümeli, aynı gün içinde eşleşmiş — iki AYRIK grup, alt küme değil,
+dolayısıyla iki-örneklemli istatistik geçerli):
+
+| ufuk | olay | kontrol | fark | t |
+|---|---|---|---|---|
+| 4 sa | −0,48% | −0,15% | −0,47% | −1,12 |
+| 24 sa | −2,27% | −0,56% | **−2,03%** | **−3,45** |
+| 72 sa | −3,37% | −0,21% | **−3,28%** | **−3,55** |
+
+Rejim kırılımı (24 sa): `ATH_BOLGESI` +0,34% (t=+0,31, N=101) ·
+`DUZELTME` −2,92% (t=−3,97, N=89) · `DERIN_AYI` −1,66% (t=−2,28, N=286).
+→ İşaret **dönmüyor** ama ATH'de yok oluyor; rejim ayrımı zorunlu.
+
+⚠️ Ham fiyat getirisi — **fonlama ve mekanik dahil DEĞİL** (CLAUDE.md sırası
+gereği bu birinci aşama). 4 saatte etki yok; botun medyan tutma süresi 2,5 saat
+olduğu için mevcut hâliyle bota uygulanamaz.
+
+**Devri alınacak ders:** *"N yetersiz, ölçülemedi"* diye kapanmış her kutu bu
+yöntemle yeniden açılabilir — örn. `12_holdout` HÜKÜM 2 (`N=107, gün=2`).
+
+#### B · Yön mü oynaklık mı tahmin edilebilir? — `04_yon_vs_oynaklik.py`
+
+200 sembol, **her biri ayrı** hesaplandı, sembol medyanı raporlandı.
+
+```
+YON      gecmis getiri -> gelecek getiri        aciklanan pay
+   1 sa   -0,017                                     %0,03
+   4 sa   +0,007                                     %0,00
+  24 sa   -0,019                                     %0,04
+  24sa blok -> sonraki blok   -0,018                 %0,03
+
+OYNAKLIK gecmis salinim -> gelecek salinim
+   1 sa   +0,294                                     %8,64
+   4 sa   +0,182                                     %3,32
+  24 sa   +0,142                                     %2,02
+  24sa blok -> sonraki blok   +0,459                 %21,08
+```
+
+Sembol dağılımı (blok düzeyi) — **kararlılık farkı burada**:
+
+```
+             %5      %25    MEDYAN    %75     %95    korelasyonu POZITIF cikan
+  YON      -0,160  -0,079  -0,018  +0,028  +0,134           %43   <- yazi-tura
+  OYNAKLIK +0,238  +0,387  +0,459  +0,538  +0,677          %100   <- 198/198
+```
+
+**Çıplak fiyat serisinden yön çıkmıyor (198 sembolün %43'ü, yani gürültü);
+oynaklık 198'de 198'de aynı işaret.** Bu, *"yön tahmin edilemez"* demek DEĞİL —
+defterin kendi kenarı (aşağıda: pozisyonların %96'sı artıya geçiyor) fiyat
+şeklinden değil, radarın alanlarından geliyor. Sonuç şu kapsamdadır:
+**fiyat serisine yön sorulmaz.**
+
+Karar sonucu: TimesFM'e ana iş olarak **dağılım/oynaklık** verilecek; yön aynı
+ileri geçişte bedava geldiği için **tavan ölçümü olarak** yine de kaydedilecek.
+
+#### C · Defter röntgeni — ANLIK GÖRÜNTÜ (2026-08-24, `pozisyon_ozet.jsonl` N=198)
+
+⚠️ **Anlık görüntüdür, drift eder.** Kanıt değeri rakamların büyüklüğündedir.
+
+```
+Hic olmazsa bir an artiya gecen   191  (%96)     ARTIDA KAPANAN   83  (%42)
+Bir an %2'yi goren                120  (%61)     TOPLAM SONUC   -2.753 $
+Bir an %5'i goren                  67  (%34)
+Bir an %10'u goren                 23  (%12)
+
+MFE >= %2  -> 120 pozisyonun 41'i  (%34) EKSIDE kapandi
+MFE >= %5  ->  67 pozisyonun  7'si (%10) EKSIDE kapandi
+MFE >= %10 ->  23 pozisyonun  0'i  ( %0) EKSIDE kapandi
+
+CIKIS SEBEBI   STOP 159 (%80) -9.296 $ | TP2 34 (%17) +5.888 $ | ZAMAN_STOP 5 +656 $
+TEPEYE SURE    medyan 1,59 sa  (%45'i ilk 1 saatte)     TUTMA medyan 2,50 sa
+MAE            medyan %3,20    %90 dilim %7,66
+```
+
+**İki bağımsız kanıt aynı eşiği gösteriyor:** çıkış taramasında geçen tek varyant
+`sabit %10 hedef` idi; burada **%10'u gören 23 pozisyonun 23'ü de artıda kapandı.**
+
+Aritmetik kerteriz: stop (−58 $ ort.) → TP2 (+173 $ ort.) salınımı 231 $.
+`2.753 ÷ 231 ≈ 12` → **defter başabaşa 12 pozisyon uzakta.** Eşdeğeri: stop
+başına ortalama zarar %30 azalsa aynı yere gelinir. Teşhis **giriş değil,
+mekanik** tarafını işaret ediyor.
+
+#### D · Hacim tezi — kullanıcı hipotezi sınandı (2026-08-24)
+
+Kullanıcı: *"hacim elimizdeki en değerli veri."* `04` ile **aynı yöntem ve aynı
+tohum** (200 sembol, her biri ayrı, sembol medyanı), 24 saatlik bloklar.
+Betikler: `scratchpad/olay_seviyesi/05_hacim.py` · `06_hacim_kismi.py`.
+
+```
+HACIM NEYI SOYLUYOR?                       aciklanan pay   ayni isaretli sembol
+  hacim -> gelecek HACIM         +0,860         %74,0             %100
+  hacim -> gelecek OYNAKLIK      +0,454         %20,6             %100
+  islem sayisi -> OYNAKLIK       +0,461         %21,3             %100
+  hacim -> hareket BUYUKLUGU     +0,264          %7,0              %99
+
+HACIM YON SOYLUYOR MU?
+  hacim -> gelecek YON           -0,033          %0,11             %24
+  taker ALIS orani -> YON        +0,008          %0,01             %57
+```
+
+**Hacim, veri setindeki EN TAHMİN EDİLEBİLİR seri** (%74 — fiyat oynaklığının
+üç katı). Ama **yön söylemiyor**: 198 sembolün yalnız %24'ünde aynı işaret.
+
+##### Kısmi korelasyon — "tek bant" tuzağından KAÇAN bir ölçüm
+
+CLAUDE.md uyarısı: *"yeni sinyal çoğu zaman aynı şeydir."* Hacim ile oynaklık
+aynı şey mi diye sınandı — biri sabitlenip diğeri ölçüldü:
+
+```
+HAM                                            KISMI (digeri SABIT)
+  hacim    -> gel. oynaklik  +0,454  %100        +0,218   %98
+  oynaklik -> gel. oynaklik  +0,459  %100        +0,230   %98
+```
+
+**İkisi de hayatta kalıyor.** Hacim, oynaklığın kılık değiştirmiş hâli DEĞİL;
+198 sembolün 194'ünde bağımsız katkı veriyor. İkisi birlikte, her biri tek
+başına olduğundan iyi.
+
+⚠️ **Kapsam:** ikisi de hâlâ **aynı banttan** (Binance perp işlem akışı) geliyor.
+Kısmi bağımsızlık, *yeni bilgi kaynağı* demek değildir — bant içinde
+tamamlayıcılık demektir.
+
+⚠️ **`taker → yön` sonucu 24 SAATLİK blokta ölçüldü.** Botun `taker_15`/`taker_60`
+kapıları çok daha kısa ufukta çalışıyor; **o ufuk ölçülmedi**, bu sonuç oraya
+taşınamaz.
+
+**Tasarım sonucu:** TimesFM'e yalnız fiyat değil, **hacim de kovaryat olarak**
+verilecek (TimesFM 2.5 XReg destekliyor). Kullanıcı hipotezi planı değiştirdi.
+
+---
+
+### 🔴 TimesFM KUANTİL KAPSAMA TESTİ — **KALDI** (2026-08-24)
+
+Ön-kayıt: `scratchpad/tfm/ON_KAYIT_kapsama.md` (**koşturmadan önce** yazıldı).
+Betikler: `scratchpad/tfm/01_topla.py` · `02_karne.py`. Ayrı venv, salt-okuma.
+**N=7.999 nokta · 564 sembol · 354 bağımsız gün · 2025-09-01..2026-08-20**
+(sızıntısız pencere: TimesFM 2.5 Eylül 2025'te yayımlandı, bu veri sonrasında oluştu).
+Yoğunlaşma: en büyük sembol payı **%0,3** · en büyük gün payı **%0,5**.
+
+| ölçüt | eşik | 4sa | 24sa | hüküm |
+|---|---|---|---|---|
+| 1 · Dürüstlük (P10–P90) | %75–85 | **%77,9** ±1,2 | **%76,1** ±1,8 | ✅ GEÇTİ |
+| 4' · Uç (P20–P80) | %55–65 | **%57,6** | **%56,3** | ✅ GEÇTİ |
+| 3 · Rejim (üçünde de) | %70–90 | ATH %75,4 · DÜZ %79,6 · AYI %76,5 | ATH %72,6 · DÜZ %78,4 · AYI %76,2 | ✅ GEÇTİ |
+| **2 · ATR'den dar** | dar olmalı | **%4,03 vs ATR %3,66** | %8,95 vs ATR %9,07 | 🔴 **KALDI** |
+
+Ölçüt 2 ayrıntısı (zaman bölmeli; ATR `k` kalibrasyon yarısında TimesFM'in kendi
+kapsamasına ayarlandı, test yarısında uygulandı):
+
+```
+      TEST kapsama                TEST band genisligi
+ 4sa  TimesFM %78,5  ATR %79,3    TimesFM %4,03   ATR %3,66   -> ATR %9 DAR
+24sa  TimesFM %76,0  ATR %78,0    TimesFM %8,95   ATR %9,07   -> berabere/ATR
+```
+
+**ATR her iki ufukta da DAHA YÜKSEK kapsamayı DAHA DAR bandla sağlıyor** (4sa'te
+açık farkla; 24sa'te %2 puan fazla kapsamayı %1,3 fazla genişlikle). Ön-kayıt
+*"1 ve 2 geçmezse TimesFM bu projede kullanılmaz, konu kapanır"* diyordu.
+
+> **HÜKÜM: TimesFM fiyat-serisi kuantilleri için KULLANILMAYACAK.**
+> Dürüst ve rejim-kararlı çıktı — ama **botta zaten kurulu olan Wilder-ATR'yi
+> geçemedi.** Yeni araç, yerine geçtiği şeyden iyi olmak zorundaydı; değil.
+
+#### İkincil (tavan ölçümü): YÖN
+
+```
+ 4sa isabet %51,2 ±1,2   (guven araliginin alt ucu %50,0)
+24sa isabet %51,0 ±1,4   (guven araligi %50'yi ICERIYOR)
+```
+
+**Rastgeleden ayırt edilemiyor** — `04_yon_vs_oynaklik`'ın öngördüğü gibi
+(çıplak fiyattan yön çıkmıyor, 198 sembolün %43'ü). *"Fiyat bandı tükendi"*
+hükmü **güçlendi**: 200M parametreli, 100 milyar zaman noktasıyla eğitilmiş bir
+model de bu seriden yön çıkaramıyor.
+
+#### 🔑 ASIL KAZANÇ — teşhis yer değiştirdi
+
+ATR, **iyi kalibre bir oynaklık ölçer** çıktı (kalibre edildiğinde %79,3 kapsama,
+TimesFM'den dar). Yani stop probleminin kaynağı **oynaklık tahmini DEĞİL** —
+o zaten doğru ölçülüyor. Sorun ATR'ye uygulanan **çarpan/yerleşim kararında**.
+
+Bu, `pozisyon_ozet` röntgeniyle (MAE medyan %3,20 · stop %2,86–9,31 · stop-olma
+%50–76) birleştiğinde şunu söylüyor: **doğru çarpan, elde zaten olan ATR ile,
+olay seviyesi yöntemiyle bedava ölçülebilir.** Temel modele gerek yok.
+
+#### Yöntem notu — ön-kayıt bu sefer işe yaradı
+
+Ölçüt 2 yazılı olmasaydı, *"kapsama %77,9, model dürüst!"* görülüp **geçti ilan
+edilecekti.** Testi öldüren şey genişlik kıyasıydı ve o kıyas yalnızca
+**önceden yazıldığı için** koşuldu.
+
+⚠️ **Kapsam:** bu test **yalnız fiyat serisi** ile yapıldı. Hacim kovaryatlı
+(XReg) varyant **ölçülmedi**. Denenecekse **yeni bir ön-kayıt** gerekir ve
+**ikinci karşılaştırma olarak sayılır** (çoklu karşılaştırma kuralı).
+
+#### E · KÜME AYIRMA — kullanıcı önerisi sınandı (2026-08-24)
+
+Kullanıcı önerisi: *"düşen / stabil / yükselen diye üç küme yap, geçmişteki
+sonucu zaten biliyoruz, model 1 saatlik tahmin yapsın."* **Yeni koşum
+gerekmedi** — `01_topla.py`'nin ham çıktısında hem tahmin hem gerçekleşen var.
+Betik: `scratchpad/tfm/03_kume_ayirma.py`. Gruplama **sonuca göre** yapıldı;
+bu meşrudur çünkü **değerlendirme ekseni**dir, bağlam/eğitim seçimi değil.
+
+```
+4 SAAT (esik +-%1)          gercek ort    MODEL NE DEDI    ongordugu band
+  DUSEN     N=2048            -2,69%         -0,173%           %6,55
+  STABIL    N=4041            -0,03%         +0,014%           %4,61
+  YUKSELEN  N=1910            +2,86%         -0,072%           %6,22
+```
+
+**Model, %2,86 yükselecek coine ile %2,69 düşecek coine neredeyse AYNI şeyi
+söylüyor** (−0,07% vs −0,17%). Ama stabil gruba **belirgin dar band** veriyor.
+
+| ayrım | skor | 4 sa | 24 sa |
+|---|---|---|---|
+| yükselen vs düşen | model **yön** tahmini | **%52,1** | **%52,0** |
+| hareketli vs stabil | model **band genişliği** | **%68,0** | **%65,2** |
+| yükselen vs düşen | band genişliği | %48,5 | %49,0 |
+
+Gün-kümeli yön AUC: **%50,9 ±5,5** (4sa) · **%52,9 ±5,8** (24sa) —
+**iki güven aralığı da %50'yi içeriyor.**
+
+##### 🔴 Ve ayırt etme yeteneği TimesFM'e ait DEĞİL
+
+Aynı test, skor olarak ATR/fiyat konularak tekrarlandı:
+
+```
+                                     4 sa      24 sa
+  TimesFM band genisligi   -> AUC   %68,0     %65,2
+  ATR / fiyat  (bedava)    -> AUC   %67,4     %64,8
+  fark                              +0,6      +0,4   -> FARK YOK
+```
+
+> **HÜKÜM: Üç kümeli tasarım işe yarıyor ama TimesFM'e gerek yok.**
+> "Hareketli mi stabil mi" ayrımını **ATR zaten yapıyor** (AUC %67,4).
+> "Yükselecek mi düşecek mi" ayrımını **hiçbiri yapamıyor** (%52, GA %50'yi içeriyor).
+> TimesFM'in katkısı **0,4–0,6 puan** — 925 MB ve ayrı ortam karşılığında.
+
+**TimesFM üzerine ÜÇÜNCÜ ve son olumsuz ölçüm.** Kapsama (ölçüt 2 kaldı) ·
+yön isabeti (%51,2, rastgele) · küme ayırma (ATR'ye eşit). **Konu kapandı.**
+
+⚠️ **Kapsam:** hepsi **çıplak fiyat serisi** üzerinedir. Defterin kendi yön kenarı
+(pozisyonların %96'sı artıya geçiyor) radarın 28 alanından geliyor; o girdi
+**TimesFM'e verilemez** — mimarisi tek seri alır, etiketli örnek almaz.
+Kullanıcının *"örnekleri göster, farkı öğrensin"* fikri mimari olarak
+**TabFM-biçimlidir**, TimesFM-biçimli değil.
+
+---
+
+### ⚖️ ATR STOP ÇARPANI — olay seviyesinde (2026-08-24) · **HÜKÜM YAZILMADI**
+
+Ön-kayıt: `scratchpad/stop_carpani/ON_KAYIT.md` (**koşturmadan önce**, 5 ölçüt).
+Betikler: `01_kol_b.py` · `02_kol_a.py` · `03_karne.py`. Salt-okuma.
+Fonlama **dahil** — birim iddiası betikte `assert` ile korunuyor (medyan |r|
+%0,0050, yüzde/8sa). Mekanik yalıtıldı: **hedef yok, iz süren yok**, sadece
+`k×ATR` stop + `H` saat zaman çıkışı.
+
+**Ölçülen mevcut durum:** bot `k = 1,50` kullanıyor (`stop/atr_giriste` medyan
+1,50, %75 dilim 1,51) · medyan kaldıraç **3x** · medyan notional 2.052 $.
+
+#### KOL B — vekil girişler · N=13.159 · **717 gün** · 532 sembol
+
+Vekil olay: `chg24 ≥ +%20` → SHORT · `chg24 ≤ −%20` → LONG. 24 bar bekleme.
+
+```
+SHORT N=8.562         2sa      4sa      8sa     24sa   stop-olma
+  k=1,50 (BOT)      +0,238   +0,224   +0,274   +0,404     %61
+  k=3,00            +0,349   +0,334   +0,376   +0,498     %40
+  STOPSUZ           +0,424   +0,433   +0,339   +0,076      %0
+
+LONG  N=4.597
+  k=1,50 (BOT)      +0,394   +0,624   +0,493   +0,531     %49
+  k=3,00            +0,489   +0,813   +0,673   +0,807     %18
+  STOPSUZ           +0,521   +0,900   +0,707   +1,174      %0
+```
+
+**Eğri `k` ile MONOTON artıyor** (ölçüt 3 ✅). SHORT'ta 24sa'te stopsuz çöküyor
+(+0,076) — **SHORT'un sınırsız yukarı riski var, LONG'un yok.** Asimetri gerçek.
+
+| ölçüt | sonuç |
+|---|---|
+| 1 · Holdout (k* ilk yarıda seçildi, ikinci yarıda kıyaslandı) | ✅ **GEÇTİ** — SHORT 4/4 ufuk (t +2,02 · +1,87 · +0,45 · +0,41) · LONG 4/4 (t +2,13 · +1,89 · +0,40 · +2,01) |
+| 2 · Rejim | ✅ **3/3** her ufukta |
+| 3 · Eğri biçimi | ✅ monoton, testere değil |
+| 5 · Likidasyon (3x) | k=1,50 %0,22 · k=3,00 **%1,17** · k=6,00 %4,46 · STOPSUZ **%10,37** |
+
+Likidasyon tavanı: 3x'te eşik ~%30 ters hareket → **`k_eşdeğer ≈ 7,4`**.
+Yani `k ≤ 4` bölgesi likidasyondan güvenli mesafede; **stopsuz değil.**
+
+#### KOL A — botun GERÇEK girişleri · N=83 · **yalnız 7 gün** → CEVAP VEREMİYOR
+
+`atr_giriste` yalnız `pozisyon_izleme.jsonl`'de var ve o dosya **2026-08-13'te
+başlıyor**; mumlar **2026-08-21'de bitiyor**. 161 girişin 83'ü oynatılabildi.
+
+```
+k=3,0 vs k=1,5   (tum ornek, 7 gun)
+   2sa  fark -0,040   %95 GA [-0,34 , +0,26]   -> AYIRT EDEMIYOR
+   4sa  fark -0,055   %95 GA [-0,47 , +0,36]   -> AYIRT EDEMIYOR
+   8sa  fark -0,084   %95 GA [-0,52 , +0,35]   -> AYIRT EDEMIYOR
+  24sa  fark -0,173   %95 GA [-1,04 , +0,69]   -> AYIRT EDEMIYOR
+```
+
+**Dört ufkun dördünde de güven aralığı sıfırı içeriyor** ve genişliği ±0,3–1,0.
+KOL B'nin bulduğu etki (+0,05…+0,25) bu aralığın **içinde kaybolur**.
+→ İki kol **çelişmiyor; biri kör.** Ayrışmanın sebebi budur (ön-kayıt ölçüt 4
+"ayrışırsa araştırılır" diyordu — araştırıldı).
+
+#### 🔴 HÜKÜM YAZILMADI — kendi kuralımız gereği
+
+Ön-kayıt: *"1 geçip 4 kalırsa hüküm yazılmaz."* Ölçüt 1 geçti, **ölçüt 4
+doğrulanamadı** → CLAUDE.md *"şüphede DAİMA statüko"*. **`k = 1,50` kalır.**
+
+**Kanıtın yönü yine de tek taraflı:** 717 gün, iki yön, üç rejim, holdout —
+hepsi *"1,50 fazla sıkı"* diyor. Ama botun kendi girişlerinde doğrulanmadı.
+
+⚠️ **Büyüklük ölçeği (KABA, vekil olaylardan taşındı, KOL A doğrulamadı):**
++0,16…+0,25 puan × 2.052 $ × 204 pozisyon ≈ **+670…+1.046 $**.
+Defterin açığı **−2.753 $**. Yani bu düzeltme **açığın ancak %25–40'ını** kapatır
+— tek başına yetmez.
+
+#### Ne bu soruyu bitirir
+
+KOL A'nın büyümesi. `atr_giriste`'ye bağımlılık kaldırılıp ATR **mumlardan
+yeniden hesaplanırsa** KOL A 83 → ~204 olaya çıkar (defter 2026-07-23'te
+başlıyor). Yine de az; asıl çözüm botun koşmaya devam etmesi.
+
+---
+
+### 🔴 AÇIĞIN KAYNAĞI — kullanıcı tespiti DOĞRULANDI, önceki teşhisim YANLIŞTI (2026-08-24)
+
+Kullanıcı: *"18-21 arası short rejimde olduğu için short kovaladı, açığın bir
+kısmı ondan; yoksa başabaştı."* **Ölçüldü — doğru, hatta daha güçlü.**
+
+#### Mutabakat denklemi önce koşuldu (CLAUDE.md zorunlu)
+
+```
+10.000,00  baslangic_bakiye
+-2.847,00  defter P&L (id ile birlestirilmis, kismi kayitlar DAHIL)
+  -401,43  kumulatif_funding
+  -295,03  kumulatif_giris_ucret
++1.005,94  _kasa_sifirlama (2026-08-12 kullanici karari)
+---------
+ 7.462,51  hesaplanan     vs   7.462,61 equity   ->  SAPMA 0,10 $
+```
+
+#### Equity yörüngesi — açık ANLIK GÖRÜNTÜ, drift eder
+
+```
+2026-08-12  9.558 $   (kasa sifirlamasi sonrasi taban)
+2026-08-17 10.156 $   <- BASLANGIC BAKIYENIN USTUNDE. Defter ARTIDAYDI.
+2026-08-21  8.312 $   <- 4 gunde -1.844 $
+2026-08-24  7.463 $   <- 3 gun daha -849 $
+```
+
+#### Piyasa o günlerde ne yaptı
+
+```
+gun        alt_get    BTC      genislik
+08-18       -1,37%  64.548      %26,5
+08-19       +5,12%  69.016      %85,9   <- patlama
+08-20       +3,05%  72.638      %77,7
+08-21       +0,66%  73.658      %76,5
+```
+
+**BTC 3 günde 64.548 → 73.658 = +%14,1.** Genişlik %26,5 → %85,9.
+
+#### GİRİŞ gününe göre kırılım (kapanış değil — CLAUDE.md "açılıp kapanan" ayrımı)
+
+```
+08-19   SHORT   -358   LONG  +241
+08-20   SHORT -1.206   LONG  +284   <- rallinin en sert gununde SHORT acti
+08-21   SHORT    -60   LONG  -285
+08-22   SHORT     +0   LONG  -315   <- ralli bitti, bot LONG'a dondu
+08-24   SHORT     +0   LONG  -583   <- ve LONG'da kaybetti
+```
+
+**Açığın yapısı iki parçalı:** (1) ralliye karşı SHORT **−1.844 $**,
+(2) ralliden sonra LONG'a dönüp **−849 $**. Klasik whipsaw.
+
+#### 🔴 ÖNCEKİ TEŞHİS YANLIŞTI — ve tam da yasak olan hatayla
+
+Bu oturumda *"para çıkışta kayboluyor, stop çok sıkı"* teşhisi yazılmıştı.
+O teşhis **198 pozisyonun havuzlanmış** rakamlarından çıkarıldı. Ama o havuz
+**kârlı bir dönemi (08-17'ye kadar) ile 3 günlük bir felaketi** aynı ortalamaya
+sokuyor. Bu, `16_rejim_kosullu`'nun zaten belgelediği hata:
+***"2 yıl ortalaması hiçbir gerçek koşula karşılık gelmez."***
+Aynı hata bu sefer 1 aylık pencerede yapıldı. **Kullanıcı yakaladı.**
+
+#### Geniş stop bu günleri kurtarır mıydı? — ÖLÇÜLDÜ, HAYIR
+
+KOL A, 08-19 sonrası girişler (N=12, SHORT 8 — **çok küçük, yön göstergesi**):
+
+```
+SHORT  2sa   k=1,5 -0,64   k=3,0 -0,63   STOPSUZ  -0,39
+SHORT  4sa   k=1,5 -0,78   k=3,0 -0,31   STOPSUZ  -0,07
+SHORT 24sa   k=1,5 -2,01   k=3,0 -3,59   STOPSUZ -10,22   <- GENIS STOP FELAKET
+```
+
+Kısa ufukta yardım ediyor, **24 saatte yıkıcı.** Sert bir ters trendde geniş stop
+kaybı büyütür. ATR çarpanı bulgusu (717 gün ortalaması) **bu rejimde geçersiz.**
+
+#### Sonuç — çalışılacak yer değişti
+
+Botun sorunu *"stop genişliği"* değil: **rejim döndüğünde hâlâ eski yönde işlem
+açması.** 08-20'de BTC %14 ralli yaparken SHORT açtı. Soru artık şu:
+**ralli başlangıcı, o an bilinebilir bir şeyle tespit edilebilir miydi?**
+(genişlik %26,5 → %85,9 sıçraması bir aday — ölçülmedi.)
+
+---
+
+### ❌ PİYASA GENİŞLİĞİ SHORT'LARI UYARIYOR MU? — **ÇÜRÜDÜ** (2026-08-24)
+
+Ön-kayıt: `scratchpad/genislik/ON_KAYIT.md` (**koşturmadan önce**, 5 ölçüt).
+Betikler: `01_genislik_serisi.py` · `02_karne.py`.
+Saatlik genişlik = 24sa getirisi pozitif sembol yüzdesi (566 sembol, 17.726 saat).
+Olaylar: `kol_b.json` SHORT (pump girişleri), **N=8.562 · 703 gün · 527 sembol**,
+getiriler **k=1,50** (botun kendi stopu). Yoğunlaşma: sembol %0,9 · gün %2,4.
+
+İDDİA: *"genişlik yüksekken açılan SHORT'lar sistematik olarak daha kötüdür."*
+
+#### Ölçüt 1 — monotonluk: **KALDI, üstelik TERS**
+
+```
+kova              N       2sa      4sa      8sa     24sa
+gen<16,8        789    -0,016   -0,356   -0,453   -0,300
+16,8-44,7     1.761    +0,186   +0,270   +0,329   +0,487
+44,7-77,8     2.244    +0,227   +0,193   +0,255   +0,207
+gen>77,8      3.768    +0,240   +0,242   +0,274   +0,748
+```
+
+**Genişlik yüksekken SHORT'lar daha İYİ.** Dört ufkun dördünde de monotonluk yok
+ve işaret hipotezin tersi. Holdout iki yarıda da **aynı (ters) işareti** veriyor
+(+0,20…+1,56), ama `t` hiçbirinde 1,5'i geçmiyor.
+
+Ölçüt 3 (rejim): **0/3** (4sa) · **1/3** (24sa) → KALDI.
+
+#### 🔴 Ölçüt 4 — karıştırıcı: teknik olarak "geçti" ama **DEJENERE**
+
+BTC 24sa sabitlendiğinde işaret dönüyor (4sa: −0,07 · −1,34 · −1,77;
+24sa: −1,58 · −1,01 · −6,20) — yani koşullu olarak hipotez yönünde. **Ama:**
+
+```
+genislik <-> BTC 24sa getirisi   korelasyon +0,714  ->  ORTAK VARYANS %51
+gen>77,8 iken BTC24 medyan +2,51%   ·   gen<16,8 iken BTC24 medyan -2,05%
+BTC'nin EN UST ceyreginde alt genislik kovasi BOS  -> kiyas yapilamiyor
+tum t degerleri |t| < 1,7
+```
+
+**Genişlik, BTC'nin hareketinin başka bir ifadesi.** Koşullandırınca geriye
+bağımsız değişim kalmıyor. CLAUDE.md'nin *"her yeni aday erken fiyat
+hareketinin başka bir ifadesi çıkıyor"* kuralının **bir kez daha** doğrulanması.
+
+> **HÜKÜM: ÇÜRÜDÜ.** Genişlik SHORT girişlerini uyarmıyor; yeni bilgi de değil.
+
+#### Ama o pencere gerçekten farklıydı — ve genişlik onu göstermedi
+
+```
+2026-08-18..21 penceresindeki KOL B SHORT olaylari (N=25):
+    2sa  PENCERE +0,240   digerleri +0,212
+    4sa  PENCERE +1,075   digerleri +0,227
+    8sa  PENCERE -0,944   digerleri +0,291   fark -1,235
+   24sa  PENCERE -0,952   digerleri +0,205   fark -1,157
+
+Pencerede genislik MEDYANI 45,6  —  tum orneklem medyani 72,0  (yani DUSUK!)
+
+Gunluk genislik yolu:  08-17 med 40 · 08-18 med 27 · 08-19 med 55 (32->87)
+                       08-20 med 85 · 08-21 med 81
+```
+
+Pencere SHORT'lar için **8–24 saatte gerçekten kötüydü** (−1,2 puan), ama
+genişlik medyanı örneklemin altındaydı. **Genişlik bu pencereyi işaretlemedi.**
+
+⚠️ N=25 — vekil olaylar botun o penceredeki etkinliğini (17 SHORT tek günde)
+temsil etmiyor. Pencerenin neden kötü olduğu **hâlâ açıklanmamış durumda.**
+
+---
+
+### ❌ "HACİM VAR, FİYAT YOK" ÖNCÜ SİNYAL Mİ? — **HÜKÜM YAZILMADI** (2026-08-24)
+
+Ön-kayıt: `scratchpad/hacim_oncu/ON_KAYIT.md` (**koşturmadan önce**, 5 ölçüt).
+Betik: `01_karne.py`. BTC saatlik, N=17.716 saat, 2 yıl.
+Olay: `hacim ≥ 4x` (medyan-24sa'e göre, ≈%95 dilim) **VE** `|saatlik ret| ≤ %0,50`.
+
+```
+OLCUM    (hacim var, fiyat YOK)      N=  314   ·  217 gun
+KONTROL1 (hacim var, fiyat DA var)   N=  596
+KONTROL2 (normal saatler)            N=16.806
+```
+
+KONTROL1 kritik: iddia *"hacim hareketi haber verir"* değil, **ayrışmanın**
+kendisi. O olmadan yalnız "hacim = oynaklık" tekrarlanmış olur.
+
+#### Ölçüt 1 — büyüklük: ölçüte göre "geçti", **ama gürültü içinde**
+
+```
+ufuk      OLCUM   KONTROL1   KONTROL2    OLCUM-KON1
+1sa       0,399     0,454      0,310     -0,055 (t-1,6)
+2sa       0,618     0,594      0,440     +0,023 (t+0,5)
+4sa       0,802     0,791      0,631     +0,011 (t+0,2)
+8sa       1,013     1,046      0,920     -0,033 (t-0,4)
+
+AZAMI hareket (ufuk icinde):
+1sa       0,697     0,850                -0,153 (t-3,6)   <- TERS, ve ANLAMLI
+2sa       1,000     1,080                -0,081 (t-1,3)
+```
+
+⚠️ **Ön-kaydımdaki ölçüt 1 fazla gevşek yazılmıştı** (*"fark > 0"*, anlamlılık
+şartı yok). Yazıldığı hâliyle geçiyor (+0,023 · +0,011) ama `t` = 0,5 ve 0,2 —
+sıfırdan ayırt edilemez. Üstelik **azami hareket ölçüsü ters yönde ve 1sa'te
+anlamlı** (t=−3,6): hacim varken fiyatın kıpırdamadığı saatleri, sonrasında
+**daha KÜÇÜK** hareket izliyor.
+
+#### 🔴 Ölçüt 2 (karıştırıcı) — **KALDI**
+
+Son 24sa gerçekleşmiş oynaklık sabitlendiğinde:
+
+```
+2sa   Q0 +0,049  Q1 -0,057  Q2 +0,017  Q3 +0,163   -> 3/4  GECTI
+4sa   Q0 +0,138  Q1 -0,089  Q2 +0,196  Q3 -0,088   -> 2/4  KALDI
+```
+
+Tüm `|t| < 1,5`. Ön-kayıt: *"1 veya 2 geçmezse hüküm YAZILMAZ."*
+
+> **HÜKÜM YAZILMADI.** Sinyal, oynaklık kontrolünden geçmiyor.
+
+Ölçüt 3 (holdout): iki yarıda da `|t| < 0,7`. Ölçüt 4 (yön): dört ufkun
+dördünde de %95 GA sıfırı içeriyor — **yön yok** (üçüncü kez doğrulandı).
+
+#### 🔑 Ölçüt 5 — VAKA DENETİMİ: anekdot kusursuz, toplam boş
+
+```
+2026-08-19 13:00   8,0x  ret +0,20%  -> OLCUM   ileri 2sa +5,45%  4sa +4,90%
+2026-08-18 14:00   7,2x  ret +0,77%  -> KON1    ileri 2sa +0,19%  4sa +0,09%
+2026-08-19 12:00   5,4x  ret +0,59%  -> KON1    ileri 2sa +1,60%  4sa +5,51%
+2026-08-19 15:00  37,6x  ret +3,99%  -> KON1    ileri 2sa -0,52%  4sa -0,17%
+```
+
+**Hipotezin doğduğu vaka kusursuz uyuyor:** 13:00'te hacim 8 kat, fiyat sabit →
+2 saatte **+%5,45**. Yanlış alarm (08-18) fiyat süzgecine takılıp ÖLÇÜM
+kümesine bile girmiyor. Ve 37,6x'lik saat hareketin **başı değil sonu**.
+
+**Ama 314 olayın toplamı hiçbir şey söylemiyor.** Tek vaka ne kadar ikna edici
+olursa olsun, genellemiyor. Bu kayıt, *"anlatı ikna eder, sayım karar verir"*
+ilkesinin en temiz örneğidir.
+
+⚠️ Sağlamlık taramasında `hacim ≥ 5x` kolu üç fiyat eşiğinde de küçük pozitif
+veriyor (+0,032 · +0,027 · +0,059; N=85–228). **Kovalanmadı** — eşik gezdirip
+geçen hücre aramak bu projede reddedilmiş davranıştır (`CLAUDE.md`).
+
+---
+
+### 🔴🔴 VERİ HATASI — `funding_gecmis` İÇİNDE BİRİM KIRILMASI (bulundu 2026-08-25)
+
+Fonlama rejim ölçümü kurulurken bulundu. **Ölçüm değil, BULGU.**
+Betikler: `scratchpad/fonlama_rejim/01_seri.py` (bulguyu ortaya çıkaran).
+
+#### Bulgu
+
+`scratchpad/funding_gecmis/*.json` içindeki `r` alanı **iki farklı birimde**:
+
+```
+gun bazinda |r| < 1e-3 olan kayitlarin payi (150 sembol ornegi):
+
+  2026-08-06    3,4%
+  2026-08-11    2,7%
+  2026-08-12   95,3%   <<<< KIRILMA
+  2026-08-13   97,7%
+  ...
+  2026-08-20   98,5%
+```
+
+**2026-08-12'den ÖNCE: yüzde (%/8sa). 2026-08-12'den İTİBAREN: kesir (ham Binance).**
+Aradaki fark **100 kat**. 24 aylık geçmişte küçük-ölçek payı %0,3–4,6 arasında
+sabit; tek bir günde %95'e fırlıyor.
+
+#### Üç bağımsız doğrulama
+
+1. **Çapraz depo:** `radar_archive.funding` medyanı **0,00500**; aynı sembolün
+   `funding_gecmis.r`'si aynı dönemde **5e-05** → tam **100 kat**.
+   (CLAUDE.md zaten *"`funding` adı başka şeydir — oran"* diye uyarıyordu.)
+2. **Kaynak kod:** `testbot.funding_uygula` → `maliyet = notional * e["rate"] * isaret`
+   — **bölme yok**, yani canlı uçtan gelen `rate` bir **kesir**. İndirici bunu
+   ham yazmaya 08-12'de başlamış.
+3. **Yer gerçeği:** defterdeki `funding_usdt` ile kıyas — kesir varsayımı 4
+   kıyaslanabilir pozisyonun 2'sinde **tam** tutuyor, yüzde varsayımı 0'ında.
+   (Kıyaslanabilir N düşük çünkü `funding_usdt` yalnız 08-17'den beri var.)
+
+#### ⛔ [DÜZELTİLDİ 2026-08-25] — aşağıdaki bölüm YANLIŞTI
+
+**Sebep bulundu ve benim çıkarımım yanlıştı.** Kırılma bir "indirici değişikliği"
+değil, **aynı önbelleğe yazan İKİNCİ BİR BETİK**:
+
+```
+scratchpad/funding_indir.py:67    "r": float(x["fundingRate"]) * 100    -> YUZDE  (dogru)
+scratchpad/veri_guncelle.py:97    "r": float(x["fundingRate"])          -> HAM KESIR (eksik *100)
+```
+
+`veri_guncelle.py`'nin kendi açıklaması: *"klines_1h_uzun ve funding_gecmis
+**08-11'de DURMUS**"* — veri durunca yazılmış bir yakalama betiği, ve `*100`'ü
+atlamış. 08-12'den itibaren eklenen kayıtlar bu yüzden kesir.
+
+**Doğrulama — `r` YÜZDEDİR, kayıtlı düzeltme DOĞRUYDU:**
+`|r| = 2,00000` (Binance'in %−2 fonlama tavanı) 21 ayrı ayda, **2026-08 dahil**
+189 kez görülüyor; kesir tavanı `0,02` iki yılda yalnız 2 kez (rastlantı).
+
+**Bu yüzden aşağıdaki iki iddiam GEÇERSİZDİR:**
+- ~~"`*100` kaldırmak 24 ayda fonlamayı sıfırlar"~~ → **yanlış.** Kaldırma doğruydu.
+- ~~"`35_stopsuz`'un hükmü şüphelidir"~~ → **geri alındı.** O hüküm için bu
+  gerekçeyle bir şüphe yok. *(Bu proje aynı hatayı bir kez daha yaşadı:
+  `short_kayip` ailesi haksız yere şüpheli ilan edilmişti — bkz. kayıtlı
+  "DÜZELTİLMİŞ FONLAMAYLA YENİDEN KOŞUM". **Ben aynı kalıbı tekrarladım:
+  bir birim şüphesini doğrulamadan geriye genelledim.**)*
+
+**AYAKTA KALAN kısım:** 08-12 sonrası kayıtlar gerçekten kesir. Etkisi
+**2 yıllık ölçümlerde ihmal edilebilir** (730 günün 10'u), ama **son pencereye
+odaklı** her ölçümde büyüktür — fonlama rejim serisi tam bu yüzden ölü göründü.
+
+**Onarım:** `veri_guncelle.py:97`'ye `* 100` eklenmeli; 08-12..08-21 kayıtları
+100 ile çarpılmalı ya da kalıcı uçtan yeniden indirilmeli. **Yapılmadı — onay bekliyor.**
+
+---
+
+#### 🔴 Sonuç: kayıtlı "düzeltme" bu bulguyla ÇELİŞİYOR
+
+`olcumler.md` → *"DÜZELTİLMİŞ FONLAMAYLA YENİDEN KOŞUM"* kaydı, `funding_gecmis`
+okuyup `*100` uygulayan **14 betiğin** düzeltildiğini (yani `*100`'ün
+kaldırıldığını) söylüyor ve bu koşumda **iki hüküm değişmişti**
+(`35_stopsuz` ve `12_holdout`).
+
+**`*100` kaldırmak yalnız 08-12 SONRASI kayıtlar için doğrudur.** Ölçümlerin
+neredeyse tamamı **08-12 ÖNCESİ 24 ayda** yaşıyor ve orada `*100` kaldırmak
+fonlamayı **100 kat küçültür — yani fiilen sıfırlar.**
+
+⚠️ **`35_stopsuz`'un "stopsuz her ufukta daha iyi" hükmü özellikle şüphelidir:**
+stopsuz kol daha uzun tutar, daha çok fonlama öder; fonlama sıfırlanırsa o kol
+yapay olarak kazanır. **Yeniden koşulmalı.**
+
+#### Bu oturumdaki ölçümlere etkisi
+
+| ölçüm | etkilendi mi |
+|---|---|
+| `stop_carpani/01_kol_b.py` (ATR çarpanı) | ❌ **Hayır** — `r` zaten yüzde, doğrudan eklemek DOĞRU; yalnız 08-12 sonrası birkaç olayda fonlama 100 kat küçük kaldı, ihmal edilebilir |
+| `fonlama_rejim/01_seri.py` | ✅ **Evet** — kritik pencere (08-17..21) tamamen kesir bölgesinde, seri orada ölü göründü |
+| TimesFM / genişlik / hacim ölçümleri | ❌ Hayır — fonlama kullanmıyorlar |
+
+#### Kural önerisi (CLAUDE.md → MİMARİ TUZAKLAR)
+
+> **Bir önbelleğin birimi ZAMAN İÇİNDE değişebilir.** Dosya başındaki tek bir
+> `assert` yetmez — indirici değiştiğinde eski ve yeni kayıtlar aynı dosyada
+> yan yana durur. Fonlama okuyan her betik **kaydın tarihine göre** birim
+> seçmeli, ya da yükleyici tek birime normalize etmeli.
+> Kırılma tarihi: **2026-08-12**.
+
+---
+
+### 🔴 TAZE VERİYLE YENİDEN — BOĞA YARISI ÖLÇÜLDÜ, TABLO TERSİNE DÖNDÜ (2026-08-25)
+
+**Betikler:** `28_cikis_taramasi.py` · `35_stopsuz.py` — fonlama düzeltilmiş **ve**
+`perp_seri` 08-25'e tazelenmiş hâliyle. Önceki koşumda B kümesi **ölçülemiyordu**
+(veri 08-21'de bitiyordu); şimdi N=91 pozisyon.
+
+#### `35_stopsuz` — iki küme ZIT
+
+```
+STOP YOK kolu      A) NOTR/AYI N=111      B) BOGA N=91
+ 1 saat               +0,005                 -0,020
+ 2 saat               +0,101                 -0,708
+ 4 saat               +0,628                 -1,382
+ 8 saat               +0,769                 -2,576
+24 saat               +1,087                 -6,147   (liq %9)
+72 saat               +1,478                 -4,698   (liq %17)
+```
+
+🔴 **2026-08-24 tarihli kaydım eksikti.** *"Stopsuz kol her ufukta artı ve süreyle
+monoton artıyor"* demiştim — o **yalnız A kümesi** içindi, B ölçülemiyordu.
+B ölçülünce **tam tersi** çıktı: stopsuz **en kötü kol**, ve süreyle çöküyor.
+
+Boğada stop **koruyor**: 24 saatte `stop %3 = −2,107` vs `stopsuz = −6,147`.
+Ayıda stop **yiyor**: 72 saatte `stop %3 = −0,582` vs `stopsuz = +1,478`.
+
+**Tek düzenlilik: stopun değeri rejime göre İŞARET DEĞİŞTİRİYOR.**
+
+#### `28_cikis_taramasi` — hüküm AYAKTA, artık iki kümede de ölçülü
+
+```
+varyant                    A (notr/ayi)     B (boga)   ikisi de arti?
+yol 24 bar (120 dk)             +377          -3011    hayir
+yol  3 bar ( 15 dk)             +312          -1226    hayir
+stop%8 / hedef %5               +211          -2187    hayir
+yol  6 bar ( 30 dk)             +154           -935    hayir
+```
+
+**46 varyantın hiçbiri iki kümede birden artı değil.** Bu hüküm önceden B'de veri
+olmadığı için zayıftı; artık **gerçek ölçümle** duruyor.
+
+⚠️ Botun B kümesindeki GERÇEK sonucu **−2.395,89 $** (89 kapanan). Izgaranın en iyi
+B hücresi −935; yani **birçok varyant botu geçiyor ama hiçbiri kâra geçmiyor.**
+
+**HÜKÜM YAZILMADI** — bunlar bozuk aletin düzeltme koşumudur, gözlemdir.
+Hüküm için ileri sınav gerekir: `ON_KAYIT_sure_rejim.md`.
+Bot dosyalarına yazım: YOK.
