@@ -4413,3 +4413,74 @@ Not: 5 pencerenin yalnız 3'üne uyuyor ve etki tamamen **yükselen** pencereler
 yoğunlaşıyor (|D| 0,47-0,65 vs düşende 0,003-0,156).
 
 **HÜKÜM: `35` hüküm üretmez.** Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔴 `pos` RET SÜZGECİ — DÜŞTÜ, `pos` YOLU KAPANDI (2026-08-25)
+
+**Ön-kayıt:** `ON_KAYIT_pos_suzgec.md`, commit **1957302**, koşumdan **önce**.
+**Betik:** `40_pos_suzgec.py` · ESIK 0,75 · stop %5 · ufuk 24 sa · maliyet %0,1726
+
+⚠️ **Ön-kayıttan sapma (koşumdan önce tespit edildi):** `BOGA_LONG` kapısı `skor`
+ve `smart` istiyor, ikisi de radar çıktısı ve `klines_1h_uzun`'dan üretilemiyor →
+**ölçülemedi**. Dolayısıyla ölçüt **Y1 de ölçülemedi** (iki kapı da SHORT).
+
+#### Sonuç
+
+```
+A_funding (SHORT · suzgec: pos < 0,75 REDDEDILIR)
+pencere              N    tut%  TUTULAN  REDDEDIL     TUMU    FARK  gun-t
+ATH 24-09/12      1058   19,4%  +0,259    -0,414   -0,283  +0,926   1,82
+ATH 25-06/10      7228   18,9%  -0,460    -0,249   -0,289  +0,495   2,12
+TOPARLANMA 25-04  2967   19,4%  -0,423    -0,579   -0,549  +0,696   1,78
+DERIN-AYI 26-01  10078   14,5%  -0,372    +0,036   -0,023  -0,205  -0,95
+AYI 26-06/08      3615   11,1%  -0,021    +0,174   +0,152  -0,037  -0,09
+
+B_ma50ucuz
+ATH 24-09/12      4936   58,5%  -0,741    -0,469   -0,628  +0,467   1,87
+ATH 25-06/10     12882   58,1%  +0,070    +0,261   +0,150  +0,184   1,02
+TOPARLANMA 25-04  4763   56,1%  -1,163    -0,897   -1,046  +0,564   1,46
+DERIN-AYI 26-01   8161   50,6%  +0,004    +0,122   +0,062  -0,178  -1,03
+AYI 26-06/08      6060   52,0%  +0,083    +0,207   +0,143  -0,030  -0,21
+```
+
+```
+              A_funding   B_ma50ucuz
+S1 fark>0        3/5         3/5      (gereken >=4)   DUSTU
+S2 gun-t>=2,0    1/5         0/5      (gereken >=3)   DUSTU
+S3 uc stopta     DUSTU       DUSTU
+U1 TUT>TUMU      2/5         0/5      DUSTU
+U2 kazanc>=0,05  2/5         0/5      DUSTU
+U3 kapsam>=%60   0/5         0/5      DUSTU
+Y1               OLCULEMEDI
+```
+
+#### HÜKÜM — ön-kayıt karar tablosundan aynen
+
+**S ✗ → *"Süzgeç de düştü. `pos`, mekanik sonrası uygulanabilir bir kural
+üretmiyor."*** `pos` yolu **KAPANDI**.
+
+⚠️ **Benim beklentim de düştü:** ön-kayda *"S'nin geçmesini bekliyorum"* yazmıştım
+(mekanik aşamada fark 5/5 pozitifti). Geçmedi. Sebebi görülüyor: mekanik aşamadaki
+5/5, **uç çeyrekler arası** farktı; süzgeç olarak uygulanınca kalan kolun kazancı
+kayboluyor ve işaret rejime göre dönüyor.
+
+Ayrıca **U3 tek başına yolu kapatırdı**: `A_funding`'de süzgeç adayların yalnız
+**%11-19'unu** bırakıyor. Kural doğru olsa bile portföy kuyruğu boşalırdı.
+
+#### 🔴 OTURUMUN TEKRARLAYAN DESENİ
+
+Bu oturumda üç bağımsız ölçümde **aynı yapı** çıktı:
+
+```
+35_stopsuz   stopun degeri     yukselen pencerede X, dusende TERS
+41_stop_rejim  D isareti       yukselen +/-, dusende ~0
+40_pos_suzgec  suzgec farki    yukselen +0,18..+0,93, dusende -0,03..-0,21
+```
+
+**Ölçülen her etki yükselen ve düşen pencereler arasında işaret değiştiriyor.**
+Bu bir bulgu değil, bir **uyarı**: tek dönemden çıkan hiçbir kural taşınmıyor.
+`olcumler.md` → *"2 yıllık ortalama hiçbir gerçek koşula karşılık gelmiyor"*
+hükmüyle aynı yere bakıyor.
+
+Bot dosyalarına yazım: YOK.
