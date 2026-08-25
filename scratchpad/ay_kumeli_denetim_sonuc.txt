@@ -1,0 +1,44 @@
+
+============================================================================
+1) SHORT bacagi (FRENIN KENDISI) — bugunku on-kayitli olcum
+============================================================================
+
+--- AYI   ham lift  -1.748%  (gozlem-t -15.33)  N=3301/7566
+    ayrik ay: 6   ay lifti: 2025-02 -2.17, 2025-03 +0.93, 2025-11 -1.47, 2025-12 -1.88, 2026-02 -1.93, 2026-06 -1.95
+    AY duzeyi -> ortalama  -1.411 · medyan  -1.907 · pozitif 1/6
+    AY-KUMELI t =  -2.95 <-- ayakta
+    baskin ay 2025-11 (katki -1599) ATILINCA -> lift  -1.817%  t -13.66  isaret AYNI
+
+--- NOTR   ham lift  -0.659%  (gozlem-t -12.62)  N=20345/31648
+    ayrik ay: 24   ay lifti: 2024-08 +0.54, 2024-09 -1.48, 2024-10 -1.59, 2024-11 -4.45, 2024-12 +1.75, 2025-01 -0.78, 2025-02 -0.86, 2025-03 -0.62, 2025-04 -0.15, 2025-05 -3.51, 2025-06 -4.20, 2025-07 +0.64, 2025-08 -1.46, 2025-09 +0.23, 2025-10 -2.96, 2025-11 -0.04, 2025-12 -0.61, 2026-01 -0.59, 2026-02 -1.33, 2026-03 +0.90, 2026-04 -1.78, 2026-05 +1.07, 2026-07 -1.08, 2026-08 +0.64
+    AY duzeyi -> ortalama  -0.905 · medyan  -0.696 · pozitif 7/24
+    AY-KUMELI t =  -2.73 <-- ayakta
+    baskin ay 2025-10 (katki -5954) ATILINCA -> lift  -0.425%  t  -7.87  isaret AYNI
+
+--- BOGA   ham lift  +0.817%  (gozlem-t  +6.07)  N=2928/4906
+    ayrik ay: 6   ay lifti: 2024-10 -3.89, 2024-11 -0.08, 2024-12 +3.00, 2025-05 -0.26, 2025-07 +1.20, 2026-05 -0.29
+    AY duzeyi -> ortalama  -0.054 · medyan  -0.171 · pozitif 2/6
+    AY-KUMELI t =  -0.06 <-- GURULTU
+    baskin ay 2024-12 (katki +2784) ATILINCA -> lift  -0.246%  t  -1.74  isaret DONDU
+
+============================================================================
+2) LONG bacagi — bugun olculdu, '21 Agustos BOGA HARIC' kararinin dayanagi
+============================================================================
+
+--- AYI   ham lift  +0.910%  (gozlem-t  +1.77)  N=147/9029
+    ayrik ay: 3   ay lifti: 2025-12 -1.77, 2026-02 +3.77, 2026-06 +0.19
+    AY duzeyi -> ortalama  +0.730 · medyan  +0.190 · pozitif 2/3
+    AY-KUMELI t =  +0.45 <-- GURULTU
+    baskin ay 2025-12 (katki -159) ATILINCA -> lift  +1.968%  t  +2.14  isaret AYNI
+
+--- NOTR   ham lift  +0.124%  (gozlem-t  +1.31)  N=3411/43387
+    ayrik ay: 22   ay lifti: 2024-08 -2.25, 2024-09 +1.40, 2024-10 -0.59, 2024-11 -4.95, 2024-12 +0.26, 2025-01 -0.84, 2025-02 +4.04, 2025-03 -0.76, 2025-04 +1.87, 2025-05 -0.12, 2025-06 +1.97, 2025-07 -0.61, 2025-08 -0.25, 2025-09 +0.83, 2025-10 -0.24, 2025-11 +0.00, 2025-12 +0.46, 2026-01 -0.27, 2026-04 -0.33, 2026-05 -1.55, 2026-07 +1.10, 2026-08 -0.44
+    AY duzeyi -> ortalama  -0.057 · medyan  -0.244 · pozitif 9/22
+    AY-KUMELI t =  -0.16 <-- GURULTU
+    baskin ay 2025-06 (katki +802) ATILINCA -> lift  -0.097%  t  -0.97  isaret DONDU
+
+--- BOGA   ham lift  -1.981%  (gozlem-t  -9.01)  N=555/8510
+    ayrik ay: 4   ay lifti: 2024-12 -2.03, 2025-05 -1.98, 2025-07 -0.61, 2026-05 -1.14
+    AY duzeyi -> ortalama  -1.438 · medyan  -1.558 · pozitif 0/4
+    AY-KUMELI t =  -4.18 <-- ayakta
+    baskin ay 2024-12 (katki -521) ATILINCA -> lift  -1.609%  t  -5.76  isaret AYNI

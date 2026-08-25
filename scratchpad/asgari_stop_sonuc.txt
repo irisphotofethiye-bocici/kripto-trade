@@ -1,0 +1,26 @@
+ASGARI STOP ESIGI 2.0 -> 3.0  —  2 yillik sinav
+==============================================================================
+ON-KAYIT: olcumler.md (commit d5a6881, kosturulmadan ONCE)
+Yapi: ALT-KUME testi (eslesmis degil) — kural kolu kontrolun alt kumesi
+Mekanik: A-stop, Wilder ATR, hedef %10.0, 72s, maliyet %0.13, FONLAMA DAHIL
+
+islenen sembol: 565
+
+--- A_funding -------------------------------------------------
+  KONTROL (stop>=2.0) : N= 20521   +0.006%  t=+0.16  t_kume=+0.03  toplam    +131.6
+  KURAL   (stop>=3.0) : N=  9457   +0.142%  t=+2.07  t_kume=+0.47  toplam   +1340.1
+  FARK (islem basina)  :  +0.135%   |   islem sayisi dususu: %53.9 <-- EK SART IHLALI (>%50)
+  ELENEN dilim (2.0-3.0): N= 11064   -0.109%  t=-2.43   <-- bunlar atiliyor
+    A yarisi: kontrol -0.289%  kural -0.398%  fark -0.109%  (N 10260->4497)
+    B yarisi: kontrol +0.302%  kural +0.631%  fark +0.329%  (N 10261->4960)
+    rejim farki: AYI +0.615% (N=2038) | BOGA -0.301% (N=361) | NOTR +0.026% (N=7058)
+
+--- B_ma50ucuz ------------------------------------------------
+  KONTROL (stop>=2.0) : N=  4340   -0.235%  t=-2.62  t_kume=-0.69  toplam   -1017.9
+  KURAL   (stop>=3.0) : N=  2487   -0.159%  t=-1.19  t_kume=-0.40  toplam    -396.3
+  FARK (islem basina)  :  +0.075%   |   islem sayisi dususu: %42.7 
+  ELENEN dilim (2.0-3.0): N=  1853   -0.335%  t=-3.14   <-- bunlar atiliyor
+    A yarisi: kontrol -0.198%  kural -0.136%  fark +0.062%  (N 2170->1193)
+    B yarisi: kontrol -0.271%  kural -0.181%  fark +0.090%  (N 2170->1294)
+    rejim farki: AYI +0.241% (N=395) | BOGA -0.294% (N=276) | NOTR +0.103% (N=1816)
+

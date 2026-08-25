@@ -14,6 +14,18 @@ NE ARAR
 CIKIS KODU: ihlal varsa 1, yoksa 0  (CI/gorev icinde kullanilabilir)
 SALT OKUMA.
 """
+# [2026-08-25] cp1254 TUZAGI — kalici kapatma.
+#   Windows konsolu cp1254; print() icindeki emoji/varyasyon secici CIKTI
+#   YONLENDIRILDIGINDE UnicodeEncodeError firlatiyor ve betik COKUYOR.
+#   Bu sinif bu projede BES kez isirdi. Emoji ayiklamak yerine stdout
+#   guvenli hale getirilir; hata sinifi disiplinle degil ARACLA kapanir.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))

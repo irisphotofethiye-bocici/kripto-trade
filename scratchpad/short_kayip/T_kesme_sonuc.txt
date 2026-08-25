@@ -1,0 +1,28 @@
+BOTUN GERCEK POZISYONLARI — yigin kacini keserdi?
+============================================================================================
+toplam kapanmis pozisyon: 117  (SHORT 103 · LONG 14)  ·  gercek P&L -239.51 $
+
+adim                          kalan  kesilen          P&L     medyan    kazanan
+0. hepsi                        117        0      -239.51     -33.54       53/117
+1. + LONG kapali                103       14      -488.94     -65.52       44/103
+2. + pump engeli <%20           103        0      -488.94     -65.52       44/103
+3. + ucuz disla >$0,07            9       94      +311.05     +98.51        5/9  
+4. + funding > -0,05              0        9   —
+5. + btc_pay != UST               0        9   —
+
+SONUC
+  117 pozisyonun 0'i acilirdi  ->  %100'i KESILIRDI
+  gercek toplam    -239.51 $
+  yigin toplami      +0.00 $
+
+  ACILAN pozisyonlar:
+
+  KESILEN en buyuk 8 zarar:
+     2Z      SHORT P&L  -181.33   eleyen: ucuz
+     2Z      SHORT P&L  -159.44   eleyen: ucuz
+     RVN     SHORT P&L  -158.13   eleyen: ucuz
+     ONG     SHORT P&L  -157.99   eleyen: ucuz
+     ONG     SHORT P&L  -157.74   eleyen: ucuz, funding-kapisi
+     RVN     SHORT P&L  -156.94   eleyen: ucuz, funding-kapisi
+     COW     SHORT P&L  -155.60   eleyen: funding-kapisi
+     AKE     SHORT P&L  -154.82   eleyen: ucuz

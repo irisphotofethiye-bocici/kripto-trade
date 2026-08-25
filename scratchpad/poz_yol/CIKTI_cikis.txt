@@ -1,0 +1,87 @@
+BIZIM VERI — botun kendi girisleri, perp_seri 5 dk mumlariyla oynatildi
+bolen: 2026-08-19 18:15:00 (boga kirilmasi)
+
+========================================================================================================
+A) NOTR / AYI   2026-08-11 .. 08-19 18:15   N=111 pozisyon
+botun GERCEK sonucu (kapanmis 111): +30.45 $
+========================================================================================================
+IZGARA — risk her hucrede SABIT 75 $/islem, ufuk 72 saat
+stop\hed            %3           %5           %7          %10          %15     hedefsiz
+%2               -1737        -2213        -2362        -2190        -3573        -2218
+%3               -1646        -3351        -3336        -3560        -3822        -3911
+%4               -1314        -2527        -2782        -2477        -2734        -2932
+%5               -1024        -1666        -1713        -1642        -2444        -2244
+%6               -1065        -1887        -1976        -1917        -2809        -2234
+%8                -530         -811        -1150        -1411        -1846        -1514
+
+UFUK taramasi (stop %3, hedef %10):
+    6 saat:     -1061 $   (N=111)
+   12 saat:     -2437 $   (N=111)
+   24 saat:     -2760 $   (N=111)
+   48 saat:     -3611 $   (N=111)
+   72 saat:     -3560 $   (N=111)
+
+YOL TABANLI cikis (stop %3, hedefsiz) — N barda yeni uc yoksa CIK:
+    3 bar ( 15 dk):        -2 $   (N=111)
+    6 bar ( 30 dk):      -265 $   (N=111)
+   12 bar ( 60 dk):     -1320 $   (N=111)
+   24 bar (120 dk):      +255 $   (N=111)
+   48 bar (240 dk):      -621 $   (N=111)
+
+  EN IYI 5:
+     yol 24 bar (120 dk)             +255 $  (N=111)
+     yol 3 bar (15 dk)                 -2 $  (N=111)
+     yol 6 bar (30 dk)               -265 $  (N=111)
+     stop%8/hedef 3                  -530 $  (N=111)
+     yol 48 bar (240 dk)             -621 $  (N=111)
+  EN KOTU 1: stop%3/hedef yok               -3911 $
+
+========================================================================================================
+B) BOGA         2026-08-19 18:15 .. simdi   N=48 pozisyon
+botun GERCEK sonucu (kapanmis 40): -959.67 $
+========================================================================================================
+IZGARA — risk her hucrede SABIT 75 $/islem, ufuk 72 saat
+stop\hed            %3           %5           %7          %10          %15     hedefsiz
+%2               -1335        -1298        -1229        -1801        -2064        -2375
+%3                -552         -547         -843        -1174        -1145        -1389
+%4                -290          +44         -255         -565         -449         -610
+%5                -465         -213         -459         -722         -630         -758
+%6                -588         -253         -445         -839         -762         -869
+%8                -580         -432         -454         -739         -752         -832
+
+UFUK taramasi (stop %3, hedef %10):
+    6 saat:      -857 $   (N=45)
+   12 saat:      -992 $   (N=45)
+   24 saat:     -1180 $   (N=45)
+   48 saat:     -1174 $   (N=45)
+   72 saat:     -1174 $   (N=45)
+
+YOL TABANLI cikis (stop %3, hedefsiz) — N barda yeni uc yoksa CIK:
+    3 bar ( 15 dk):      -176 $   (N=45)
+    6 bar ( 30 dk):      +102 $   (N=45)
+   12 bar ( 60 dk):      -249 $   (N=45)
+   24 bar (120 dk):      -501 $   (N=45)
+   48 bar (240 dk):     -1110 $   (N=45)
+
+  EN IYI 5:
+     yol 6 bar (30 dk)               +102 $  (N=45)
+     stop%4/hedef 5                   +44 $  (N=45)
+     yol 3 bar (15 dk)               -176 $  (N=45)
+     stop%5/hedef 5                  -213 $  (N=45)
+     yol 12 bar (60 dk)              -249 $  (N=45)
+  EN KOTU 1: stop%2/hedef yok               -2375 $
+
+========================================================================================================
+IKI KUMEDE DE EN IYI 8 VARYANT (siralama A'ya gore)
+========================================================================================================
+varyant                        A (notr/ayi)       B (boga)   ikisi de arti?
+yol 24 bar (120 dk)                    +255           -501   hayir
+yol 3 bar (15 dk)                        -2           -176   hayir
+yol 6 bar (30 dk)                      -265           +102   hayir
+stop%8/hedef 3                         -530           -580   hayir
+yol 48 bar (240 dk)                    -621          -1110   hayir
+stop%8/hedef 5                         -811           -432   hayir
+stop%5/hedef 3                        -1024           -465   hayir
+ufuk 6sa                              -1061           -857   hayir
+
+HUKUM YAZILMADI. bot dosyalarina yazim: YOK

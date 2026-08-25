@@ -1,0 +1,31 @@
+btc_pay LONG PENCERESI REJIMDEN BAGIMSIZ MI? - 2 yillik VEKIL sinav
+==============================================================================
+ON-KAYIT: olcumler.md (commit a1b39d8, kosturulmadan ONCE)
+VEKIL: btc_d_xs r=+0,680 - para_rejim r=+0,882 (MEDYAN tabanli)
+DONDURULMUS: UST_ESIK=2.8755  DUR=[-2.8046 , 2.3766]
+Mekanik: LONG, aynalanmis A-stop, hedef +10.0%, 72s, maliyet+FONLAMA dahil
+
+islenen sembol: 565
+
+--- AYI -----------------------------------------------------------
+  UST+durgun : N=  157   +0.122%   (ayri sembol 137)
+  diger      : N= 9206   -0.222%   (ayri sembol 530)
+  LIFT       :  +0.344%   iki-ornekli t = +0.73
+    A yarisi: lift  +0.425%  t=+0.65  (N 78 vs 4603)
+    B yarisi: lift  +0.267%  t=+0.39  (N 79 vs 4603)
+
+--- NOTR ----------------------------------------------------------
+  UST+durgun : N= 3458   -0.079%   (ayri sembol 495)
+  diger      : N=43439   -0.385%   (ayri sembol 551)
+  LIFT       :  +0.306%   iki-ornekli t = +3.13
+    A yarisi: lift  +0.314%  t=+2.42  (N 1729 vs 21719)
+    B yarisi: lift  +0.298%  t=+2.04  (N 1729 vs 21720)
+
+--- BOGA ----------------------------------------------------------
+  UST+durgun : N=  604   -1.857%   (ayri sembol 304)
+  diger      : N= 8378   +0.185%   (ayri sembol 455)
+  LIFT       :  -2.043%   iki-ornekli t = -9.95
+    A yarisi: lift  -2.372%  t=-8.01  (N 302 vs 4189)
+    B yarisi: lift  -1.713%  t=-6.07  (N 302 vs 4189)
+
+OLCUT 4 -- AYI lifti +0.344%  ·  NOTR lifti +0.306%  ->  isaret AYNI

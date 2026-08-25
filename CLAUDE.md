@@ -268,6 +268,29 @@ düşülmüştü. Stub'lanacaklar: `_append_jsonl` · `_save_state` · `pozisyon
 `pozisyon_liq` · `pozisyon_kismi_tp1` · `telegram_gonder`. Testin sonunda
 "diske yazım: YOK" diye **doğrula**.
 
+🔴 **`print()` İÇİNDEKİ EMOJİ ÇIKTI YÖNLENDİRİLİNCE BETİĞİ ÖLDÜRÜR — beş kez ısırdı.**
+Windows konsolu **cp1254**; emoji ve varyasyon seçicileri (`⚠️` = U+26A0 + U+FE0F)
+bu kodlamada **yok**. Ekrana basarken sorun çıkmaz, `> dosya` ile yönlendirilince
+`UnicodeEncodeError` fırlatır ve betik **çöker**. Bir kez uydurma p-değeri de
+ürettirdi (çıktı yarıda kesilmişti).
+⚠️ **Em-dash (`—`) ve Türkçe harfler cp1254'te VAR** — onlar tehlikeli değil.
+Sorun yalnız emoji/varyasyon seçicisi. İlk taramam em-dash'i yanlışlıkla suçladı.
+**Disiplinle kapanmadı, ARAÇLA kapatıldı** — her ölçüm betiğinin başına:
+
+```python
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+```
+
+Uygulandı: `poz_yol/40..43` · `fonlama_oku` · `fonlama_denetim` · `perp_seri_indir`
+· `son2gun*` · `veri_denetim_2gun`. **Yeni ölçüm betiği bu bloksuz yazılmaz.**
+⚠️ Bot dosyalarına (`testbot.py` vb.) EKLENMEDİ — onlar `pythonw` ile koşuyor,
+çıktı yönlendirilmiyor, sorun çıkarmıyorlar; dokunmak bota müdahale olurdu.
+
 **`python -m pyflakes *.py` — her kod değişikliğinden sonra, `py_compile`'a EK.**
 `py_compile` yalnız sözdizimine bakar; **tanımsız isim** onun için hata değil, çalışma
 anında patlar. Bu sınıf **üç kez** ısırdı: `radar.HERE` (modül düzeyinde yoktu — sessizce

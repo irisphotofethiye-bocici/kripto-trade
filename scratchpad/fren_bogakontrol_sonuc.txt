@@ -1,0 +1,33 @@
+BOGA hucresi — AY AY kirilim (post-hoc saglamlik, hukum DEGISMEZ)
+========================================================================
+ay          N_UST      UST%   N_dig    diger%      lift
+2024-10        56   -1.173      97   +2.722    -3.895 <--
+2024-11       892   -1.564    1551   -1.483    -0.081 <--
+2024-12       927   +2.578     841   -0.426    +3.004 
+2025-04         9         -      63         -      (N az)
+2025-05       933   -0.563    1598   -0.303    -0.260 <--
+2025-07        73   +3.368     188   +2.173    +1.196 
+2026-04         0         -     142         -      (N az)
+2026-05        38   -1.688     426   -1.402    -0.286 <--
+
+lift POZITIF ay: 2 · NEGATIF ay: 4
+BOGA x UST toplam N=2928, 7 ayrik ay, 364 ayri sembol
+EN BUYUK ay: 2025-05 -> N=933 (%31.9)  <-- tek ay hakimiyeti kontrolu
+EN BUYUK ay ATILINCA: lift +1.326%  iki-ornekli t=+7.88  (N 1995 vs 3308)
+
+========================================================================
+BASKIN AY testi — en cok N'li ay degil, LIFTE en cok katkiyi veren ay
+   2024-12 katki   +2784.4  (lift +3.004 x N 927)
+   2025-07 katki     +87.3  (lift +1.196 x N 73)
+   2026-05 katki     -10.9  (lift -0.286 x N 38)
+   2024-11 katki     -72.3  (lift -0.081 x N 892)
+   2024-10 katki    -218.1  (lift -3.895 x N 56)
+   2025-05 katki    -242.7  (lift -0.260 x N 933)
+
+2024-12 ATILINCA: lift -0.246%  iki-ornekli t=-1.74  (N 2001 vs 4065)
+ON-KAYITLI ust hukum: lift +0.817%%, t=+6.07 -> 'fren BOGA'da ZARARLI'
+TEK AY cikinca hukum COKUYOR
+
+AY duzeyinde lift dizisi: -3.895, -0.081, +3.004, -0.260, +1.196, -0.286
+ay sayisi 6 · ortalama -0.054 · medyan -0.171 · pozitif 2/6
+AY-KUMELI t = -0.06   <-- bagimsiz birim AY alinirsa

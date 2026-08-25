@@ -1,0 +1,37 @@
+FRENIN KENDISI (btc_pay SHORT bacagi) REJIMDEN BAGIMSIZ MI? - VEKIL sinav
+==============================================================================
+ON-KAYIT: olcumler.md (commit 43d2cf5, kosturulmadan ONCE)
+FRENIN IDDIASI: bant==UST -> SHORT kenari DUSUK (lift NEGATIF olmali)
+DONDURULMUS: UST_ESIK=2.8755 (LONG sinavindan aynen)
+Mekanik: SHORT, A-stop, hedef -10.0%, 72s, maliyet+FONLAMA dahil
+
+islenen sembol: 565
+
+--- AYI -----------------------------------------------------------
+  UST (frenlenen) : N= 3301   -1.498%   (ayri sembol 516)
+  diger (serbest) : N= 7566   +0.250%   (ayri sembol 528)
+  LIFT (UST-diger):  -1.748%   iki-ornekli t = -15.33   fren HAKLI
+    A yarisi: lift  -1.898%  t=-11.93  (N 1650 vs 3783)
+    B yarisi: lift  -1.599%  t=-9.79  (N 1651 vs 3783)
+
+--- NOTR ----------------------------------------------------------
+  UST (frenlenen) : N=20345   -0.336%   (ayri sembol 535)
+  diger (serbest) : N=31648   +0.323%   (ayri sembol 547)
+  LIFT (UST-diger):  -0.659%   iki-ornekli t = -12.62   fren HAKLI
+    A yarisi: lift  -0.339%  t=-4.67  (N 10172 vs 15824)
+    B yarisi: lift  -0.979%  t=-13.08  (N 10173 vs 15824)
+
+--- BOGA ----------------------------------------------------------
+  UST (frenlenen) : N= 2928   +0.196%   (ayri sembol 364)
+  diger (serbest) : N= 4906   -0.621%   (ayri sembol 442)
+  LIFT (UST-diger):  +0.817%   iki-ornekli t = +6.07   fren TERS
+    A yarisi: lift  +0.571%  t=+3.08  (N 1464 vs 2453)
+    B yarisi: lift  +1.064%  t=+5.50  (N 1464 vs 2453)
+
+==============================================================================
+ON-KAYITLI OLCUT — BOGA hucresi
+  [fren BOGA'da HAKLI]  lift<0 False · iki yari<0 False · t<-2,0 False
+  [fren BOGA'da ZARARLI] lift>0 True · iki yari>0 True · t>+2,0 True
+  -> HUKUM: fren BOGA'da ZARARLI (rejim sinirlamasi onerisi 21-22'ye)
+  [bilgi] AYI lifti -1.748% (t=-15.33)
+  [bilgi] NOTR lifti -0.659% (t=-12.62)

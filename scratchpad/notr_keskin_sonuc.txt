@@ -1,0 +1,30 @@
+NOTR hukmu KESKIN HAREKET anlarinda da gecerli mi?
+============================================================================
+Bugunun konumu: BTC 30g +5,11%% (NOTR) · 3g +8,95%%
+Yontem: NOTR gozlemleri BTC 3g getirisine gore UCE bolunur (esik secilmez)
+Istatistik: AY-KUMELI
+
+--- tohum 41   dilim sinirlari: BTC 3g  -2.31%  ve  +0.85%
+    DUSUK  (BTC 3g <-2.3)      N=11122/ 6209  ham -1.049%  AY-KUMELI lift -1.902% t=-2.99  (20 ay, 5/20 poz) 
+    ORTA                       N= 6137/11184  ham -0.395%  AY-KUMELI lift -0.582% t=-1.16  (20 ay, 6/20 poz) <-- gurultu
+    YUKSEK (BTC 3g >+0.9)      N= 3086/14255  ham -0.441%  AY-KUMELI lift -1.040% t=-2.47  (19 ay, 6/19 poz) 
+
+--- tohum 7   dilim sinirlari: BTC 3g  -2.28%  ve  +0.88%
+    DUSUK  (BTC 3g <-2.3)      N=11078/ 6065  ham -1.174%  AY-KUMELI lift -2.046% t=-3.40  (20 ay, 5/20 poz) 
+    ORTA                       N= 5915/11241  ham -0.330%  AY-KUMELI lift -0.506% t=-1.24  (20 ay, 6/20 poz) <-- gurultu
+    YUKSEK (BTC 3g >+0.9)      N= 3010/14141  ham -0.476%  AY-KUMELI lift -1.200% t=-3.26  (20 ay, 4/20 poz) 
+
+    YUKSEK (BTC 3g >+0.9)      N= 3086/14255  ham -0.441%  AY-KUMELI lift -1.040% t=-2.47  (19 ay, 6/19 poz) 
+
+--- tohum 7   dilim sinirlari: BTC 3g  -2.28%  ve  +0.88%
+    DUSUK  (BTC 3g <-2.3)      N=11078/ 6065  ham -1.174%  AY-KUMELI lift -2.046% t=-3.40  (20 ay, 5/20 poz) 
+    ORTA                       N= 5915/11241  ham -0.330%  AY-KUMELI lift -0.506% t=-1.24  (20 ay, 6/20 poz) <-- gurultu
+    YUKSEK (BTC 3g >+0.9)      N= 3010/14141  ham -0.476%  AY-KUMELI lift -1.200% t=-3.26  (20 ay, 4/20 poz) 
+
+============================================================================
+BUGUN (+8,95%) BU DAGILIMIN NERESINDE?
+  NOTR gozlemlerinin %99.3'i bugunkunden DUSUK bir BTC 3g getirisinde
+  dagilim: %10 -5.62 · %50 -0.75 · %90 +3.98 · %95 +5.51 · en yuksek +16.70
+
+  UST DILIM (en yuksek %10) — bugunku duruma en yakin kume:
+    N=853/4348  ham +0.551%  AY-KUMELI lift -0.592%  t=-0.79  (9 ay, 4/9 poz) <-- gurultu

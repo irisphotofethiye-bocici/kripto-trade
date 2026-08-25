@@ -1,0 +1,27 @@
+KATILIM FILTRESI  islem_x >= 1.0  —  2 yillik sinav
+==============================================================================
+ON-KAYIT: olcumler.md (commit 0a73e29, kosturulmadan ONCE)
+islem_x = n(giris bari) / medyan(n, onceki 48 bar)   [GORELI, boyuttan arinik]
+UYARI: gozlem 15 dk, bu veri SAATLIK -> VEKIL olcum
+Mekanik: A-stop, hedef %10, 72s, maliyet + FONLAMA DAHIL
+
+islenen sembol: 565
+
+--- A_funding -------------------------------------------------
+  KONTROL (filtresiz)     : N= 20521   +0.006%  t=+0.16  t_kume=+0.03
+  KURAL   (islem_x>=1.0)  : N= 14149   -0.007%  t=-0.14  t_kume=-0.03
+  FARK (islem basina)     :  -0.013%   |   islem dususu: %31.1 
+  ELENEN dilim (x<1.0)    : N=  6372   +0.035%  t=+0.47   <-- atilanlar
+    A yarisi: kontrol -0.289%  kural -0.391%  fark -0.102%  (N 10260->7167)
+    B yarisi: kontrol +0.302%  kural +0.388%  fark +0.086%  (N 10261->6982)
+    rejim farki: AYI +0.003% (N=2996) | BOGA -0.239% (N=447) | NOTR -0.004% (N=10706)
+
+--- B_ma50ucuz ------------------------------------------------
+  KONTROL (filtresiz)     : N=  4340   -0.235%  t=-2.62  t_kume=-0.69
+  KURAL   (islem_x>=1.0)  : N=  3631   -0.166%  t=-1.71  t_kume=-0.49
+  FARK (islem basina)     :  +0.069%   |   islem dususu: %16.3 
+  ELENEN dilim (x<1.0)    : N=   709   -0.587%  t=-2.54   <-- atilanlar
+    A yarisi: kontrol -0.198%  kural -0.085%  fark +0.113%  (N 2170->1776)
+    B yarisi: kontrol -0.271%  kural -0.243%  fark +0.028%  (N 2170->1855)
+    rejim farki: AYI +0.049% (N=523) | BOGA +0.036% (N=410) | NOTR +0.078% (N=2698)
+

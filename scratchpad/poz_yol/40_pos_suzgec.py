@@ -20,6 +20,18 @@ SHORT kapilarinda suzgec `pos < ESIK` olanlari REDDEDER (on-kayitta boyle yazild
 
 SALT OKUMA.
 """
+# [2026-08-25] cp1254 TUZAGI — kalici kapatma.
+#   Windows konsolu cp1254; print() icindeki emoji/varyasyon secici CIKTI
+#   YONLENDIRILDIGINDE UnicodeEncodeError firlatiyor ve betik COKUYOR.
+#   Bu sinif bu projede BES kez isirdi. Emoji ayiklamak yerine stdout
+#   guvenli hale getirilir; hata sinifi disiplinle degil ARACLA kapanir.
+import sys as _sys
+for _s in (_sys.stdout, _sys.stderr):
+    try:
+        _s.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 import os, sys, json, datetime, collections, statistics as sx, math
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -168,7 +180,7 @@ if __name__ == "__main__":
     print("pos RET SUZGECI — on-kayit ON_KAYIT_pos_suzgec.md")
     print("ESIK=%.2f · stop birincil %%%.0f · ufuk %dsa · maliyet %%%.4f"
           % (ESIK, BIRINCIL, UFUK, MALIYET))
-    print("⚠️ BOGA_LONG kapisi OLCULEMEDI (skor/smart klines'tan uretilemiyor)")
+    print("[UYARI] BOGA_LONG kapisi OLCULEMEDI (skor/smart klines'tan uretilemiyor)")
     print("⚠️ Olcut Y1 (yon tutarliligi) bu yuzden OLCULEMEDI\n")
     kova = topla()
 
