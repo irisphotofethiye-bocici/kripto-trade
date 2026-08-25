@@ -22,6 +22,8 @@ ap = argparse.ArgumentParser()
 ap.add_argument("--n-est", type=int, default=8)
 ap.add_argument("--sure-probu", action="store_true", help="tek gun, SADECE sure basar")
 ap.add_argument("--min-baglam-gun", type=int, default=7)
+ap.add_argument("--ckpt", default=os.path.join(HERE, "agirlik"))
+ap.add_argument("--gun", default=None, help="sure probu icin tek gun")
 A = ap.parse_args()
 
 D = json.load(open(os.path.join(HERE, "veri.json"), encoding="utf-8"))
@@ -74,10 +76,13 @@ from tabfm.src.pytorch import tabfm_v1_0_0
 from tabfm import TabFMRegressor
 
 t0 = time.time()
-model = tabfm_v1_0_0.load(model_type="regression", device="cpu")
+model = tabfm_v1_0_0.load(model_type="regression", checkpoint_path=A.ckpt, device="cpu")
 print("model yuklendi (%.0f sn)" % (time.time() - t0), flush=True)
 
 sat = []
+if A.gun:
+    TEST_GUN = [A.gun]
+
 for gi, g in enumerate(TEST_GUN):
     ctx = df[df["gun"] < g]
     tst = df[df["gun"] == g]
