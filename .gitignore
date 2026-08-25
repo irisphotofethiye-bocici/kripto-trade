@@ -126,6 +126,8 @@ scratchpad/olay_seviyesi/*.json
 scratchpad/tabfm_venv/
 scratchpad/tabfm/*.json
 scratchpad/tabfm/hf_cache/
+scratchpad/tabfm/agirlik/
+scratchpad/tabfm/*.log
 
 scratchpad/tfm_venv/
 
