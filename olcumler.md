@@ -4274,3 +4274,84 @@ o rakam bir sızıntı yapaylığıydı, bulgu değil.
 ve düştü" diye **sayılamaz**. Gerçek sayım: **4 kural sınandı, 4'ü de geçemedi.**
 
 **HÜKÜM YAZILMADI.** Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔴 PORTFÖY AŞAMASI — üç aşamalı sıranın ÜÇÜNCÜSÜ, ilk kez yapıldı (2026-08-25)
+
+**Betik:** `scratchpad/poz_yol/43_portfoy.py` · N=210 kapanmış pozisyon
+(83'ü kısmi kayıt içeriyor) · toplam net **−3.168,75 $** · **tanımlayıcı, hüküm yok**
+
+#### 1 · Pozisyon sınırı — bağlıyor ama nadiren
+
+```
+maks_pozisyon = 8   (config: testbot.maks_pozisyon)
+6.869 turun 544'u (%7,9) sinirda
+acik sayisi: {0:4239, 1:484, 2:174, 3:283, 4:306, 5:321, 6:213, 7:305, 8:544}
+```
+
+Turların **%62'sinde hiç açık pozisyon yok.** Sınır ana kısıt değil; asıl kısıt
+aday bulmak (adayların %97,4'ü skorda eleniyor — bu dosya, boğa kapısı ölçümü).
+
+#### 2 · 🔴 KUYRUK SIRASI KEYFİ — skor sonucu öngörmüyor
+
+Bot adayları **skora göre** sıralıyor ([testbot.py:1444](testbot.py#L1444)):
+
+```
+skor dilimi      N   ort net $   kazanma
+30,0-36,2       52     -16,76      %38
+36,4-47,0       52      -6,00      %40
+47,2-57,7       52     -21,77      %42
+58,2-89,3       54     -15,80      %44
+UST - ALT ceyrek: +2,20 $   gun-kumeli t +0,42  (11 gun)
+```
+
+**Monotonluk yok, fark yok (t=+0,42).** Sınır bağladığında bot hangi adayı seçtiğini
+**bilmiyor** — sıralama pratikte rastgele. Kazanma oranı hafif artıyor (%38→%44)
+ama dolar sonucu değişmiyor.
+
+#### 3 · Girişteki `pos` — işaret doğru, güç yok
+
+```
+pos dilimi       N   ort net $   kazanma
+0,00-0,57       52      -0,88      %48
+0,57-0,77       52     -31,21      %37
+0,77-0,91       52     -20,75      %37
+0,92-3,27       54      -7,79      %44
+UST - ALT ceyrek: -5,13 $   gun-kumeli t -0,57  (10 gun)
+```
+
+İşaret **beklenen yönde** (yüksek `pos` kötü) ve en alt çeyrek neredeyse başabaş
+(−0,88, %48 kazanma) — ama t=−0,57, **anlamlı değil.** N=210, 10 gün.
+⚠️ `range_pos_giriste` **1'i aşıyor** (maks 3,27) — 20 barlık aralığın dışında
+hesaplanıyor olabilir; ayrı teşhis gerekir.
+
+#### 4 · Boyutlandırma
+
+```
+marjin $: medyan 401  ceyrekler 218 / 723  aralik 50-1174   (23 kat yayilim)
+kaldirac : 3x=164 · 4x=47 · 5x=34 · 6x=19 · 7x=6 · 8x=9 · 9x=6 · 10x=8
+```
+
+Risk sabit (~121 $) → **stop genişliği pozisyon büyüklüğünü belirliyor.**
+
+#### 5 · 🔴 KAPI KARNESİ — kaybın %61'i TEK kapıdan
+
+```
+kapi              N     toplam     ort   kazanma
+MA50+ucuz        98   -1921,58  -19,61     %36   <<< kaybin %61'i
+BOGA             53   -1504,74  -28,39     %42
+A+B              25    +198,56   +7,94     %44
+NOTR-belirsiz    19    +140,61   +7,40     %63
+A+B+MA50          6    +598,58  +99,76     %67
+AYI               5    -690,08 -138,02     %40
+```
+
+🟢 **2 yıllık ölçümle BİREBİR uyumlu.** `olcumler.md` → maliyet doğrulaması:
+*"`MA50+ucuz` kapısının BRÜT kenarı NEGATİF (−0,0301) — maliyet öncesi bile
+kaybettiriyor."* Canlı veri aynı şeyi söylüyor: **N=98, −1.921,58, %36 kazanma.**
+
+İki bağımsız ölçüm (2 yıl replay + 210 canlı işlem) aynı kapıyı işaret ediyor.
+
+**HÜKÜM YAZILMADI** — bu tanımlayıcı bir ölçüm. Kapı kapatma kararı ayrı ön-kayıt
+ister. Bot dosyalarına yazım: YOK.
