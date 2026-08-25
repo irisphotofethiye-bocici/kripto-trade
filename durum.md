@@ -698,3 +698,79 @@ var ve kaynak alanı yok — ayırt edilemiyorlar. `defter2` bu hatayı yapmıyo
 
 Karşılaştırma **eşzamanlı** olduğu için rejim farkı yok. Ölçüt sayısı ve
 penceresi **henüz belirlenmedi** — 21-22 tartışmasının maddesi.
+
+## 🆕 DEFTER-3 KURULDU VE BAŞLATILDI (2026-08-25, KULLANICI KARARI)
+
+**Soru:** *"Defter-2 kaybediyor — kayıp EVRENDEN mi geliyor, YÖN KISITINDAN mı?"*
+
+`defter2` yalnız SHORT açtığı için boğa haftasında **yapısı gereği** kaybeder.
+O kaybın hangi kaynaktan geldiği ayrılamıyordu. `defter3` bu iki kaynağı ayırır.
+
+| | defter2 | defter3 |
+|---|---|---|
+| evren | fiyat > $0,07 · funding > −0,05 · chg24 < %20 · btc_pay ≠ UST | **birebir aynı** |
+| yön | yalnız SHORT | `chg24 ≥ 0 → SHORT` · `chg24 < 0 → LONG` |
+| çıkış · stop · boyutlandırma · `MAKS_POZ` | — | **birebir aynı** (bilinçli) |
+
+**Tek değişken YÖN.** `defter3 − defter2` = yönün etkisi. Ayrıca `chg24 < 0`
+alt kümesinde **aynı isimler üzerinde** doğrudan yön kıyası olur (biri SHORT,
+diğeri LONG).
+
+🔴 **LONG kolunun KAYBETMESİ BEKLENİYOR.** Bu evrende LONG, ölçümün beş
+adımının hepsinde `t < −4` ile reddedilmişti (`CLAUDE.md` → defter tablosu).
+Defter o hükmü **ileri zamanda** sınamak için kuruldu; *"gerçekten kötü"* de
+tam bir cevaptır. **Hüküm bu kolun kârına göre yazılmaz.**
+
+⚠️ **FORMASYON İCAT EDİLMEDİ.** Kullanıcı *"en iyi formasyonu uygula"* dedi;
+uygulanmadı, çünkü 2026-08-25'te yapılan yedi ölçümün **yedisi de olumsuz**
+sonuçlandı — konacak ölçülmüş bir formasyon yok. Uydurmak yerine tek değişken
+bırakıldı. *(Bu, "en iyi hücre seçilmez" kuralının uygulanmasıdır.)*
+
+### Kurulum ayrıntısı
+
+```
+dosyalar : defter3_state.json · defter3_islemler.jsonl · defter3_equity.jsonl
+           defter3_veto.jsonl   (botun veto_log'una SIZMASIN diye AYRI)
+gorev    : KriptoDefter3 · PT7M30S · trigger baslangici 2026-08-25T16:12:40
+kasa     : 10.000 $ sanal
+okuma    : python defter3.py --durum   (LONG/SHORT kirilimi + defter2 yan yana)
+```
+
+⚠️ **`--durum` fonlamayı AYRI sütunda gösterir.** LONG kolu fonlamayı **öder**,
+SHORT kolu **tahsil eder**; net kârı tek sayıya indirgemek iki kolu haksız
+kıyaslar. (2026-08-25 ölçümü: fonlama 24 saatte ham kenarın **%85'ini** yiyor.)
+
+### Doğrulama
+
+| kontrol | sonuç |
+|---|---|
+| kuru test (diske yazan **her** yol stub'lu) | **"DİSKE YAZIM: YOK"** · `defter3_*` dosyası oluşmadı |
+| `testbot._DEFTER` geri alındı | evet (`finally`) |
+| `VETO_LOGF` takası | var — `golge.py`'de eksik olan dördüncü koruma |
+| `pyflakes` + `py_compile` | temiz |
+| bot dosyalarına dokunma | **hiçbiri değişmedi** — `testbot.py` dahil |
+
+### ⚠️ Zamanlanmış görevde SAPMA — ölçüldü, çalışıyor, ama referanstan farklı
+
+```
+KriptoTestBot  Interval PT7M30S  Duration 'P3650D'
+KriptoDefter2  Interval PT7M30S  Duration 'P3650D'
+KriptoDefter3  Interval PT7M30S  Duration ''        <- BOS
+```
+
+`durum.md`'nin defter2 bölümü boş `Duration`'ı *"tekrar hiç olmuyor"* diye
+kaydetmişti. **Bu vakada olmadı:** trigger 16:12:40'ta başladı, son koşum
+19:27:41 — yani `16:12:40 + 26 × 7dk30sn` **tam tutuyor**, 26 tekrar koştu
+(`LastTaskResult = 0`). Batarya ayarları da doğru (`DisallowStart=False`).
+
+📌 **Karar: statüko.** Görev kanıtlanmış şekilde koşuyor; şüphede statüko
+kuralı gereği dokunulmadı. **Ama eski kayıt bu haliyle eksik** — boş `Duration`
+tek başına tekrarı öldürmüyor, öldüren muhtemelen batarya ayarıydı. İkisi
+birlikte teşhis edilmiş, ayrılmamış.
+🔎 **Denetim:** `Get-ScheduledTaskInfo -TaskName KriptoDefter3` → `LastTaskResult`
+ve `defter3_state.json`'ın **mtime**'ı. `State = Ready` tek başına kanıt DEĞİL.
+
+### Ne zaman hüküm yazılır
+
+Ölçüt ve pencere **henüz belirlenmedi** — defter2 ile aynı açık madde.
+Bir hafta öncesi anlamsız; iki kol da tek haneli N taşır.
