@@ -4355,3 +4355,61 @@ kaybettiriyor."* Canlı veri aynı şeyi söylüyor: **N=98, −1.921,58, %36 ka
 
 **HÜKÜM YAZILMADI** — bu tanımlayıcı bir ölçüm. Kapı kapatma kararı ayrı ön-kayıt
 ister. Bot dosyalarına yazım: YOK.
+
+---
+
+### 🔴 STOP: REJİM Mİ, YÖN MÜ? — İKİSİ DE DÜŞTÜ (2026-08-25)
+
+**Ön-kayıt:** `ON_KAYIT_sure_rejim.md`, commit **c471b59**, koşumdan **önce**.
+**Betik:** `41_stop_rejim_yon.py` · 5 pencere × 2 yön = 10 hücre · tarafsız kesit
+(kapı süzgeci yok) · `D = net(STOP YOK) − net(STOP %3)` · ufuk 24 sa
+
+#### Sonuç
+
+```
+pencere              yon        D    gun-t   gun   D(top3cik)  liq%   tur
+ATH 24-09/12         LONG   +0,500   +2,29    91     +0,484    0,1  yukselen
+ATH 24-09/12         SHORT  -0,473   -2,44    91     -0,459    0,7  yukselen
+ATH 25-06/10         LONG   -0,094   -0,40   136     -0,129    0,9  yukselen
+ATH 25-06/10         SHORT  -0,192   -1,41   136     -0,168    1,2  yukselen
+TOPARLANMA 25-04     LONG   +0,577   +2,55    42     +0,552    0,1  yukselen
+TOPARLANMA 25-04     SHORT  -0,655   -2,13    42     -0,627    1,4  yukselen
+DERIN-AYI 26-01      LONG   -0,003   -0,03    74     -0,029    0,3    dusen
+DERIN-AYI 26-01      SHORT  +0,078   +0,73    74     +0,113    1,2    dusen
+AYI 26-06/08         LONG   +0,069   +0,87    56     +0,021    0,7    dusen
+AYI 26-06/08         SHORT  +0,156   +2,31    56     +0,180    2,0    dusen
+```
+
+```
+H1 (REJIM)  H1a 4/6 · H1b 3/4 · H1c 5/10   -> DUSTU
+H2 (YON)    H2a 2/5 · H2b 2/5 · H2c 5/10   -> DUSTU
+K1 yogunlasma: isaret DONEN hucre 0        -> GECTI
+K3 likidasyon: hicbir hucre %25'i asmadi
+```
+
+#### HÜKÜM — ön-kayıt karar tablosundan aynen
+
+**İkisi de ✗ → *"`35`'in A/B farkı botun kendi örneklemine özgü, evrene
+genellenmiyor. `35` bir hüküm üretmez."***
+
+`35_stopsuz`'un *"ayıda stop yiyor, boğada koruyor"* okuması **hüküm olarak
+yazılamaz.** Botun 202 pozisyonunda görülen fark, 2 yıllık tarafsız kesitte yok.
+
+#### 🔴 KENDİ ÖN-KAYDIMDA ÇELİŞKİ — kayda geçiyor
+
+Beklenti notunda şöyle yazmıştım: *"trendin **tersine** açılan pozisyonda stop
+kaçınılmaz olarak korur."* Yükselen piyasada trendin tersi **SHORT**'tur.
+Ama ölçütü **`H2a: LONG'da D < 0`** diye kodladım — yani stopun **LONG'u**
+koruyacağını yazdım. **Gerekçemle ölçütüm birbirini tutmuyordu.**
+
+Veri, yazdığım gerekçeyi iki güçlü pencerede destekliyor
+(ATH 24-09 ve TOPARLANMA: LONG `D>0` = stop yiyor · SHORT `D<0` = stop koruyor),
+ama **kodladığım ölçütün tam tersi**. D/9 gereği ölçüt değiştirilmez:
+**H2 DÜŞTÜ olarak kalır.**
+
+Gözlenen desen (*"stop, trendin tersindeki pozisyonu korur"*) **yeni bir hipotezdir**
+ve kendi ön-kaydını gerektirir. Bu ölçümden hüküm olarak çıkarılamaz.
+Not: 5 pencerenin yalnız 3'üne uyuyor ve etki tamamen **yükselen** pencerelerde
+yoğunlaşıyor (|D| 0,47-0,65 vs düşende 0,003-0,156).
+
+**HÜKÜM: `35` hüküm üretmez.** Bot dosyalarına yazım: YOK.
