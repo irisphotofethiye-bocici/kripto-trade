@@ -122,6 +122,11 @@ defter2_equity.jsonl
 scratchpad/olay_seviyesi/*.json
 
 # TimesFM sanal ortami (ayri venv — botun global Python'una DOKUNMAZ)
+# TabFM sanal ortami + agirliklar (6,3 GB, yeniden indirilebilir)
+scratchpad/tabfm_venv/
+scratchpad/tabfm/*.json
+scratchpad/tabfm/hf_cache/
+
 scratchpad/tfm_venv/
 
 # TimesFM kapsama testi ham ciktisi (buyuk, yeniden uretilebilir)
