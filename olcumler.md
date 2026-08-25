@@ -4484,3 +4484,385 @@ Bu bir bulgu değil, bir **uyarı**: tek dönemden çıkan hiçbir kural taşın
 hükmüyle aynı yere bakıyor.
 
 Bot dosyalarına yazım: YOK.
+
+#### ✅ [2026-08-25] Kırılma, DİĞER OTURUMUN KENDİ ARACIYLA doğrulandı — ve sebebi kesinleşti
+
+Diğer oturum `scratchpad/fonlama_oku.py` (birim doğrulayıcı) ve
+`scratchpad/fonlama_denetim.py` (depo tarayıcı) yazmış. **Okuyucu-tarafı teşhisi
+doğru; `funding_gecmis.r` yüzdedir** (`funding_indir.py:67` `*100` uyguluyor,
+`|r|=2,00000` tavanı 21 ayda 189 kez). Yukarıdaki yanlış çıkarımım düzeltildi.
+
+**Ama ikinci ve bağımsız bir hata var — YAZICI tarafında:**
+
+```
+scratchpad/funding_indir.py:67    "r": float(x["fundingRate"]) * 100    -> YUZDE   (dogru)
+scratchpad/veri_guncelle.py:97    "r": float(x["fundingRate"])          -> KESIR   (EKSIK *100)
+```
+
+`veri_guncelle.py` açıklaması: *"klines_1h_uzun ve funding_gecmis **08-11'de
+DURMUS**"* — yakalama betiği, `*100`'ü atlamış. Aynı dosyaya yazan iki betik,
+iki farklı birim.
+
+**Onların KENDİ doğrulayıcısı, KENDİ eşikleriyle (59 sembol):**
+
+```
+TUM DOSYA        gecti: 59/59     <- butun dosya medyani hala yuzde (bozuk dilim %1,4)
+08-12 ONCESI     gecti: 59/59     <- dogru
+08-12 SONRASI    gecti:  4/59     <- 55 sembol BirimHatasi firlatiyor
+
+  ornek           medyan ONCE   medyan SONRA
+  SUI                0,007853       0,000078
+  PIXEL              0,005000       0,000050     (tam 100 kat)
+  ENJ                0,010000       0,000050
+```
+
+##### İki alet boşluğu — araç iyi, kapsamı dar
+
+| boşluk | kanıt |
+|---|---|
+| `fonlama_oku.dogrula()` **tüm dosyaya** bakıyor; kırılma **tarihe yerel** | tüm dosya 59/59 geçiyor, pencere 4/59 |
+| `fonlama_denetim.py` **okuyucuları** tarıyor (`["r"]*100`), **yazıcıları** taramıyor | `python fonlama_denetim.py` → *"IHLAL YOK"*, `veri_guncelle.py` hiç anılmıyor |
+
+##### 🔴 AKTİF TEHLİKE
+
+Veri **2026-08-21'de duruyor** (bugün 08-25). Yakalamak için `veri_guncelle.py`
+yeniden koşulursa **4 gün daha kesir kayıt eklenir.** Betik düzeltilmeden
+koşturulmamalı.
+
+##### Onarım (yapılmadı, onay bekliyor)
+
+1. `veri_guncelle.py:97` → `float(x["fundingRate"]) * 100`
+2. `t ≥ 2026-08-12` kayıtları `×100` ile onar **ya da** kalıcı uçtan yeniden indir
+3. `fonlama_oku.dogrula()`'ya **son N kayıt** için ayrı iddia eklensin
+4. `fonlama_denetim.py`'ye **yazıcı** kalıbı eklensin: `fundingRate` okuyup
+   `funding_gecmis`'e `*100`'süz yazan dosya = ihlal
+
+**Etki:** 2 yıllık ölçümlerde ihmal edilebilir (730 günün 10'u) · son pencereye
+odaklı ölçümlerde büyük.
+
+#### 🔧 [2026-08-25] ONARIM UYGULANDI — beş adım, her biri doğrulandı
+
+**1 · Yazıcı düzeltildi.** `scratchpad/veri_guncelle.py:97` →
+`float(x["fundingRate"]) * 100`, gerekçe yorumu satır içinde.
+`py_compile` + `pyflakes` temiz.
+
+**2 · Veri onarıldı.** `scratchpad/fonlama_onar.py` (yeni betik).
+Yedek alındı (55 MB, 567 dosya, oturum klasörü).
+
+> ⚠️ **Sınır DOSYA BAZINDADIR, sabit tarih DEĞİL.** `veri_guncelle` her dosyanın
+> kendi son kaydından devam etmişti; ölçüldü: 393 dosya 08-12 00:00'da, 44'ü
+> 08-12 04:00'ta, 12'si **08-11'de** başlıyor. Sabit kesim, geç başlayanların
+> **yüzde** kayıtlarını 100'le çarpar → yeni bozulma. Bu yüzden dosyanın
+> sonundan geriye kesintisiz kesir bloğu taranıyor; sınır 2026-08-11'den
+> önceyse dosya **atlanıyor**.
+
+```
+onarilan dosya : 552      onarilan kayit : 24.274
+dokunulmayan   :  13      ATLANAN        : 2  (CBRS · SPY — tokenize hisse, belirsiz)
+```
+
+Atomik yazım (`.tmp` + `os.replace`). **İki bağımsız doğrulama:**
+
+```
+(a) DIGER OTURUMUN dogrulayicisi, pencere pencere (59 sembol):
+       08-12 SONRASI gecti:   4/59  ->  59/59
+
+(b) Botun kendi funding_usdt dolarina karsi:
+       YUZDE tuttu  0/4 -> 2/4      KESIR tuttu  2/4 -> 0/4
+       (SPACE 0,287=0,287 · EDGE -0,571=-0,571 tam eslesme)
+```
+
+**3 · Doğrulayıcı genişletildi.** `fonlama_oku.dogrula()` artık **son pencereyi
+ayrı** doğruluyor (kuyruk medyanı dosya medyanından farklı birimdeyse
+`BirimHatasi`). Sınandı: onarılmış veride **0/40 yanlış alarm**; son 250 kaydı
+sentetik olarak kesire çevrilmiş dosyada **yakalandı**.
+
+**4 · Denetim genişletildi.** `fonlama_denetim.py` artık **yazıcı** kalıbını da
+arıyor (`fundingRate` okuyup `*100`'süz yazan satır). Sınandı: sentetik hatalı
+**yazıcı ve okuyucu — ikisi de yakalandı**; güncel depo **ihlalsiz** (çıkış 0).
+`fonlama_onar.py` muafiyete eklendi (orada `*100` meşru).
+
+**5 · Eksik veri indirildi.** Düzeltilmiş `veri_guncelle.py` ile.
+Tek-sembol sınaması (LINK) önce koşuldu: +101 mum, +12 fonlama, yeni kayıtlar
+`r = 0,010000` (Binance taban oranı, **yüzde**), pencere doğrulaması geçti.
+
+##### Neden bu sıra önemliydi
+
+Yazıcı (1) düzeltilmeden veri (2) onarılsaydı, indirme (5) bozukluğu **yeniden
+üretirdi.** Doğrulayıcı (3) ve denetim (4) ise bu hata sınıfının **bir daha
+sessiz kalmamasını** sağlar — CLAUDE.md'nin *"hata sınıfı disiplinle değil
+ARAÇLA kapanır"* ilkesi.
+
+##### ⚠️ ONARIM ÜÇ KEZ YANLIŞ YAPILDI — kütüğe aynen yazılıyor
+
+İlk kayıtta *"552 dosya onarıldı, doğrulandı"* yazıyordu. **Eksikti.** Sonraki
+denetimlerde üç ayrı hata çıktı; üçü de **sezgisel sınır aramasından** doğdu:
+
+| # | yaklaşım | hata | belirti |
+|---|---|---|---|
+| 1 | sabit eşik `|r| < 0,0009` | yüksek-fonlamalı sembollerde kesir değerleri eşiği aşıyor | 20 dosya kaçtı, çoğu **kısmen** onarıldı |
+| 2 | sabit tarih `t ≥ 08-11` | dosyaların sınırları **farklı**; geç başlayanların DOĞRU kayıtları da ×100 | 33 dosyada `max|r|` %2,7–11,7 (tavan %2) |
+| 3 | değişim-noktası (oran argmax) | medyan sağlam → erken bölmeler de yüksek oran; argmax pencere başına yapıştı | 300 dosyada sınır 08-08'e kaydı |
+
+🔴 **İkinci hata özellikle utandırıcı:** *"sabit kesim yeni bozulma üretir"*
+uyarısını betiğin kendi başlığına ben yazmıştım ve sonra aynısını yaptım.
+
+**Yakalayan şey her seferinde BÜYÜKLÜK MANTIĞI oldu** — *"bu sayı mekanik olarak
+mümkün mü?"* Binance fonlama tavanı **%2**; `max|r| = 11,7` görülünce şüphe
+veriye değil **alete** yöneldi. Diğer oturumun `37_pos_mekanik` vakasında
+bulduğu ders, burada birebir tekrarlandı.
+
+##### Çözüm: sezgisel arama BIRAKILDI
+
+Fonlama **KALICI sınıf** veridir (CLAUDE.md) — `/fapi/v1/fundingRate` istendiği
+an geçmişi döndürür. **Bozuk pencereyi uçtan yeniden çekmek eşiksiz ve kesindir.**
+`scratchpad/fonlama_yeniden_cek.py`: bozuk dosyayı tespit et → pencereyi uçtan
+al (`*100` uygula) → zaman damgasına göre birleştir → **kısalırsa hata fırlat**.
+Tespit-çek-tespit döngüsü **bozuk dosya kalmayana kadar** tekrarlandı.
+
+`fonlama_onar.py` ise güvenli hâle getirildi: sınırı **güvenle belirleyemediği
+dosyayı yedeğe geri döndürüyor** (*"şüphede DAİMA statüko"*).
+
+##### NİHAİ DURUM — üç bağımsız denetim
+
+```
+1) birim dogrulayici (567 sembol)     : 0 hata
+2) bozuk pencere taramasi             : 0 dosya
+3) onarimin urettigi tavan asimi      : 0 dosya
+4) depo denetimi (okuyucu + yazici)   : IHLAL YOK
+5) kapsam: fonlama 2026-08-25 04:00 · mum 2026-08-25 06:00  (guncel)
+```
+
+Yer gerçeği (botun `funding_usdt`'si): **6/11** (onarım öncesi 0/4). Sapan 5
+pozisyonda fark **birim değil pencere** kaynaklı — bot fonlamayı
+`son_funding_kontrol_ts`'e göre kesiyor, kıyas betiği giriş→çıkış aralığı
+kullanıyor. Bu ayrı bir konu, birim sorunu değil.
+
+**Yedek:** `scratchpad/funding_yedek_20260825/` (55 MB, 567 dosya, gitignore'da).
+
+---
+
+### ❌ PİYASA GENELİ FONLAMA SHORT'LARI UYARIYOR MU? — **ÇÜRÜDÜ** (2026-08-25)
+
+Ön-kayıt: `scratchpad/fonlama_rejim/ON_KAYIT.md` (**koşturmadan önce**, 5 ölçüt).
+Betikler: `01_seri.py` · `02_olcum.py`. Veri **2026-08-25 onarımı sonrası**;
+seri `fonlama_oku` üzerinden okunuyor (birim doğrulaması araçta).
+**N=8.853 SHORT pump girişi · 708 gün · 527 sembol.** Yoğunlaşma: sembol %0,9 ·
+gün %2,3. Mekanik yok — **ham ileri fiyat getirisi**, fonlama AYRI.
+
+#### Ölçüt 1 — monotonluk: **KALDI** (U biçimli)
+
+```
+fonlama kovasi          N       HAM 4sa    HAM 24sa      FON 4sa    FON 24sa
+ort<-0,0095          2334        +0,901      +1,341      -0,2777     -1,1544
+-0,0095..-0,0032     2082        +0,643      +0,611      -0,2038     -0,9426
+-0,0032..+0,0020     2206        +0,556      +0,093      -0,0903     -0,4544
+ort>+0,0020          2231        +0,589      +1,429      -0,0381     -0,2116
+```
+
+#### Ölçüt 2 (kritik) — BTC sabitlendiğinde: **KALDI**
+
+```
+ 4sa  BTC0 -2,03  BTC1 +0,35  BTC2 -1,13  BTC3 +0,89   -> 2/4
+24sa  BTC0 -2,67  BTC1 -1,85  BTC2 +1,31  BTC3 +3,87   -> 2/4
+```
+
+İşaret BTC kovaları arasında **dönüyor**. Ölçüt 3 (holdout) de yarılar arasında
+işaret döndürüyor (4sa −0,579 → +0,029; 24sa +1,352 → −0,108). Ölçüt 4 (rejim)
+nominal 2/3 ama ufuklar arasında işaret tutarsız (ATH: 4sa −1,92 · 24sa +2,03).
+
+> **HÜKÜM: ÇÜRÜDÜ.** Piyasa geneli fonlama SHORT girişlerini uyarmıyor.
+> Bant dışı ilk aday da elendi.
+
+⚠️ `ort>+0,0020` kovasının NET'i **+1,217** ile en yüksek. **Bu bir bulgu
+DEĞİLDİR** — ön-kayıtlı ölçütlerin ikisi de kaldı; tabloya bakıp en iyi hücreyi
+seçmek bu projede reddedilmiş davranıştır.
+
+#### 🔑 İKİNCİL ÖLÇÜM — asıl değer burada
+
+```
+ufuk        HAM fiyat        FONLAMA           NET     fonlamanin payi
+ 4sa    +0,648 (t +4,7)   -0,1575 (t -16,1)   +0,491        %24
+24sa    +0,821 (t +2,2)   -0,7016 (t -15,7)   +0,120        %85
+
+fonlamasi NEGATIF olan (SHORT ODUYOR):  4sa %28,9  ·  24sa %36,1
+```
+
+**SHORT pump girişlerinde fonlama, 24 saatte ham kenarın %85'ini yiyor.**
+CLAUDE.md'de kayıtlı *"A+B kapısında kenarın %83'ünü fonlama yedi"* olgusu,
+bağımsız bir popülasyonda (8.853 olay · 708 gün) **doğrulandı.**
+
+🔴 **Asimetriye dikkat:** kenarın `t`'si **+2,2**, fonlama maliyetinin `t`'si
+**−15,7**. **Maliyet kesin, kenar marjinal.** Kenar tartışmalıyken maliyet
+tartışmasızdır.
+
+**Bota dair gözlem (kural değil):** 4 saatte fonlama payı %24, net +0,491;
+24 saatte pay %85, net +0,120. Kısa tutma fonlama yapısına **çok daha uygun** —
+botun medyan tutma süresi 2,5 saat, yani bu tarafta doğru konumlanmış.
+
+---
+
+### 🟡 OI DEĞİŞİMİ — **ADAY** (hüküm DEĞİL) · pozisyon kompozisyonu (2026-08-25)
+
+Ön-kayıt: `scratchpad/pozisyon_komp/ON_KAYIT.md` (**koşturmadan önce**;
+**güç sınırı orada ilan edildi**). Betik: `01_olcum.py`.
+**N=358 SHORT pump girişi · 31 gün · 84 sembol** (`perp_seri`, 102 sembol × 30 gün).
+Tasarım: **gün içi eşleştirme** — piyasa günlük hareketi tanımı gereği sabit.
+Mekanik yok, ham ileri fiyat getirisi.
+
+7 değişken sınandı (`d_oi_3s` · `d_oi_24s` · `top_ls` · `d_top_ls` · `glob_ls` ·
+`fark_ls` · `taker`). **Yalnız biri ayırdı:**
+
+```
+degisken     1 saat              4 saat              24 saat            tutarli
+d_oi_3s     -2,151 t=-3,27 *    -1,989 t=-1,50      -6,380 t=-2,12 *    3/3
+taker       -0,727 t=-1,08      -2,124 t=-1,92      -4,085 t=-1,67      3/3
+d_oi_24s    -0,345 t=-0,58      -0,840 t=-0,79      -1,476 t=-0,51      3/3
+top_ls      +0,507 t=+0,59      -1,389 t=-1,20      -1,675 t=-0,59      2/3
+fark_ls     +0,316 t=+0,40      -0,453 t=-0,34      -1,063 t=-0,41      2/3
+```
+
+`fark_ls` (`top_ls − glob_ls`) yine boş — CLAUDE.md'nin *"denendi, bulgu
+çıkmadı"* kaydı **yinelendi**.
+
+#### Ön-kayıtlı ölçütlerin tamamı geçti (`d_oi_3s`)
+
+| ölçüt | sonuç |
+|---|---|
+| 1 · gün içi \|t\| ≥ 2,0 | ✅ 1sa **t=−3,27** · 24sa **t=−2,12** |
+| 2 · ufuklar arası tutarlılık | ✅ **3/3** aynı işaret |
+| 3 · holdout (31 gün ikiye) | ✅ ILK −2,267 · SON −1,781 — **aynı işaret** |
+| 4 · yoğunlaşma | ✅ sembol %8,1 · gün %13,7 (eşik %15) |
+
+#### Karıştırıcı denetimi — pump BÜYÜKLÜĞÜ
+
+```
+ust yari (d_oi yuksek) ortalama chg24  +27,69%
+alt yari (d_oi dusuk)  ortalama chg24  +27,52%      fark +0,17  t=+0,10
+```
+
+Yarılar pump büyüklüğünde **ayrışmıyor**. chg24 açıkça sabitlenip tekrar
+ölçüldüğünde: **1sa −1,763 (t=−2,39, n=44) AYAKTA** · 24sa −4,336 (t=−1,38)
+**zayıflıyor**.
+
+#### 🔴 HÜKÜM DEĞİL — ADAY. Sebepleri:
+
+1. **31 gün.** Ön-kayıt bunu önceden ilan etti: bu pencerede geçen bir sonuç
+   *"aday"* olarak kaydedilir. Kıyas: genişlik 251 gün, fonlama 708 gün.
+2. **7 değişken × 3 ufuk = 21 sınama.** Bu, 7'nin biri.
+3. 🔴 **İŞARET, ÖN-KAYITTAKİ GEREKÇEMİN TERSİ.** Ön-kayıtta *"OI artarak gelen
+   pump = yeni kaldıraçlı LONG = kırılgan"* yazmıştım — kırılgan olsa SHORT
+   **kazanırdı**. Ölçüm tersini söylüyor: **OI hızla artarken short açmak
+   DAHA KÖTÜ.** Okuma: hızlı pozisyon girişi = momentum sürüyor.
+   *Gerekçe yanlıştı, etki var — ikisi ayrı şeyler.*
+4. 24 saatte karıştırıcı kontrolünden sonra zayıflıyor.
+5. Ham fiyat getirisidir; **fonlama dahil değil** (bu oturumda ölçüldü:
+   24sa'te ham kenarın %85'i).
+
+#### Doğrulama için ne gerekir
+
+`perp_seri` **30 günlük kayan pencere** — koşulmadığı her gün kuyruğundan bir
+gün düşüyor (CLAUDE.md). Bu adayın hüküm olabilmesi için pencerenin
+**büyümesi** gerek: `perp_seri_indir.py` düzenli koşarsa 60-90 günde yeniden
+sınanabilir. **Koşulmazsa bu aday doğrulanamadan ölür.**
+
+#### ⛔ [DÜZELTME 2026-08-25, aynı gün] — `d_oi_3s` ADAYLIĞI **DÜŞÜRÜLDÜ**
+
+*"Bota nasıl uygularız"* sorusu sorulunca botun kendi tanımına bakıldı ve
+ölçtüğüm değişkende **fiyat bulaşması** olduğu görüldü:
+
+```
+BOTUN oi3     : sumOpenInterest       = KONTRAT sayisi       (fiyattan arinik)
+BENIM d_oi_3s : sumOpenInterestValue  = DOLAR = kontrat x FIYAT
+```
+
+Dolar cinsinden OI, fiyat yükseldiği için **kendiliğinden** artar. Ölçüldü:
+
+```
+dolar-OI   <-> son 3sa FIYAT : korelasyon +0,774   ORTAK VARYANS %60
+kontrat-OI <-> son 3sa FIYAT : korelasyon +0,396   ortak varyans %16
+```
+
+**Değişkenimin %60'ı fiyat hareketiymiş.** `chg24`'ü sabitlemiştim ama
+**son 3 saatin** fiyat hareketini sabitlememiştim.
+
+##### Temiz (kontrat) sürümle yeniden ölçüm — ÖLÇÜT 1'İ GEÇMİYOR
+
+```
+gun ici eslesmis fark, 1 saat SHORT ham getiri:
+
+  DOLAR-OI   (ilk olcum)             -2,151  t=-3,27  *   <- gecmisti
+  DOLAR-OI   | 3sa FIYAT sabit       -1,818  t=-2,56  *
+  KONTRAT-OI (fiyattan arinik)       -0,781  t=-1,25      <- GECMIYOR
+  KONTRAT-OI | 3sa FIYAT sabit       -1,118  t=-1,72      <- GECMIYOR
+  SADECE 3sa FIYAT (kiyas)           -1,149  t=-1,48
+```
+
+Ön-kayıtlı ölçüt **|t| ≥ 2,0** idi. **Pozisyon kompozisyonunun temiz ölçüsü
+(kontrat OI) bu eşiği geçmiyor.**
+
+> **YENİ HÜKÜM: `d_oi_3s` bulgusu, büyük ölçüde FİYAT HAREKETİNİN başka bir
+> ifadesidir.** CLAUDE.md'nin *"her yeni aday erken fiyat hareketinin başka bir
+> ifadesi çıkıyor"* kuralı **beşinci kez** doğrulandı (agresör dengesi · son yeni
+> uç · genişlik · hacim-öncü · ve şimdi dolar-OI).
+
+##### Ders — ön-kayıt bu hatayı yakalayamadı
+
+Ön-kayıtta karıştırıcı olarak **pump büyüklüğünü** (`chg24`) yazmıştım ve o
+kontrol geçti. Ama asıl bulaşma **değişkenin tanımının içindeydi**: `Value`
+alanı fiyatı çarpan olarak taşıyor. **Karıştırıcı listesi dışsal değişkenlerle
+sınırlı kalmamalı — ölçülen büyüklüğün KENDİ TANIMI da denetlenmeli.**
+Yakalayan şey, *"bot bunu nasıl hesaplıyor"* sorusu oldu.
+
+⚠️ Kodda kayıtlı bağımsız ölçüm ([testbot.py:1432](testbot.py#L1432), 2026-08-03,
+41 gün): `BASLIYOR (vol_x>2.5 & last1>2 & oi3>3)` N=69 ort R **−0,09** ·
+`izle` N=796 ort R **+0,07**. Aynı yön, ama N=69 ve etki küçük — o da hüküm değil.
+
+### ❌ NÖTR→BOĞA GEÇİŞİNDE PUMP TETİĞİ — **DÜŞTÜ** (2026-08-25)
+
+**Ön-kayıt:** `ON_KAYIT_gecis_pump.md`, commit `2e0c96f` — **koşumdan önce** yazıldı.
+**Hipotez (kullanıcı):** *"nötrden boğaya geçiş anında bu tetiklenirse artıda kapanır."*
+**Betik:** `scratchpad/gecis_pump_ham.py` · rejim serisi `scratchpad/rejim_gecis_sayim.py`
+
+**Veri:** `klines_1h_uzun` 546 sembol · 2024-12-23 → 2026-08-25 · **18.420 tetik**
+(`chg24 ≥ +%10` ve `vol_x ≥ 2,0`, sembol başına 24 saatte tek). Rejim serisi
+`evren.btc_rejim()`'den gün gün nedensel üretildi ve **botun canlı etiketiyle
+doğrulandı**. NÖTR→BOĞA geçiş: **7**. Aşama: **HAM** (stop/hedef/fonlama yok), H=24s.
+
+| ölçüt | sonuç |
+|---|---|
+| G1 · `T0−KONTROL` ort ≥ +1,0 **ve** t ≥ +2,5 | ❌ ort **+0,920** · **t = +0,49** |
+| G2 · ≥5/7 geçişte pozitif | ❌ **4/7** |
+| G3 · çürütme (`ÖNCE` ≥ `T0`) | ⚠️ tetikledi, **ama sağlam değil** (aşağı) |
+| G4 · `chg24 × vol_x` hücrelerinde ayakta | ✅ 7/9 hücre pozitif |
+| G5 · şans (2000 sahte geçiş) | ❌ **p = 0,1205** |
+
+**HÜKÜM: DÜŞTÜ.**
+
+**Sonuç tek epizoda yaslanıyor.** 2025-05-06 çıkarılınca işaret dönüyor:
+`T0−KONTROL` **+0,920 → −0,763** (t=−0,75 · 3/6). Kalan altı geçiş: −5,24 · +1,81 ·
++0,62 · +0,46 · −0,63 · −1,60.
+
+🔴 **Hipotezi doğuran geçiş, hipoteze KARŞI çıktı.** 2026-08-21 (canlı pencere):
+`T0` −1,597 · `ÖNCE` **+5,692**. Para etiket dönmeden **önce** kazanılmış.
+
+⚠️ **G3'e yaslanılmaz — ön-kayıt bir ayrıntıyı bağlamamıştı.** 2025-10-03 ve 10-12
+epizodları bitişik; bantlar çakışıyor. İlk-eşleşme atamasıyla `ÖNCE` +1,643 (t=+1,27),
+her geçişe kendi penceresi verilince **+0,214** (t=+0,10) — ve G3 artık tetiklemiyor.
+İkisi de eşiği geçmiyor, **hüküm değişmiyor**, ama G3 bir bulgu olarak kullanılamaz.
+
+**Betimsel gradyan (çıkarım DEĞİL):** `ÖNCE` +2,856 → `T0` +1,443 → `T1` −0,406 →
+`T2` −2,286 (ham ort +24s). Etiketten uzaklaştıkça kötüleşiyor.
+
+⚠️ **TASARIM SINIRI — ufuk stratejiyle uyuşmuyor.** Ölçüm 24 saat tutuyor; golge'nin
+medyan tutma süresi **1,8 saat**. Kısa ufuklu bir kenarı 24 saatlik ham getiri
+göremeyebilir. Bu **ayrı bir ön-kayıtla** sınanır; sonuç görüldükten sonra ufuk
+değiştirmek bu projede reddedilmiş davranıştır — **kısa ufka BİLEREK bakılmadı.**
+
+**Beklenti tutmuştu:** ön-kayıt G1'in düşmesine ~%25 vermiş ve gerekçe olarak
+*"etiket hareketi geç yakalıyor"* yazmıştı; 08-21'de `ÖNCE ≫ T0` çıktı.
+
+⚠️ **Koşum sırasında ileriye-bakma hatası bulundu ve onarıldı:** haftalık seri bir kez
+baştan kuruluyordu, yani açık haftanın kapanışı o haftanın **son** günüydü. Etiketi
+kaydırıyordu (7 geçiş → 5, `2025-05-06 → 05-11`). Onarımdan sonra geçiş sayısı
+ön-kayıtla uyuştu. Ölçüt **değiştirilmedi**.
