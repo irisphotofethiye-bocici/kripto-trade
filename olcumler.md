@@ -4919,3 +4919,97 @@ demişti. **Dördüncü kez aynı duvar** değil ama akrabası: sinyal seviyenin
 maliyet sonrası **+0,099%** — fonlama HARİÇ ve fonlama SHORT lehine olurdu.
 Ama kapı karnesinin *"ters kapı sınavı"* (fonlaması pozitif olanı shortla) zaten
 **KALDI** (NET −0,0279). Bu satır bir kural önerisi DEĞİLDİR.
+
+### 🔴 `skor` İLERİ GETİRİYİ TAHMİN EDİYOR MU? — **DÜŞTÜ**, ama TERS YÖNDE (2026-08-25)
+
+**Ön-kayıt:** `ON_KAYIT_skor_tahmin.md`, commit `a4e0706` — koşumdan **önce**.
+**Betik:** `scratchpad/skor_tahmin.py` · rejim düzeltmesi `scratchpad/skor_tahmin_rejim.py`
+**Neden:** `skor` botun **tek pozitif seçicisi**; LONG kapısı `skor ≥ 45`'e dayanıyor
+ve **hiç doğrudan ölçülmemişti**.
+
+**Veri — KOŞU A (tam tarama evreni):** `radar_archive.jsonl` 184.373 satır →
+`(sembol, saat)` tekilleştirmesiyle 52.028 → kline eşleşen **50.738 gözlem** ·
+441 sembol · **60 gün**. `top_ls/smart/glob_ls/taker` (%24,7) ve `chg24` (%20,5)
+**kullanılmadı** — gizli seçilim. KOŞU B yok, iki evren karıştırılmadı.
+
+⚠️ **KALİBRASYON — bu yapılmasaydı ölçüm sessizce yanlış çıkardı.** `radar_archive`
+`ts` alanı **YEREL saat (UTC+3)**; kline UTC. Ofset −3'te fiyatlar **%100** bar
+aralığında, ofset 0'da **%37**. Giriş anı, ileriye bakmayı engellemek için anlık
+görüntünün **bir sonraki saatinin** kapanışı alındı.
+
+#### Bant tablosu (ham +24s)
+
+```
+bant      N       ort       medyan    pozitif   ATR med
+<2      5870    +0,126%    -0,146%     %47       1,14%
+2-5    10523    +0,218%    -0,132%     %48       1,11%
+5-10   11876    +0,249%    -0,067%     %49       1,32%
+10-20  12204    +0,250%    -0,119%     %48       1,85%
+20-30   5513    -0,001%    -0,419%     %45       2,47%
+30-45   3381    -0,623%    -1,034%     %42       2,90%
+>=45    1371    -2,015%    -3,062%     %35       3,38%   <- BOTUN LONG KAPISI
+```
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| S1 · monotonluk | ρ ≥ **+0,75** | ❌ **ρ = −0,643** (H6: **−0,893**) · uç fark −2,141 · gün-kümeli t=−2,00 |
+| S2 · işaret tutarlılığı | ≥%60 gün | ❌ **13/43 gün (%30)** · t=−2,14 |
+| S3 · 🔴 karıştırıcı | ≥%60 hücre | ✅ **6/9** — ama **NEGATİF işaretle** |
+| S4 · şans (gün-içi permütasyon) | p ≤ 0,05 | ❌ **p = 1,0000** — gerçek değer 2000 permütasyonun **hepsinin altında** |
+
+**HÜKÜM: DÜŞTÜ.** Ön-kayıtlı hipotez *"skor pozitif tahmin eder"* **çürüdü.**
+
+#### 🔴 Ama düşme biçimi önemli: skor GÜRÜLTÜ DEĞİL, TERS
+
+Monotonik **azalan**. S4'ün `p=1,0000`'ı şu demek: gözlenen fark 2000 gün-içi
+permütasyonun tamamından **daha negatif**. S3 (belirleyici karıştırıcı kapısı)
+negatif işaretle **ayakta kaldı** → skor yalnızca oynaklığın vekili değil.
+
+**Sağlamlık — bu projede nadir görülen tutarlılık:**
+
+```
+zaman yarilari    ILK -3,343   SON -1,067          AYNI ISARET
+rejim (tek tanim) NOTR -1,017  AYI -3,584  BOGA -2,870   UCUNDE DE AYNI ISARET
+yogunlasma        274 sembol · 58 gun · top3 sembol %8,2 · top3 gun %14,4
+ufuk              H24 rho -0,643   ·   H6 rho -0,893  (t=-3,21)
+```
+
+`BANT × REJİM` (tek tanımlı): BOĞA'da `<2` … `20-30` bantlarının **hepsi güçlü
+pozitif** (+2,087 … +2,577) ve **yalnız `≥45` negatif** (−0,675). Yani boğada her şey
+çıkarken en yüksek skorlular çıkmıyor.
+
+⚠️ **Sınırlar aynen:** gün-kümeli t'ler ılımlı (−2,00 / −2,14; H6'da −3,21). Rejim içi
+t'ler **anlamsız**: NOTR −1,14 · AYI −0,99 · **BOGA t=−9,40 ama yalnız 3 gün ve N=123
+→ okunmaz.** 60 gün tek pencere. Bantlar oynaklıkta **3 kat** ayrışıyor (ATR 1,14 →
+3,38) — S3 bunu ele aldı ama mekanik aşama için not düşülür.
+
+#### Çıkarım (hüküm DEĞİL — 2. ve 3. aşama yapılmadı)
+
+`skor ≥ 45` **iyi bir SHORT seçicisi gibi davranıyor ve LONG kapısı olarak kullanılıyor.**
+AYI'da `≥45` ham −4,043% → shortlamak +4,043% (maliyet %0,345). Ama bu **ham** aşamadır;
+`CLAUDE.md`'nin kendi kaydı bir ham kenarın stopla ölebileceğini de, mekaniğin güveni
+şişirebileceğini de gösteriyor. Kural önerisi için mekanik + portföy aşaması şart.
+
+**Ön-kayıtlı yönlü tahmin kısmen tuttu:** *"gradyan çıkarsa BOĞA'da negatif, NOTR'de
+düz"* yazılmıştı. BOĞA negatif ✅; NOTR düz değil, **o da negatif**.
+
+---
+
+### 🔴 VERİ TUZAĞI — `radar_archive.rejim` 2026-07-22'de TANIM DEĞİŞTİRDİ (2026-08-25)
+
+Yukarıdaki ölçümün rejim kırılımı yapılırken bulundu. F10 SEZON×HAVA katmanlaması
+[evren.py:294](evren.py#L294) **2026-07-22'de** eklendi; arşivin `rejim` alanı o
+tarihten önce **eski tek-katmanlı** detektörden geliyor. Ad değişmedi, anlam değişti.
+
+```
+arsiv rejim  vs  F10 3'lu map   07-22 ONCESI  %21,1 uyum   ·   SONRASI  %96,8
+arsiv rejim  vs  hava (eski)    07-22 ONCESI  %80,7 uyum
+```
+
+Somut: Temmuz'da 8.880 satır arşivde **BOGA**, tek tanımda **AYI** (`TEPKI_RALLISI`).
+Genel uyum yalnız **%73,7**.
+
+**Kural:** `radar_archive`'in `rejim` alanıyla 2026-07-22'yi **aşan** hiçbir kırılım
+yapılmaz; rejim BTC mumundan **yeniden üretilir** (`scratchpad/skor_tahmin_rejim.py`
+içinde hazır, botun canlı etiketiyle doğrulanmış). Bu, `funding_gecmis` birim
+kırılmasıyla **aynı hata sınıfıdır**: alan adı değişmeden anlamı değişmiş.

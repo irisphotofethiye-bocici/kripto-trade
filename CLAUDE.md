@@ -177,8 +177,12 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   yanlıştır: o veri yalnızca **o an kaydediyorsan** vardır. `radar_archive` için
   yazılı olan *"noktasal veridir, kayıp kareler geri gelmez"* kuralı **aynen
   `perp_seri` için de geçerlidir.**
-  ⚠️ **`perp_seri_indir.py` ZAMANLANMIŞ GÖREV DEĞİLDİR** — elle koşulan kurtarma
-  betiğidir. Koşulmadığı her gün 30 günlük pencerenin kuyruğundan bir gün düşer.
+  ⚠️ ~~**`perp_seri_indir.py` ZAMANLANMIŞ GÖREV DEĞİLDİR** — elle koşulan kurtarma
+  betiğidir.~~ **[DEĞİŞTİ 2026-08-25]** Artık zamanlanmış görev **VAR**:
+  `KriptoPerpSeri`, 2026-08-24'te kurulmuş, her gün **03:30**, son koşum başarılı
+  (`LastTaskResult 0`). Yani pencere **büyüyor**, kuyruğundan düşmüyor.
+  Eski uyarı, görev **silinir ya da başarısız olursa** yeniden geçerlidir —
+  `Get-ScheduledTaskInfo -TaskName KriptoPerpSeri` ile denetlenir.
 - 🔴 **YENİDEN İNDİRME ESKİYİ SİLEBİLİR — indiriciler BİRLEŞTİRMELİ, EZMEMELİ.**
   Gerçek kayıp (2026-08-24): `perp_seri_indir.py --bot` 07-26'dan başlayan bir
   pencere istedi; `sembol_indir` var olan dosyayı `os.replace` ile **ezdi**.
@@ -189,6 +193,16 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   **Kural:** arşiv dosyasına yazan her indirici (a) var olanı okur, (b) zaman
   damgasına göre birleştirir, (c) **sonuç eskisinden KISAysa hata fırlatır.**
   Onarım `perp_seri_indir.py:sembol_indir` içinde; deseni kopyala.
+- 🔴 **ALAN ADI DEĞİŞMEDEN ANLAMI DEĞİŞEBİLİR — tarih sınırı olan alanlar var.**
+  `radar_archive.jsonl` → `rejim` alanı **2026-07-22'de tanım değiştirdi** (F10
+  SEZON×HAVA katmanlaması o gün eklendi, [evren.py:294](evren.py#L294)); öncesi eski
+  tek-katmanlı detektör. O tarihi **aşan** hiçbir rejim kırılımı bu alanla yapılmaz —
+  rejim BTC mumundan yeniden üretilir. Bu, `funding_gecmis` birim kırılmasıyla **aynı
+  hata sınıfı**: iki farklı şey aynı adı taşıyor ve `pyflakes` de `py_compile` de
+  göremez. Oranlar ve kırılım `olcumler.md`'de.
+  **Grep'lenebilir refleks:** bir alanla uzun pencere bölmeden önce *"bu alanı yazan
+  kod bu pencerede değişti mi"* diye `git log -S"<alan>"` koştur.
+
 - **Fonlama pozisyona 2026-08-17'den İTİBAREN atfediliyor.** O tarihten önce açılmış
   pozisyonların fonlaması **geri üretilemez**. Bu olgunun sahibi burasıdır; başka
   dosya kopyalamaz, işaret eder.
@@ -299,7 +313,7 @@ Doğrulandı: pyflakes ikisini de **isim isim** yakalıyor. Bu sınıf disiplinl
 **araçla** kapanır. Beklenen çıktı: `undefined name` **sıfır** (bilinen zararsız
 uyarılar: kullanılmayan import/değişken, placeholder'sız f-string).
 
-## DÖRT DEFTER — her biri tek değişkeni yalıtır
+## ALTI DEFTER — her biri tek değişkeni yalıtır
 
 | defter | soru | dosya |
 |---|---|---|
@@ -307,6 +321,33 @@ uyarılar: kullanılmayan import/değişken, placeholder'sız f-string).
 | `golge` | **İKİ İŞ birden** — aşağıya bak | `golge.py` |
 | `benim` | Kararı kullanıcı verseydi? | `benim.py` |
 | `ayna` | Bot girsin, çıkışa kullanıcı karar versin | `ayna.py` |
+| `defter2` | **Bot yanlış evrende mi avlanıyor?** (2026-08-20) | `defter2.py` |
+| `defter3` | **Aynı evren, İKİ YÖN** — kayıp evrenden mi yön kısıtından mı? (2026-08-25) | `defter3.py` |
+
+⚠️ **`defter2` mevcut bota EKLENEMEZ, ayrı olmak ZORUNDA.** Ölçüldü: botun 117
+gerçek pozisyonunun **%100'ü** bu yapılandırmadan geçemezdi — çünkü botun iki
+giriş kapısı bu evreni **tam olarak dışlıyor** (`A+B` → `funding ≤ −0,05`;
+`MA50+ucuz` → `fiyat ≤ $0,07`). Filtreleri bota eklemek onu **hiç işlem
+açmaz** hâle getirir. Evren: `fiyat > $0,07` · `funding > −0,05` · `chg24 < %20`
+· `btc_pay ≠ UST` · **YALNIZ SHORT**.
+🔴 **LONG bilinçli olarak DIŞARIDA:** bu evrende LONG, ölçümün **beş adımının
+hepsinde `t < −4`**. "Çift yönlü yapalım" önerisi bu ölçüme karşı savunma
+yapmak zorundadır.
+Çıkış kuralları **bilinçli olarak testbot ile aynı** — fark yalnız girişten
+gelsin diye. Ölçülmüş stop onarımı BURAYA KONMADI; konsaydı fark iki kaynaktan
+gelir ve ayrılamazdı.
+
+⚠️ **`defter3` = `defter2` + YÖN.** Evren · çıkış · boyutlandırma **birebir aynı**;
+tek fark: `chg24 ≥ 0 → SHORT` (defter2 ile aynı), `chg24 < 0 → LONG` (defter2
+burada SHORT açıyor). Böylece `defter3 − defter2` = **yönün etkisi**, ve
+`chg24 < 0` alt kümesinde **aynı isimler üzerinde doğrudan yön kıyası** olur.
+**Neden:** defter2 yalnız SHORT olduğu için boğa haftasında yapısı gereği
+kaybeder — kaybın *evrenden* mi *yön kısıtından* mı geldiği ayrılamıyordu.
+🔴 LONG'un bu evrende `t < −4` ile reddedildiği bilinerek kuruldu; **LONG kolunun
+kaybetmesi BEKLENİYOR**, "gerçekten kötü" de tam bir cevaptır.
+İkisi de **kendi zamanlanmış göreviyle** koşar (`KriptoDefter2` · `KriptoDefter3`,
+7dk30sn) — `golge`/`ayna`/`benim` gibi testbot içinden çağrılmazlar; testbot'a
+hiçbir değişiklik yapılmadı.
 
 ⚠️ **`golge` tek soru yalıtmıyor, iki farklı iş yapıyor** — "reddettiği girişlere
 girseydi?" tanımı defterin yalnızca **üçte birini** kapsıyor:
