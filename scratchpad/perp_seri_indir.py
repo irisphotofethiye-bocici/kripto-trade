@@ -250,7 +250,18 @@ def rapor():
         return
     say = collections.defaultdict(lambda: collections.defaultdict(int))
     for f in dosya:
-        sym, uc = f[:-5].rsplit("_", 1)
+        # [2026-08-25 ONARIM] ESKIDEN: rsplit("_", 1) — IKI PARCALI ekleri boluyordu
+        #   ("2Z_glob_ls" -> "2Z_glob" + "ls") ve raporda SAHTE sembol uretiyordu:
+        #   gunluk gorev logunda 200+ "2Z_glob, 2Z_top ... OI verisi BOS" satiri.
+        #   Veri saglamdi, YALNIZ RAPOR yaniltiyordu. Simdi BILINEN uc listesiyle eslesir.
+        ad = f[:-5]
+        uc = None
+        for _u in list(UCLAR) + ["kline"]:
+            if ad.endswith("_" + _u):
+                sym, uc = ad[:-(len(_u) + 1)], _u
+                break
+        if uc is None:
+            continue
         try:
             with open(os.path.join(CIKTI, f), encoding="utf-8") as fh:
                 say[sym][uc] = len(json.load(fh))
