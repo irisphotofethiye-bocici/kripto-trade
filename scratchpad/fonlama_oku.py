@@ -86,6 +86,23 @@ def dogrula(oranlar, kaynak=""):
             "%s: tek oran fonlama tavanini asiyor (max |r| = %.4f > %.1f)."
             % (kaynak, enb, MUTLAK_TAVAN))
 
+    # [2026-08-25 EKLEME] SON PENCERE AYRI DOGRULANIR.
+    #   Neden: birim kirilmasi TARIHE YEREL olabilir. 2026-08-12'de veri_guncelle.py
+    #   `*100`'u atlayarak KESIR kayit ekledi; bozuk dilim dosyanin yalnizca ~%1,4'uydu
+    #   ve TUM-DOSYA medyani kaymadi -> bu dogrulayici 59/59 GECTI, oysa ayni
+    #   dogrulayici son pencereye uygulaninca 55/59 HATA veriyordu.
+    #   Ders: bir onbellege BIRDEN FAZLA betik yazabilir ve birimleri farkli olabilir.
+    #   Ayrinti: olcumler.md -> "funding_gecmis ICINDE BIRIM KIRILMASI".
+    if len(sifirsiz) >= 60:
+        kuyruk = sifirsiz[-max(30, len(sifirsiz) // 10):]
+        med_k = sx.median(kuyruk)
+        if med_k > MEDYAN_UST or med_k < MEDYAN_ALT:
+            raise BirimHatasi(
+                "%s: SON PENCERE birimi dosyanin geri kalanindan FARKLI "
+                "(kuyruk medyan |r| = %.8f, dosya medyani = %.6f). "
+                "Onbellege farkli birimde yazan ikinci bir betik olabilir."
+                % (kaynak, med_k, med))
+
 
 _ONBELLEK = {}
 

@@ -94,7 +94,11 @@ def fonlama_guncelle(sym):
             if t in gorulen:
                 continue
             gorulen.add(t)
-            d.append({"t": t, "r": float(x["fundingRate"])})
+            # [2026-08-25 ONARIM] *100 EKSIKTI -> 08-12..08-21 arasi kayitlar
+            #   KESIR olarak yazildi, oysa funding_gecmis YUZDE tutar
+            #   (funding_indir.py:67 ile ayni birim olmali). Ayrinti: olcumler.md
+            #   -> "funding_gecmis ICINDE BIRIM KIRILMASI".
+            d.append({"t": t, "r": float(x["fundingRate"]) * 100})
             ekle += 1
         yeni = int(r[-1]["fundingTime"]) + 1
         if yeni <= t0 or ekle == 0:

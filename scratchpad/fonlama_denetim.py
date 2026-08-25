@@ -37,7 +37,13 @@ YUZDE_DIZIN = "funding_gecmis"
 ONDALIK_DIZIN = os.path.join("short_kayip", "fonlama")
 
 CARPIM = re.compile(r'\["r"\]\s*\*\s*100|\[.r.\]\s*\*\s*100')
-ATLA = {"fonlama_oku.py", "fonlama_denetim.py", "funding_indir.py"}
+# [2026-08-25 EKLEME] YAZICI tarafi. Okuyucu taramasi 2026-08-12 hatasini KACIRDI:
+#   veri_guncelle.py:97 `fundingRate`i HAM (kesir) yazip funding_gecmis'e ekliyordu.
+#   Denetim "IHLAL YOK" dedi cunku yalniz *100 UYGULAYAN okuyuculari ariyordu.
+#   Bu desen tersini arar: fundingRate okuyup *100'SUZ yazan satir.
+YAZIM = re.compile(r'"r"\s*:\s*float\([^)]*fundingRate[^)]*\)(?!\s*\*\s*100)')
+ATLA = {"fonlama_oku.py", "fonlama_denetim.py", "funding_indir.py",
+        "fonlama_onar.py"}   # [2026-08-25] onarim araci: *100 orada MESRU
 
 
 def dosyalar():
@@ -66,6 +72,9 @@ def denetle():
             if CARPIM.search(satir) and yuzde_kaynak and not ondalik_kaynak:
                 ihlal.append((os.path.relpath(yol, PROJE), n, satir.strip()[:88],
                               "funding_gecmis ZATEN yuzde -> fazladan *100"))
+            if YAZIM.search(satir) and yuzde_kaynak and not ondalik_kaynak:
+                ihlal.append((os.path.relpath(yol, PROJE), n, satir.strip()[:88],
+                              "funding_gecmis'e KESIR yaziyor -> *100 EKSIK"))
     return ihlal
 
 
@@ -75,7 +84,7 @@ if __name__ == "__main__":
     print("=" * 92)
     if not ihlal:
         print("  IHLAL YOK.")
-        print("  (funding_gecmis okuyup fazladan *100 uygulayan betik bulunamadi)")
+        print("  (okuyucuda fazladan *100 yok · yazicida eksik *100 yok)")
         sys.exit(0)
     print("  %d IHLAL:" % len(ihlal))
     for yol, n, satir, sebep in ihlal:
