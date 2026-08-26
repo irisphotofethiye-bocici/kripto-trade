@@ -5240,3 +5240,87 @@ kadarı stop, ne kadarı ufuk — **ayrılmadı.** Ayrı ön-kayıt ister.
 
 **Yeni ve daha keskin soru:** botun LONG tarafı, giriş kapısı ne olursa olsun
 kaybediyorsa, sıradaki inceleme **giriş seçiminde değil, ÇIKIŞ mekaniğinde** olmalı.
+
+### 🔴 KENARI STOP MU YİYOR, SÜRE Mİ? — **STOP DEĞİL** (2026-08-26)
+
+**Ön-kayıt:** `ON_KAYIT_stop_mu_sure_mu.md`, commit `1505a48` — koşumdan **önce**.
+**Betik:** `scratchpad/stop_mu_sure_mu.py` · **N:** LONG 17.715 · SHORT 18.175 · 59 gün.
+
+**Ayırma yöntemi:** her işlem için mekaniğin **kendi gerçekleşen tutma süresi** alınıp
+aynı süre boyunca **stopsuz** ne olacağı hesaplandı → `Δ_stop` süre etkisini **tanım
+gereği** sıfırlar. Süre etkisi ayrıca stopsuz sabit-ufuk eğrisiyle ölçüldü.
+
+#### LONG (birincil)
+
+```
+mekanikli (botun kendisi)       net -0,266%    medyan tutma 6 sa
+STOPSUZ, AYNI sure (eslesmis)   net -0,385%
+D_stop                              +0,120 puan     <- STOP YARDIM EDIYOR
+```
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| D1 · `Δ_stop` < 0 (stop yiyor mu) | t ≤ −2,5 | ❌ **+0,077** · **t = +0,94** — işaret **TERS** |
+| D2 · zaman yarıları | aynı işaret | ✅ ilk +0,163 · son +0,094 (ikisi de **pozitif**) |
+| D3 · süre eğrisinde pozitif bölge | — | ❌ **YOK** |
+| D4 · baskın faktör | — | **SÜRE** (yayılım 0,470 vs stop 0,120) |
+
+**Saf süre eğrisi (stopsuz, sabit ufuk) — LONG:**
+
+```
+1s -0,178  ·  2s -0,194  ·  4s -0,225  ·  6s -0,226  ·  12s -0,227  ·  24s -0,364  ·  48s -0,648
+```
+
+**HÜKÜM: D1 DÜŞTÜ — stop suçlu değil.** Ve süre ayarı da kurtarmıyor: **hiçbir ufukta
+pozitif yok.** Geriye tek açıklama kalıyor: **bu evrende LONG yanlış taraf.**
+
+#### 🔴 ÖNCEKİ ANLATIYI DÜZELTİYOR
+
+Bir önceki ölçüm *"farkı yiyen şey stop mekaniği"* diye **betimlemişti** (hüküm
+yazılmamıştı, ufuk uyumsuzluğu not düşülmüştü — iyi ki). **Yanlıştı.** Ufuk
+eşleştirilince stop **yardım ediyor**. Kırılım:
+
+```
+STOP            N=11566 (%65)   D_stop +0,055
+TP2             N= 3316 (%19)   D_stop -0,748   <- TP2 kazanci KESIYOR
+STOP_TP1SONRASI N= 2662 (%15)   D_stop +1,479   <- kismi+iz-suren EN COK BURADA kazandiriyor
+```
+
+Skor bandına göre `Δ_stop`: `<5` −0,027 · `5-20` +0,080 · `20-45` +0,159 ·
+**`≥45` +0,842** — stop en çok, en oynak yerde yardım ediyor.
+
+⚠️ Bu, projenin *"A-stop ham kenarın %65'ini yedi"* kaydını **geçersiz kılmaz**;
+o başka bir kapı ve başka bir stopla ölçülmüştü. Ama *"bizim stopumuz genel olarak
+kenarı yer"* şeklindeki genellemeyi **bu evrende çürütür.**
+
+#### SHORT (önceden ilan edilmiş ikincil — ölçüt uygulanmadı)
+
+```
+mekanikli net -0,021%   ·   D_stop -0,012 (t=+0,13, notr)
+sure egrisi: 1s -0,099 · 4s -0,050 · 12s -0,003 · 24s +0,273 · 48s +0,614
+```
+
+LONG'un **tam aynası**: süre uzadıkça SHORT iyileşiyor, LONG kötüleşiyor.
+🔴 **Bu bir strateji bulgusu DEĞİL, bu pencerenin YÖN bulgusudur** — radar evreni
+bu iki ayda aşağı sürüklendi. `24s/48s SHORT` hücresi **kural yapılmaz** (en iyi
+hücre seçilmez); ayrı ön-kayıt ve başka pencere ister. Ayrıca fonlama SHORT'un
+**aleyhine** (48s'te −0,193) ve stopsuz kol **likidasyon içermiyor.**
+
+#### İKİ TAHMİN DE YANLIŞ ÇIKTI — aynen yazılıyor
+
+- **Benimki:** *"D1 geçer ~%70, stop yiyor"* → **DÜŞTÜ**, stop yardım ediyor.
+- **Benim karşı-tahminim:** *"süre etkisi çıkarsa KISA sürenin aleyhine çıkar
+  (maliyet sabit)"* → **YANLIŞ.** LONG'da kısa süre **daha az** kötü, uzun süre daha
+  kötü. Maliyet mantığım doğruydu ama yön sürüklenmesi onu ezdi.
+- **Kullanıcınınki:** *"süre yiyor"* → **baskın faktör gerçekten SÜRE** (0,470 vs 0,120).
+  Yön beklentisi farklıydı ama teşhis doğruydu.
+
+#### Nereye kaydı
+
+Teşhis sırayla şuraya taşındı: skor eşiği → LONG tarafının tamamı → **stop değil,
+süre değil, YÖNÜN KENDİSİ.** Botun LONG açması bu evrende hiçbir çıkış ayarıyla
+kurtarılamıyor.
+
+**Sınırlar:** sentetik evren (botun kapı öncesi havuzu, botun karnesi DEĞİL) ·
+59 gün tek pencere · stopsuz kol likidasyonsuz, teşhis aracı · `asgari_stop` elemesi
+kollara ortak uygulandı ama evreni daraltıyor.
