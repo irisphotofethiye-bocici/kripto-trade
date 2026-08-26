@@ -5701,3 +5701,117 @@ düşük olduğunu göstermişti (%3,7), ama **etkileşim var.**
 kullanışlı değil.** Bu ikisi ayrı şeylerdir ve bu proje ilk kez ikisini
 ayırabildi: aday, *"aynı şeyin başka ifadesi"* diye değil, **kendi başına
 yetersiz** olduğu için elendi.
+
+---
+
+### 🔴 TabFM DOĞRU UFUKTA (+2 saat) — **DÜŞTÜ**, ve `+24s` BULGUSU GERİ ÇEKİLDİ (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/tabfm/ON_KAYIT_h2.md`, commit `454281d` — koşumdan önce.
+**N:** 3.598 satır · 13 test günü — **`+24s` koşumuyla BİREBİR AYNI SATIRLAR.**
+
+Kullanıcı itirazı: *"24 saat üzerinden değerlendirdin ama eldeki veri 2,5 saatte
+en büyük etkiyi veriyor."* Ölçüldü, **haklı**:
+
+```
+HAVUZ 816 tekil pozisyon   medyan tutma 1,90 sa   ·   STOP ile kapanan %93, medyan 1,70 sa
+<=2 sa kapanan %52          <=24 sa kapanan %97
+```
+
+**24 saatte pozisyonların %97'si çoktan kapanmış** — ölçülen fiyat hareketinin
+neredeyse tamamı pozisyon kapandıktan *sonra* gerçekleşiyordu.
+
+#### İKİ UFUK YAN YANA — tek değişen ufuk
+
+| ölçüt | `+24s` | `+2s` | |
+|---|---|---|---|
+| **S1** rho ort · t | **+0,1676 · t=+4,92** ✅ | **+0,0379 · t=+1,45** | ❌ |
+| **S2** TabFM − skor | +0,0552 · t=+1,48 ❌ | −0,0393 · t=−1,11 | ⚪ **GEÇERSİZ** |
+| **S3** TabFM − en iyi tek alan | +0,1805 · t=+3,94 ✅ | **+0,0004 · t=+0,02** | ❌ |
+| **S4** gün × ATR hücresi | %56,4 ❌ | %51,3 | ❌ |
+| **S5** ilk/son yarı | aynı işaret ✅ | −0,013 vs +0,097 **TERS** | ❌ |
+| ikincil havuz rho | +0,2311 | **+0,0380** | |
+
+**HÜKÜM: DÜŞTÜ (5/5).**
+
+#### 🔴 `+24s` BULGUSU GERİ ÇEKİLİYOR
+
+2026-08-25'te *"TabFM ham sinyali görüyor"* diye kaydedilmişti (`S1` geçmişti).
+**Doğru ufukta ayakta kalmıyor:** etki **4,4 kat** küçülüyor (havuz rho'da
+**6,1 kat**) ve `t` eşiğin altına iniyor.
+
+Daha keskin bir gösterge `S3`: `+24s`'te TabFM en iyi tek alanı **+0,1805**
+farkla geçiyordu; `+2s`'te fark **+0,0004** — yani **tam olarak sıfır.**
+Modelin 23 alanı birleştirmekten gelen üstünlüğünün tamamı **ufka özgüymüş.**
+
+#### İKİ UFUK FARKLI ŞEY ÖLÇÜYOR
+
+Günlük rho'ların birbirine korelasyonu **pearson +0,372 (p=0,21)** ·
+spearman +0,324 (p=0,28) — **anlamsız.** 13 günün 5'inde işaret bile ters.
+İyi bir `+24s` günü, iyi bir `+2s` günü demek değil.
+
+#### 🔑 YENİ TABAN KAPISI İLK KULLANIMDA ATEŞLENDİ
+
+```
+skor tabani        : baglamda p<0,05 olan gun  0/13   -> S2 GECERSIZ (VOID)
+en iyi alan tabani :                         13/13   -> S3 gecerli
+```
+
+`+2s`'te skorun bağlam korelasyonu **hiçbir günde** sıfırdan ayırt edilemedi.
+Kapı olmasaydı `S2` *"TabFM tabandan kötü"* diye okunacaktı — oysa **taban
+yoktu.** Kapı, havuz ölçümündeki `H3` sahte geçişinden sonra eklenmişti
+(`454281d`); **ilk kullanıldığı koşumda** işini gördü.
+
+📌 Yan bulgu: `skor`'un *"düşecekleri işaretlemesi"* **yavaş bir sinyal** —
+24 saatte var, 2 saatte yok.
+
+#### ÖN-KAYITTAN SAPMA — BETİMLEYİCİ EĞRİ KOŞULMADI
+
+Ön-kayıt `1·2·3·4·6·12·24` saatlik betimleyici eğri vaat ediyordu.
+**Koşulmadı** — her ufuk ayrı bir tam model koşumu demek (~3 sa × 7 = 21 saat).
+Vaat edilip yapılmadığı için burada açıkça yazılıyor. Eğri istenirse
+**modelsiz** (tek alan tabanlarıyla) ucuza üretilebilir.
+
+#### METODOLOJİK KAZANÇ
+
+Tasarım *"tek değişen şey ufuk"* ilkesine kilitlendi ve doğrulandı:
+satır 3.598=3.598 · gün 20=20 · test günü 13=13 · gün başı satır **birebir** ·
+skor vektörü **aynı** · etiket std 17,782→5,615 (oran 3,17; rastgele yürüyüş
+beklentisi 3,46).
+
+⚠️ **Satır kilidinde hata bulunup koşumdan önce onarıldı:** ilk parmak izi
+`(sym, gün, skor)` **saati içermiyordu**; aynı sembol gün içinde birden çok
+saatte aynı skorla görünüyor → 122 anahtar çakıştı, kilit 3.601 satır geçirdi.
+Parmak izine `price/last1/last3/vol_x` eklendi ve kilit **çoklu-küme** yapıldı.
+
+#### SAYIM — 4. TabFM karşılaştırması, 4. düşüş
+
+| # | ölçüm | sonuç |
+|---|---|---|
+| 1 | aday havuzu `+24s` | düştü (S2·S4) — **S1 geçişi bu kayıtla geri çekildi** |
+| 2 | testbot poz. BOĞA | düştü |
+| 3 | testbot poz. NÖTR | düştü |
+| 3b | beş defter havuzu | düştü (H1·H4) |
+| **4** | **aday havuzu `+2s`** | **düştü (5/5)** |
+
+#### 🔴 SINIR — HEPSİ KUTUNUN İÇİNDE
+
+Ölçüldü: `aday_arsiv`, botun taradığı sembollerin **%6,3'ü** (tur başına 9-10 /
+~142) ve skor tabanı **≥30** (evren medyanı 9,5). TabFM piyasanın **%94'ünü
+hiç görmedi.**
+
+```
+RADAR (tam tarama)      N=58.359   medyan skor  9,5   min 0,0
+ADAY ARSIVI (TabFM'e)   N=14.248   medyan skor 40,6   min 30,0
+```
+
+Dört ölçümün **dördü de** bu huninin içinde: `golge`/`defter2`/`defter3`
+girişlerinin aday arşiviyle eşleşmesi %99,8-%100.
+
+**Bu yüzden hüküm şudur:** *"TabFM botun kısa listesinin içinde iyileştirecek
+bir şey bulamadı."* — *"model işe yaramaz"* DEĞİL. Kutunun dışı hiç ölçülmedi.
+`radar_archive` 62 gün · 53.341 tekil (sembol,saat) · 18 alan %93-100 dolu ile
+bunu mümkün kılıyor; **açık iş.**
+
+#### GEÇMEZSE — kurulum
+
+Kullanıcı kararı: **silinmiyor**, karar sonra verilecek.
