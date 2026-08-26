@@ -24,9 +24,11 @@ ap.add_argument("--sure-probu", action="store_true", help="tek gun, SADECE sure 
 ap.add_argument("--min-baglam-gun", type=int, default=7)
 ap.add_argument("--ckpt", default=os.path.join(HERE, "agirlik"))
 ap.add_argument("--gun", default=None, help="sure probu icin tek gun")
+ap.add_argument("--veri", default="veri.json")
+ap.add_argument("--etiket", default="ham_sonuc")
 A = ap.parse_args()
 
-D = json.load(open(os.path.join(HERE, "veri.json"), encoding="utf-8"))
+D = json.load(open(os.path.join(HERE, A.veri), encoding="utf-8"))
 SAY, KAT, GUNLER = D["sayisal"], D["kategorik"], D["gunler"]
 df = pd.DataFrame(D["satir"])
 print("veri: %d satir · %d gun · ufuk +%ds" % (len(df), len(GUNLER), D["ufuk"]))
@@ -120,7 +122,16 @@ for gi, g in enumerate(TEST_GUN):
     isaret_b = 1.0 if en_iyi_r >= 0 else -1.0
     base_b = isaret_b * pd.to_numeric(tst[en_iyi], errors="coerce").to_numpy(float)
 
+    # TABAN GECERLILIGI (on-kayit 454281d): tabanin BAGLAM gunlerindeki kendi
+    # rho'su sifirdan ayirt edilemiyorsa o olcut GECTI degil GECERSIZ sayilir.
+    _b = np.isfinite(np.asarray(yc, float))
+    _ps = stats.spearmanr(pd.to_numeric(ctx["score"], errors="coerce")[_b],
+                          yc[_b]).pvalue if _b.sum() > 10 else 1.0
+    _pb = stats.spearmanr(pd.to_numeric(ctx[en_iyi], errors="coerce")[_b],
+                          yc[_b], nan_policy="omit").pvalue if _b.sum() > 10 else 1.0
+
     sat.append(dict(gun=g, n=len(tst), nctx=len(ctx), sn=sn,
+                    p_skor_ctx=float(_ps), p_base_ctx=float(_pb),
                     rho_tab=rho(pred, yt), rho_skor=rho(base_s, yt),
                     rho_base=rho(base_b, yt), alan=en_iyi,
                     pred=pred.tolist(), y=yt.tolist(),
@@ -129,7 +140,7 @@ for gi, g in enumerate(TEST_GUN):
           % (g, len(ctx), len(tst), sn, sat[-1]["rho_tab"], sat[-1]["rho_skor"],
              en_iyi[:9], sat[-1]["rho_base"]), flush=True)
 
-json.dump(sat, open(os.path.join(HERE, "ham_sonuc.json"), "w"))
+json.dump(sat, open(os.path.join(HERE, A.etiket + ".json"), "w"))
 print("\n" + "=" * 96)
 print("OLCUTLER — on-kayitta SABIT")
 print("=" * 96)
@@ -142,15 +153,30 @@ m, t, n = t_ist(rt)
 print("S1  rho > 0 ve t >= 2,0        : rho ort %+.4f  t=%+.2f  N=%d gun   -> %s"
       % (m, t, n, "GECTI" if (m > 0 and t >= 2.0) else "DUSTU"))
 
+# TABAN GECERLILIK KAPILARI
+_gs = sum(1 for s in sat if s.get("p_skor_ctx", 1.0) < 0.05)
+_gb = sum(1 for s in sat if s.get("p_base_ctx", 1.0) < 0.05)
+print("\nTABAN GECERLILIGI (baglamda p<0,05 olan gun sayisi, esik: gunlerin YARISI)")
+print("   skor tabani        : %d/%d gun" % (_gs, len(sat)))
+print("   en iyi alan tabani : %d/%d gun" % (_gb, len(sat)))
+S2_GECERLI = _gs >= len(sat) / 2.0
+S3_GECERLI = _gb >= len(sat) / 2.0
+if not S2_GECERLI:
+    print("   !!! skor tabani SIFIRDAN AYIRT EDILEMIYOR -> S2 GECERSIZ (VOID)")
+if not S3_GECERLI:
+    print("   !!! en iyi alan tabani SIFIRDAN AYIRT EDILEMIYOR -> S3 GECERSIZ (VOID)")
+
 d2 = [a - b for a, b in zip(rt, rs)]
 m2, t2, n2 = t_ist(d2)
+_s2 = ("GECERSIZ (VOID)" if not S2_GECERLI else ("GECTI" if t2 >= 2.0 else "DUSTU"))
 print("S2  TabFM - skor(isaretli)     : fark %+.4f  t=%+.2f  N=%d      -> %s"
-      % (m2, t2, n2, "GECTI" if t2 >= 2.0 else "DUSTU"))
+      % (m2, t2, n2, _s2))
 
 d3 = [a - b for a, b in zip(rt, rb)]
 m3, t3, n3 = t_ist(d3)
+_s3 = ("GECERSIZ (VOID)" if not S3_GECERLI else ("GECTI" if t3 >= 1.5 else "DUSTU"))
 print("S3  TabFM - en iyi tek alan    : fark %+.4f  t=%+.2f  N=%d      -> %s"
-      % (m3, t3, n3, "GECTI" if t3 >= 1.5 else "DUSTU"))
+      % (m3, t3, n3, _s3))
 
 # S4 karistirici: gun x ATR-uctebirlik hucrelerinde ust yari - alt yari
 poz = tot = 0
@@ -181,7 +207,8 @@ ayni = np.isfinite(m1_) and np.isfinite(m2_) and (m1_ > 0) == (m2_ > 0)
 print("S5  ilk 7 / son %d test gunu    : %+.4f  vs  %+.4f              -> %s"
       % (len(y2), m1_, m2_, "GECTI" if ayni else "DUSTU"))
 
-gecti = ((m > 0 and t >= 2.0) and t2 >= 2.0 and t3 >= 1.5 and oran >= 60 and ayni)
+gecti = ((m > 0 and t >= 2.0) and (S2_GECERLI and t2 >= 2.0)
+         and (S3_GECERLI and t3 >= 1.5) and oran >= 60 and ayni)
 print("\n" + "=" * 96)
 print("HUKUM: %s" % ("GECTI - tum olcutler" if gecti else "DUSTU"))
 print("=" * 96)

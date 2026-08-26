@@ -10,14 +10,20 @@ for _s in (_sys.stdout, _sys.stderr):
     try: _s.reconfigure(encoding="utf-8", errors="replace")
     except Exception: pass
 
-import os, json, datetime, collections, statistics
+import os, json, datetime, collections, statistics, argparse
 
 HERE  = os.path.dirname(os.path.abspath(__file__))
+_ap = argparse.ArgumentParser()
+_ap.add_argument("--ufuk", type=int, default=24)
+_ap.add_argument("--cikti", default="veri.json")
+_ap.add_argument("--ayni-satirlar", default=None,
+                 help="verilen veri dosyasindaki (sym,gun,score) satirlariyla AYNI kume")
+_A = _ap.parse_args()
 PROJE = os.path.dirname(os.path.dirname(HERE))
 KL    = os.path.join(PROJE, "scratchpad", "klines_1h_uzun")
 ARSIV = os.path.join(PROJE, "testbot_aday_arsiv.jsonl")
 OFSET = -3          # radar ts YEREL (UTC+3) -> UTC. skor_tahmin.py ile AYNI
-UFUK  = 24          # ON-KAYITTA SABIT
+UFUK  = _A.ufuk     # ON-KAYITTA SABIT (h2 kosumunda 2)
 
 # --- on-kayitta yazili 23 alan ---------------------------------------------
 SAYISAL = ["score", "price", "comp", "vol_x", "oi24", "oi3", "funding", "pos",
@@ -27,7 +33,7 @@ KATEGORIK = ["stage", "rejim", "smart", "dip_yakit", "ayrisma", "dusuk_float"]
 # DISLANAN (on-kayit): karar, sonuc, red_kapi, kaynak, float_oran, mcap, ts, sym
 DISLANAN = {"karar", "sonuc", "red_kapi", "kaynak", "float_oran", "mcap"}
 
-print("TabFM VERI KUMESI — on-kayit ON_KAYIT.md (43b0785)")
+print("TabFM VERI KUMESI — ufuk +%ds  ·  cikti %s" % (UFUK, _A.cikti))
 print("=" * 96)
 
 # ---------------------------------------------------------------- 1) arsiv
@@ -104,7 +110,7 @@ for n, (sym, kayit) in enumerate(sorted(gerek.items())):
               for k in range(g - 13, g + 1)]
         r = dict(v)
         r["atr"] = 100.0 * (sum(tr) / len(tr)) / c[g]
-        r["y"]   = 100.0 * (c[g + UFUK] / c[g] - 1.0)    # HAM +24s getiri
+        r["y"]   = 100.0 * (c[g + UFUK] / c[g] - 1.0)    # HAM +UFUK saat getiri
         r.pop("yerel")
         satir.append(r)
     if (n + 1) % 100 == 0:
@@ -112,6 +118,35 @@ for n, (sym, kayit) in enumerate(sorted(gerek.items())):
 
 print("\nkullanilabilir gozlem %d  ·  kline'i olmayan sembol %d  ·  bar eslesmeyen %d"
       % (len(satir), eksik_sym, eksik_bar))
+
+# --- SATIR KILIDI (on-kayit 454281d): +24s kosumuyla AYNI satir kumesi ---
+if _A.ayni_satirlar:
+    # Parmak izi SAATI icermek zorunda: ayni sembol gun icinde birden cok
+    # saatte AYNI skorla gorunebiliyor. (sym,gun,score) 122 satirda cakisti.
+    # Fiyat/last1/last3/vol_x saatten saate degisir -> ayirt eder.
+    def _fp(x):
+        return (x["sym"], x["gun"],
+                round(float(x["score"]), 4), round(float(x["price"]), 10),
+                round(float(x["last1"]), 4), round(float(x["last3"]), 4),
+                round(float(x["vol_x"]), 4))
+    kay = json.load(open(os.path.join(HERE, _A.ayni_satirlar), encoding="utf-8"))
+    # COKLU-KUME kilidi: kaynakta kac kez varsa o kadar alinir
+    kalan = collections.Counter(_fp(x) for x in kay["satir"])
+    onc, tut = len(satir), []
+    for r in satir:
+        k = _fp(r)
+        if kalan.get(k, 0) > 0:
+            kalan[k] -= 1
+            tut.append(r)
+    satir = tut
+    hedef = len(kay["satir"])
+    print("SATIR KILIDI %s: %d -> %d  (hedef %d)"
+          % (_A.ayni_satirlar, onc, len(satir), hedef))
+    if len(satir) != hedef:
+        print("  UYARI: %d satir eslesmedi (+%ds etiketi hesaplanamamis olabilir)"
+              % (hedef - len(satir), UFUK))
+    else:
+        print("  KILIT TAM: kaynakla BIREBIR ayni satir kumesi")
 
 GUN = sorted({r["gun"] for r in satir})
 say = collections.Counter(r["gun"] for r in satir)
@@ -130,7 +165,7 @@ for a in SAYISAL + KATEGORIK:
     d = sum(1 for r in satir if r.get(a) is not None)
     print("   %-14s %6d  %%%5.1f" % (a, d, 100.0 * d / len(satir)))
 
-out = os.path.join(HERE, "veri.json")
+out = os.path.join(HERE, _A.cikti)
 with open(out, "w", encoding="utf-8") as f:
     json.dump({"sayisal": SAYISAL, "kategorik": KATEGORIK, "ufuk": UFUK,
                "gunler": GUN, "satir": satir}, f)
