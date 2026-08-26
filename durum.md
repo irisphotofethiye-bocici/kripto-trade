@@ -121,6 +121,28 @@ Geri dönmek gerekirse tek satır: `tp1_efektif_hesapla` çağrısını
 `cikis_modu == "sabit_hedef"` pozisyonlarda atla. **`kismi_kar_r = 0` YAPMA** —
 neden olmadığı `CLAUDE.md`'de yazılı (TP1 anında tetikleniyor).
 
+**🔴 YENİ — TEŞHİS YER DEĞİŞTİRDİ (2026-08-26). Karar ALINMADI, soru DEĞİŞTİ.**
+
+Dört ön-kayıtlı ölçüm arka arkaya koşuldu ve teşhisi üç kez taşıdı:
+
+```
+"skor esigi yanlis yerde"  ->  "LONG tarafinin tamami kaybediyor"  ->  "stop degil, sure degil"
+```
+
+Sırayla: `skor` ileri getiriyi **ters** tahmin ediyor · ters kenar **mekanikle**
+tutmuyor · `skor ≥ 45` **fren** olarak da doğru teşhis değil (her skor bandı negatif) ·
+kenarı **stop yemiyor** (stop eşleşmiş sürede yardım ediyor) ve **süre ayarı da
+kurtarmıyor** (hiçbir ufukta pozitif yok).
+
+**Bekleyen karar:** yok — hiçbir kural önerilmedi, bota dokunulmadı.
+**Açık soru:** botun LONG tarafı, giriş kapısı ve çıkış ayarı ne olursa olsun bu
+evrende kaybediyorsa, sıradaki inceleme **yön/rejim** tarafındadır.
+⚠️ Tek pencere (2 ay). İkinci bir pencerede görülmeden kural yazılmaz.
+
+Hüküm metinleri, N, betik ve ölçütler **`olcumler.md`**'de — buraya rakam yazılmaz.
+Ön-kayıtlar: `ON_KAYIT_skor_tahmin.md` · `ON_KAYIT_skor_mekanik.md` ·
+`ON_KAYIT_skor_fren.md` · `ON_KAYIT_stop_mu_sure_mu.md`.
+
 ### ⭐ ALTI İŞ TEK HAKEME BAĞLI — ayrı ayrı tartışılmasın
 
 ```mermaid
@@ -680,6 +702,9 @@ Defter aday arşivini **salt okur**, kendi sürecinde koşar, botun kilidini alm
    Ama `A+B` notu *"skor eklemek düşürüyor"* diyor (+0,396 → +0,338). Bu bir
    kapı değil **kapasite kuyruğu**; hüküm yazarken not düşülmeli.
    📌 **Kullanıcı kararı (2026-08-20): "sonra duruma göre değiştiririz."**
+   📌 **[2026-08-26] `skor` artık ölçüldü** — sıralama ölçütü olarak kullanılan
+   bu alan ileri getiriyi **ters** tahmin ediyor. Hüküm ve sınırlar
+   `olcumler.md` → *"`skor` İLERİ GETİRİYİ TAHMİN EDİYOR MU"*. Karar değişmedi.
 2. **Dayanak anlamlı değil.** Geçmiş ölçüm ay-kümeli **t=+1,33** ve
    **örneklem içi inşa**. 2 yılın tamamı kullanıldı → tek geçerli hakem
    **ileri zaman**. Bu defter o hakemdir.
