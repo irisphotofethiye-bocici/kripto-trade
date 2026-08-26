@@ -127,6 +127,9 @@ scratchpad/tabfm_venv/
 scratchpad/tabfm/*.json
 scratchpad/tabfm/hf_cache/
 scratchpad/tabfm/agirlik/
+
+# Basis yoklamasi ara ciktisi
+scratchpad/basis/*.json
 scratchpad/tabfm/*.log
 
 scratchpad/tfm_venv/
