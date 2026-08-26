@@ -5171,3 +5171,72 @@ coinler"*. Farkın yönü bilinmiyor; kıyas bu yüzden ideal değil.
 
 Üç aşamalı sıra **tam olarak bunun için var**. Ham aşama güçlü ve tutarlı görünüyordu;
 mekanik aşama tutarlılığı yok etti. **Botta hiçbir şey değişmez.**
+
+### 🔴 `skor ≥ 45` FREN OLARAK — **AÇIKLAMA (b)**: LONG TARAFININ TAMAMI KAYBEDİYOR (2026-08-26)
+
+**Ön-kayıt:** `ON_KAYIT_skor_fren.md`, commit `6bc6daf` — koşumdan **önce**.
+**Betik:** `scratchpad/skor_fren.py` · mekanik `skor_mekanik.py` ile **aynı**
+(olcucu+testbot+config'ten birebir) · yalnız **LONG**.
+**N:** 17.715 LONG işlem · 441 sembol · 59 gün · tüm skor aralığı.
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| V1 · vetolanacak küme zararlı mı | net<0 **ve** t ≤ −2,5 | ✅ **−1,001%** · **t = −2,65** |
+| V2 · 🔴 **AYIRICI** V−K | ≤−0,3 **ve** t ≤ −2,5 | ❌ ort −0,533 · **t = −1,69** |
+| V3 · işaret tutarlılığı | ≥%60 gün | ❌ **28/51 (%55)** |
+| V4 · zaman yarıları | aynı işaret | ✅ ilk −0,433 · son −0,981 |
+| V5 · zorunlu sınama | — | ✅ stop genişliği **1,13 kat**, stop-olma %88/%80 → kıyas adil |
+
+**HÜKÜM: AÇIKLAMA (b).** Ön-kayıt bu sonucu *"en olası tek sonuç"* diye
+**önceden** yazmıştı (V1 ~%55, V2 ~%35).
+
+#### 🔴 Asıl bulgu — skor bandı **fark etmiyor, hepsi negatif**
+
+```
+bant       N      net       stop-olma  kazanan
+<2       1241   -0,519%       %81       %31
+2-5      2280   -0,313%       %78       %35
+5-10     3439   -0,206%       %78       %36
+10-20    5062   -0,170%       %79       %36
+20-30    2763   -0,165%       %82       %36
+30-45    2019   -0,205%       %83       %33
+>=45      911   -1,001%       %88       %26
+```
+
+`≥45` en kötü hücre ama **çıkarmak kurtarmıyor**: işlem başına −0,266% → −0,226%.
+Hâlâ negatif. **Fren doğru teşhis değil.**
+
+Eşik taraması bunu doğruluyor — 45'te uçurum yok, **plato** var
+(`≥40 −0,625` · `≥45 −0,775` · `≥50 −0,869` · `≥60 −0,804`). Yani 45 sayısında
+özel bir şey yok; yüksek skor genel olarak kötü, eşik keyfî.
+
+#### 🔴 DAHA BÜYÜK OLGU — mekanik, ham beklentiyi işaretiyle birlikte yiyor
+
+Birinci aşamada (`e8c9d59`) düşük bantlar **pozitifti** (`<2` +0,126% · `10-20`
++0,250%). Aynı olaylara botun mekaniği uygulanınca **hepsi negatife düşüyor**
+(`<2` −0,519% · `10-20` −0,170%).
+
+Maliyet yalnız 0,13 puan. Aradaki fark bundan **büyük** → farkı yiyen şey
+**stop mekaniği**. Bu, projenin kayıtlı örüntüsüyle örtüşüyor: *"çıkışı sıkılaştıran
+28 varyantın 28'i de kaldı"*, ve A-stop bir ölçümde ham kenarın **%65'ini** yemişti.
+
+⚠️ **Hüküm değil, betimleme:** ham aşama sabit 24 saat tutuyordu, mekanik aşamanın
+medyan tutması 4-6 saat. İki ölçüm **aynı ufuğa sahip değil**; işaret kaymasının ne
+kadarı stop, ne kadarı ufuk — **ayrılmadı.** Ayrı ön-kayıt ister.
+
+#### Sınırlar — aynen
+
+- **Sentetik evren:** her radar anlık görüntüsü bir LONG girişi sayıldı. Bot ayrıca
+  `smart` · taker · onay bekletme · maks pozisyon kapılarını uyguluyor.
+  **Bu botun karnesi DEĞİLDİR**, botun *kapı öncesi havuzunun* karnesidir.
+- **Eşitsiz eleme:** `asgari_stop=2` kolları eşit etkilemiyor — `≥45` olaylarının
+  **%68,4'ü**, `<45` olaylarının **%34,9'u** işleme dönüştü. K kolu seçilmiş bir alt küme.
+- 59 gün, tek pencere.
+
+#### Ne değişti, ne değişmedi
+
+**Değişen:** teşhis. Sorun *"skor eşiği yanlış yerde"* değil.
+**Değişmeyen:** bot. Hiçbir dosyaya dokunulmadı.
+
+**Yeni ve daha keskin soru:** botun LONG tarafı, giriş kapısı ne olursa olsun
+kaybediyorsa, sıradaki inceleme **giriş seçiminde değil, ÇIKIŞ mekaniğinde** olmalı.
