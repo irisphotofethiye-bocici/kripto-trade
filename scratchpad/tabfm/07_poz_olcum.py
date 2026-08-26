@@ -15,10 +15,14 @@ from scipy import stats
 HERE = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
 ap.add_argument("--n-est", type=int, default=32)
+ap.add_argument("--gunler", default=None, help="virgullu test gunleri")
+ap.add_argument("--etiket", default="poz_sonuc")
 A = ap.parse_args()
 
 D = json.load(open(os.path.join(HERE, "poz_veri.json"), encoding="utf-8"))
 SAY, KAT, TEST = D["sayisal"], D["kategorik"], D["test_gun"]
+if A.gunler:
+    TEST = [x.strip() for x in A.gunler.split(",") if x.strip()]
 df = pd.DataFrame(D["satir"])
 ALAN = SAY + KAT
 print("POZISYON OLCUMU — on-kayit e1097b5  ·  TESHIS, hukum yazilmaz")
@@ -99,7 +103,7 @@ for g in TEST:
     print("  %s  ctx=%-4d tst=%-3d  ust-alt %+8.2f $  (ust %+8.2f / alt %+8.2f)  skor isaret %+d"
           % (g, len(ctx), len(tst), d, us, al, int(isaret)), flush=True)
 
-json.dump(sat, open(os.path.join(HERE, "poz_sonuc.json"), "w"))
+json.dump(sat, open(os.path.join(HERE, A.etiket + ".json"), "w"))
 
 print("\n" + "=" * 100)
 print("OLCUTLER — on-kayitta SABIT (e1097b5)")
@@ -134,8 +138,8 @@ def t1(anahtar, suzgec=None):
 
 f, ust, alt, poz, n = t1("p_L2")
 m, t, _ = t_ist(f)
-gec1 = (m > 0 and poz >= 5)
-print("T1  PARA  ust yari - alt yari : ort %+.2f $/poz · t=%+.2f · pozitif gun %d/%d"
+gec1 = (m > 0 and poz >= max(4, int(round(0.7*max(n,1)))))
+print("N1  PARA  ust yari - alt yari : ort %+.2f $/poz · t=%+.2f · pozitif gun %d/%d"
       % (m, t, poz, n))
 print("          toplam: ust %+.2f $  ·  alt %+.2f $  ·  FARK %+.2f $   -> %s"
       % (ust, alt, ust-alt, "GECTI" if gec1 else "DUSTU"))
@@ -143,7 +147,7 @@ print("          toplam: ust %+.2f $  ·  alt %+.2f $  ·  FARK %+.2f $   -> %s"
 r2 = [rho(s["p_L1"], s["L1"]) for s in sat if s.get("p_L1") and s.get("L1")]
 m2, t2, n2 = t_ist(r2)
 gec2 = (m2 > 0 and t2 >= 1.5)
-print("T2  SINYAL rho(tahmin, ham L1): %+.4f · t=%+.2f · N=%d gun            -> %s"
+print("N2  SINYAL rho(tahmin, ham L1): %+.4f · t=%+.2f · N=%d gun            -> %s"
       % (m2, t2, n2, "GECTI" if gec2 else "DUSTU"))
 
 fs, us_, as_, pz, ns = t1("p_skor")
@@ -151,15 +155,32 @@ ms, ts_, _ = t_ist(fs)
 rs2 = [rho(s["p_skor"], s["L1"]) for s in sat if s.get("L1")]
 ms2, _, _ = t_ist(rs2)
 gec3 = (np.isfinite(ms) and m > ms) and (np.isfinite(ms2) and m2 > ms2)
-print("T3  TABAN skor: para %+.2f $/poz (pozitif %d/%d) · rho %+.4f"
+print("N3  TABAN skor: para %+.2f $/poz (pozitif %d/%d) · rho %+.4f"
       % (ms, pz, ns, ms2))
 print("          TabFM her ikisinde de gecti mi -> %s" % ("GECTI" if gec3 else "DUSTU"))
 
-fl, ul, al_, pl, nl = t1("p_L2", suzgec="LONG")
-ml, tl, _ = t_ist(fl)
-gec4 = np.isfinite(ml) and np.isfinite(m) and (ml > 0) == (m > 0)
-print("T4  KARISTIRICI yalniz LONG   : ort %+.2f $/poz · pozitif gun %d/%d   -> %s"
-      % (ml, pl, nl, "GECTI" if gec4 else "DUSTU"))
+# N4 (ONARILMIS): karistirici OYNAKLIK. Havuzu chg24 medyaniyla ikiye bol,
+# etki HER IKI yarida da POZITIF olmali. "Isaret uyussun" DEGIL, "ayakta kalsin".
+tum_c = np.array([abs(x) for s_ in sat for x in
+                  df[df["gun"] == s_["gun"]]["chg24"].fillna(0).to_numpy(float)])
+esik = np.median(tum_c) if len(tum_c) else 0.0
+kol = {}
+for ad, alt_ust in (("dusuk oynaklik", False), ("yuksek oynaklik", True)):
+    tu = ta = 0.0; pz = nn = 0
+    for s_ in sat:
+        p_ = np.array(s_["p_L2"], float); y_ = np.array(s_["L2"], float)
+        c_ = np.abs(df[df["gun"] == s_["gun"]]["chg24"].fillna(0).to_numpy(float))
+        mm = (c_ > esik) if alt_ust else (c_ <= esik)
+        if mm.sum() < 4: continue
+        d_, u_, a_ = yari(p_[mm], y_[mm])
+        if not np.isfinite(d_): continue
+        tu += u_; ta += a_; nn += 1; pz += 1 if d_ > 0 else 0
+    kol[ad] = (tu - ta, pz, nn)
+    print("N4  KARISTIRICI %-16s: fark %+8.2f $ · pozitif gun %d/%d"
+          % (ad, tu - ta, pz, nn))
+gec4 = all(v[0] > 0 for v in kol.values()) and len(kol) == 2
+print("          HER IKI yarida da pozitif mi (esik |chg24|=%.1f) -> %s"
+      % (esik, "GECTI" if gec4 else "DUSTU"))
 
 print("\n" + "=" * 100)
 print("SONUC: %s" % ("SINAMAYA DEGER (T1+T3+T4)" if (gec1 and gec3 and gec4)
