@@ -5013,3 +5013,89 @@ Genel uyum yalnız **%73,7**.
 yapılmaz; rejim BTC mumundan **yeniden üretilir** (`scratchpad/skor_tahmin_rejim.py`
 içinde hazır, botun canlı etiketiyle doğrulanmış). Bu, `funding_gecmis` birim
 kırılmasıyla **aynı hata sınıfıdır**: alan adı değişmeden anlamı değişmiş.
+
+---
+
+### ❌ TabFM İNDİKATÖR OLABİLİR Mİ? — **DÜŞTÜ** (5 ölçütün 2'si) (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/tabfm/ON_KAYIT.md`, commit `43b0785` — koşumdan önce.
+**Betikler:** `scratchpad/tabfm/01_veri.py` · `02_olcum.py` · `03_taban.py`
+**N:** 3.598 sembol-saat · 236 sembol · 20 gün (2026-08-04..24) · 13 test günü
+
+Soru: *"Botun elle konmuş eşikleri yerine bir tablo modeli koysak daha iyi sıralar mı?"*
+Etiket **ham +24s getiri** (stop/hedef/ücret/fonlama YOK). Gün-bloklu ileri
+doğrulama + **etiket ufku kadar ambargo**. Model TabFM 1.0.0 regresyon (6,14 GB, CPU).
+
+| ölçüt | sonuç | eşik | |
+|---|---|---|---|
+| **S1** sıralıyor mu | rho **+0,1676** · t=+4,92 | t≥2,0 | ✅ |
+| **S2** ters skoru geçiyor mu | fark **+0,0552** · t=+1,48 | t≥2,0 | ❌ |
+| **S3** en iyi tek alanı geçiyor mu | fark **+0,1805** · t=+3,94 | t≥1,5 | ✅ |
+| **S4** karıştırıcı (gün × ATR) | **22/39 = %56,4** | %60 | ❌ |
+| **S5** dayanıklılık | +0,151 vs +0,187 (aynı işaret) | aynı | ✅ |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### Asıl bulgu — model bir şey buluyor, ama BEDAVA olanı geçemiyor
+
+Model **gerçekten sıralıyor**: 13 günün 12'sinde pozitif, en iyi tek alanı
+belirgin farkla geçiyor (t=+3,94). Bu, *"tek banttan türüyor, etkileşimden
+kazanç yok"* beklentisini **çürütüyor** — etkileşimden kazanç VAR.
+
+Ama rakibi tek alan değil, **`skor`'un ters çevrilmiş hâli** — bugün bedavaya
+elde edilebilen şey. Fark yalnız **+0,055 rho** ve **t=+1,48**.
+
+```
+ters skor (BEDAVA)   rho +0,1124
+TabFM (6,14 GB)      rho +0,1676
+fark                     +0,0552   t=+1,48  (esik 2,0)
+```
+
+⚠️ **Bu "daha kötü" demek DEĞİL, "daha iyi olduğu kanıtlanamadı" demek.**
+İşaret pozitif, ama 13 günde güç yetmiyor. Ön-kayıt bunu zaten yazmıştı:
+*"olumsuz sonuç zayıf kanıttır."*
+
+#### S4 neden önemli — düşmesi tesadüf değil
+
+Aynı gün **ve** aynı oynaklık diliminde ayırma yalnız hücrelerin %56,4'ünde
+tuttu. Yani kazancın bir kısmı **oynaklıkla** ilişkili, temiz kesitsel ayırma
+değil. Bu, projenin zorunlu karıştırıcı kontrolü — agresör dengesi ve *son yeni
+uç* tam burada ölmüştü.
+
+#### BEKLENTİM YANLIŞ ÇIKTI — kayda geçiyor
+
+Ön-kayıtta *"S1 geçer, S3 düşer"* yazmıştım. **S3 geçti**, hem de t=+3,94 ile.
+Modeli hafife almışım. Düşüren S2 oldu — yani darboğaz *"model bir şey bulamıyor"*
+değil, ***"bulduğu şeyin çoğu zaten bedavaya elde edilebiliyor."***
+
+#### İKİNCİL — hükme girmedi
+
+Gün ortalaması arındırılmış havuz rho **+0,2311** (N=2.668 sembol-saat),
+gün-rho dağılımı −0,022 … +0,425, **12/13 gün pozitif**.
+t'si **bilerek basılmadı**: gün kümelemesini yok sayar, güveni şişirir.
+
+#### SINIRLAR
+
+- **Tek pencere, tek rejim.** 20 gün, %87 NÖTR / %13 BOĞA. **Ayı verisi YOK.**
+- **Seçilmiş havuz** — botun yüzeye çıkardığı adaylar, tüm evren değil.
+- **Maliyet yok.** Ham fiyat. Fonlama 24 saatte ham kenarın büyük kısmını yiyor
+  (2026-08-25 ölçümü) → ham kenar ödemeler sonrası kalmayabilir.
+- **`n_estimators=16`**, süre bütçesine göre seçildi (4 saat); 32 ile sonuç
+  değişebilir. Seçim **yalnız süreye** bakılarak, sonuç görülmeden yapıldı
+  (kural commit `705670b`).
+- Koşum süresi 2 sa 51 dk (CPU, GPU yok).
+
+#### YOL BOYUNCA İKİ ONARIM
+
+1. **Etiket örtüşmesi** (`81272c2`): bağlamın son gününün +24s etiketi test
+   gününe bakıyordu (bağlamın %4-12'si). Ambargo kondu, koşumdan **önce**.
+   Kullanıcının *"N küçüklüğü olay seviyesi örneklemeyle giderilir demiştin"*
+   sorusu ortaya çıkardı.
+2. **`safetensors` eksikti** — `tabfm[pytorch]` çekmiyor; prob çöktü, kuruldu.
+
+#### VERİ NOTU — 2026-08-23 arşivde YOK
+
+Bug değil: bot o gün `HALT_DUSUS`'te (192/192 tur, tur süresi 2,6 sn vs
+komşularda 148-212 sn). Düşüş freni 08-22'de tetiklendi, 08-24'te elle devam
+edildi. Radar normal koştu (4.660 satır) ama testbot taramadı.
+Bu yüzden test günü 14 değil **13**.
