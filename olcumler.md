@@ -5417,3 +5417,68 @@ kusur yüzünden anlamsız — yani **fiilen** o da bir şey göstermedi.
 düşürüyordu. Taze mumlar **ayrı bir önbelleğe** çekildi (`scratchpad/tabfm/taze_mum/`,
 08-26 08:00'a kadar) — paylaşılan veri kümesine **dokunulmadı** (`CLAUDE.md`:
 indiriciler birleştirmeli, ezmemeli). L1 opsiyonel yapıldı; L2 tüm 119'da var.
+
+---
+
+### ❌ TabFM NÖTR PENCEREDE (11-18 Ağu) — **SINAMAYA DEĞMEZ**, ama düşme BİÇİMİ öğretici (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/tabfm/ON_KAYIT_notr.md`, commit `abf488b` — koşumdan önce.
+**N:** 61 pozisyon · **4** test günü · bağlam 49→97
+
+Pencere seçildi çünkü **karıştırıcı yapısal olarak yoktu**: 11-18 arası 108
+pozisyonun 101'i SHORT, rejim %100 NÖTR. Önceki ölçümü öldüren *"aslında yön
+ayrımıydı"* açıklaması burada **mümkün değil**. Ayrıca pencere kârda (+238 $).
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **N1** PARA | +9,49 $/poz · t=+0,33 · **3/4** gün · toplam fark +169,71 $ | ❌ (4/4 gerekti) |
+| **N2** SİNYAL | rho **+0,2448** · t=+1,21 · N=4 gün | ❌ (t≥1,5 gerekti) |
+| **N3** TABAN | skor: para **+26,98** $/poz · rho **−0,0245** | ❌ |
+| **N4** KARIŞTIRICI | **düşük oynaklık +728,20 $ · yüksek oynaklık −654,67 $** | ❌ |
+
+#### 🔴 ASIL BULGU N4'TE — onarılmış ölçüt İLK KOŞUMDA işini yaptı
+
+```
+dusuk oynaklik  (|chg24| <= 10,5)   fark  +728,20 $   pozitif gun 3/4
+yuksek oynaklik (|chg24| >  10,5)   fark  -654,67 $   pozitif gun 1/4
+                                    ----------------
+toplamda gorunen                          +169,71 $
+```
+
+Toplam sayı **iki zıt etkinin farkıdır.** Model düşük oynaklıkta sıralıyor,
+yüksek oynaklıkta **tersine dönüyor**, net neredeyse sıfır kalıyor.
+
+⚠️ **Eski T4 bunu göremezdi.** *"İşaret aynı olsun"* ölçütü toplamla düşük-kolu
+karşılaştırıp geçerdi. Onarım (`4c3af9e`'de kaydedilmişti) **ilk kullanıldığı
+koşumda** gizli bir bölünmeyi yakaladı.
+
+#### BOĞA PENCERESİYLE KIYAS — aynı model, iki dünya
+
+| | 19-26 (BOĞA) | 11-18 (NÖTR) |
+|---|---|---|
+| PARA yönü | **−24,97** $/poz | **+9,49** $/poz |
+| pozitif gün | 2/7 | 3/4 |
+| ham sinyal rho | +0,058 | **+0,245** |
+| skorun rho'su | +0,115 | **−0,025** |
+
+Nötr pencerede TabFM **ham sinyalde skoru geçiyor** (+0,245 vs −0,025) —
+boğada tersiydi. Ama t=+1,21, N=4 gün: **güç yok.** Bu bir bulgu değil,
+*"rejime göre değişiyor olabilir"* şüphesi.
+
+#### ÇOKLU KARŞILAŞTIRMA — 2/2
+
+Aynı model + aynı defter üzerinde **iki pencere denendi, ikisi de düştü.**
+Ön-kayıt bunu şart koşmuştu: geçseydi bile *"rejim bağımlılığı iddiası"*
+olacaktı, bulgu değil.
+
+#### ÖN-KAYITTAN SAPMA — muhafazakâr yönde
+
+5 test günü yazılmıştı; betikteki sabit `bağlam ≥ 40` alt sınırı **08-13**'ü
+(bağlam 29) eledi → **4 gün**. N1 eşiği gün sayısıyla ölçeklendiği için
+`4/5` yerine **`4/4`** istendi — yani **daha sıkı**. Gevşek eşik (3/4 ≥ 4/5
+karşılığı) uygulansaydı N1 yine geçmezdi; N3 ve N4 bağımsız düştü.
+
+#### BEKLENTİM — kısmen yanlış
+
+*"N1 düşer"* demiştim; düştü **ama pozitif yönde** (+9,49, 3/4). Boğa
+penceresindeki tutarlı terslik nötrde yok. Modeli yine hafife almışım.
