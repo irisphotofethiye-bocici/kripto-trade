@@ -5099,3 +5099,75 @@ Bug değil: bot o gün `HALT_DUSUS`'te (192/192 tur, tur süresi 2,6 sn vs
 komşularda 148-212 sn). Düşüş freni 08-22'de tetiklendi, 08-24'te elle devam
 edildi. Radar normal koştu (4.660 satır) ama testbot taramadı.
 Bu yüzden test günü 14 değil **13**.
+
+### ❌ SKORUN TERS KENARI MEKANİKLE — **DÜŞTÜ** (2026-08-26)
+
+**Ön-kayıt:** `ON_KAYIT_skor_mekanik.md`, commit `d7b607d` — koşumdan **önce**.
+**Aşama:** üç aşamalı sıranın **İKİNCİSİ**. Birinci aşama: `e8c9d59`.
+**Betik:** `scratchpad/skor_mekanik.py` · mekanik `olcucu.py`+`testbot.py`+config'ten
+**birebir** (üç adaylı stop · asgari %2 · TP1 yapısal/2R · TP2 = TP1+1,5R ·
+%40 kısmi @1,5R · iz-süren 2,0/1,5/1,0 ATR · zaman stopu 48s).
+**N:** 9.507 işlem · 59 gün · giriş = anlık görüntünün bir sonraki saati · ofset −3.
+
+```
+kol                     N     BRUT    NET(cfg)  NET(olculen)  fonlama  stop-olma  kazanan
+A SHORT skor>=45      930   +1,263%   +0,689%     +0,629%     -0,444     %73       %44
+B SHORT skor<5       4145   -0,095%   -0,219%     -0,279%     +0,005     %79       %34
+C LONG  skor>=45      911   -1,027%   -1,001%     -1,060%     +0,156     %88       %26   <- BOTUN KAPISI
+D LONG  skor<5       3521   -0,251%   -0,385%     -0,445%     -0,005     %79       %33
+```
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| M1 · A net > 0 | maliyet+fonlama sonrası | ✅ **+0,689%** (ölçülen slipajla +0,629%) |
+| M2 · A−B (BİRİNCİL) | ≥+0,3 **ve** t ≥ +2,5 | ❌ ort +0,632 · **t = +1,56** |
+| M3 · işaret tutarlılığı | ≥%60 gün | ❌ **29/49 (%59)** |
+| M4 · zaman yarıları | aynı işaret | ❌ **İŞARET DÖNÜYOR** |
+| M5 · zorunlu sınama | — | ✅ stop genişliği A/B **1,21 kat** (yakın), stop-olma %73/%79 |
+
+**HÜKÜM: DÜŞTÜ.**
+
+🔴 **Ölüm M4'te ve öğretici:** ham aşamada iki zaman yarısı **aynı işaretteydi**
+(−3,343 / −1,067). Mekanik girince ilk yarı **döndü**:
+
+```
+ILK yari   A -0,211%   B +0,001%   fark -0,212
+SON yari   A +1,411%   B -0,389%   fark +1,800
+```
+
+Kenarın tamamı ikinci yarıda. **Bu tam olarak `CLAUDE.md`'nin kayıtlı uyarısıdır:**
+ham kenar mekanikle ölebilir — burada dönemsel olarak öldü. M5 geçtiği için bunu
+"stop genişliği ayrışması" ile açıklayamayız; ayrışma yok (1,21 kat).
+
+✅ **M1 geçti ve gömülmemeli:** A kolu maliyet **ve** fonlama sonrası pozitif.
+Ama tek başına M1 hüküm değil — ön-kayıt dört ölçüt istiyordu.
+
+#### Ön-kayıtlı beklentiler — biri tuttu, biri TUTMADI
+
+- *"En olası ölüm biçimi: kenar var ama stop yiyor"* → **kısmen**. Kenar tamamen
+  yenmedi (A hâlâ net pozitif), ama ham aşamadaki tutarlılık yok oldu.
+- *"Fonlama SHORT'ta muhtemelen lehte"* → 🔴 **YANLIŞ.** Fonlama A'da **−0,444**,
+  yani yüksek skorlu coinlerde fonlama **negatif**; SHORT ödüyor, tahsil etmiyor.
+  Brütün üçte birinden fazlasını yiyor. Varsayım ölçülmeden yazılmıştı, ölçüm çürüttü.
+- *"C kolu (botun bugünkü LONG'u) negatif çıkacak"* → **tuttu**, aşağıda.
+
+#### C KOLU — botun bugünkü davranışı (ön-kayıtta KEŞİFSEL, hüküm değil)
+
+`LONG skor≥45`: işlem başına net **−1,001%**, **%88 stop-olma**, kazanan **%26**,
+medyan tutma 4 saat. Aynı olayda ters yön farkı **+1,690 puan**.
+`LONG≥45 − LONG<5` = −0,431 (t=−1,12, 23/51 gün) → **anlamlı değil**, yalnız betimsel.
+
+⚠️ **C, botun kendisi DEĞİLDİR:** bot ayrıca `smart` · taker · onay bekletme ·
+maks pozisyon kapılarını uyguluyor. C bu kapıların hepsini atlar, yani **abartır**.
+
+#### 🔴 KONTROL KOLUNDA SEÇİLİM — rapor edilmeli
+
+`asgari_stop_pct = 2` düşük oynaklıklı adayları eliyor ve bu **kolları eşit
+etkilemiyor**: `≥45` olaylarının ~%68'i işleme dönüştü, `<5` olaylarının ~%25'i.
+B kolu *"düşük skorlu coinler"* değil, *"düşük skorlu ama stopu yeterince geniş
+coinler"*. Farkın yönü bilinmiyor; kıyas bu yüzden ideal değil.
+
+#### Bunun anlamı
+
+Üç aşamalı sıra **tam olarak bunun için var**. Ham aşama güçlü ve tutarlı görünüyordu;
+mekanik aşama tutarlılığı yok etti. **Botta hiçbir şey değişmez.**
