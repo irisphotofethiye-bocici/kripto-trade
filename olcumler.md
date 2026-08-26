@@ -5324,3 +5324,96 @@ kurtarılamıyor.
 **Sınırlar:** sentetik evren (botun kapı öncesi havuzu, botun karnesi DEĞİL) ·
 59 gün tek pencere · stopsuz kol likidasyonsuz, teşhis aracı · `asgari_stop` elemesi
 kollara ortak uygulandı ama evreni daraltıyor.
+
+---
+
+### ❌ TabFM BOTUN KENDİ POZİSYONLARINI AYIRABİLİR Mİ? — **SINAMAYA DEĞMEZ** (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/tabfm/ON_KAYIT_pozisyon.md`, commit `e1097b5` — koşumdan önce.
+**Betikler:** `scratchpad/tabfm/05_poz_veri.py` · `06_taze_mum.py` · `07_poz_olcum.py`
+**N:** 119 pozisyon · 7 test günü (2026-08-19..26) · bağlam 112→227 pozisyon
+
+Kullanıcı sorusu: *"Botun 19'undan sonra poz aldığı coinleri verip tahmin
+yapmasını sağlayabilir miyiz?"* — yani **bizi −3.208 $'lık serinin dışında
+tutabilir miydi?**
+
+🔴 **TEŞHİS, hüküm değil.** Pencere *kaybettiğimizi bilerek* seçildi; tek rejim.
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **T1** PARA: üst yarı − alt yarı | **−24,97 $/poz** · t=−1,56 · pozitif gün **2/7** | ❌ |
+| **T2** SİNYAL: ham +24s ile rho | +0,0578 · t=+0,38 · N=6 gün | ❌ |
+| **T3** TABAN: skoru geçti mi | **hayır**, ikisinde de geride | ❌ |
+| **T4** yalnız LONG | aynı işaret (**ikisi de negatif**) | ⚠️ bkz. aşağıda |
+
+**SONUÇ: SINAMAYA DEĞMEZ.** TabFM yalnız ayıramadı, **tutarlı biçimde ters**
+sıraladı — "iyi" dediği yarı 7 günün 5'inde daha çok kaybetti.
+
+#### 🔴 TABAN ŞAŞIRTTI, SONRA KARIŞTIRICI KONTROLÜNDE ÇÖKTÜ
+
+Botun **kendi skoru** (işaret bağlamdan seçilerek) çok güçlü göründü:
+
+```
+gun          isaret    ust $      alt $      fark
+08-19          +1     +182,36   -298,59   +480,95
+08-20          +1     -214,34   -707,54   +493,20
+08-21          +1      +18,11   -363,10   +381,21
+08-22          -1     -144,55   -170,89    +26,34
+08-24          -1     -305,24   -392,35    +87,11
+08-25          -1     -300,72   -428,16   +127,44
+08-26          -1      +12,42    -95,73   +108,15
+TOPLAM                -751,96  -2456,36  +1704,40      pozitif gun 7/7
+```
+
+7/7 gün pozitif, tek güne bağlı değil (en büyük gün çıkarılınca **6/6**, +1.211 $).
+
+**Ama ön-kayıtta olmayan bir kontrol koştum** — kendi şaşkınlığımı sınamak için,
+ve sonucu **zayıflatan** yönde:
+
+```
+KARISTIRICI 1 — skor ayrimi YON ayrimi mi?
+   08-19  ust yaridaki LONG %60  ·  alt yarida %0    <-- AYRISIYOR
+   08-20  ust yaridaki LONG %46  ·  alt yarida %8    <-- AYRISIYOR
+   (kalan gunlerde her iki yari da %100 LONG)
+
+KARISTIRICI 2 — YALNIZ LONG alt kumesinde
+   TOPLAM fark  +252,77 $   (pozitif gun 5/6)
+```
+
+**+1.704 $ → +253 $. Etkinin %85'i YÖNDÜ.** En büyük iki gün (19-20 Ağustos)
+skorla değil, **SHORT/LONG ayrımıyla** kazanmış.
+
+Bu, `CLAUDE.md`'de kayıtlı **aynı hata sınıfının üçüncü vakası**: agresör
+dengesi (ilk-saat getirisi sabitlenince işaret döndü) · *son yeni uç*
+(11,8 puan → 2-4 puan). Karıştırıcı sabitlenince kalan artık küçük ve
+kanıtlanmamış.
+
+#### ⚠️ KENDİ ÖLÇÜTÜM KUSURLUYDU — T4
+
+T4'ü *"yalnız LONG'da işaret aynı olsun"* diye yazmıştım. **Etki her iki kolda
+da yoksa bu ölçüt kendiliğinden geçer.** Tam olarak bu oldu: ikisi de negatif,
+T4 "GEÇTİ" yazdı ve hiçbir şey söylemedi.
+**Doğrusu:** karıştırıcı ölçütü *"etki AYAKTA KALSIN"* der, *"işaret uyuşsun"*
+demez. Bir sonraki ön-kayıtta bu düzeltilecek.
+
+#### BEKLENTİM — yarısı tuttu
+
+*"T1 ve T4 düşer"* yazmıştım. T1 düştü. T4 kâğıt üzerinde geçti ama yukarıdaki
+kusur yüzünden anlamsız — yani **fiilen** o da bir şey göstermedi.
+
+#### SINIRLAR
+
+- 119 pozisyon / 7 gün · pencere **seçilmiş** · %67 BOĞA, tek rejim
+- 22 Ağustos'tan sonra pozisyonların **%100'ü LONG** → yön boyutu o günlerde yok
+- Bağlam 112-227 satır; dünkü ölçümde 800-3400'dü
+- **`derinlik_giriste` (emir defteri) kullanılamadı:** test'te %100, bağlamda
+  %1,7 (18 Ağustos'ta eklendi). 📌 08-18 sonrası tam dolu → birkaç hafta sonra
+  **ayrı bir ölçümün** konusu; `CLAUDE.md`'nin *"gerçekten yeni bilgi"*
+  listesindeki ilk madde.
+
+#### VERİ NOTU
+
+`klines_1h_uzun` 2026-08-25 06:00'da bitiyor; `+24s` etiketi örneklemi 119→79'a
+düşürüyordu. Taze mumlar **ayrı bir önbelleğe** çekildi (`scratchpad/tabfm/taze_mum/`,
+08-26 08:00'a kadar) — paylaşılan veri kümesine **dokunulmadı** (`CLAUDE.md`:
+indiriciler birleştirmeli, ezmemeli). L1 opsiyonel yapıldı; L2 tüm 119'da var.
