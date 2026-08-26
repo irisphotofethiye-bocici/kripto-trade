@@ -5609,3 +5609,95 @@ uyuşmazlığı ilk kez sayısallaştı.**
 
 🔴 **HÜKÜM YAZILMADI, BOTA DOKUNULMADI.** Bu bir ölçümdür. Kapı değişikliği
 kullanıcı kararıdır ve ileri zamanda ayrı defterle sınanmalıdır.
+
+---
+
+### ❌ SPOT-PERP BASIS — **DÜŞTÜ** (5/5), ama işaret HİPOTEZ YÖNÜNDE ve ETKİ ÇOK KÜÇÜK (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/basis/ON_KAYIT.md`, commit `2e3ff43` — koşumdan önce.
+**Betikler:** `00_yoklama.py` · `01_spot_indir.py` · `02_veri.py` · `03_olcum.py`
+**N:** 216.358 gözlem · 357 sembol · **744 gün** (2024-08-11 .. 2026-08-24)
+Model **kullanılmadı** — doğrudan kesitsel sıra korelasyonu.
+
+`CLAUDE.md`'nin *"gerçekten yeni bilgi bandın dışındadır"* listesinden ilk kez
+denenen aday. Eleme testini projenin en temiz farkıyla geçmişti (basis vs
+fonlama %3,7 · vs fiyat %1,1-3,6; elenenler %60 ve %51).
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **B1** gün-kümeli rho | **−0,0152 · t=−4,85** · N=744 gün | ❌ **etki tabanı** |
+| **B2** dört çeyrek | −0,0250 · −0,0206 · −0,0156 · **+0,0004** | ❌ |
+| **B3** rejim | BOĞA −0,0396 · NÖTR −0,0123 · **AYI +0,0002** | ❌ |
+| **B4** fonlama üçte-birlikleri | **alt +0,0254** · orta −0,0268 · üst −0,0369 | ❌ |
+| **B5** `chg24` üçte-birlikleri | alt +0,0006 · orta −0,0155 · üst +0,0074 | ❌ |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### 🔑 B1 İSTATİSTİKTEN DEĞİL, ETKİ BÜYÜKLÜĞÜNDEN DÜŞTÜ
+
+```
+t = -4,85          <- son derece "anlamli"
+|rho| = 0,0152     <- esik 0,02   ->  DUSTU
+```
+
+Ön-kayıt eşiği `|rho| ≥ 0,02` **VE** `|t| ≥ 3,0` diyordu. Gerekçesi de
+yazılıydı: *"~750 gün kümesiyle hiçliğe yakın bir etki bile t>3 verir."*
+
+**Bu taban olmasaydı B1 GEÇERDİ** ve `t=−4,85` ile güçlü bir bulgu ilan
+edilirdi. Ölçüt koşumdan önce yazıldığı için bu olmadı.
+📌 Bu, projenin *"yön aynı, güven yalan"* dersinin ikinci kez işe yaraması.
+
+#### İŞARET DOĞRU ÇIKTI — hipotez yönünde
+
+Ön-kayıt *"pozitif basis = kalabalık uzun taraf → `rho < 0`"* diyordu.
+Ölçülen işaret **negatif**. Yani ekonomik sezgi doğru, **büyüklük yetersiz.**
+
+#### ⏳ ETKİ ZAMAN İÇİNDE SÖNÜYOR
+
+```
+C1 2024-08..2025-02   -0,0250   t=-3,40
+C2 2025-02..2025-08   -0,0206   t=-3,45
+C3 2025-08..2026-02   -0,0156   t=-2,50
+C4 2026-02..2026-08   +0,0004   t=+0,08     <- SIFIR
+```
+
+**Monotonik sönüm.** Etki iki yıl önce (zaten küçükken) daha büyüktü, bugün
+yok. Bu, "kenar keşfedilince kapanır" örüntüsüyle uyumlu — ama tek pencere,
+kanıt değil.
+
+#### 🎯 B3 — İKİ YILLIK VERİNİN ASIL KAZANCI
+
+```
+BOGA  -0,0396  t=-3,88  N= 93 gun     etki EN GUCLU
+NOTR  -0,0123  t=-2,79  N=313 gun     zayif ama ayni yon
+AYI   +0,0002  t=+0,05  N=204 gun     YOK
+```
+
+**Ayı piyasasında etki yok.** Bu proje bugüne kadar hiçbir ölçümü ayı verisinde
+sınayamamıştı; `CLAUDE.md`'nin en sık tekrar eden uyarısı (*"aynı tablo rejim
+değişince tersine döndü"*) **ilk kez doğrudan test edildi** ve haklı çıktı —
+tersine dönmedi ama **kayboldu.**
+
+#### KARIŞTIRICI KIRILIMLARI
+
+`B4`: fonlama **düşükken işaret TERSİNE dönüyor** (+0,0254, t=+5,19).
+Yani basis'in bilgisi fonlamadan bağımsız değil — eleme testi korelasyonun
+düşük olduğunu göstermişti (%3,7), ama **etkileşim var.**
+📌 Ders: *"az korelasyonlu"* ile *"bağımsız"* aynı şey değil.
+
+`B5`: etki yalnız **orta** `chg24` diliminde (−0,0155); uçlarda yok.
+
+#### SINIRLAR
+
+- Etiket **ham fiyat**; fonlama/ücret dahil değil. rho −0,015'lik bir kenar
+  maliyet sonrası zaten kalmazdı.
+- Tek ufuk (+24s), ön-kayıtta sabit. Başka ufka **bakılmadı**.
+- 357 sembol = perp evreninin %63'ü (spotta işlem görenler). Spotta olmayan
+  %37 en yeni/küçük listelemeler — sistematik bir dışlama.
+
+#### NE ÖĞRENİLDİ
+
+**Basis gerçekten yeni bilgi taşıyor** (eleme testi bunu gösterdi) **ama
+kullanışlı değil.** Bu ikisi ayrı şeylerdir ve bu proje ilk kez ikisini
+ayırabildi: aday, *"aynı şeyin başka ifadesi"* diye değil, **kendi başına
+yetersiz** olduğu için elendi.

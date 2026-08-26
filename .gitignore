@@ -130,6 +130,8 @@ scratchpad/tabfm/agirlik/
 
 # Basis yoklamasi ara ciktisi
 scratchpad/basis/*.json
+scratchpad/basis/spot_1h/
+scratchpad/basis/*.log
 scratchpad/tabfm/*.log
 
 scratchpad/tfm_venv/
