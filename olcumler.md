@@ -5482,3 +5482,130 @@ karşılığı) uygulansaydı N1 yine geçmezdi; N3 ve N4 bağımsız düştü.
 
 *"N1 düşer"* demiştim; düştü **ama pozitif yönde** (+9,49, 3/4). Boğa
 penceresindeki tutarlı terslik nötrde yok. Modeli yine hafife almışım.
+
+---
+
+### 🟡 TabFM BEŞ DEFTERİN HAVUZUNDA — **SINAMAYA DEĞMEZ**, ama HAM SİNYAL İLK KEZ EŞİĞİ GEÇTİ (2026-08-26)
+
+**Ön-kayıt:** `scratchpad/tabfm/ON_KAYIT_havuz.md`, commit `e1b30d8` — koşumdan önce.
+**Betikler:** `08_havuz_veri.py` · `09_havuz_olcum.py`
+**N:** 705 test pozisyonu · 13 test günü · bağlam 89→774 · `n_est=32` · koşum ~2 sa
+
+Havuz: `testbot` 205 · `golge` 377 · `defter2` 110 · `defter3` 10 · `ayna` 3.
+Örtüşme tekilleştirildi (`ayna` testbot'un %98'i; `golge` %86 farklı).
+Etiket **pozisyon getirisi = net/marjin** — defterlerin boyutlandırması farklı.
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **H1** üst yarı − alt yarı (getiri) | +2,026% · **t=+0,55** · pozitif 9/13 | HAYIR |
+| **H2** ham +24s ile rho | **+0,1662 · t=+2,63** · N=12 gün | **EVET** |
+| **H3** botun `skor`'unu geçti mi | evet (skor: +1,156% · rho −0,0824) | SAYILMAZ |
+| **H4** yön × oynaklık, dördü de pozitif | **LONG/düşük −1,612%** · LONG/yüksek +0,722% · SHORT/düşük +2,508% · SHORT/yüksek +7,256% | HAYIR |
+| **H5** yalnız gerçek ret (hükme girmez) | +1,558% · t=+0,34 · N=6 gün | — |
+
+**SONUÇ: SINAMAYA DEĞMEZ** (H1+H3+H4 gerekiyordu).
+
+#### 🟡 İLK KEZ: H2 EŞİĞİ GEÇTİ
+
+Üç TabFM ölçümünde ilk kez ön-kayıtlı bir eşik gerçekten aşıldı.
+Model **ham ileri fiyat hareketini** sıralıyor: rho +0,166, **t=+2,63**, 12 gün.
+
+Ama **H1 düştü** (t=+0,55):
+
+```
+ham sinyal      VAR   (H2 gecti)
+paraya donusum  YOK   (H1 t=+0,55)
+```
+
+Bu tam olarak `CLAUDE.md`'nin *ham getiri → ticaret mekaniği → portföy*
+zincirinin **ikinci halkada kopması**. Zincirin ilk halkası bu kez tuttu.
+Günlük değerler +36,36% ile −22,29% arasında saçılıyor; ortalama pozitif ama
+gün-kümeli t'yi taşımıyor.
+
+#### ⚠️ H3'ÜN GEÇMESİ SAYILMAZ — TABAN GÜRÜLTÜYDÜ
+
+Taban işareti `rho(skor, pozisyon getirisi)`'nden seçiliyor. **Aynı gün ayrıca
+ölçüldü: bu korelasyon −0,0308, p=0,39** — sıfırdan ayırt edilemez. İşaret
+bağlamda kararsız: 10 gün `+1`, 3 gün `−1`. Yani taban rakip değil **para
+atışı**; H3'ün geçmesi TabFM'in üstünlüğü değil **tabanın zayıflığıdır.**
+Bu ölçütü bu koşumda geçerli saymıyorum. Kusur ölçüt tasarımındadır ve sonucu
+görmeden fark edilmeliydi.
+
+#### H4 — üçünde ayakta, birinde değil
+
+```
+LONG  / dusuk oynaklik   -1,612%   <-- TEK NEGATIF
+LONG  / yuksek oynaklik  +0,722%
+SHORT / dusuk oynaklik   +2,508%
+SHORT / yuksek oynaklik  +7,256%
+```
+
+Önceki iki ölçümde karıştırıcı kapısı **daha sert** çökmüştü (N4: +728 / −655,
+zıt işaret). Burada 4'te 3 pozitif ve tek negatif küçük. **Yine de geçmedi** —
+ölçüt *"hepsinde ayakta kalsın"* diyor; bu bilinçli, çünkü bu proje 4'te 3'e
+bakıp kural yazmanın bedelini ödedi.
+
+#### SAYIM — 3. deneme, 3. düşüş
+
+| ölçüm | N | geçen ölçüt |
+|---|---|---|
+| aday havuzu (08-25) | 3.598 satır / 13 gün | S1·S3·S5 (S2·S4 düştü) |
+| testbot poz BOĞA | 119 / 7 gün | yok |
+| testbot poz NÖTR | 61 / 4 gün | yok |
+| **beş defter havuzu** | **705 / 13 gün** | **H2** (H3 sayılmaz) |
+
+Ön-kayıt şunu şart koşmuştu: *geçse bile tek başına bulgu değildir.* Geçmedi.
+
+#### SINIRLAR
+
+- Çıkış kuralları havuzda **aynı** (`testbot`·`golge`·`defter2`·`defter3`) →
+  H1'in etiketi bizim stopumuzun damgasını taşıyor. H2 bundan **bağımsız**.
+- `golge` %74 `pump_long_tezi` → havuz "botun reddettikleri" değil.
+- 13 gün, 08-13..08-26, tek pencere. **Ayı verisi yok.**
+- Fonlama etiketlere dahil değil.
+
+---
+
+### 🔴 BOT, DÜŞECEĞİNİ KENDİ SKORUNUN SÖYLEDİĞİ COİNLERDE LONG AÇIYOR (2026-08-26)
+
+Yukarıdaki havuz verisinden, **model kullanılmadan**. N=689 pozisyon (L1 dolu).
+
+```
+1) skor -> HAM +24s fiyat hareketi        rho = -0,1456   p = 0,00012
+2) skor >= 45   N=320   SHORT %23 (=> %77 LONG)   ham hareket ort  -2,98%
+   skor <  45   N=369   SHORT %52                 ham hareket ort  +0,91%
+3) skor -> YONE GORE ISARETLI getiri      rho = -0,0895   p = 0,019
+4) skor -> POZISYON GETIRISI (stop dahil) rho = -0,0308   p = 0,39
+5) yon sabit:  LONG   rho(skor, ham) = -0,1395   p = 0,004
+               SHORT  rho(skor, ham) = -0,0110   p = 0,86
+```
+
+`skor ≥ 45` botun **BOĞA rejimindeki LONG kapısıdır**. O bantta coinler ortalama
+**%2,98 düşüyor** ve giriş **%77 LONG**. Etki LONG içinde ayakta (p=0,004);
+SHORT'ta yok — yani skor SHORT'a yardım etmiyor, **LONG'da zarar veriyor.**
+
+Madde (4) ayrıca yukarıdaki H3'ün neden sayılmadığını gösteriyor: skorun
+pozisyon getirisiyle ilişkisi **sıfırdan ayırt edilemez.**
+
+#### KOD BUNU ZATEN UYARMIŞTI — uyarı işletilmedi
+
+[radar.py:138](radar.py#L138), `squeeze_bonus` notu:
+
+> *"SINIR: tek 41 günlük pencere, YALNIZ ayı piyasası. **Boğada 'sert düşer'
+> tersine dönebilir. Boğaya girildiğinde bu kural YENİDEN ÖLÇÜLMELİDİR.**"*
+
+Boğaya girildi, kural yeniden ölçülmedi. Şimdi ölçüldü ve uyarı **haklı**
+çıktı — ama beklenenden farklı biçimde: **kural tersine dönmedi, KULLANIMI
+döndü.** Skor hâlâ düşecekleri işaretliyor; değişen şey, boğada `≥45`
+kapısının LONG açtırması. Ayı rejiminde aynı skor SHORT açtırıyordu ve
+*"long için en kötü kova = short için en iyi kova"* mantığı tutuyordu.
+
+#### SAYIM
+
+Bu, *skor ters çalışıyor* bulgusunun **ikinci veri kümesindeki teyididir**
+(birincisi: aday havuzu, 2026-08-25, ters skor `t=+3,44`). Aynı olgu →
+**bağımsız kanıt değil**, farklı kümede doğrulama. Yeni olan: **yön
+uyuşmazlığı ilk kez sayısallaştı.**
+
+🔴 **HÜKÜM YAZILMADI, BOTA DOKUNULMADI.** Bu bir ölçümdür. Kapı değişikliği
+kullanıcı kararıdır ve ileri zamanda ayrı defterle sınanmalıdır.
