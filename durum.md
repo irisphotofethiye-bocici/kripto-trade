@@ -373,6 +373,35 @@ olarak yok.** Alanın tanımı, `null`/`0.0` ayrımı ve süzgeç → **`CLAUDE.
   muhtaç değil), tutuş süresi × fonlama canlı doğrulaması, fonlamalı gerçek R.
 - Doğrulama: `scratchpad/funding_pozisyon_testi.py` — 15 kontrol, diske yazım YOK.
 
+## 🔴🔴 DÜŞÜŞ FRENİ KAPATILDI (2026-08-27, KULLANICI KARARI)
+
+> **`testbot.maks_dusus_pct`: 25 → 0.** Config `.gitignore`'da olduğu için bu
+> değişikliğin **git izi YOK** — kalıcı kaydı burası ve config içindeki
+> `_maks_dusus_pct_not` alanı (eski değer orada korunuyor, D/9).
+> **Geri alma:** o alanı `25` yap. **Yedek:** oturum scratchpad'inde
+> `kripto-config.YEDEK-20260827.json`.
+
+**Kullanıcı gerekçesi:** *"freni kaldır bu bizim veri almayı engeller."*
+
+**Tetikleyen olgu:** fren 08-24 00:06 ve 08-26 17:58'de **iki kez** tetikledi.
+İkincisinden sonra testbot ~30 saat boyunca **hiç taramadı** (tur başına taranan
+sembol 0). 🔴 **Ve bu dört defteri birden durdurdu:** `golge` · `ayna` · `defter2`
+kendi taramalarını yapmıyor, adaylarını testbot'un döngüsünden alıyorlar — üçü de
+`AKTIF` yazıp veri üretmez hâle geldi. Son girişleri HALT ile aynı saatte kesildi.
+
+**İki adım uygulandı:** (1) config'de eşik 0, (2) `python testbot.py --devam`
+ile `HALT_DUSUS` temizlendi (zirve referansı sıfırlandı).
+
+⚠️ **Bunun bedeli kayda geçiyor:** `min_equity_dur = 50` pratikte hiç tetiklenmez,
+yani botta artık **sermaye koruması yok**. Kâğıt üstünde çalıştığı için kabul edildi.
+
+⚠️ **ÖLÇÜM PENCERESİ NOTU** (`CLAUDE.md` → BUG İSTİSNASI sınaması: *"bu değişiklik
+botun hangi işlemi açacağını değiştiriyor mu?"*): **EVET değiştiriyor** — fren
+kapalıyken bot, açık olsaydı açmayacağı işlemleri açar. Yani 2026-08-27'yi **aşan**
+her karşılaştırma iki farklı kural setini karıştırır. Hüküm yazan bunu okumak zorunda.
+
+---
+
 ## 🔴🔴 FREN — 2026-08-19'da ÜÇ KEZ DEĞİŞTİ (hepsi KULLANICI KARARI)
 
 > **`esikler.btc_pay_short_freni`.** Config `.gitignore`'da olduğu için bu
