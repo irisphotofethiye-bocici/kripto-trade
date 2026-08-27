@@ -5815,3 +5815,92 @@ bunu mümkün kılıyor; **açık iş.**
 #### GEÇMEZSE — kurulum
 
 Kullanıcı kararı: **silinmiyor**, karar sonra verilecek.
+
+
+---
+
+### 🔴 TabFM KUTUNUN DIŞINDA — tam tarama, skorsuz — **DÜŞTÜ 4/4** (2026-08-27)
+
+**Ön-kayıt `e1b6457`** (koşumdan önce yazıldı ve commit edildi). Ölçütler koşum
+sırasında değişmedi. Kullanıcı sorusu: *"Radardan çektiğimiz veriyi skorlama
+olmadan TabFM'e verseydik ne seçerdi, ne olurdu?"* → *"Kutunun dışını da test et."*
+
+Bir önceki kayıtta **açık iş** olarak bırakılan madde budur; **kapandı.**
+
+```
+kaynak  radar_archive.jsonl — TAM TARAMA (bosluk kaydi 111 okundu)
+veri    51.478 gozlem · 441 sembol · 62 gun (06-24..08-26)
+etiket  HAM +2 saat perp getirisi  (dogru ufuk)
+test    52 gun · 48.604 test gozlemi
+girdi   19 alan · score OZELLIK DEGIL (yalniz ust-veri)
+model   TabFM regresyon · n_est=8 · baglam 2.500'e orneklendi (sure butcesi)
+sure    8,3 saat CPU
+```
+
+Önceki TabFM ölçümüne göre **14 kat gözlem, 4 kat test günü.**
+
+#### SONUÇ
+
+| # | ölçüt | eşik | sonuç | |
+|---|---|---|---|---|
+| **D1** | rho(tahmin, ham +2s), gün-kümeli | rho>0 · t≥2,0 · \|rho\|≥0,03 | **+0,0106 · t=+0,89 · 31/52 gün** | ❌ |
+| **D2** | 🔴 SEPET: TabFM en iyi 10 − RASTGELE 10 | t≥2,0 | **−0,0106% · t=−0,31 · 28/52** | ❌ |
+| **D3** | karıştırıcı: ATR/fiyat üçte-birlikleri | üçünde aynı işaret | yüksek oynaklık **TERS** (−0,0113) | ❌ |
+| **D4** | karıştırıcı: rejim (BTC mumundan yeniden) | üçünde aynı işaret | **BOĞA TERS** (−0,0495, N=5 gün) | ❌ |
+| **D5** | betimleyici sepetler | hükme girmez | aşağıda | — |
+
+**HÜKÜM: DÜŞTÜ.** Dört ölçütün dördü de.
+
+#### 🔴 D2 — ölçümün kalbi, ve en sert cevap
+
+```
+TabFM en iyi 10        ort -0,0488% · t=-1,08 · N=52 gun
+RASTGELE 10            ort -0,0382% · t=-0,91 · N=52 gun
+BOT en iyi 10 (skor)   ort -0,0592% · t=-1,01 · N=52 gun
+TERS-SKOR 10           ort +0,0033% · t=+0,07 · N=52 gun
+```
+
+**TabFM'in seçtiği 10 coin, rastgele seçilen 10 coinden KÖTÜ.** Ön-kayıt bu
+kontrolü *"kenar buldu"* ile *"işlem yapmadı"*yı ayırmak için koymuştu; ayırdı
+ve TabFM'in tarafında bir şey çıkmadı. `TERS-SKOR` tek artı sepet ama
+`t=+0,07` — gürültü.
+
+#### ⚠️ BEKLENTİM YANLIŞ ÇIKTI — ve yanlış yönde
+
+Ön-kayıtta *"D1 geçer, D3 düşer"* yazmıştım; gerekçe **51 bin gözlem ve 52
+günle küçük bir sıralama kabiliyeti bile t≥2,0 üretir** idi. Üretmedi:
+`t=+0,89`. Model beklediğimden **daha zayıf** çıktı. Etki boyutu tabanı da
+(`|rho|≥0,03`) zaten karşılanmıyordu — iki ayrı sebepten düştü.
+
+#### ⚠️ TEK HÜCRE BULGU DEĞİLDİR
+
+`D4`'te `AYI` hücresi `rho +0,0487 · t=+2,10 · N=16 gün` verdi. **Bu bir bulgu
+olarak kaydedilmiyor:** üç hücrenin biri, ön-kayıt yalnız **kesişimi** hükme
+sokuyor, ve `BOĞA` hücresi ters işaretli. Çoklu karşılaştırma sayılıyor.
+
+#### SAYIM — 5. TabFM karşılaştırması, 5. düşüş
+
+| # | ölçüm | evren | sonuç |
+|---|---|---|---|
+| 1 | aday havuzu `+24s` | kutu içi | düştü (S2·S4) — S1 geçişi geri çekildi |
+| 2 | testbot poz. BOĞA | kutu içi | düştü |
+| 3 | testbot poz. NÖTR | kutu içi | düştü |
+| 3b | beş defter havuzu | kutu içi | düştü (H1·H4) |
+| 4 | aday havuzu `+2s` | kutu içi | düştü (5/5) |
+| **5** | **radar tam tarama, skorsuz** | **KUTU DIŞI** | **düştü (4/4)** |
+
+#### 🔑 ELEME ARTIK TAM
+
+Önceki dört düşüşün hükmü *"TabFM botun kısa listesinin içinde iyileştirecek
+bir şey bulamadı"* idi — çünkü model piyasanın **%94'ünü** hiç görmemişti.
+Bu ölçüm o %94'ü de gösterdi: **51.478 gözlem, skor yok, botun kapıları yok.**
+Sonuç değişmedi.
+
+Yani *"kutu daraltıyor"* savunması **artık kullanılamaz.** Yeni bir TabFM
+denemesi için gereken şey daha geniş evren değil, **bandın dışında yeni bir
+girdi** (`CLAUDE.md` → emir defteri likiditesi · spot-perp basis · çapraz borsa
+· pozisyon kompozisyonu). Basis denendi ve **düştü**; diğer üçü açık.
+
+**Betikler:** `scratchpad/tabfm/10_kutu_disi_veri.py` · `11_kutu_disi_olcum.py`
+**Ham çıktı:** `scratchpad/tabfm/kutu_disi.log` · özet `kutu_disi_ozet.json`
+**Kurulum:** silinmedi (kullanıcı kararı) — 7,2 GB (`tabfm_venv` + `agirlik`).
