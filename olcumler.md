@@ -6231,3 +6231,56 @@ Karar verilebilir pencerede güçlü ayrım (döngüsel olmayan biçimde):
 
 ⚠️ **5 dakikalık izleme yalnız `testbot`'u kapsıyor** (`kaynak='canli'`, 241 pozisyon).
 Diğer dört defterin yol verisi **YOK** — bu bir veri boşluğudur.
+
+#### EK — MEKANİZMA ARANDI, BULUNAMADI (2026-08-30, aynı gün)
+
+Kural yazmadan önce *"büyük pozisyonlar neden kaybediyor"* sorusu kovalandı.
+**Cevap bulunamadı.** Elenenler ve kalan:
+
+**Kod okundu** ([testbot.py:1218-1242](testbot.py#L1218)): boyutlandırma sanıldığı gibi
+saf risk-önce **değil**. `marjin = baz_equity × marjin_pct(skor)` ve kaldıraç iki yerden
+klempleniyor (`kaldirac_min/max` + `kaldirac_guvenlik_kirp`); risk hedefi yalnız
+**yukarı yönlü kırpıyor**, aşağı yönlü doldurmuyor.
+
+**ELENEN AÇIKLAMALAR:**
+
+| aday | ölçüm | sonuç |
+|---|---|---|
+| skor (boyut skordan türüyor) | `log(notional)` ↔ `skor` korelasyon **−0,064**; `marjin` ↔ `skor` **+0,068** | ❌ `marjin_pct` pratikte hiç değişmiyor (skorların çoğu 45 civarı, fonksiyon orada düz) |
+| stop genişliği | kazanan/kaybeden **d = +0,00**; stop × skor hücrelerinde **4/4** etki ayakta | ❌ |
+| zaman / equity | equity d = **−0,05** | ❌ |
+| döngüsellik (ilk kare geç çekilmiş olabilir) | 4 çeyrekte de ilk kare **0,05 sa**, ilk kare pnl ≈ **0**, TP1 alınmış %0-3 | ❌ temiz alt küme (228/235) **aynı sonucu** veriyor |
+
+**KALAN OLGU — açıklanamadı:**
+
+```
+carpan ayristirmasi (notional = risk$ / stop%)
+  notional      d = -0,87
+  RISK ($)      d = -1,13   <- EN GUCLU AYIRICI
+  stop%         d = +0,00
+  equity        d = -0,05
+
+risk ceyrekleri:  38,80$ -> %98 kazanma  ·  68,84$ -> %39  ·  88,68$ -> %19  ·  127,58$ -> %19
+ayni gun icinde:  risk kucuk olan 14/15 gunde onde, t = +6,80
+```
+
+🔴 **%98 kazanma oranı olağandışıdır ve açıklaması yoktur.** Boyutlandırma formülü
+bu dağılımı üretmemeli: hedef risk equity'nin %1,5'i (~129 $) iken Q1 pozisyonları
+**%0,65**'te (~39 $) duruyor — yani risk hedefin çok altında kalmış ve bunun neden
+olduğu bulunamadı. Aday yollar (smart karşı yönde → `hedef_risk/2` · kaldıraç klempi)
+tek başına bu dağılımı açıklamıyor.
+
+**BU YÜZDEN KURAL YAZILMIYOR.** Etki gerçek ve dört yoldan doğrulandı, ama sebebi
+bilinmeden *"pozisyonu küçült"* demek, neyi küçülttüğünü bilmeden müdahale etmektir.
+
+#### 🔧 SOMUT SONRAKİ ADIM — ölçümü değil, KAYDI düzelt
+
+`risk_usdt` kodda **hesaplanıyor** ([testbot.py:1239](testbot.py#L1239)) ve pozisyon
+sözlüğüne yazılıyor, ama **işlem defterine yazılmıyor**. Şu an ancak
+`pozisyon_izleme`'nin `stop_mesafe_pct` alanından **türetiliyor** — ve o yalnız
+`testbot`'u kapsıyor (N=235), diğer dört defterde **hiç yok**.
+
+**Öneri:** işlem defterine iki alan eklensin — `risk_usdt` ve girişteki `stop`.
+⚠️ `CLAUDE.md` → BUG İSTİSNASI sınaması: *"bu değişiklik botun hangi işlemi açacağını
+değiştiriyor mu?"* → **HAYIR.** Yalnız kaydı genişletir, davranışa dokunmaz →
+ölçüm penceresi kırılmaz. Bu yapılmadan mekanizma beş defterde birden aranamaz.
