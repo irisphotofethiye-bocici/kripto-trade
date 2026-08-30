@@ -6564,3 +6564,89 @@ Bu ölçüm, giriş seçiciliği aramanın **kapı tarafında da** tükendiğini
 radar/ölçücünün ürettiği hiçbir alan, engellenmesi kârlı olacak bir dilim
 işaretlemiyor. Projenin *"bot ne alınmayacağını biliyor, ne alınacağını bilmiyor"*
 hükmü artık daha da dar: **ne alınmayacağını da bu alanlardan öğrenemiyor.**
+
+### 🟡 TERSİNE MÜHENDİSLİK — KAZANANLARIN İNCELENMESİ (2026-08-30) · **KEŞİFSEL**
+
+**Tür:** ön-kayıt YOK, kullanıcı isteğiyle betimleyici inceleme. **HÜKÜM DEĞİL.**
+**N:** 1.467 pozisyon (6 defter) · kâr geri verme kısmı `testbot` 241 pozisyon.
+
+#### 1 · Kâr YOĞUNLAŞMIYOR — vaka incelemesi değil, istatistik doğru araç
+
+```
+en iyi   5 poz: karin  %4'u     en iyi  50 poz: karin %24'u
+en iyi  10 poz: karin  %7'u     en iyi 100 poz: karin %41'u
+```
+
+Piyango yapısı **yok**. `golge`'nin pump tezindeki *"10 pozisyon her şeyi taşıyor"*
+deseni defterlerin geneli için **geçerli değil**.
+
+#### 2 · 🔴 YÜZDE POZİTİF, DOLAR NEGATİF
+
+```
+YUZDE bazinda   ort kazanc +6,561%   ort kayip -4,013%   oran 1,63   kazanma %50
+DOLAR bazinda   ort kazanc  +84,5$   ort kayip -100,3$   oran 0,84
+```
+
+Beş defterin **beşi de** başabaş için gereken kazanç/kayıp oranının **altında**.
+İşlem başı yüzde beklentisi açıkça pozitif (+1,27 puan/işlem) ama defterler
+kaybediyor. Fark **boyut ağırlığından** geliyor.
+
+⚠️ Bu, aynı gün geri çekilen *"küçük pozisyon kazanır"* bulgusu **değildir**.
+O bir **tahmin** iddiasıydı ve TP1 kanalından geçtiği için çürüdü. Bu ise
+gerçekleşmiş defterin **aritmetik** bir olgusu: eşit-ağırlıklı ve dolar-ağırlıklı
+sonuçlar zıt işaretli. Boyut sonucu **öngörmüyor** ama sonuçla **ilişkili**;
+ikisi farklı ifadelerdir ve bu satır kural önerisi taşımaz.
+
+#### 3 · Kazananların %83'ü hedefe VARMADAN kapanıyor
+
+```
+KAZANANLAR   STOP  612 (%83)  ort +5,458%   TP2  87 (%12)  ort +14,099%
+KAYBEDENLER  STOP  717 (%98)  ort -4,060%
+```
+
+İz-süren stopla kapanan kazananlar tepenin **%58'ini** tutuyor; hedefe varanlar
+**+%14,10** alıyor. Kazananları kesen şey hedef değil, **iz-süren stop.**
+
+#### 4 · 🔴 ARTIYA GEÇİP GERİ VERME — ŞANSTAN FAZLA
+
+`pnl-tepe-raporu.md` N=17'ydi; artık **N=241**.
+
+```
+tepe >= %1 : 167 poz -> %39 KAYBETTI      tepe >= %3 : 108 poz -> %18
+tepe >= %2 : 134 poz -> %32               tepe >= %5 :  68 poz -> % 7
+```
+
+**Şans tabanı ölçüldü** — driftsiz rastgele yürüyüş, pozisyonun **kendi ATR'si,
+kendi süresi, kendi stopu ve 2×ATR iz-süren stopu** ile (mekanik birebir aynı,
+tek fark fiyatın rastgele olması):
+
+```
+esik        GERCEK   RASTGELE+STOP    fark
+tepe>=%1      %39         %19       +20,3 puan
+tepe>=%2      %32         %12       +20,0
+tepe>=%3      %18          %7       +10,3
+tepe>=%5       %7          %8        -0,3   <- SANSLA AYNI
+```
+
+🔑 **Küçük kâra geçen pozisyonlar şansın 2-3 katı oranında geri dönüyor.
+%5'i aşanlar ise tam olarak şans gibi davranıyor.** Etki mekanik kontrolünü geçti:
+simülasyona gerçek stop ve iz-süren stop eklendiğinde fark **kapanmadı**.
+
+⚠️ **MODEL RİSKİ — hükmü bu yüzden yazmıyorum:** boş hipotez Gauss rastgele
+yürüyüş. Kripto kısa ufukta **ortalamaya dönüyor** ve pompalanmış altlarda bu
+belgelenmiş bir olgu. *"Rastgele yürüyüşten kötü"*, **piyasanın özelliği** olabilir,
+botun kusuru değil. Doğru boş hipotez (aynı evrende eşleştirilmiş rastgele giriş
+zamanları) kurulmadan bu bir bulgu değil, bir **adaydır**.
+
+#### Nereye işaret ediyor
+
+Dört bulgunun dördü de **giriş seçiciliğine değil, ÇIKIŞ/KÂR ALMA seviyesine**
+bakıyor: yüzde kenarı var ama dolara dönüşmüyor · kazananlar hedefe varmadan
+kesiliyor · küçük kârlar şanstan fazla geri veriliyor · büyük kârlar normal.
+
+⚠️ Bunun doğal önerisi *"daha erken kâr al"* olur ve bu bir **çıkış
+sıkılaştırmasıdır** — bu projede sıkılaştıran **29 varyantın 29'u da kalmıştır**
+(bugün 28→29 oldu). Öneriye dönüşmeden önce kendi ön-kaydı ve **doğru boş
+hipotezi** gerekir.
+
+**Kural önerilmiyor. Bota dokunulmadı.**
