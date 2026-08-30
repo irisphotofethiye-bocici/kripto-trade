@@ -6467,3 +6467,100 @@ Ayrıca botun 119 sembolünün **hiçbirinin** likit opsiyonu yok (290 işlemin 
 hesaplanabiliyordu.
 
 **Betik:** `scratchpad/odul_boyutu.py` (BTC önbelleği `.gitignore`'da)
+
+### ❌ KAPI SİSTEMİNİN DENGELİ DENETİMİ — **A ve C DÜŞTÜ**, B kısmi (2026-08-30)
+
+**Ön-kayıt:** `ON_KAYIT_kapi_dengesi.md`, commit `bd327a6` — koşumdan **önce**.
+**Betikler:** `scratchpad/kapi_veri.py` · `kapi_karne.py` · `kapi_erken_cikis.py`
+**Veri:** `testbot_aday_arsiv.jsonl` (31 alan, gizli seçilim YOK) × 5 defter →
+**1.467 pozisyon, %84 eşleşme**, medyan gecikme 2,6 dk.
+
+⚠️ **Ön-kayıtta tasarım kusuru — koşumdan önce fark edildi, DÜZELTİLMEDİ:**
+keşif penceresi `N=253 · 9 gün · dolar −168` iken doğrulama `N=984 · 12 gün ·
+−8.228`. Keşif hem küçük hem **neredeyse hiç zarar taşımıyor.** Tarihleri sonradan
+değiştirmek disiplin ihlali olurdu; ön-kayıtlı hâliyle koşuldu.
+
+#### A KOLU (eklenecek kapı) — **DÜŞTÜ, 0/26**
+
+26 aday koşulun **hiçbiri** hak kazanmadı. Ve bu bir güç sorunu **değil**:
+
+| tarama | N | gün | dolar | hak kazanan |
+|---|---|---|---|---|
+| keşif (ön-kayıtlı) | 253 | 9 | −168 | **0/26** |
+| tüm pencere (keşifsel kontrol) | 1.237 | 21 | −8.397 | **0/26** |
+
+🔴 **Engellenebilecek her dilimin işlem başı getirisi POZİTİF.** Sınananlar:
+`vol_x` · `oi3` · `oi24` · `rel3` · `last1` · `last3` · `btc_chg3` · `taker` ·
+`comp` · `ma50_mesafe` · `dip_yakit` · `ayrisma` · `dusuk_float` · `stage`.
+
+**Yapısal gözlem:** dilimlerin çoğunda işlem başı getiri **+**, dolar toplamı **−**
+(ör. `taker ≤ 0,93`: +0,306% ama −5.508 $). Yani **zarar seçimden değil, boyut
+ağırlığından** geliyor. Ama boyutun TP1 kanalından geçtiği aynı gün ölçüldü
+(bkz. GERİ ÇEKME) → bu da eyleme dönüştürülemez.
+
+#### B KOLU (kaldırılacak kapı) — `golge` doğal deneyi
+
+Gölge botun **reddettiklerini** açıyor; reddedilenler kârlıysa kapı yanlıştır.
+
+```
+kaynak            N     ort ret    TOPLAM $   kazanan   gun-t   yorum
+pump_long_tezi  461    +2,297%    +2.813,4      %59    +5,40   kapi yanlis OLABILIR
+blowoff          13    +5,562%      +210,0      %62    +1,91   N=13, HUKUM YOK
+long_veto        40    +0,340%      -337,3      %52    +0,70   belirsiz (ret/dolar celisiyor)
+onay_bekle       57    -0,404%    -1.757,0      %46    -0,00   kapi dogru gorunuyor
+stop_cok_dar     39    -0,408%      -948,1      %38    -0,66   kapi dogru gorunuyor
+btc_pay_freni    20    -0,989%      -756,4      %30    -2,58   kapi dogru gorunuyor
+```
+
+⚠️ `pump_long_tezi` bir **kapı değil, gölgenin kendi tezi** — "kapı kaldırma" olarak
+okunamaz. ⚠️ N'ler küçük; keşif/doğrulama **bölünemedi** (ön-kayıtta sınır olarak
+yazılıydı). Hiçbiri K1+K2+K3'ü geçmedi.
+
+**`skor ≥ 45` LONG kapısı — ön-kayıtlı YÖNLÜ TAHMİN TUTTU:**
+
+```
+kapinin ALDIKLARI      N=525  ort +0,686%  TOPLAM -7.512,1 $  kazanan %50  gun-t +1,69
+kapinin REDDETTIKLERI  N=219  ort +2,364%  TOPLAM +1.383,6 $  kazanan %59  gun-t +2,95
+```
+
+⚠️ Bu **yeni bilgi değil** — aynı gün `skor`un ters çalıştığı ölçülmüştü; burada
+farklı bir dilimde ve farklı veriyle **tekrar** görülüyor. Hüküm o kayıttadır.
+
+#### C KOLU (erken çıkış) — **DÜŞTÜ**
+
+Karşı-olgu: koşulu sağlayanlar 30. dakikada kesilseydi ne olurdu?
+(birim doğrulandı: izleme `pnl_pct` ile defter `ret` aynı tabanda, eğim 1,195)
+
+```
+                        KESIF (N=57)          DOGRULAMA (N=184)
+kosul                   kazanc   gun-t        kazanc   gun-t
+30dk pnl < 0            -1,473   -0,52        -0,104   -0,54
+30dk pnl < -0,5%        -3,106   -0,86        +0,256   +0,03
+30dk MAE < -1%          -2,911   -1,31        -0,279   -0,98
+30dk artida sure < %50  -3,130   -0,70        +0,134   -0,29
+```
+
+Keşifte kesmek **zarar ettiriyor**, doğrulamada **sıfıra yakın**. Hiçbirinde
+gün-kümeli t anlamlı değil. **28/28 sicili bozulmadı — 29/29 oldu.**
+
+🔑 **Z1 kontrol katmanı uyarı verdi:** erken çıkış koşulları TP1 alma oranıyla
+**güçlü ilişkili** (`30dk pnl<0`: TP1 alanlarda %26, almayanlarda %54 — **27,6 puan**).
+Yani bulunacak şey *"kesmek iyi"* değil *"zaten kaybedenleri kesmek iyi"* olurdu —
+bugün geri çekilen artefaktın aynı kanalı. Ölçüt zaten geçmedi, ama **geçseydi bile
+bu kontrol düşürecekti.**
+
+#### HÜKÜM
+
+**Ön-kayıtlı ölçüm hiçbir kapı değişikliği üretmedi.** A ve C düştü; B'de K1+K2+K3'ü
+geçen küme yok. **Bota hiçbir şey önerilmiyor.**
+
+⚠️ Tasarım kusuru (dengesiz keşif penceresi) A kolunun sonucunu **değiştirmedi** —
+tüm pencerede de 0/26. Ama C kolunun keşif yarısı (N=57, 4 gün) gerçekten zayıftı;
+o kolun "düştü"sü doğrulama yarısına dayanıyor.
+
+#### Ne öğrenildi
+
+Bu ölçüm, giriş seçiciliği aramanın **kapı tarafında da** tükendiğini gösteriyor:
+radar/ölçücünün ürettiği hiçbir alan, engellenmesi kârlı olacak bir dilim
+işaretlemiyor. Projenin *"bot ne alınmayacağını biliyor, ne alınacağını bilmiyor"*
+hükmü artık daha da dar: **ne alınmayacağını da bu alanlardan öğrenemiyor.**
