@@ -6148,3 +6148,86 @@ büyüklüğü**. İki bağımsız işaret bu projede nadirdir.
 
 **Sıradaki adım açık:** aynı ölçüm ~4 hafta sonra tekrarlanır (küme sayısı 11 → ~40).
 Ölçüt **değiştirilmez**; bugün düşen ölçütle yeniden koşulur.
+
+### 🔴🔴 KAZANAN vs KAYBEDEN — TEK AYIRICI POZİSYON BÜYÜKLÜĞÜ (2026-08-30)
+
+**Tür:** 🟡 **KEŞİFSEL — HÜKÜM DEĞİL.** Ön-kayıt yok; kullanıcı isteğiyle yapılan
+patern taraması. Kural önerisi için **kendi ön-kaydıyla** sınanmalı.
+**Betik:** `scratchpad/kazanan_kaybeden.py` · **N=1.460 pozisyon** · 6 defter.
+
+#### Giriş anında HİÇBİR ŞEY ayırmıyor — bir şey hariç
+
+Kazanan (736) vs kaybeden (724), giriş anı özellikleri, etki büyüklüğü `d`:
+
+```
+skor              d=-0,06      range_pos     d=+0,09      beklenen slipaj  d=+0,04
+chg24 giriste     d=+0,10      kaldirac      d=-0,04      poz/defter orani d=-0,14
+NOTIONAL ($)      d=-0,69   <-- TEK AYIRICI
+```
+
+`yon` · `smart` · `stage` · `rejim` dağılımları kazanan/kaybeden arasında **aynı**.
+Botun bütün seçici alanları ayırt etmiyor. **Ayıran tek şey pozisyonun büyüklüğü.**
+
+#### Çeyrekler (aynı gün + aynı defter içinde hesaplandı)
+
+```
+ceyrek  N     notional med   kazanma   ort ret     TOPLAM $      poz basi $
+Q1     363          982       %85      +6,890%   +20.680,12       +56,97
+Q2     363        1.676       %58      +1,333%    +7.383,07       +20,34
+Q3     365        2.478       %31      -1,409%   -12.867,31       -35,25
+Q4     364        4.085       %29      -1,496%   -25.581,04       -70,28
+                                                 ------------
+                                        TOPLAM   -10.385,16
+```
+
+**Q3+Q4 olmasaydı defterler −10.385 yerine +28.063 olurdu.**
+
+#### Geçtiği kontroller
+
+| kontrol | sonuç |
+|---|---|
+| aynı gün **ve** aynı defter | **59/63 hücrede (%94)** küçük önde · ort fark **+5,913** · **t = +13,35** |
+| stop genişliği sabitlenince (testbot) | **3/3 dilimde** küçük önde (+5,64 · +8,54 · +9,90) |
+| defterler arası | **5/5** |
+| haftalar arası | **3/3** |
+| likidasyon artefaktı | **yok** (4 çeyrekte de sıfır likidasyon) |
+| dolar mutabakatı | yüzde artefaktı **değil** — dolar bazında da aynı |
+
+#### 🔑 Aynı olgu DÖRDÜNCÜ kez, dört farklı yoldan
+
+1. 2026-08-25 portföy simülasyonu: kazananların exposure medyanı 0,160 · kaybedenlerin 0,400
+2. 2026-08-25: eşit-ağırlıklı +29,88 puan → gerçekleşen −10,96
+3. 2026-08-30 emir defteri: `notional/defter_usdt_20` kusursuz monotonik
+4. **bu ölçüm:** giriş anındaki tek ayırıcı `notional`, dolar bazında doğrulandı
+
+**Kaldıraç kırılımı aynı şeyi söylüyor:** dokuz kaldıraç bandının sekizinde
+ortalama yüzde getiri **POZİTİF**, ama dolar toplamı **NEGATİF**.
+🔴 **Bot ortalamada haklı, büyük bahis koyduğu yerde haksız.**
+
+#### ⚠️ MEKANİZMA AÇIKLANMADI — hüküm bu yüzden yazılmıyor
+
+`t=+13` bu kadar çalışılmış bir sistemde **kendi başına şüphe sebebidir**. Aday
+mekanizmalar (piyasa etkisi · risk-önce boyutlandırmanın stop genişliğiyle bağı ·
+kaldıraç klempi) **elenmedi**; stop genişliği kontrolü etkiyi ortadan kaldırmadı,
+yani en bariz mekanik açıklama tutmadı. **Sebep bilinmeden kural yazılmaz.**
+
+#### İlk 30 dakika — ikinci bulgu (yalnız testbot, N=239)
+
+Karar verilebilir pencerede güçlü ayrım (döngüsel olmayan biçimde):
+
+```
+30dk sonunda pnl>0    N=117  kazanma %62  ort ret +3,128%  |  degilse N=122 %27 -1,318%
+30dk MAE > -%1        N=111          %59         +2,140%   |          N=128 %32 -0,253%
+30dk artida %50+      N=127          %59         +2,469%   |          N=112 %28 -0,968%
+```
+
+⚠️ Bu bir **çıkış sıkılaştırması** önerisidir ve bu projede sıkılaştıran
+**28 varyantın 28'i de kalmıştı**. Prior kötü; ayrı ön-kayıt şart.
+
+#### Atlanmış alanlar (izlemede toplanıyor, hiç ölçülmedi)
+
+`arti_oran` · `atr_canli`/`atr_giriste` (**oynaklık GENİŞLEMESİ — seviye değil değişim**) ·
+`ma50_mesafe` · `radar_izi` · `stop_mesafe_pct` · `tp1_alindi`
+
+⚠️ **5 dakikalık izleme yalnız `testbot`'u kapsıyor** (`kaynak='canli'`, 241 pozisyon).
+Diğer dört defterin yol verisi **YOK** — bu bir veri boşluğudur.
