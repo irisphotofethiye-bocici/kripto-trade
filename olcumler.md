@@ -5904,3 +5904,166 @@ girdi** (`CLAUDE.md` → emir defteri likiditesi · spot-perp basis · çapraz b
 **Betikler:** `scratchpad/tabfm/10_kutu_disi_veri.py` · `11_kutu_disi_olcum.py`
 **Ham çıktı:** `scratchpad/tabfm/kutu_disi.log` · özet `kutu_disi_ozet.json`
 **Kurulum:** silinmedi (kullanıcı kararı) — 7,2 GB (`tabfm_venv` + `agirlik`).
+
+
+---
+
+## 2026-08-30 — ÜÇ BETİMLEYİCİ KAYIT (ön-kayıt YOK, eşik YOK)
+
+⚠️ **Bunlar HÜKÜM DEĞİL.** Hipotez yazılmadan, geçme ölçütü konmadan, kullanıcı
+sorularına cevaben koşuldu. Kural çıkarılmaz — yalnız *"o gün defterler ne
+gösteriyordu"* kaydıdır. Tüm rakamlar **2026-08-30 13:04:29 anlık görüntüsüdür.**
+
+⚠️ **YÖNTEM DERSİ — defter SOHBETİN İÇİNDE büyüdü.** Aynı oturumda testbot
+kapanmış pozisyonu `243 → 288` oldu, kasası `6.414 → 5.458` düştü. İlk verdiğim
+rakamlar üç gün sonra yalan söylüyordu. **Canlı deftere dayanan her sayı damgalanır**
+(`CLAUDE.md` → hızlı değişen rakam). Mutabakat üç defterde de koşuldu:
+testbot sapma **+0,08** · defter2 **−0,03** · defter3 **−0,01**.
+
+---
+
+### 1. GÖLGE — 19 Ağustos sonrası (BOĞA), botun kaybettiği pencerede
+
+Kullanıcı sorusu: *"Bot boğada 19 Ağustos sonrası başarısız, gölge defter ne durumda?"*
+
+```
+pencere 2026-08-19 00:00 -> 2026-08-30 13:04
+testbot  equity  9749,71 -> 5457,73   PENCERE REALIZE  -4291,98
+golge    equity  7280,32 -> 8152,39   PENCERE REALIZE   +872,07
+```
+
+Kasada gölge önde. **Ama iki iş ayrılınca işaret dönüyor** (`CLAUDE.md`: gölge
+tek soru yalıtmıyor):
+
+| iş | poz | P&L | kazanma |
+|---|---|---|---|
+| `pump_long_tezi` — botun hiç oynamadığı LONG tezi | 305 | **+3.747,60** | %61,3 |
+| **botun REDDETTİĞİ girişler** | 100 | **−2.699,24** | %43,0 |
+
+Reddedilenlerin kırılımı — **altının beşi eksi**:
+
+```
+onay_bekle    50 poz  -1502,39      btc_pay_freni  6 poz  -189,57
+stop_cok_dar  13 poz   -560,50      taker_soguma   2 poz  -117,22
+long_veto     26 poz   -345,36      blowoff        3 poz   +15,80  <- TEK ARTI
+```
+
+🔑 **Gölgenin kasasına bakıp *"bot yanlış eliyor"* DENMEZ.** Gölgeyi taşıyan şey
+botun elediği girişler değil, botun **hiç oynamadığı ayrı bir tez.** Botun
+reddettikleri bu pencerede **2.699 $ kaybettirirdi** — kapılar işini yaptı.
+
+⚠️ Fonlama asimetrisi bu pencerede **ısırmıyor**: ikisi de tahsil etti
+(testbot +165,17 · golge +130,32). Olağan *"gölge LONG olduğu için fonlama
+topluyor"* uyarısı burada geçerli değil.
+
+**Betikler:** `scratchpad/golge_19agu.py` · `_b.py` · `_c.py`
+
+---
+
+### 2. DEFTER2 vs DEFTER3 — yönün etkisi, örtüşen pencerede
+
+Örtüşen pencere `2026-08-25 16:12 → 08-30 13:04` (**4,9 gün**), yalnız o
+pencerede **AÇILAN** pozisyonlar (defter2 pencere başında 8 açık pozisyon
+devraldı — kaba equity farkı bu yüzden yanıltıcı):
+
+```
+defter2   82 poz   P&L   +97,66   kazanma %55   medyan marjin 491
+defter3   79 poz   P&L  -765,76   kazanma %49   medyan marjin 665
+FARK (D3 - D2):  -863,42 $
+```
+
+Ayrışma **tek noktada** — `chg24` işareti:
+
+| dilim | defter2 | defter3 |
+|---|---|---|
+| `chg24 ≥ 0` — **ikisi de SHORT** (kontrol) | −3,05 · 67 poz · %52 | +674,48 · 61 poz · %57 |
+| `chg24 < 0` — **D2 SHORT / D3 LONG** | **−6,42** · 15 poz · %60 | **−1.523,20** · 18 poz · **%17** |
+
+```
+defter3 LONG kolu olmasaydi:  +674,48   (gercek: -765,76)
+```
+
+Pencerede açılan **161 pozisyonun 161'i de `BOĞA` rejiminde** girildi. Yani
+boğada bile bu evrende LONG kaybediyor — `defter3` ön-kayıtının *"LONG bu
+evrende `t < −4`, LONG kolunun kaybetmesi BEKLENİYOR"* beklentisiyle aynı yönde.
+
+⚠️ **Hüküm yazılamaz:** 4,9 gün, 18 LONG pozisyon, tek pencere, ayı verisi yok.
+`durum.md`'de yazılı olduğu gibi bu iki defter için **ölçüt ve pencere hâlâ
+belirlenmedi** — bu kayıt o açık maddeyi kapatmaz.
+
+📌 08-27'de aynı ölçüm koşulduğunda defter3 `+43,79` idi ve *"sıralama VELVET'in
+sonucundan bağımsız olarak defter2 lehine kilitli"* diye hesaplanmıştı
+(`scratchpad/acik_poz_menzil.py`). Üç gün sonra sıralama aynı, **fark 20 kat
+büyüdü.**
+
+**Betikler:** `scratchpad/defter23_durum.py` · `_esit.py` · `_d.py` · `acik_poz_menzil.py`
+
+---
+
+### 3. 🔴 ÖDEME GEOMETRİSİ — dört defter aynı duvara çarpıyor
+
+Kullanıcı itirazı: *"Yanlış yere bakıyor olabilir misin?"* — evet.
+
+`kazanma oranı > %50` olan defterler bile para kaybediyor. Sebep seçim değil,
+**kazanç/kayıp büyüklüğü**:
+
+| defter | poz | kazanma | ort KAZANÇ | ort KAYIP | **oran** | beklenti/poz |
+|---|---|---|---|---|---|---|
+| testbot | 288 | %43,8 | +93,46 | −102,89 | **0,91** | −16,99 |
+| golge | 631 | %55,9 | +86,35 | −114,23 | **0,76** | −2,02 |
+| defter2 | 180 | %50,6 | +63,62 | −75,70 | **0,84** | −5,27 |
+| defter3 | 80 | %48,8 | +87,00 | −102,11 | **0,85** | −9,92 |
+
+Başabaş için gereken kazanma oranı `kayıp/(kazanç+kayıp)`:
+
+```
+testbot   gereken %52,4   gercek %43,8   ACIK -8,7 puan
+golge     gereken %56,9   gercek %55,9   ACIK -1,0 puan
+defter2   gereken %54,3   gercek %50,6   ACIK -3,8 puan
+defter3   gereken %54,0   gercek %48,8   ACIK -5,2 puan
+```
+
+#### 🔑 ASIL GÖZLEM — DOĞAL DENEY
+
+Bu dört defterin **seçim kuralları tamamen farklı**: farklı evren, farklı yön
+kısıtı, farklı kapılar. Kazanma oranları **12 puanlık** bir aralığa yayılıyor
+(%43,8 → %55,9).
+
+**Ödeme oranı ise 0,76–0,91 dar bandında sıkışmış.**
+
+Seçim değişiyor, geometri değişmiyor — çünkü dördü de **aynı çıkış kodunu**
+paylaşıyor (`CLAUDE.md`: *"Çıkış kuralları bilinçli olarak testbot ile aynı —
+fark yalnız girişten gelsin diye"*). Bu, tasarımın istenen yan ürünü: girişi
+yalıtmak için çıkış sabitlendi, ve sabitlenen şey **bağlayıcı kısıt** çıktı.
+
+#### ÖDEME ŞEKLİ NEREDEYSE İKİLİ
+
+```
+testbot   TP1'e ULASTI    116 poz  ort  +95,50  kazanma %92
+          TP1'e ULASMADI  172 poz  ort  -92,85  kazanma %11
+golge     TP1 var 271 ort +108,07 (%93)  ·  TP1 yok 360 ort -84,89 (%28)
+defter2   TP1 var  70 ort  +78,17 (%96)  ·  TP1 yok 110 ort -58,36 (%22)
+defter3   TP1 var  29 ort +116,09 (%100) ·  TP1 yok  51 ort -81,57 (%20)
+```
+
+🔴 **BU NEDENSEL DEĞİL — sonuca göre seçim (selection on outcome).** TP1'e
+ulaşanlar zaten lehe hareket edenlerdir; kârlı olmaları tanım gereğidir.
+*"TP1 kâr getiriyor"* diye okunamaz. Gösterdiği tek şey **şekildir**: kazananın
+yarısı erken alınıyor, kaybedenin tamamı taşınıyor — `ort kazanç < ort kayıp`
+üretmenin matematiksel yolu tam olarak budur.
+
+#### BU KAYIT NEYİ ÖNERİYOR — kural değil, ÖLÇÜT
+
+Çıkış tarafında **29 varyant** denendi, geçen **1** tanesi çıkışı *gevşetiyordu*
+(sabit %10 hedef); sıkılaştıran **28'in 28'i de kaldı**. Bu kayıt o 28/28 ile
+**aynı yöne** bakıyor — ödeme oranı düşükse çare üst tarafı açmaktır.
+
+Önerilen tek şey **ölçütün değişmesi**: bir çıkış varyantı denendiğinde
+başarı ölçüsü **kazanma oranı değil, `ort kazanç / ort kayıp` oranı** olmalı.
+Dört defterin dördünde de kazanma oranı yanıltıcı çıktı — `golge` %55,9 kazanıp
+kaybediyor.
+
+⚠️ **Bu bir ön-kayıt değildir.** Çıkış varyantı denenecekse ayrı ön-kayıt
+gerekir ve **29 varyantın 30.'su olarak sayılır.**
+
+**Betik:** `scratchpad/geometri.py` · ham çıktı `scratchpad/_kayit_ham.txt`

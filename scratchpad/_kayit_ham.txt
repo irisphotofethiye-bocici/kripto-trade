@@ -1,0 +1,270 @@
+ANLIK GORUNTU: 2026-08-30 13:04:29
+testbot  equity   5457.73  durum AKTIF        acik 3  son_cycle 2026-08-30 13:02:01
+golge    equity   8152.39  durum AKTIF        acik 8  son_cycle 2026-08-30 13:02:12
+defter2  equity   8962.28  durum AKTIF        acik 6  son_cycle 2026-08-30 13:03:55
+defter3  equity   9176.39  durum AKTIF        acik 8  son_cycle 2026-08-30 12:57:51
+
+================================================================================================
+TESTBOT   |  pencere 2026-08-19 00:00:00 -> simdi
+================================================================================================
+  equity pencere basi :    9749.71  (2026-08-18 23:54:31)
+  equity SIMDI        :    5457.73
+  PENCERE REALIZE     :   -4291.98  <- gercek nakit degisimi
+  acik pozisyon       : 3
+
+  PENCEREDE ACILIP KAPANAN pozisyon : 170
+    defter P&L (fonlama HARIC)      :   -4266.63
+    fonlama (id ile toplandi, N=171) :    +165.17
+    kazanma orani (POZISYON basi)   : 73/171 = %42.7
+
+================================================================================================
+GOLGE   |  pencere 2026-08-19 00:00:00 -> simdi
+================================================================================================
+  equity pencere basi :    7280.32  (2026-08-18 23:54:37)
+  equity SIMDI        :    8152.39
+  PENCERE REALIZE     :    +872.07  <- gercek nakit degisimi
+  acik pozisyon       : 8
+
+  PENCEREDE ACILIP KAPANAN pozisyon : 405
+    defter P&L (fonlama HARIC)      :   +1196.84
+    fonlama (id ile toplandi, N=407) :    +130.32
+    kazanma orani (POZISYON basi)   : 232/407 = %57.0
+
+================================================================================================
+GOLGE — IKI IS AYRI SAYILIR  (CLAUDE.md: golge tek soru yalitmiyor)
+================================================================================================
+  is                   poz          P&L      fonlama    kazanma
+  pump_long_tezi       305     +3747.60       +23.89      61.3%
+  REDDEDILEN GIRIS     100     -2699.24      +101.64      43.0%
+
+  KAYNAK KIRILIMI (reddedilen girisler):
+    golge:onay_bekle            50 poz   -1502.39  kazanma 46%
+    golge:stop_cok_dar          13 poz    -560.50  kazanma 23%
+    golge:long_veto             26 poz    -345.36  kazanma 50%
+    golge:btc_pay_freni          6 poz    -189.57  kazanma 33%
+    golge:taker_soguma           2 poz    -117.22  kazanma 0%
+    golge:blowoff                3 poz     +15.80  kazanma 67%
+
+================================================================================================
+YON ve REJIM — pencerede acilip kapanan pozisyonlar
+================================================================================================
+  --- testbot ---
+     yon      LONG     141 poz   -2702.31  kazanma 48%
+     yon      SHORT     29 poz   -1624.02  kazanma 14%
+     rejim    BOGA     131 poz   -3227.74  kazanma 47%
+     rejim    NOTR      39 poz   -1098.59  kazanma 28%
+
+  --- golge ---
+     yon      SHORT     20 poz    -785.35  kazanma 25%
+     yon      LONG     385 poz   +1833.71  kazanma 58%
+     rejim    BILINMIYOR   9 poz    -907.67  kazanma 22%
+     rejim    BOGA     281 poz    -152.26  kazanma 57%
+     rejim    NOTR     115 poz   +2108.29  kazanma 60%
+
+================================================================================================
+MUTABAKAT — pencere realize ile defter P&L farki = fonlama + ucret
+================================================================================================
+  testbot  realize  -4291.98  defter P&L  -4266.63  fark   -25.35  (fonlama +165.17)
+  golge    realize   +872.07  defter P&L  +1196.84  fark  -324.77  (fonlama +130.32)
+==================================================================================================
+1) TAM OMUR — her defter kendi baslangicindan bugune
+==================================================================================================
+  defter2  2026-08-20 17:28 -> simdi  (9.8 gun)
+     kasa 10000.00 ->  8962.28    -1037.72  (%-10.38)   acik 6  durum AKTIF
+     180 poz kapandi · kazanma %51.4 · defter P&L   -840.89 · fonlama   +15.33 · ucret -216.36
+     MUTABAKAT: baslangic +10000.00  P&L -840.89  fonlama(state) +19.49  ucret -216.36  kasa-sifir +0.00
+                = 8962.24  vs equity 8962.28  -> SAPMA -0.03
+
+  defter3  2026-08-25 16:12 -> simdi  (4.9 gun)
+     kasa 10000.00 ->  9176.39     -823.61  (%-8.24)   acik 8  durum AKTIF
+      80 poz kapandi · kazanma %50.0 · defter P&L   -710.53 · fonlama    +5.59 · ucret -121.02
+     MUTABAKAT: baslangic +10000.00  P&L -710.53  fonlama(state) +7.96  ucret -121.02  kasa-sifir +0.00
+                = 9176.41  vs equity 9176.39  -> SAPMA +0.02
+
+  testbot  2026-07-23 19:07 -> simdi  (37.7 gun)
+     kasa 10000.00 ->  5457.73    -4542.27  (%-45.42)   acik 3  durum AKTIF
+     288 poz kapandi · kazanma %43.9 · defter P&L  -4832.05 · fonlama  +176.21 · ucret -376.95
+     MUTABAKAT: baslangic +10000.00  P&L -4832.05  fonlama(state) -339.13  ucret -376.95  kasa-sifir +1005.94
+                = 5457.81  vs equity 5457.73  -> SAPMA +0.08
+
+==================================================================================================
+2) ORTUSEN PENCERE — 2026-08-25 16:12 -> simdi   (defter3'un dogumu)
+   defter2 ile defter3 arasindaki TEK fark YON. Ayni evren, ayni cikis, ayni boyut.
+==================================================================================================
+  defter2  equity  8469.02 ->  8962.28  =  +493.26 (%+5.82)    82 poz  kazanma %55.3  fonlama  +11.66
+  defter3  equity 10000.00 ->  9176.39  =  -823.61 (%-8.24)    79 poz  kazanma %49.4  fonlama   +5.59
+  testbot  equity  6757.86 ->  5457.73  = -1300.13 (%-19.24)    64 poz  kazanma %47.7  fonlama  +60.64
+
+==================================================================================================
+3) YONUN ETKISI — chg24 isaretine gore ayrilmis (ortusen pencere)
+   chg24>=0 : IKI DEFTER DE SHORT  (kontrol dilimi, ayni olmali)
+   chg24<0  : defter2 SHORT / defter3 LONG  (TEK AYRISMA NOKTASI)
+==================================================================================================
+  --- chg24>=0 (ikisi de SHORT) ---
+     defter2  67 poz  P&L    -3.05  kazanma %52  yon {'SHORT': 67}
+     defter3  61 poz  P&L  +674.48  kazanma %57  yon {'SHORT': 61}
+
+  --- chg24<0  (D2 SHORT / D3 LONG) ---
+     defter2  15 poz  P&L    -6.42  kazanma %60  yon {'SHORT': 15}
+     defter3  18 poz  P&L -1523.20  kazanma %17  yon {'LONG': 18}
+
+==================================================================================================
+4) AYNI SEMBOL — iki defterin ORTUSEN pencerede ortak isimleri
+==================================================================================================
+  ortak sembol: 44  (D2 82 · D3 79)
+  sym        D2 yon     D2 P&L   D3 yon     D3 P&L   chg24
+  AUCTION    SHORT       +2.36   SHORT      -71.24   +12.9
+  BTR        SHORT       +3.02   SHORT      +24.56   +5.5
+  BTW        SHORT     +101.99   SHORT       -3.88   +2.4
+  COLLECT    SHORT      +49.52   SHORT      +97.89   +19.6
+  COW        SHORT     +127.37   SHORT     +168.94   +4.7
+  CVX        SHORT       +1.84   SHORT       +2.01   +8.2
+  CYS        SHORT      -67.73   LONG        +3.64   -9.1   <- YON FARKLI
+  DEXE       SHORT      -69.41   SHORT      -70.37   +5.2
+  DOS        SHORT      +58.28   SHORT       +1.53   +15.3
+  EDEN       SHORT      -67.03   SHORT      -69.22   +19.6
+  ENA        SHORT      +50.57   SHORT      +55.78   +19.2
+  FARTCOIN   SHORT     +124.34   SHORT     +138.17   +18.5
+  FET        SHORT      -69.56   LONG      -142.20   -2.7   <- YON FARKLI
+  FF         SHORT       +7.05   SHORT      +20.79   +10.2
+  FLUID      SHORT     +180.46   SHORT     -159.72   +15.6
+  GIGGLE     SHORT       +2.48   SHORT     +107.88   +19.1
+  HOLO       SHORT       +6.01   SHORT      +99.46   +4.5
+  JTO        SHORT      +82.97   LONG      -143.65   -8.9   <- YON FARKLI
+  KNC        SHORT      -70.61   SHORT      -69.33   +6.3
+  LAB        SHORT      -66.11   SHORT      +52.42   +12.8
+  LISTA      SHORT      -63.61   SHORT      -67.34   +10.6
+  MAGMA      SHORT      +29.19   LONG      -134.38   -6.8   <- YON FARKLI
+  MASK       SHORT       +2.52   SHORT       +5.62   +1.5
+  MELANIA    SHORT     +120.57   SHORT     +121.47   +2.7
+  MET        SHORT       -0.92   LONG      -139.73   -1.4   <- YON FARKLI
+  O          SHORT      -70.82   SHORT      -70.42   +11.1
+  OP         SHORT      +98.76   LONG      -135.73   -7.1   <- YON FARKLI
+  PIEVERSE   SHORT     +130.18   SHORT      +90.51   +13.8
+  POL        SHORT       +2.73   SHORT      +69.21   +6.1
+  PROM       SHORT     -139.73   SHORT     -152.59   +18.2
+  RED        SHORT      +18.28   SHORT      +11.85   +6.3
+  RIVER      SHORT       +7.57   SHORT       +0.68   +9.5
+  RUNE       SHORT     +231.54   SHORT     +251.10   +12.8
+  SNX        SHORT      -67.64   LONG      -138.85   -2.9   <- YON FARKLI
+  SPX        SHORT      -60.60   SHORT       +1.40   +17.9
+  STX        SHORT     +315.15   SHORT     +337.92   +6.2
+  TIA        SHORT      +45.20   LONG      -141.44   -5.1   <- YON FARKLI
+  TRUMP      SHORT     +136.09   SHORT       -3.34   +11.5
+  TWT        SHORT      -60.72   SHORT      -59.83   +10.0
+  UAI        SHORT       +4.82   SHORT      -64.05   +14.6
+  UB         SHORT     -134.13   SHORT       +4.95   +14.1
+  VVV        SHORT     +160.14   SHORT     +160.23   +5.8
+  ZRO        SHORT      +48.81   SHORT      +59.36   +4.5
+  龙虾         SHORT      -69.00   SHORT       +1.73   +19.2
+  TOPLAM              +1072.19              +51.79
+
+==================================================================================================
+5) SU AN ACIK
+==================================================================================================
+  defter2  ZEC      SHORT giris 2026-08-29 18:11:19  marjin 698  chg24 3.208
+  defter2  UNI      SHORT giris 2026-08-30 06:11:23  marjin 702  chg24 10.473
+  defter2  FORM     SHORT giris 2026-08-30 08:48:59  marjin 357  chg24 7.689
+  defter2  BTW      SHORT giris 2026-08-30 09:11:29  marjin 225  chg24 5.254
+  defter2  GIGGLE   SHORT giris 2026-08-30 09:11:31  marjin 256  chg24 10.97
+  defter2  O        SHORT giris 2026-08-30 10:33:53  marjin 707  chg24 5.82
+  defter3  BEAT     SHORT giris 2026-08-29 14:12:49  marjin 264  chg24 11.155
+  defter3  DASH     SHORT giris 2026-08-29 17:42:54  marjin 732  chg24 7.779
+  defter3  ZEC      SHORT giris 2026-08-29 18:12:50  marjin 737  chg24 3.208
+  defter3  UNI      SHORT giris 2026-08-30 06:12:53  marjin 742  chg24 10.473
+  defter3  FORM     SHORT giris 2026-08-30 08:05:22  marjin 368  chg24 6.563
+  defter3  GIGGLE   SHORT giris 2026-08-30 09:12:54  marjin 264  chg24 10.97
+  defter3  O        SHORT giris 2026-08-30 10:35:23  marjin 678  chg24 5.82
+  defter3  EGLD     SHORT giris 2026-08-30 12:42:50  marjin 769  chg24 8.85
+==============================================================================================
+A) EQUITY FARKI NEDEN YANILTIYOR — defter2 ACIK POZISYON DEVRALDI
+==============================================================================================
+  defter2  pencere basinda ACIK devralinan:  8 poz  ->  P&L  +620.82
+  defter3  pencere basinda ACIK devralinan:  1 poz  ->  P&L   +55.23
+
+==============================================================================================
+B) ESIT ZEMIN — YALNIZ pencerede ACILAN pozisyonlar
+==============================================================================================
+  defter2  82 poz  P&L   +97.66  fonlama +11.66  kazanma %55  medyan marjin  491.3
+  defter3  79 poz  P&L  -765.76  fonlama  +5.59  kazanma %49  medyan marjin  664.7
+
+  -> FARK (D3 - D2): -863.42 $
+
+==============================================================================================
+C) DEFTER3'UN KENDI ICINDE — LONG kolu SHORT kolunu ne kadar yiyor
+==============================================================================================
+  SHORT  61 poz  P&L  +674.48  kazanma %57
+  LONG   18 poz  P&L -1523.20  kazanma %17
+  -> LONG kolu olmasaydi defter3: +674.48  (gercek: -765.76)
+
+==============================================================================================
+D) REJIM — bu pencere gercekten BOGA mi (giristeki etiket)
+==============================================================================================
+  defter2  {'BOGA': 82}
+  defter3  {'BOGA': 79}
+
+==============================================================================================
+E) SURE — kac gunluk veriyle konusuyoruz
+==============================================================================================
+  defter2  omur 9.8 gun
+  defter3  omur 4.9 gun
+  ortusen pencere: 4.9 gun
+====================================================================================================
+1) BEKLENTI AYRISTIRMASI — kazanma orani yeterli mi
+====================================================================================================
+  defter      poz kazanma  ort KAZANC   ort KAYIP     oran beklenti/poz
+  testbot     288   43.8%      +93.46 -102.89         0.91      -16.99
+  golge       631   55.9%      +86.35 -114.23         0.76       -2.02
+  defter2     180   50.6%      +63.62 -75.70          0.84       -5.27
+  defter3      80   48.8%      +87.00 -102.11         0.85       -9.92
+
+  -> BASABAS icin gereken kazanma orani = kayip/(kazanc+kayip)
+     testbot   gereken %52.4  ·  gercek %43.8  ·  ACIK -8.7 puan
+     golge     gereken %56.9  ·  gercek %55.9  ·  ACIK -1.0 puan
+     defter2   gereken %54.3  ·  gercek %50.6  ·  ACIK -3.8 puan
+     defter3   gereken %54.0  ·  gercek %48.8  ·  ACIK -5.2 puan
+
+====================================================================================================
+2) TP1 KISMI KAR — yarisini erken almak ne yapiyor
+====================================================================================================
+  --- testbot ---
+     TP1 ALDI   116 poz  toplam +11078.43  ort  +95.50  kazanma %92
+     TP1 YOK    172 poz  toplam -15970.18  ort  -92.85  kazanma %11
+     TP1 alip yine de EKSI kapanan: 9/116 (%8)  toplam   -124.51
+
+  --- golge ---
+     TP1 ALDI   271 poz  toplam +29286.78  ort +108.07  kazanma %93
+     TP1 YOK    360 poz  toplam -30559.95  ort  -84.89  kazanma %28
+     TP1 alip yine de EKSI kapanan: 20/271 (%7)  toplam    -92.81
+
+  --- defter2 ---
+     TP1 ALDI    70 poz  toplam  +5471.58  ort  +78.17  kazanma %96
+     TP1 YOK    110 poz  toplam  -6419.60  ort  -58.36  kazanma %22
+     TP1 alip yine de EKSI kapanan: 3/70 (%4)  toplam     -3.26
+
+  --- defter3 ---
+     TP1 ALDI    29 poz  toplam  +3366.75  ort +116.09  kazanma %100
+     TP1 YOK     51 poz  toplam  -4160.24  ort  -81.57  kazanma %20
+     TP1 alip yine de EKSI kapanan: 0/29 (%0)  toplam     +0.00
+
+====================================================================================================
+3) KAPANIS SEBEBI — para nereden giriyor, nereden cikiyor
+====================================================================================================
+  --- testbot (toplam -4891.75) ---
+     STOP          243 poz (%84.4)  -11929.32   ort  -49.09
+     ZAMAN_STOP      6 poz (% 2.1)    +634.17   ort +105.70
+     TP2            39 poz (%13.5)   +6403.40   ort +164.19
+
+  --- golge (toplam -1273.17) ---
+     STOP          609 poz (%96.5)   -6513.79   ort  -10.70
+     TP2            22 poz (% 3.5)   +5240.62   ort +238.21
+
+  --- defter2 (toplam -948.02) ---
+     STOP          175 poz (%97.2)   -1488.37   ort   -8.50
+     ZAMAN_STOP      2 poz (% 1.1)     +24.31   ort  +12.16
+     TP2             3 poz (% 1.7)    +516.04   ort +172.01
+
+  --- defter3 (toplam -793.49) ---
+     STOP           79 poz (%98.8)   -1131.41   ort  -14.32
+     TP2             1 poz (% 1.2)    +337.92   ort +337.92
+
