@@ -6067,3 +6067,84 @@ kaybediyor.
 gerekir ve **29 varyantın 30.'su olarak sayılır.**
 
 **Betik:** `scratchpad/geometri.py` · ham çıktı `scratchpad/_kayit_ham.txt`
+
+### 🟡 EMİR DEFTERİ DERİNLİĞİ — **DÜŞTÜ**, ama GÜÇ yetmediği için (2026-08-30)
+
+**Ön-kayıt:** `ON_KAYIT_defter_derinligi.md`, commit `837631d` — koşumdan **önce**.
+**Betik:** `scratchpad/defter_derinligi.py` · **N=1.056 pozisyon** · 5 defter ·
+175 sembol · **yalnız 12 gün** (08-18 → 08-30).
+**Yordayıcı (önceden atanmış):** `bası = notional / defter_usdt_20` — pozisyonumuzun
+defterin yenen tarafına oranı.
+
+```
+ceyrek                N     ret ort    ret med   kazanan  kaldirac   chg24   slipaj
+Q1 (poz/defter EN KUCUK) 264  +2,668%    +0,446%     %62      3,0     +12,7   0,0253
+Q2                    264    +0,946%    +0,041%     %50      4,0     +12,0   0,0485
+Q3                    264    +0,175%    -2,032%     %42      4,0     +12,9   0,0608
+Q4 (poz/defter EN BUYUK) 264 +0,027%    -1,034%     %44      4,0     +14,0   0,0700
+```
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| O1 · üst−alt çeyrek | ≤−0,3 **ve** t ≤ −2,5 | ❌ fark **−2,640** ama **t = −1,99** |
+| O2 · monotonluk | ρ ≤ −0,75 | ✅ **ρ = −1,000** (kusursuz) |
+| O3 · 🔴 **BELİRLEYİCİ** karıştırıcı | ≥%60 hücre | ✅ **6/6 (%100)** |
+| O4 · defterler arası | ≥3/5 | ✅ **4/4** |
+| O5 · şans (2000 permütasyon) | p ≤ 0,05 | ✅ **p = 0,0000** |
+
+**HÜKÜM: DÜŞTÜ** — ön-kayıt dört ölçütün hepsini istiyordu, O1 tutmadı.
+
+🔴 **Ama düşme sebebi İŞARET DEĞİL, GÜÇ.** Pencere **12 gün**, kullanılabilir gün
+kümesi **11**. Etki büyük (−2,640 puan), kusursuz monotonik, 9/11 günde aynı yönde,
+4/4 defterde aynı yönde, permütasyonda p sıfır. Eksik olan tek şey **küme sayısı**.
+
+**Karıştırıcı elemeleri geçti:** `chg24` çeyrekler arası düz (+12,7 … +14,0) → pump
+büyüklüğünün vekili değil. `kaldirac` düz (3-4) → oynaklığın vekili değil. Yön
+kırılımında da aynı işaret: LONG −3,087 · SHORT −2,003.
+
+#### 🔴 AÇIK KALAN AYRIM — bu hüküm yazılmadan çözülmeli
+
+`bası` büyük ölçüde bir **sembol özelliğidir**: iki çeyrekte birden görülen sembol
+sayısı yalnız **6**. Yani bulgu iki farklı şey olabilir ve ölçüm bunları **ayırmıyor**:
+
+- **(a) boyutlandırma:** pozisyon/defter oranı önemli → kural: pozisyonu defterin
+  derinliğine göre kırp
+- **(b) coin seçimi:** derin defterli coinlerde daha iyiyiz → kural: sığ coine girme
+
+Eşleşen 6 sembolde etki **−6,171 · t=−2,99 · 6/6 negatif** — (a) yönünü destekliyor
+ama **N=6 sembol hiçbir şey kanıtlamaz.**
+
+#### İkincil yordayıcılar (önceden ilan edilmiş, keşifsel)
+
+```
+slipaj_pct        ceyrek ort +1,490 · +1,408 · +0,463 · +0,456   rho -1,00
+defter_usdt_20    ceyrek ort +1,839 · -0,041 · +1,317 · +0,701   rho -0,40
+yetersiz=True     N=66 +0,953%  ·  False N=990 +0,954%  ->  fark SIFIR
+```
+
+`yetersiz` bayrağı hiçbir şey söylemiyor. Mutlak derinlik zayıf. **Oran güçlü.**
+
+#### Beklentiler — biri yanlış, biri doğru
+
+- *"O3'ü geçmesi ~%25"* → **yanlıştı**, 6/6 ile geçti.
+- *"Kalın defter → daha iyi sonuç"* → **doğru**; pozisyon defterin yanında küçükken
+  sonuç daha iyi.
+
+#### 🔑 İKİNCİ BAĞIMSIZ ÖLÇÜM AYNI YERİ GÖSTERİYOR
+
+2026-08-25'te portföy ölçümünde bulunmuştu: *"kazananların medyan exposure'ı 0,160,
+kaybedenlerin 0,400"* — risk-önce boyutlandırma kazananları küçültüyor.
+Bu ölçüm **farklı veriyle, farklı yöntemle** aynı yeri gösteriyor: **pozisyon
+büyüklüğü**. İki bağımsız işaret bu projede nadirdir.
+
+#### Sınırlar
+
+- 12 gün · 11 gün kümesi — **tek eksik olan bu**
+- Derinlik yalnız **dolan** pozisyonda kaydediliyor (seçilim yanlı; bu soru için meşru,
+  *"daha iyi aday seçebilir miydik"* için değil)
+- Defterin **tek tarafı** saklanıyor → **dengesizlik ölçülemez**, emir defterinin
+  klasik kenarı hâlâ ölçülmemiş durumda
+- Sembol yoğunlaşması sorun değil (top3 payı %19, 74/69 tekil sembol)
+
+**Sıradaki adım açık:** aynı ölçüm ~4 hafta sonra tekrarlanır (küme sayısı 11 → ~40).
+Ölçüt **değiştirilmez**; bugün düşen ölçütle yeniden koşulur.
