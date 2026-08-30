@@ -6284,3 +6284,85 @@ sözlüğüne yazılıyor, ama **işlem defterine yazılmıyor**. Şu an ancak
 ⚠️ `CLAUDE.md` → BUG İSTİSNASI sınaması: *"bu değişiklik botun hangi işlemi açacağını
 değiştiriyor mu?"* → **HAYIR.** Yalnız kaydı genişletir, davranışa dokunmaz →
 ölçüm penceresi kırılmaz. Bu yapılmadan mekanizma beş defterde birden aranamaz.
+
+### 🔴🔴 GERİ ÇEKME — POZİSYON BÜYÜKLÜĞÜ BULGUSU ÇÜRÜDÜ (2026-08-30, aynı gün)
+
+**Kullanıcı ısrarı sayesinde yakalandı:** *"mekanizmayı bulman lazım... %98 aradığımızın
+da üstü."* Mekanizma arandı ve **artefakt çıktı. Bulgu GERİ ÇEKİLİYOR.**
+
+#### Artefaktın kalbi
+
+```
+notional Q1   TP1 alan %83   kazanma %85
+notional Q2   TP1 alan %53   kazanma %58
+notional Q3   TP1 alan %17   kazanma %31
+notional Q4   TP1 alan %10   kazanma %29
+```
+
+**Kısmi kâr alma oranı, kazanma oranını neredeyse birebir izliyor.** Ve `TP1 alındı`
+bir SONUÇtur — fiyat lehe 1,5R gittiğinde tetiklenir. Yani "küçük pozisyon kazanıyor"
+cümlesi, "fiyatı lehine gitmiş pozisyonlar kazanıyor" cümlesinin kılığıymış.
+
+#### Kontrol katman katman — nerede çöktüğü
+
+```
+gun                                  19/19  hucre (%100)  t=+11,40
+gun + defter                         61/65        (%94)   t=+12,81
+gun + defter + YON                   68/72        (%94)   t=+12,52
+gun + defter + yon + TP1 DURUMU      43/106       (%41)   t= +1,58   <- COKTU
+```
+
+TP1 sabitlenince:
+
+```
+TP1 ALDI  N=593   Q1 %97 / Q2 %96 / Q3 %93 / Q4 %87     (hepsi kazaniyor)
+TP1 YOK   N=862   Q1 %21 / Q2 %17 / Q3 %23 / Q4 %23     (hepsi kaybediyor)
+```
+
+Her iki grubun **içinde** notional ayırmıyor. `TP1 YOK` grubunda işaret **ters** bile
+dönüyor (en büyük çeyrek en iyi: −1,91 vs −5,11).
+
+#### 🔴 AYNI ARTEFAKT EMİR DEFTERİ ÖLÇÜMÜNÜ DE ÇÜRÜTÜYOR
+
+`ON_KAYIT_defter_derinligi.md` / commit `9751a6a` — *"düştü ama güç yetmedi, en umut
+verici bulgu"* diye yazılmıştı. **O da aynı artefakt:**
+
+```
+KONTROLSUZ   Q1 +2,697% ... Q4 +0,029%   (TP1 alan %53 -> %29)
+TP1 ALDI     Q4-Q1 = -1,57
+TP1 YOK      Q4-Q1 = +0,47      <- ISARET DONUYOR
+```
+
+`bası` çeyrekleri boyunca TP1 alma oranı %53 → %29 düşüyor; gradyanı üreten buydu.
+
+#### 🔴 "DÖRT BAĞIMSIZ ONAY" — DÖRDÜ DE AYNI ARTEFAKTMIŞ
+
+Aynı gün *"dört ayrı yoldan aynı yere çıkıyoruz"* diye yazılmıştı. **Yanlış.**
+Dördü de `notional`/`exposure` tabanlıydı ve dördü de aynı TP1 kanalından geçiyordu:
+2026-08-25 exposure kıyası · 2026-08-25 eşit-ağırlık kıyası · 2026-08-30 emir defteri ·
+2026-08-30 kazanan/kaybeden. **Bağımsız değillerdi.**
+
+#### Ders — kayda geçiyor
+
+⚠️ **`kismi` (TP1 alındı) bir SONUÇ değişkenidir ve bu betiğin kendi B bölümünde
+"DÖNGÜSEL, karar için kullanılamaz" diye ETİKETLENMİŞTİ** (`False: KAZ%25/KAY%95`).
+Sonra notional analizinde **kontrol edilmedi.** Kusur bilgi eksikliği değil,
+**uygulama**: döngüsel diye işaretlenen değişken, ikinci analizde kontrol listesine
+alınmadı.
+
+🔑 **Grep'lenebilir refleks:** bir ölçümde *"döngüsel"* diye etiketlenen her değişken,
+**aynı veri üzerindeki sonraki her ayrıştırmada kontrol katmanı olarak** kullanılır.
+
+⚠️ Ayrıca bir **veri tutarsızlığı** bulundu (bulguyu etkilemiyor, kayda geçiyor):
+`TP1_KISMI` kaydında `marjin` yarıya yazılıyor ama `notional` tam kalıyor →
+`(notional/marjin)/kaldirac` TP1'li pozisyonlarda **2,00**, diğerlerinde 1,00.
+`notional` iki kayıtta da aynı (son/ilk = 1,00), yani o alan güvenli.
+
+#### Geriye ne kaldı
+
+**Pozisyon büyüklüğü hakkında hiçbir şey.** Giriş anında kazananı kaybedenden ayıran
+**hiçbir alan bulunamadı** — skor, chg24, range_pos, kaldıraç, yön, smart, stage,
+rejim, slipaj, defter derinliği, **ve notional.** Hepsi ayırmıyor.
+
+Bu, projenin *"bot ne alınmayacağını biliyor, ne alınacağını bilmiyor"* hükmünü
+zayıflatmıyor — **güçlendiriyor.**
