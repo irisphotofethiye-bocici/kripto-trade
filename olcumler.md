@@ -6366,3 +6366,104 @@ rejim, slipaj, defter derinliği, **ve notional.** Hepsi ayırmıyor.
 
 Bu, projenin *"bot ne alınmayacağını biliyor, ne alınacağını bilmiyor"* hükmünü
 zayıflatmıyor — **güçlendiriyor.**
+
+
+---
+
+### 🔻 REJİM DÖNÜŞ DEDEKTÖRÜNÜN ÜST SINIRI — **ÖDÜL KÜÇÜK** (2026-08-30)
+
+**Betimleyici, ön-kayıt YOK.** Anlık görüntü **2026-08-30 14:18**.
+
+🔴 **Bu ölçüm, onu öneren kişinin (benim) 10 dakika önceki tavsiyesini çürüttü —
+iş yapılmadan önce.** Kayıt bu yüzden değerli.
+
+#### NEDEN KOŞULDU
+
+Kullanıcı bir X gönderisi getirdi: opsiyon *25-delta put skew*'inin fiyatı 6-18
+dakika öncülediği iddiası. Değerlendirirken `olcumler.md`'nin 08-24 kaydına
+dayanarak *"Deribit skew'i TabFM'in her varyantının önünde"* dedim. Gerekçem o
+kayıttaki şu cümleydi:
+
+> *"Botun sorunu stop genişliği değil: **rejim döndüğünde hâlâ eski yönde işlem
+> açması.** 08-20'de BTC %14 ralli yaparken SHORT açtı."*
+
+Tavsiye vermeden **önce ödülü ölçmem gerekiyordu.** Ölçmedim; kullanıcı
+*"faydası tam olarak ne"* diye sorunca ölçtüm.
+
+#### YÖNTEM
+
+Her kapanmış pozisyon için **tutma süresi boyunca** BTC'nin hareketi
+(`fapi/v1/klines`, 1sa, kalıcı uç). Üç kova: yön BTC'ye **ters** · BTC ile
+**aynı** · BTC **yatay** (|hareket| < %0,25). Soru: *"ters yöndeki pozisyonların
+hiçbiri açılmasaydı"* — yani **mükemmel** bir dedektörün üst sınırı.
+
+#### SONUÇ
+
+```
+TESTBOT   toplam -4903,34
+  BTC YATAY iken    161 poz (%55,3)   -4666,18   <- KAYBIN %95'I BURADA
+  BTC'ye TERS        75 poz (%25,8)    -570,80
+  BTC ile AYNI       55 poz (%18,9)    +333,64
+  mukemmel dedektor:  -4903 -> -4333   kurtardigi +570,80  =  kaybin %11,6'si
+```
+
+| defter | şimdi | mükemmel dedektörle | kurtardığı |
+|---|---|---|---|
+| testbot | −4.903,34 | −4.332,54 | **+570,80 (%11,6)** |
+| defter2 | −947,36 | −441,42 | +505,94 |
+| defter3 | −862,43 | **+164,69** | +1.027,12 |
+
+#### 🔑 HÜKÜM
+
+**Botun kaybı BTC'ye ters düşmekten gelmiyor.** Kaybın **%95'i BTC yatayken**
+oluşuyor — altcoin'in kendi hareketinde, BTC'nin yönünde değil. Mükemmel bir
+rejim dönüş dedektörü bile ana defterin kaybının **%11,6'sını** kurtarıyor.
+
+`defter3` istisna (ters yöndeki 11 pozisyon −1.027, dedektörle defter artıya
+geçiyor) — ama 4,9 günlük ve 84 pozisyonluk.
+
+⚠️ **KARIŞTIRICI, açıkça yazılıyor:** *"BTC yatay"* = tutma süresi boyunca
+hareket < %0,25. Medyan tutma 1,7-1,9 saat olduğu için **kısa tutmalar yapısal
+olarak "yatay" kovasına düşüyor** — kova kısmen tutma süresinin vekilidir.
+Yön yine de belirgin: TERS kova pozisyonların yalnız %25,8'i ve kaybın %11,6'sı.
+
+#### GÖNDERİNİN DOĞRULAMASI — kayda geçiyor ki tekrar tartışılmasın
+
+| iddia | doğrulanan |
+|---|---|
+| *"CBOE veriyi gerçek zamanlı ve ücretsiz yayınlıyor"* | **Cboe SKEW Index günde BİR KEZ, kapanışta** hesaplanıyor; Cboe 2025'te intraday'e geçmeyi **teklif etti** (konsültasyon Haziran 2025'te kapandı, tarih açıklanmadı) |
+| *"canlı 25-delta skew"* | Cboe skew'i **"End-Of-Day Volatility Skew Data"** adıyla DataShop'ta **satıyor** |
+| ücretsiz kaynaklar | MarketChameleon · Barchart: **15 dk gecikmeli** → 6-18 dk öncülüğü yer |
+| *"2019 arxiv, parçacık sürüklenme"* | **bulunamadı.** En yakın gerçek çalışma Cont & Mueller, `arXiv:1904.03058` — emir defteri SPDE'si; skew, Citadel, tahmin **yok** |
+| *"%71 kazanma oranı"* | ödeme oranı ve maliyet yok → anlamsız (`golge` %55,9 kazanıp kaybediyor) |
+| *"14 ayın 14'ü pozitif"* | uyarı işareti, güven işareti değil |
+
+**Gönderi uydurma.** Altındaki tek gerçek veri kaynağı Deribit (BTC/ETH IV skew
++ DVOL, genel API kimlik doğrulaması istemiyor).
+
+#### ERİŞİM — ölçüldü, KAPALI
+
+```
+Binance fapi     OK    0,8 sn
+genel internet   OK    0,4 sn
+Deribit          HATA 12,0 sn (timeout)   <- bu makineden erisilemiyor
+```
+
+Geçmiş verinin var olup olmadığı **ölçülemedi** (bağlanılamadı). Yoksa
+`perp_seri` gibi **ileriye doğru biriktirme** gerekir.
+Ayrıca botun 119 sembolünün **hiçbirinin** likit opsiyonu yok (290 işlemin 0'ı)
+— skew ancak piyasa geneli **rejim girdisi** olabilirdi, coin başına sinyal değil.
+
+#### SIRALAMAYA ETKİSİ
+
+```
+1. odeme geometrisi   kaybin %100'une dokunuyor · veri ELDE · maliyet SIFIR
+2. Deribit skew       kaybin ~%12'si · borsa KAPALI · gunler + VPN
+3. TabFM varyantlari  5 olcumde de bir sey bulunmadi
+```
+
+**Yöntem dersi:** *"şu veri kaynağını ekleyelim"* önerisi, **ödülün üst sınırı
+ölçülmeden** yapılmamalı. Üst sınır elde olan veriyle ve dakikalar içinde
+hesaplanabiliyordu.
+
+**Betik:** `scratchpad/odul_boyutu.py` (BTC önbelleği `.gitignore`'da)
