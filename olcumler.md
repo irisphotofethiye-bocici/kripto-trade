@@ -6650,3 +6650,64 @@ sıkılaştırmasıdır** — bu projede sıkılaştıran **29 varyantın 29'u d
 hipotezi** gerekir.
 
 **Kural önerilmiyor. Bota dokunulmadı.**
+
+### ❌ "ARTIYA GEÇİP GERİ VERME" — **DÜŞTÜ**: botun kusuru değil (2026-08-30)
+
+**Ön-kayıt:** `ON_KAYIT_geri_verme.md`, commit `17cfdec` — koşumdan **önce**.
+**Betik:** `scratchpad/geri_verme.py`
+**Boş hipotez:** aynı sembol · aynı dönem (±3 gün) · aynı yön · **rastgele giriş anı** ·
+**birebir aynı mekanik**. Değişen tek şey giriş anı = botun sinyali.
+**N:** gerçek **458** · kontrol **7.980** (pozisyon başına ~17,4)
+
+```
+esik        GERCEK    KONTROL     fark
+tepe>=%1     55,9%     52,0%     +3,9 puan
+tepe>=%2     46,4%     41,2%     +5,1
+tepe>=%3     35,0%     28,4%     +6,6
+tepe>=%5     22,8%     14,9%     +7,9
+```
+
+| ölçüt | eşik | sonuç |
+|---|---|---|
+| N1 · fark(2%) | ≥+5,0 **ve** t ≥ +2,5 | ❌ fark **+5,1** ✓ ama **t = +1,37** ✗ |
+| N2 · gradyan | azalmalı, \|fark(5)\|≤5 | ❌ **ARTIYOR** (+3,9 → +7,9) |
+| N3 · yön tutarlılığı | ikisi aynı işaret | ✅ LONG +4,5 · SHORT +7,7 |
+| N4 · süre eşitliği | 1,5 kat içinde | ❌ gerçek 4,0 sa · kontrol 6,0 sa (oran 0,67) |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### 🔴 GAUSS BOŞ HİPOTEZİ ETKİYİ DÖRT KAT ABARTMIŞ
+
+```
+Gauss rastgele yuruyus (onceki)    +20,3 / +20,0 / +10,3 / -0,3 puan
+Eslestirilmis GERCEK fiyat (bu)     +3,9 /  +5,1 /  +6,6 / +7,9 puan
+```
+
+Aynı gün *"model riski"* diye yazılan çekince **haklı çıktı**: geri vermenin
+büyük kısmı **piyasanın kendi ortalamaya dönüşü**, botun kusuru değil.
+
+#### 🔴 ÖN-KAYITLI YÖNLÜ TAHMİN YANLIŞ ÇIKTI — aynen yazılıyor
+
+*"fark(5%) sıfıra yakın kalacak, etki varsa yalnız küçük kârlarda"* demiştim.
+**Tersi çıktı:** fark eşikle **büyüyor**, en büyüğü %5'te (+7,9). Yani kalan cılız
+etki küçük kârlarda değil, **büyük tepelerde**. Bu, *"küçük kârı erken al"*
+yorumunun dayanağını **ortadan kaldırır** — bulgu olsaydı bile öneri o olmazdı.
+
+#### Sınırlar — hükmü zayıflatanlar da aynen
+
+- 🔴 **Gerçek pozisyonların yalnız %31'i yeniden üretilebildi** (458/1.467).
+  762'si asgari %2 stop kuralında elendi: canlı ölçücü **canlı fiyatla**,
+  yeniden üretim **kapanmış barla** çalışıyor → stoplar birebir tutmuyor.
+- 🔴 **Kontrol kolu seçilmiş:** 16.040 rastgele çekiliş asgari-stop kuralında
+  elendi. Yani kontrol *"herhangi bir an"* değil, *"stopu yeterince geniş çıkan an"*.
+- ⚠️ N4 düştü: gerçek 4,0 sa tutuyor, kontrol 6,0 sa. Gerçek **daha kısa tuttuğu
+  hâlde daha çok geri veriyor** — bu farkı zayıflatmaz, ama kollar eşit değil.
+- 21 gün, tek pencere.
+
+#### Ne kaldı
+
+**Hiçbir şey.** *"Bot artıya geçip geri veriyor"* gözlemi, doğru boş hipoteze karşı
+**anlamlı değil**. Çıkış/kâr-alma tarafında da eyleme dönüşebilir bir bulgu yok.
+
+Bu, aynı gün üretilen adayın **kendi ön-kaydıyla sınanıp ölmesidir** — kural
+yazılmadan önce. Sistem tam da bunun için kuruldu.
