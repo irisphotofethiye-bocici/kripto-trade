@@ -6711,3 +6711,60 @@ yorumunun dayanağını **ortadan kaldırır** — bulgu olsaydı bile öneri o 
 
 Bu, aynı gün üretilen adayın **kendi ön-kaydıyla sınanıp ölmesidir** — kural
 yazılmadan önce. Sistem tam da bunun için kuruldu.
+
+#### EK — ÜST SINIRIN KENDİ SINIRI (aynı gün, kullanıcı itirazı üzerine)
+
+Kullanıcı: *"Yani işimize yaramaz mı demek istiyorsun?"* — modellediğim dedektör
+yalnız **engelliyordu**; gerçek bir sinyal **yön çevirebilir** de. Üç senaryo
+koşuldu.
+
+⚠️ Defter bu arada yine büyüdü: testbot 290 → **296 poz**, −4.903 → **−5.049**.
+
+```
+TESTBOT   gercek -5048,98  (296 poz)
+  1) TERS olanlar HIC ACILMASAYDI      -4478,18    kurtardigi  +570,80
+  2) TERS olanlar YATAY gibi olsaydi   -6652,20    DAHA KOTU
+  3) HER poz BTC'nin YANINDA olsaydi   +1795,59    fark     +6844,57
+
+DEFTER2   gercek  -987,39  (189 poz)
+  1)  -481,45   ·   2) -1677,75   ·   3) +7665,38
+```
+
+#### 🔴 SENARYO 3 KULLANILMIYOR — KÂHİNLİKTİR
+
+`+6.844`'lük sıçrama gerçek görünüyor ve **geçersizdir.** *"BTC'nin yanında
+olmak"* ancak pozisyon **kapandıktan sonra** bilinir; `AYNI` kovası **sonuca
+göre tanımlıdır.** Onun gözlenen ortalamasını (`+6,07 $/poz`) 296 pozisyona
+uygulamak, geleceği bilmeyi varsaymaktır — sinyal değil, kâhinlik.
+
+Bu, `CLAUDE.md`'nin *"KARIŞTIRICI KONTROLÜ ZORUNLU"* ve *"en iyi hücre
+seçilmez"* kurallarının doğrudan kapsamındadır. **Sayı üretildi ve
+kullanılmadı.** Uygulanabilir şekildeki tek sınır **senaryo 1: +570,80 = %11,6.**
+
+#### 🔑 SENARYO 2 — TERS EN KÖTÜ KOVA DEĞİL
+
+```
+TERS  ortalama   -7,61 $/poz
+YATAY ortalama  -28,98 $/poz   <- EN KOTU KOVA BU
+AYNI  ortalama   +6,07 $/poz
+```
+
+TERS pozisyonlar YATAY gibi davransaydı defter **daha kötü** olurdu (−6.652).
+Yani *"BTC'ye ters düşmek"* kaybın kaynağı değil; kayıp **BTC hiçbir şey
+yapmazken**, altcoin'in kendi hareketinde oluşuyor. Bu, ana bulguyu
+zayıflatmıyor — **güçlendiriyor.**
+
+#### ⚠️ ÖNERİLMEYEN İKİNCİ KULLANIM — bilerek önerilmedi
+
+Skew aslında **yön** değil **oynaklık/kuyruk riski** ölçer. Projenin kendi
+bulgusu *"yön çıkmıyor, oynaklık 198/198 çıkıyor"*, ve bağlayıcı kısıt olan
+ödeme oranı da stop/hedef mesafesi meselesi. Yani skew'in **başka** bir
+kullanımı teorik olarak tutarlıdır.
+
+🔴 **Buna rağmen önerilmiyor.** Bir fikrin ödülü ölçülüp küçük bulunduktan
+hemen sonra aynı veri için ikinci gerekçe üretmek, **gerekçeyi sonuca
+uydurmaktır.** O yol denenecekse ayrı soru, ayrı ön-kayıt, ve **ödül önce
+ölçülür.** Bu paragraf, ileride birinin *"ama skew oynaklık için denenmemişti"*
+demesi için değil, **denenirse hangi disiplinle deneneceği** için duruyor.
+
+**Betik:** `scratchpad/odul_ustsinir2.py`
