@@ -827,4 +827,86 @@ ve `defter3_state.json`'ın **mtime**'ı. `State = Ready` tek başına kanıt DE
 ### Ne zaman hüküm yazılır
 
 Ölçüt ve pencere **henüz belirlenmedi** — defter2 ile aynı açık madde.
-Bir hafta öncesi anlamsız; iki kol da tek haneli N taşır.
+~~Bir hafta öncesi anlamsız; iki kol da tek haneli N taşır.~~
+**[DEĞİŞTİ 2026-08-30]** LONG kolu artık tek haneli değil ve **belirgin
+biçimde eksi** (`olcumler.md` → *DEFTER2 vs DEFTER3*). Ön-kayıtın
+*"LONG bu evrende `t < −4`"* beklentisiyle aynı yönde. **Hüküm yine de
+yazılmadı:** pencere tek, ayı verisi yok, ölçüt hâlâ konmadı.
+
+---
+
+## 🆕 ÖLÇÜMLERİN SIRASI DEĞİŞTİ (2026-08-30)
+
+Bu bölüm **kararları** taşır. Rakamlar `olcumler.md`'dedir ve buraya kopyalanmaz.
+
+### 1. 🔑 ÖDEME ORANI — yeni ölçüt, kural DEĞİL
+
+Dört defterin (`testbot` · `golge` · `defter2` · `defter3`) seçim kuralları
+tamamen farklı, kazanma oranları geniş bir aralığa yayılıyor — **ama ödeme
+oranı (`ort kazanç / ort kayıp`) dar bir bantta sıkışık ve dördü de 1'in
+altında.** Dördü de aynı çıkış kodunu paylaşıyor.
+
+**Karar:** bundan sonra bir **çıkış varyantı** denendiğinde başarı ölçüsü
+kazanma oranı değil, **ödeme oranıdır.** `golge` kazanma oranı yüksek olduğu
+hâlde kaybediyor — kazanma oranı bu projede yanıltıcı olduğunu kanıtladı.
+
+⚠️ **Bu bir kural ya da kapı değişikliği DEĞİL, ölçüttür.** Çıkış varyantı
+denenirse ayrı ön-kayıt gerekir ve **29 varyantın 30.'su olarak sayılır.**
+Sıkılaştırma öneriliyorsa 28/28'e karşı savunma zorunlu.
+
+📌 **Sırada birinci.** Gerekçe: kaybın tamamına dokunuyor, veri elde, maliyet sıfır.
+
+### 2. REJİM DÖNÜŞ DEDEKTÖRÜ — ödül ÖLÇÜLDÜ, küçük
+
+08-24 kaydı *"bot rejim döndüğünde eski yönde işlem açıyor"* diyordu ve bu
+uzun süre bir sonraki iş sanıldı. **Ödülün üst sınırı ölçüldü** ve mükemmel bir
+dedektörün ana defterde kurtardığı pay küçük çıktı — çünkü kaybın büyük kısmı
+**BTC yatayken** oluşuyor, BTC'ye ters düşerken değil.
+
+**Karar:** sıraya **arkaya** kondu. Kapatılmadı, çürütülmedi — ödülü küçük.
+
+🔴 **Yöntem kuralı buradan çıktı:** *"şu veri kaynağını ekleyelim"* önerisi,
+**ödülün üst sınırı ölçülmeden** yapılmaz. Bu vakada üst sınır elde olan veriyle
+dakikalar içinde hesaplanabiliyordu ve öneriyi çürüttü.
+
+### 3. OPSİYON SKEW / DERIBIT — ertelendi, erişim KAPALI
+
+Bir X gönderisi üzerine incelendi. **Gönderi doğrulandı ve uydurma çıktı**
+(Cboe SKEW günde bir kez kapanışta hesaplanıyor, skew gün-sonu ürünü olarak
+satılıyor, ücretsiz kaynaklar gecikmeli, iddia edilen 2019 makalesi yok) —
+ayrıntı `olcumler.md`'de, **tekrar araştırılmasın diye kayıtlı.**
+
+Altındaki tek gerçek kaynak Deribit (BTC/ETH IV skew + DVOL, genel API).
+Üç engel ölçüldü:
+
+- 🔴 **Deribit bu makineden erişilemiyor** (Binance ve genel internet açık) → VPN gerekir
+- botun sembollerinin **hiçbirinin** likit opsiyonu yok → ancak piyasa geneli rejim girdisi olabilir
+- geçmiş verinin var olup olmadığı **ölçülemedi** (bağlanılamadı); yoksa `perp_seri` gibi ileriye biriktirme gerekir
+
+**Karar:** ertelendi. Denenirse **taban = BTC mumundan üretilen rejim** olarak
+sabitlenir (bedava ve kurulu) — TimesFM'i öldüren kıyasın aynısı.
+
+⚠️ Skew'in *"oynaklık girdisi"* olarak ikinci bir kullanımı **bilerek
+önerilmedi**: ödül ölçülüp küçük bulunduktan sonra aynı veriye ikinci gerekçe
+üretmek, gerekçeyi sonuca uydurmaktır. Denenirse ayrı soru, ayrı ön-kayıt,
+**ödül önce ölçülür.**
+
+### 4. TabFM — ELEME TAM, karar kullanıcıda
+
+Kutu dışı (radar tam tarama, skorsuz, doğru ufuk) ölçüldü ve düştü.
+Önceki düşüşlerin hükmü *"model botun kısa listesinin içinde bir şey
+bulamadı"* idi; artık piyasanın tamamı da gösterildi.
+
+**Sonuç: *"evren dardı / kutu daraltıyordu"* savunması ARTIK KULLANILAMAZ.**
+Yeni bir deneme için gereken şey daha geniş evren değil, **bandın dışında yeni
+bir girdi.**
+
+📌 **Açık karar (kullanıcıda):** kurulum diskte duruyor (venv + ağırlık,
+GB mertebesinde; yeniden indirmesi saatler sürer, silme geri alınamaz).
+Artık *"bir sonraki denemede lazım olur"* gerekçesi yok — tek kalan dürüst rolü,
+henüz toplanmamış bant-dışı veri için **tavan bulucu** olmak.
+
+### ⚠️ Bu bölümdeki hiçbir madde BOTA DOKUNMUYOR
+
+Dördü de ölçüm/sıralama kararıdır. `testbot.py`, altı defterin dosyaları,
+`testbot_state.json` ve zamanlanmış görevler **değiştirilmedi.**
