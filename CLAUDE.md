@@ -117,13 +117,17 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   onarım) serbest. Değiştiriyorsa pencere ya beklenir ya yeniden başlatılır.
 - **DEĞİŞİKLİK PROTOKOLÜ** (D/9): eski ölçüt **silinmez**; yanına `[DEĞİŞTİ tarih]`
   eklenir. Kriter metni yorumlanmaz, sayı eşiği uygulanır. **Şüphede DAİMA statüko.**
-- **Başarısızlık aynen raporlanır.** Çıkış tarafında **29 varyant** denendi, **1'i**
+- **Başarısızlık aynen raporlanır.** Çıkış tarafında **30 varyant** denendi, **1'i**
   geçti (`olcumler.md` → sayım). Bunu yumuşatmak da şişirmek de projenin değerini
-  yok eder.
+  yok eder. ⚠️ **Bu sayı BÜYÜYOR — tekrarlamadan önce `olcumler.md`'den oku.**
 - **Tekrarlayan bulgu — keskin hâli:** geçen tek varyant çıkışı **gevşetiyordu**
-  (sabit %10 hedef). Çıkışı **sıkılaştıran 28 varyantın 28'i de kaldı.**
+  (sabit %10 hedef). Çıkışı **sıkılaştıran 29 varyantın 29'u da kaldı.**
   Yeni bir çıkış kuralı önerirken önce buna bak: sıkılaştırma öneriyorsan
-  28/28'e karşı savunma yapman gerekiyor.
+  **29/29**'a karşı savunma yapman gerekiyor.
+  ⚠️ **[DEĞİŞTİ 2026-08-31]** Burada aylarca `28/28` yazıyordu ve **bayatlamıştı**;
+  30. varyant (30. dakikada kesme) 2026-08-30'da düştü. Aynı gün ben de iki ayrı
+  dosyaya `28/28` yazdım — **kaynağa bakmadan.** Bu, projenin kendi
+  *"sayı tekrarlanmaz, sayılır"* kuralının ihlaliydi.
 - **BİR SAPMAYI AÇIKLAYAN FORMÜL BULUNDUĞUNDA, İKİNCİ BİR ZAMANDA SINANMADAN HÜKÜM
   YAZILMAZ.** Tek noktaya uyan formül *"donmuş kayma"* ile *"büyüyen hata"*yı
   **ayırt edemez** — ikisi de o tek noktada aynı sayıyı verir. Gerçek vaka: `ayna`'nın

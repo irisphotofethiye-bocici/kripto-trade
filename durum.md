@@ -852,9 +852,18 @@ hâlde kaybediyor — kazanma oranı bu projede yanıltıcı olduğunu kanıtlad
 
 ⚠️ **Bu bir kural ya da kapı değişikliği DEĞİL, ölçüttür.** Çıkış varyantı
 denenirse ayrı ön-kayıt gerekir ve **29 varyantın 30.'su olarak sayılır.**
-Sıkılaştırma öneriliyorsa 28/28'e karşı savunma zorunlu.
+Sıkılaştırma öneriliyorsa **29/29**'a karşı savunma zorunlu
+(**[DÜZELTİLDİ 2026-08-31]** — ilk yazımda `28/28` yazmıştım, sayım bayattı).
 
 📌 **Sırada birinci.** Gerekçe: kaybın tamamına dokunuyor, veri elde, maliyet sıfır.
+
+⚠️ **AMA ÖNCE OKU — aynı gün üç ölçüm daha yapıldı ve çıtayı yükseltti:**
+`65043f6` (TP1 **döngüseldir**, her ayrıştırmada kontrol katmanı olmalı) ·
+`b386738` (zarar seçimden değil **boyut ağırlığından**, ama boyut da TP1
+kanalından geçiyor → eyleme dönüştürülemez) · `f6eebc3` (*"artıya geçip geri
+verme"* düştü, **çıkış tarafında eyleme dönüşebilir bulgu YOK**).
+Ödeme oranı ölçütü bu üçüyle **çelişmiyor** — ana hesabı TP1 koşullaması
+içermiyor. Ama *"çıkışı değiştirelim"* önerisi artık bu üçüne de cevap vermeli.
 
 ### 2. REJİM DÖNÜŞ DEDEKTÖRÜ — ödül ÖLÇÜLDÜ, küçük
 

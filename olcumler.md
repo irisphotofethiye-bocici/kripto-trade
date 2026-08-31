@@ -33,14 +33,19 @@ olan girer; kaydı olmayan betik `kayıt yok` diye işaretlenir, uydurulmaz.
 | A+B'ye sabit %10 hedef | 08-10 | 206 | **GEÇTİ** — +2,01% vs mevcut +1,24% | — | s.1231 · s.1249 |
 | **Sabit hedefin `MA50+ucuz`'a genişletilmesi** | 08-11 | 460 | ⚠️ **AÇIK SORU — dayanağı çürütüldü.** Genişletme koda *"ölçümü de %10 hedefle yapıldı (net +0,84%)"* diye gerekçelendirildi ([testbot.py:1179](testbot.py#L1179)); **o +0,84% ertesi gün 2 yılda −0,079 · t=−4,05 ile çürütüldü** (s.2790). 08-10 kararı *"A+B'ye özel"* demişti (s.1249). Pencere sonrası A+B kararıyla **birlikte** ele alınmalı → `durum.md` beşinci iş | — | s.1249 · s.2790 |
 
-## Çıkış kuralları — 29 varyant, 1'i geçti
+## Çıkış kuralları — 30 varyant, 1'i geçti
 
-**SAYIM (2026-08-17'de yapıldı).** Beş ölçüm · içlerinde **29 ayrı varyant**:
+> 🔻 **GÜNCEL SAYIM (2026-08-31): 30 denendi · 1 geçti · sıkılaştıran 29'un 29'u kaldı.**
+> Aşağıdaki 29'luk döküm **2026-08-17 tabanıdır**; 30. varyant (30. dakikada kesme)
+> 2026-08-30'da düştü. **Bu sayıyı tekrarlamadan önce buraya bak** — bir kez
+> bayatladı ve iki dosyaya yanlış kopyalandı.
+
+**TABAN SAYIM (2026-08-17'de yapıldı).** Beş ölçüm · içlerinde **29 ayrı varyant**:
 5 (çıkış kıyası) + 8 (oynak hedef) + 7 (kısmi: 4 kural + 3 şekil) + 1 (başabaş) +
 8 (erken müdahale) = **29.**
 
 **Geçen: 1** — sabit %10 hedef. Ve o **çıkışı gevşetiyordu.** Çıkışı sıkılaştıran
-**28 varyantın 28'i de kaldı.**
+~~**28 varyantın 28'i de kaldı.**~~ **[DEĞİŞTİ 2026-08-30] → 29 varyantın 29'u.**
 
 > ⚠️ *"13 çıkış kuralı denendi"* cümlesi bu projede aylarca tekrarlandı ve
 > **dayanağı yoktu.** Gerçek sayım yukarıdadır. `kismi_pay = %40` bu 29'a dahil
@@ -6052,11 +6057,31 @@ ulaşanlar zaten lehe hareket edenlerdir; kârlı olmaları tanım gereğidir.
 yarısı erken alınıyor, kaybedenin tamamı taşınıyor — `ort kazanç < ort kayıp`
 üretmenin matematiksel yolu tam olarak budur.
 
+🔴 **[EKLENDİ 2026-08-31] AYNI GÜN BAŞKA BİR OTURUM BUNU DAHA SERT KOYDU
+(`65043f6`, GERİ ÇEKME).** Orada `TP1` üzerinden yapılan bir **pozisyon
+büyüklüğü** bulgusu artefakt çıktı: TP1 bir **sonuçtur** (fiyat lehe 1,5R
+gidince tetiklenir), ve TP1 kontrol katmanı eklenince işaret çöktü
+(`t=+12,52 → +1,58`). Konan kural:
+
+> *"Döngüsel diye etiketlenen her değişken, aynı veri üzerindeki sonraki
+> **her** ayrıştırmada kontrol katmanı olur."*
+
+**Bu kaydın ANA bulgusu (`ort kazanç / ort kayıp` oranı) o kanaldan geçmiyor**
+— TP1 koşullaması içermez, doğrudan pozisyon P&L'inden hesaplanır. Ama
+**yukarıdaki TP1 tablosu karar için kullanılamaz**; yalnız şekli gösterir.
+İlgili: `b386738` (*zarar seçimden değil boyut ağırlığından — ama boyut da TP1
+kanalından geçiyor, eyleme dönüştürülemez*) · `f6eebc3` (*"artıya geçip geri
+verme" düştü; çıkış/kâr-alma tarafında eyleme dönüşebilir bulgu YOK*).
+
 #### BU KAYIT NEYİ ÖNERİYOR — kural değil, ÖLÇÜT
 
-Çıkış tarafında **29 varyant** denendi, geçen **1** tanesi çıkışı *gevşetiyordu*
-(sabit %10 hedef); sıkılaştıran **28'in 28'i de kaldı**. Bu kayıt o 28/28 ile
+Çıkış tarafında **30 varyant** denendi, geçen **1** tanesi çıkışı *gevşetiyordu*
+(sabit %10 hedef); sıkılaştıran **29'un 29'u da kaldı**. Bu kayıt o **29/29** ile
 **aynı yöne** bakıyor — ödeme oranı düşükse çare üst tarafı açmaktır.
+
+⚠️ **[DÜZELTİLDİ 2026-08-31]** Bu paragraf ilk yazıldığında `28/28` diyordu —
+sayımı kaynaktan okumadan tekrarladım. 30. varyant aynı gün (`b386738`)
+düşmüştü. Projenin *"sayı tekrarlanmaz, sayılır"* kuralının ihlali.
 
 Önerilen tek şey **ölçütün değişmesi**: bir çıkış varyantı denendiğinde
 başarı ölçüsü **kazanma oranı değil, `ort kazanç / ort kayıp` oranı** olmalı.
@@ -6064,7 +6089,7 @@ Dört defterin dördünde de kazanma oranı yanıltıcı çıktı — `golge` %5
 kaybediyor.
 
 ⚠️ **Bu bir ön-kayıt değildir.** Çıkış varyantı denenecekse ayrı ön-kayıt
-gerekir ve **29 varyantın 30.'su olarak sayılır.**
+gerekir ve **31.'si olarak sayılır** (güncel sayım `olcumler.md` başlığında).
 
 **Betik:** `scratchpad/geometri.py` · ham çıktı `scratchpad/_kayit_ham.txt`
 
