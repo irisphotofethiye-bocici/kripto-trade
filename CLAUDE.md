@@ -339,6 +339,20 @@ Doğrulandı: pyflakes ikisini de **isim isim** yakalıyor. Bu sınıf disiplinl
 **araçla** kapanır. Beklenen çıktı: `undefined name` **sıfır** (bilinen zararsız
 uyarılar: kullanılmayan import/değişken, placeholder'sız f-string).
 
+🔴 **AMA PYFLAKES YETMEZ — DÜZENLİ İFADENİN *ANLAMI* İKİSİNE DE GÖRÜNMEZ.**
+Betik **heredoc ile** yazıldığında kaçış dizileri sessizce bozulabilir: `\b`
+(sınır imi) gerçek **BACKSPACE karakterine (0x08)** dönüştü, kural hiçbir zaman
+eşleşmedi, yüzlerce kayıt yanlış sınıflandı — ve `py_compile` DE `pyflakes` DE
+**temiz geçti.** `radar.HERE` / `ayna.time` ile aynı sınıf: araç görmüyor.
+⚠️ Bu proje heredoc'la **iki kez** ısırıldı (biri `[^"\\]`'yi karakter kümesi
+olarak bozdu, biri bu). **Düzenli ifade içeren dosya heredoc'la yazılmaz** —
+yazma aracı kullanılır.
+**Sınama, sınıflandırma yapan her betikte ZORUNLU:** bilinen girdi → beklenen
+etiket listesi; düşerse betik **çalışmayı reddeder**. Ayrıca kalıplarda kontrol
+karakteri aranır (`any(ord(c) < 32 for c in rx.pattern)`).
+Örnek: `scratchpad/olay_listesi.py → kural_sinamasi()`. Vaka: `olcumler.md`
+→ *OLAY KUYRUĞU*.
+
 ## ALTI DEFTER — her biri tek değişkeni yalıtır
 
 | defter | soru | dosya |
