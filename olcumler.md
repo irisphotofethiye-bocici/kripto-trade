@@ -6793,3 +6793,130 @@ uydurmaktır.** O yol denenecekse ayrı soru, ayrı ön-kayıt, ve **ödül önc
 demesi için değil, **denenirse hangi disiplinle deneneceği** için duruyor.
 
 **Betik:** `scratchpad/odul_ustsinir2.py`
+
+---
+
+## OLAY KUYRUĞU — "haber gelince poz al" akışı kurulabilir mi? (2026-09-01)
+
+**Ön-kayıt:** `ON_KAYIT_olay_kuyrugu.md` (commit `dd5b94d`, **koşumdan önce**)
+**Betikler:** `scratchpad/olay_listesi.py` · `scratchpad/olay_kuyrugu.py` ·
+`scratchpad/olay_kacan_dagilim.py`
+**Hüküm:** 🔴 **BİRİNCİL HÜCRE DÜŞTÜ** — ama gerekçesi ön-kayıtta beklenen gerekçe değil.
+
+### Soru
+
+Kullanıcının Grok/X ajentik önerisinin üç kolundan **geriye test edilebilen tek kolu.**
+*"AVAX'la ilgili haber gelince sana bildirir, sen analiz edip poz almamı sağlarsın"*
+akışı için zorunlu koşul: `Grok → bildirim → analiz → karar` gecikmesinden **sonra**
+hâlâ maliyeti aşan kenar kalmalı.
+
+### Veri
+
+Binance resmî duyuru arşivi (public CMS ucu, anahtarsız) — **962 duyuru**,
+2024-08-12…2026-09-01, `releaseDate` **dakika kesinliğinde** → `t=0` yorum payı yok.
+Fiyat: `fapi` 5dk mum, olay penceresi başına, `scratchpad/olay_pencere/` (YENİ dizin;
+mevcut arşivler okunmadı da yazılmadı da).
+
+| tip | aday | ölçülen | düşme sebebi |
+|---|---|---|---|
+| `perp_listeleme` | 260 | **0** | 232'si *olay öncesi bar yok* — **yapısal** |
+| `delisting` | 135 | 84 | 51 mum yok |
+| `launchpool` | 87 | 36 | 24 mum yok · 27 olay öncesi bar yok |
+| `spot_listeleme` | 52 | 31 | 6 mum yok · 15 olay öncesi bar yok |
+
+🔑 **`perp_listeleme` yapısı gereği ölçülemez:** bir perp kendi listelenmesinden
+**önce var olmaz**, dolayısıyla olay öncesi fiyatı da yoktur. 260 adayın 0'ı ölçüldü.
+Bu bir eksiklik değil, **sonuçtur** — bu olay tipi tanım gereği kovalanamaz.
+
+### 🔴 ASIL BULGU — kenar testi değil, KAÇAN HAREKET
+
+Birincil hücre (olumlu duyuru havuzu · 30 dk gecikme · 4 sa ufuk) düştü:
+ham kenar **−0,404 %**, şans tabanına eşli fark **−0,324 %** (gün-t −0,20, 57 gün).
+**Ama bu testin gücü yok** (aşağı bak). Hükmü taşıyan sayı bu değil, `kaçan`:
+
+```
+olumlu duyuru — duyuru anindan girise kadar KACAN hareket
+gecikme     ortalama   MEDYAN     %25      %75    >%2 pay
+ 5 dk       +15,54%   + 6,49%   +0,91%  +22,22%     72%
+15 dk       +18,72%   + 7,85%   +1,06%  +24,41%     72%
+30 dk       +18,52%   + 9,12%   +0,17%  +27,52%     67%
+60 dk       +20,35%   +10,70%   +0,16%  +28,42%     67%
+```
+
+**Hareket ilk 5 dakikada bitmiş durumda.** 5→60 dakika arası artış (+15,5 → +20,4)
+ilk sıçramanın yanında küçük. Uç değer değil: **medyan** olay bile 5 dakikada
+**+%6,5** kaçırmış, olayların **%72'si** +%2'yi aşmış. En büyük 5 olay çıkarılınca
+30 dk ortalaması **+%10,33**, medyan **+%8,51** — sonuç ayakta.
+
+`spot_listeleme` daha da keskin (5 dk medyan **+%7,78**, olayların **%81'i** >%2).
+`launchpool` en uç-değer bağımlısı (en büyük 5 çıkarılınca 30 dk medyanı
++%4,02 → **+%1,18**'e iner).
+
+⚠️ `delisting` dağılım tablosunda N=168, ölçüm tablosunda 84 — dağılım betiği yalnız
+olay öncesi bar arar, ölçüm ayrıca ≥5 geçerli şans çekilişi ister. Aynı sayı değil.
+
+### 🔴 GÜÇ DENETİMİ — "DÜŞTÜ" burada "ETKİ YOK" DEMİYOR
+
+Ön-kayıt bunu **zorunlu** kılmıştı (`chg24 >40 LONG` dersi):
+
+```
+asgari saptanabilir etki (t=2) : %3,287
+kabul bari                      : %0,57
+```
+
+Örneklem, **barın altı katı** büyüklükte gerçek bir etkiyi bile göremez.
+Yani ileri-getiri testinin hükmü **"kovalanabilir kenar yok" değil, "göremiyoruz".**
+Bu ayrım yazılmasaydı bulgu abartılırdı.
+
+**Ama akış hakkındaki hüküm bu testten gelmiyor** — `kaçan`'dan geliyor ve o
+büyüklük hem ortalamada hem medyanda hem uç değersiz hâlde ayakta.
+
+### ⚠️ MEKANİK EŞİTLİĞİ DÜŞTÜ — kıyas zayıf
+
+`CLAUDE.md` 2026-08-20 kuralı gereği raporlanır:
+
+| grup | gerçek \|ort\| | şans \|ort\| |
+|---|---|---|
+| `olumlu_duyuru` | %8,33 | %4,02 |
+| `delisting` | %13,08 | %2,91 |
+
+Olay kolu şans kolundan **2-4,5 kat** oynak. Eşli fark testinin güveni bu yüzden
+zayıf; MDE'nin büyüklüğünün de kaynağı bu. Kayda geçiyor.
+
+### Sızıntı
+
+`launchpool` +0,551 % (olay-t +0,75) · `spot_listeleme` +0,061 % · `delisting`
+−0,115 %. Yani `t=0` **görece temiz** — hareket duyurudan **önce** değil, duyuruyla
+başlıyor. Bu, kaçan-hareket bulgusunu güçlendirir: kaçırdığımız şey sızıntı değil,
+**kendi gecikmemiz.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | `kaçan` D ile artacak, sıçrama ilk 15 dk'da | ✅ **TUTTU** |
+| 2 | `delisting` kuyruğu listelemeden uzun | ⚠️ **KISMİ** — ham kenar öyle (+2,07 vs −0,40) ama şans tabanına karşı ikisi de sıfır (t −0,3 / −0,2) |
+| 3 | `H=24sa` kenarı `H=4sa`'ten büyük olacak | ❌ **YANLIŞ** — 24 saat tutarlı biçimde **negatif** (havuzda her gecikmede, t≈−2,2) |
+
+Tahmin 3 sadece yanlış değil, **ters** çıktı: duyuru sonrası geç girip 24 saat tutmak
+şans tabanının **altında**. (Betimleyici ızgarada, hüküm taşımaz — ama yön tutarlı.)
+
+### Ne öğrendik
+
+1. **Duyuru kovalama akışı insan hızında kurulamaz.** Hareket 5 dakikada bitiyor;
+   `Grok → bildirim → analiz → karar` zinciri bunun altına inemez.
+2. **`perp_listeleme` tanım gereği kovalanamaz** — 260 aday, ölçülebilir 0.
+3. Bir kenar **var mı yok mu bilinmiyor** — örneklem onu görecek güçte değil.
+   Bu soru kapanmadı, **cevaplanamadı.**
+4. Plandaki üç sonuçtan **🟡**: kuyruk var ama insan-döngüsü için çok kısa.
+   Aşama 2 (Grok alt botları) bu hâliyle **kurulmaz**; kurulacaksa gerekçesi
+   "haber kovalama" olamaz.
+
+### Tuzak — kayda geçti
+
+`olay_listesi.py` bir kez **heredoc** ile yazıldı; düzenli ifadedeki `\b` sınır imi
+gerçek **BACKSPACE (0x08)** karakterine döndü, kural hiç eşleşmedi, **134 duyuru**
+yanlış sınıflandı. **`py_compile` DE `pyflakes` DE temiz geçti** — ikisi de düzenli
+ifadenin *anlamına* bakmaz. Aynı sınıf: `radar.HERE` · `ayna.time`.
+Çözüm araç oldu: `kural_sinamasi()` her koşumda 9 bilinen başlığı sınar, kalıplarda
+kontrol karakteri arar, ve düşerse betik **çalışmayı reddeder**.

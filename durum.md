@@ -919,3 +919,56 @@ henüz toplanmamış bant-dışı veri için **tavan bulucu** olmak.
 
 Dördü de ölçüm/sıralama kararıdır. `testbot.py`, altı defterin dosyaları,
 `testbot_state.json` ve zamanlanmış görevler **değiştirilmedi.**
+
+---
+
+## 🆕 GROK/X ÖNERİSİ — AŞAMA 1 ÖLÇÜLDÜ, "HABER KOVALAMA" KOLU KAPANDI (2026-09-01)
+
+Bu bölüm **kararı** taşır. Rakamlar `olcumler.md` → *OLAY KUYRUĞU* bölümündedir
+ve buraya kopyalanmaz. Ön-kayıt: `ON_KAYIT_olay_kuyrugu.md` (commit `dd5b94d`).
+
+### Ne soruldu
+
+Kullanıcının önerisi üç koldu: (1) Grok'tan sayısal parametre, (2) Grok'un
+**rejim etiketi** olması, (3) *"AVAX'la ilgili haber gelince sana bildirir, sen
+analiz edip poz almamı sağlarsın."*
+
+Üçünden **yalnız (3) geriye test edilebilirdi** — ve edildi.
+
+### Karar 1 — 🔴 HABER KOVALAMA AKIŞI KURULMAYACAK
+
+Binance'in resmî duyuru arşivi (dakika kesinliğinde damgalı) ile ölçüldü:
+**hareket ilk 5 dakikada bitiyor.** `Grok → bildirim → analiz → kullanıcı kararı`
+zinciri bunun altına inemez. Medyan olayda bile kaçan hareket büyük ve uç
+değerlerden gelmiyor.
+
+**Sonuç:** Aşama 2 (Grok alt botları) *"haber kovalama"* gerekçesiyle **kurulmaz.**
+Kurulacaksa başka bir gerekçe gerekir ve o gerekçe ayrıca ölçülür.
+
+### Karar 2 — ⚠️ "KENAR YOK" DENMEDİ, "GÖREMİYORUZ" DENDİ
+
+Birincil hücrenin ileri-getiri testi düştü **ama örneklem, kabul barının altı
+katı büyüklükte bir etkiyi bile saptayacak güçte değil** (MDE ölçüldü ve
+ön-kayıtta zorunluydu). Bu soru **kapanmadı, cevaplanamadı.**
+
+🔴 Bir gün *"duyuru sonrası kenar denendi, yoktu"* denirse **bu satır yanlıştır.**
+Denenen ve düşen şey **insan gecikmesiyle kovalanabilirlik**tir.
+
+### Karar 3 — `perp_listeleme` tanım gereği kovalanamaz
+
+Bir perp kendi listelenmesinden önce var olmadığı için olay öncesi fiyatı da yok:
+260 adayın **0'ı** ölçülebildi. Bu tip bir daha aday olarak önerilmez.
+
+### Sırada ne var — DEĞİŞMEDİ
+
+Yukarıdaki *"ÖLÇÜMLERİN SIRASI"* bölümü aynen geçerli: **ödeme oranı birinci.**
+Grok kollarından (1) ve (2) hâlâ ölçülmedi; (2) rejim etiketi kolu geriye test
+edilemiyor (hindsight), yalnız **ileriye** ölçülebilir ve belirleyici kontrolü
+*"`sezon`/`hava`/SMA20/`btc_chg24` sabitken ek bilgi taşıyor mu"* sorusudur.
+
+### Yöntem kuralı — ön-kayıta GÜÇ DENETİMİ eklendi
+
+Bu ölçümden itibaren, *"düştü"* hükmü veren her ön-kayıt **asgari saptanabilir
+etkiyi** (MDE) de raporlar. MDE kabul barından büyükse hüküm *"etki yok"* diye
+değil **"göremiyoruz"** diye yazılır. Gerekçe: `chg24 >40 LONG` bir kez
+"gürültü" diye gömüldü ve ham getiride canlıydı.
