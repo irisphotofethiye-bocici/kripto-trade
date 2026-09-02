@@ -1,0 +1,233 @@
+[
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2024-08-21",
+  "utc": "2024-08-21 18:00",
+  "ts": 1724263200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2024-09-18",
+  "utc": "2024-09-18 18:00",
+  "ts": 1726682400000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2024-10-09",
+  "utc": "2024-10-09 18:00",
+  "ts": 1728496800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2024-11-07",
+  "utc": "2024-11-07 19:00",
+  "ts": 1731006000000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2024-11-26",
+  "utc": "2024-11-26 19:00",
+  "ts": 1732647600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2024-12-18",
+  "utc": "2024-12-18 19:00",
+  "ts": 1734548400000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-01-08",
+  "utc": "2025-01-08 19:00",
+  "ts": 1736362800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-01-29",
+  "utc": "2025-01-29 19:00",
+  "ts": 1738177200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-02-19",
+  "utc": "2025-02-19 19:00",
+  "ts": 1739991600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-03-19",
+  "utc": "2025-03-19 18:00",
+  "ts": 1742407200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-04-09",
+  "utc": "2025-04-09 18:00",
+  "ts": 1744221600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-05-07",
+  "utc": "2025-05-07 18:00",
+  "ts": 1746640800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-05-28",
+  "utc": "2025-05-28 18:00",
+  "ts": 1748455200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-06-18",
+  "utc": "2025-06-18 18:00",
+  "ts": 1750269600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-07-09",
+  "utc": "2025-07-09 18:00",
+  "ts": 1752084000000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-07-30",
+  "utc": "2025-07-30 18:00",
+  "ts": 1753898400000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-08-20",
+  "utc": "2025-08-20 18:00",
+  "ts": 1755712800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-09-17",
+  "utc": "2025-09-17 18:00",
+  "ts": 1758132000000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-10-08",
+  "utc": "2025-10-08 18:00",
+  "ts": 1759946400000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-10-29",
+  "utc": "2025-10-29 18:00",
+  "ts": 1761760800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-11-19",
+  "utc": "2025-11-19 19:00",
+  "ts": 1763578800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2025-12-10",
+  "utc": "2025-12-10 19:00",
+  "ts": 1765393200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2025-12-30",
+  "utc": "2025-12-30 19:00",
+  "ts": 1767121200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2026-01-28",
+  "utc": "2026-01-28 19:00",
+  "ts": 1769626800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2026-02-18",
+  "utc": "2026-02-18 19:00",
+  "ts": 1771441200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2026-03-18",
+  "utc": "2026-03-18 18:00",
+  "ts": 1773856800000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2026-04-08",
+  "utc": "2026-04-08 18:00",
+  "ts": 1775671200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2026-04-29",
+  "utc": "2026-04-29 18:00",
+  "ts": 1777485600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2026-05-20",
+  "utc": "2026-05-20 18:00",
+  "ts": 1779300000000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2026-06-17",
+  "utc": "2026-06-17 18:00",
+  "ts": 1781719200000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2026-07-08",
+  "utc": "2026-07-08 18:00",
+  "ts": 1783533600000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_karar",
+  "gun": "2026-07-29",
+  "utc": "2026-07-29 18:00",
+  "ts": 1785348000000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ },
+ {
+  "tip": "fomc_tutanak",
+  "gun": "2026-08-19",
+  "utc": "2026-08-19 18:00",
+  "ts": 1787162400000,
+  "kaynak": "federalreserve.gov/monetarypolicy/fomccalendars.htm"
+ }
+]
