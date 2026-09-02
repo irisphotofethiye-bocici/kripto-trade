@@ -972,3 +972,60 @@ Bu ölçümden itibaren, *"düştü"* hükmü veren her ön-kayıt **asgari sapt
 etkiyi** (MDE) de raporlar. MDE kabul barından büyükse hüküm *"etki yok"* diye
 değil **"göremiyoruz"** diye yazılır. Gerekçe: `chg24 >40 LONG` bir kez
 "gürültü" diye gömüldü ve ham getiride canlıydı.
+
+---
+
+## 🆕 GROK/X — DUYGU KOLU KAPANDI, TAKVİMLİ MAKRO KOLU DA (2026-09-01)
+
+Kararlar burada; rakamlar `olcumler.md` → *X DUYGUSU* ve *MAKRO KUYRUK*.
+Ön-kayıt: `ON_KAYIT_makro_kuyruk.md` (`df8eb1e`).
+
+### Karar 1 — 🔴 DUYGU ÖLÇÜMÜ BİR DAHA ADAY OLARAK ÖNERİLMEZ
+
+Kontrol günleriyle ölçüldü: BTC ne yaparsa yapsın kripto X aynı oranda boğa
+konuşuyor. Sert düşüş gününde bile fark ayırt edilemiyor. **Anahtar-kelime
+duygu sayımı yön bilgisi taşımıyor.**
+
+⚠️ Bu, `x_sentiment.py`'yi çürütmez — o betik D4'te *okunacak tweet seçmek* için
+var, **yön etiketi üretmek** için değil. Zaten skill'de *"auto BOĞA/AYI etiketi
+ZAYIF, CEO tweet'leri OKUR"* yazıyordu. Ölçüm o uyarıyı **doğruladı.**
+
+### Karar 2 — 🔴 TAKVİMLİ MAKRO OLAY KOVALANMAZ
+
+FOMC kararları ve tutanakları gerçekten oynatıyor (ilk 5 dakika normalin ~3 katı),
+**ama yönlü devamı yok** — 5 dakikada da yok, 2 saatte de. Ve bu kez örneklem
+bunu görecek güçte (MDE barın altında), yani hüküm *"göremiyoruz"* değil.
+
+**Sonuç:** takvimli makro olay Grok boru hattı için gerekçe **olamaz**.
+
+### Karar 3 — ⚠️ SÜRPRİZ MAKRO HABER HÂLÂ AÇIK
+
+19 Ağustos'u açıklayan şey Hazine geri-alım haberiydi ve o **sürprizdi**; ölçülen
+FOMC ise **takvimli**. Bu iki şey aynı değil. Ayrıca 19 Ağustos'ta ikisi aynı güne
+düştü → anekdot **karıştırıcı** taşıyor.
+
+🔴 Bir gün *"makro haber denendi, çıkmadı"* denirse **yanlış olur.** Denenmiş olan
+**takvimli** makro olaydır. Sürpriz makro haber ölçülmedi çünkü geçmiş damgaları
+doğrulanabilir biçimde alınamadı (`bls.gov` 403; Hazine duyuru arşivi).
+
+### Sırada ne var — DEĞİŞMEDİ
+
+**Ödeme oranı hâlâ birinci.** Grok kollarının bugünkü durumu:
+
+| kol | durum |
+|---|---|
+| haber kovalama (borsa duyurusu) | 🔴 kapandı — hareket 5 dakikada bitiyor |
+| duygu / rejim etiketi | 🔴 kapandı — duygu yön taşımıyor |
+| takvimli makro olay | 🔴 kapandı — devam hareketi yok, güç yeterli |
+| **sürpriz makro haber** | ⚠️ **açık, ölçülmedi** — damga kaynağı gerekiyor |
+
+### Yöntem — kayda geçen iki şey
+
+1. **Ücretli kazıyıcı sahte kayıt döndürebilir.** Apify aktörü sonuç bulamayınca
+   `type="mock_tweet"` yer tutucu döndürüp yine ücret alıyor. Gerçek gönderi
+   sanılırsa sayımı kirletir. **Her çekimde damga/mock denetimi zorunlu**
+   (`scratchpad/x_mock_denetim.py`).
+2. **Zaman penceresi sessizce düşebilir.** Aktörün `since_time`/`until_time`/
+   `max_id` alanları saat bileşenini atıp yalnız günü uyguluyor — *doğru gün,
+   yanlış saat* döndürüyor. Yalnız X gelişmiş-arama sözdizimi
+   (`since:YYYY-MM-DD_HH:MM:SS_UTC`) tutuyor. **"Döndü" başarı değildir.**

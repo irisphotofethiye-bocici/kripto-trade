@@ -6920,3 +6920,116 @@ yanlış sınıflandı. **`py_compile` DE `pyflakes` DE temiz geçti** — ikisi
 ifadenin *anlamına* bakmaz. Aynı sınıf: `radar.HERE` · `ayna.time`.
 Çözüm araç oldu: `kural_sinamasi()` her koşumda 9 bilinen başlığı sınar, kalıplarda
 kontrol karakteri arar, ve düşerse betik **çalışmayı reddeder**.
+
+---
+
+## X DUYGUSU — KONTROL GÜNLERİYLE ÖLÇÜLDÜ: yön bilgisi YOK (2026-09-01)
+
+**Betikler:** `scratchpad/x_gun_cek.py` · `x_kontrol_coz.py` · `x_mock_denetim.py`
+**Hüküm:** 🔴 **KESİN OLUMSUZ** — duygu sayımı yön taşımıyor.
+
+19 Ağustos tek başına yorumlanamıyordu (`olcumler.md` → *X GÖNDERİLERİ*): boğa payı
+%84 çıkmıştı ama kripto X yapısal olarak boğa olduğu için bunun **normal mi sinyal mi**
+olduğu bilinmiyordu. Kontrol günleri **çekimden önce** kurala göre seçildi.
+
+| gün | BTC 13→23 | boğa payı |
+|---|---|---|
+| **2026-08-19 (hedef)** | **+%7,1** | **%84** |
+| 2026-07-08 (yatay) | −%0,1 | %83 |
+| 2026-07-29 (düşüş) | −%1,5 | %81 |
+| 2026-02-05 (sert düşüş) | **−%10,0** | **%77** |
+
+```
+hedef   boga 145 · ayi 27   -> %84
+kontrol boga 361 · ayi 87   -> %81      iki oran farki z = +1,07
+hedef (+%7,1) vs sert dusus (-%10,0)    z = +1,59
+```
+
+**BTC'de 17 puanlık bir salınım, boğa payında 7 puan oynatıyor ve bu istatistiksel
+olarak ayırt edilemiyor.** Kripto X, fiyat ne yaparsa yapsın ~%80 boğa konuşuyor.
+`%90 boğa` bir sinyal değil, o ortamın **normali**.
+
+⚠️ **Sınır:** sert düşüş günü hedeften 195 gün uzak (±6 haftada −%4'ten sert gün
+YOKTU) — rejim farklı. Yakın kontroller yalnız −%0,1 ve −%1,5'ti.
+
+### 🔑 TUZAK — ÜCRETLİ AKTÖR SAHTE KAYIT DÖNDÜRÜYOR
+
+Apify aktörü sonuç bulamayınca `type="mock_tweet"`, `id=-1` **yer tutucu** döndürüyor
+(ve yine ücret alıyor). Metni gerçek gönderi sanılırsa sayıma girer ve sonucu kirletir.
+Bir pencerede 15 tanesi çıktı. `x_mock_denetim.py` bütün dosyaları tarar.
+**19 Ağustos verisi temiz çıktı — önceki rakamlar ayakta.**
+Yakalayan şey damga denetimiydi; onsuz sessizce geçerdi.
+
+---
+
+## MAKRO KUYRUK — takvimli makro olayda kovalanabilir kenar YOK (2026-09-01)
+
+**Ön-kayıt:** `ON_KAYIT_makro_kuyruk.md` (commit `df8eb1e`, **koşumdan önce**)
+**Betikler:** `scratchpad/makro_olaylar.py` · `makro_kuyruk.py`
+**Hüküm:** 🔴 **DÜŞTÜ — ve bu kez örneklem YETERLİ.**
+
+19 Ağustos anekdotunu sınanabilir hâle getirme denemesi. 33 olay (16 FOMC kararı +
+17 FOMC tutanağı), hepsi 14:00 ET, kaynak `federalreserve.gov`; 2026 tarihleri
+projedeki `makro_takvim.json` ile **birebir** uyuştu. Yaz/kış saati elde hesaplandı
+ve iki bilinen noktada **sınandı** (düşerse betik koşmaz).
+
+### Olaylar gerçekten oynatıyor — özne var
+
+| grup | N | olay \|ilk 5dk\| | şans \|ilk 5dk\| | oran |
+|---|---|---|---|---|
+| havuz | 33 | %0,338 | %0,116 | **2,91×** |
+| `fomc_karar` | 16 | %0,488 | %0,124 | **3,95×** |
+| `fomc_tutanak` | 17 | %0,196 | %0,109 | 1,81× |
+
+### Ama devamı yok — hiçbir gecikmede
+
+Birincil hücre (havuz · D=30 dk · H=4 sa): ham kenar **−0,062 %**, şans tabanına
+eşli fark **+0,059 %** (olay-t **+0,31**). K1 ve K2 **ikisi de düştü**.
+
+🔑 **Ve önemli olan şu: kenar `D=5` dakikada da yok.** Izgaranın tamamı sıfır
+civarında geziniyor. Yani bu bir **gecikme sorunu değil** — devam hareketi hiç yok.
+Borsa duyurusunda hareket 5 dakikada *bitiyordu*; burada hareket oluyor ama
+**yönlü devamı hiç başlamıyor.** İki farklı başarısızlık biçimi.
+
+### 🔑 GÜÇ DENETİMİ — bu kez "GÖREMİYORUZ" DEĞİL
+
+```
+asgari saptanabilir etki (t=2): %0,377   ·   kabul bari: %0,57
+-> MDE bar'in ALTINDA. Orneklem bari saptayacak guctedir. DUSTU ANLAMLIDIR.
+```
+
+Listeleme ölçümünün aksine (MDE %3,29, bar %0,57 → "göremiyoruz"), burada hüküm
+gerçek bir olumsuzluk. Aynı ön-kayıt maddesi bir ölçümü kurtardı, diğerini mahkûm etti.
+
+### Anekdotun günü örneklemin İÇİNDE
+
+`2026-08-19` bu 33'ten biri (tutanak günü). Kendi çerçevesinde: ilk 5 dk **−0,168 %**
+→ yön SHORT, birincil hücre **−1,251 %**. Yani anekdot kendi yöntemiyle ölçüldüğünde
+**kaybediyor**.
+
+🔴 **Ama bu, anekdotu çürütmez — çünkü aynı şeyi ölçmüyor.** O günün asıl hareketi
+**14:00-15:00 UTC** arasında Hazine geri-alım haberiyle oldu; FOMC tutanağı
+**18:00 UTC**. Bu ölçüm o gün için **tutanağı** ölçüyor, Hazine haberini değil.
+İkisinin aynı güne düşmesi anekdotun **karıştırıcısıydı** — N=1'in neden
+yetmediğinin somut örneği.
+
+### Ölçümün asıl sınırı — ön-kayıtta yazılıydı
+
+CPI/PPI/NFP alınamadı (`bls.gov` HTTP 403; tarih **uydurulmaz**). Hazine geri-alım
+duyurularının geçmiş damgaları da doğrulanabilir biçimde alınamadı.
+🔴 **Yani düşen şey *"makro haber kovalanmaz"* değil, *"TAKVİMLİ makro olay
+kovalanmaz"*.** FOMC takvimlidir ve piyasa önceden pozisyon alır; 19 Ağustos'un
+Hazine haberi **sürprizdi.** Sürpriz makro haber **hâlâ ölçülmedi.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | ilk 5 dk hareketi rastgeleden belirgin büyük | ✅ **TUTTU** (2,91×) |
+| 2 | `fomc_karar` ilk tepkisi `fomc_tutanak`tan büyük | ✅ **TUTTU** (2,5 kat) |
+| 3 | kuyruk `D` ile hızla tükenecek, `D=120`'de sıfır | ⚠️ **KISMİ** — sıfır, ama `D=5`'te de sıfır; tükenmedi, hiç var olmadı |
+
+### Mekanik eşitliği
+
+Gerçek kol şans kolundan **1,40×** oynak (listeleme ölçümünde 2-4,5× idi). Daha iyi
+ama tam eşit değil; kayda geçiyor.
