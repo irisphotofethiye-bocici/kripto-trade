@@ -7252,3 +7252,128 @@ rejimde doğruluyor.
   ham kenarı gerçeğinden **yüksek** gösterir. Kayıtlı ölçüm: fonlama A+B'nin
   kenarının **%83'ünü** yemişti.
 - `A+B` kolunda en büyük sembolün payı %7,8 (PROM) — yoğunlaşma sınırda.
+
+---
+
+## BOYUTLANDIRMA — ön-kayıt GEÇTİ, ama YORUMU KISMEN GERİ ÇEKİYORUM (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_boyutlandirma.md` (commit `161271f`, **koşumdan önce**)
+**Betikler:** `scratchpad/boyut_karsi_olgu.py` · `boyut_mekanizma.py`
+**Hüküm:** ölçütler **GEÇTİ** · mekanizma zinciri **KOPTU** · yorum **DÜZELTİLDİ**
+
+### Ön-kayıtlı ölçütler — üçü de geçti
+
+```
+gercek P&L  -5.676,83 $        ESIT AGIRLIK  +8.620,07 $     fark +14.296,91 $
+K1 bolunmus yari : A +8.144,48 · B +6.509,32          -> GECTI
+K2 permutasyon   : gercek deger 10.000 karistirmanin  -> GECTI (yuzdelik %0,00)
+                   HEPSININ altinda
+K3 uc deger      : en buyuk 5 ve 20 atilinca ayakta   -> GECTI
+```
+
+### Mekanizma zinciri KOPTU — ön-kayıtta bu ihtimal yazılıydı
+
+| | korelasyon | t |
+|---|---|---|
+| M1 `notional ~ ret` | **−0,303** | −6,15 |
+| M2 `skor ~ ret` | +0,009 | +0,18 |
+| M3 `skor ~ notional` | −0,028 | −0,53 |
+| EK `marjin ~ ret` | **−0,573** | −13,54 |
+
+**Skor boyutu belirlemiyor.** Sebep kodda: `marjin_pct_hesapla` skoru
+**%8–12 bandına sıkıştırıyor** ([testbot.py:255](testbot.py#L255)) — bant doyuyor.
+Ön-kayıtlı *"skor → boyut → kayıp"* zinciri **kurulmadı**.
+
+### Elenen açıklamalar
+
+| aday | sonuç |
+|---|---|
+| **zaman** (equity düşerken boyut küçülüyor) | ❌ `zaman~ret` −0,032 · kısmi kontrolde ilişki **güçlendi** (−0,602) |
+| **stop mesafesi** | ❌ dilim **içi** karşı-olgu global kazancın **%88'ini** taşıyor; log uzayında kısmi kontrol de zayıflatmadı |
+| **kaldıraç** | ❌ `kaldirac~ret` −0,066 |
+
+### 🔴 SONRA BULDUĞUM ARTEFAKT — ve ön-kayıtımdaki HATA
+
+Koda tekrar bakınca ([testbot.py:1237-1241](testbot.py#L1237)):
+
+```
+risk_usdt = stop_frac * notional
+if risk_usdt > hedef_risk:  hepsi kucultulur
+   =>  notional  ~  hedef_risk / stop_frac
+```
+
+**`notional` yapısı gereği stop mesafesiyle ters orantılı.** Ve `ret` yaklaşık
+stop mesafesi kadar oynar. Yani **`|ret| ∝ 1/notional` MEKANİK bir bağıntıdır** —
+piyasa hakkında bir bulgu değil, boyutlandırma formülünün kendi aritmetiği.
+
+Eşit-ağırlık karşı-olgusu bu yüzden kısmen **formülün aritmetiğini** ölçüyor.
+
+🔴 **VE ÖN-KAYITTA YAZDIĞIM GEREKÇE YANLIŞTI.** Şöyle yazmıştım:
+
+> *"TP1'e koşullamak burada AŞIRI KONTROL olurdu — TP1 nedensel yolun üzerinde."*
+
+**Bu muhakeme hatalı.** TP1'in boyutun *ardılı* olabilmesi için boyutun fiyatı
+etkilemesi gerekir; kâğıt defterde etkilemiyor. TP1 ile boyutun **ORTAK NEDENİ**
+var: **stop mesafesi**. Dar stop → hem büyük `notional`, hem TP1'e varmadan
+stop. Yani TP1 aracı değil, **ortak neden çocuğu**. Koşullamak aşırı kontrol değildi.
+
+**Ve koşullanınca gradyan çöküyor:**
+
+```
+TUM POZISYONLAR (notional dilimi):   kazanan %82 / %53 / %26 / %17
+                                     TP1 alan %83 / %48 / %19 / %4
+TP1 ALMAYANLAR icinde:               kazanan %21 / %11 / %14 / %12   <- GRADYAN YOK
+```
+
+Bu, projenin **daha önce bir kez geri çektiği** bulgunun aynı çöküşü.
+
+### 🔑 GERİYE NE KALIYOR — ve bu kısım sağlam
+
+Yüzdeye hiç bakmayan ölçü: **R katı** (dolar / pozisyonun kendi riski).
+
+```
+toplam R      +62,06        ortalama R +0,193 (t +2,05)
+toplam DOLAR  -4.749,10     ort risk $  77,45
+saf risk-paritesi olsaydi: 77,45 x 62,06 = +4.805,97 $
+```
+
+**Defter R cinsinden ARTIDA, dolar cinsinden EKSİDE.** Aradaki ~9.555 $
+tamamen **riskin sabit olmamasından** geliyor:
+
+| risk $ dilimi | ort risk $ | toplam R | net $ | kazanan |
+|---|---|---|---|---|
+| Q1 düşük | 39,92 | **+157,66** | +6.201 | %96 |
+| Q2 | 67,66 | +11,05 | +362 | %40 |
+| Q3 | 80,43 | −41,98 | −3.505 | %25 |
+| Q4 yüksek | 121,22 | **−64,67** | −7.807 | %16 |
+
+Risk $ **32–156 arası, 4,8 kat** yayılıyor — risk paritesi **tutmuyor**.
+Sebep kodda: `kaldirac_min=3` / `kaldirac_max=10` kırpmaları ve
+`kaldirac_guvenlik_kirp` hedeflenen sabit riski bozuyor.
+
+⚠️ `risk$ ~ R` korelasyonu (−0,564) **aynı artefakt sınıfından** olabilir
+(`R = net/risk`). Artefakttan bağımsız olan tek ifade: **toplam R > 0, t=+2,05.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | fark pozitif ve kaybın yarısı mertebesinde | ✅ **TUTTU** (fark kaybın 2,5 katı — büyüklük bile aşıldı) |
+| 2 | M2 sıfıra yakın, zincir "skor bilgisiz ama boyutu belirliyor" | ⚠️ **YARIM** — M2 sıfır (doğru) ama skor boyutu **belirlemiyor** (zincir koptu) |
+| 3 | eşit ağırlık defteri artıya çevirmez, sadece kaybı küçültür | ❌ **YANLIŞ** — artıya çeviriyor (+8.620) |
+
+### HÜKÜM
+
+- ✅ Ön-kayıtlı ölçütler geçti — **kayda geçiyor, silinmiyor**.
+- 🔴 **Ama eşit-ağırlık rakamı KURAL ÜRETMEZ:** kısmen boyutlandırma formülünün
+  kendi aritmetiğini ölçüyor, ve TP1 katmanı gradyanı çökertiyor.
+- 🔑 **Eyleme dönüşebilir tek kısım:** *"risk paritesi tutmuyor, risk $ 4,8 kat
+  yayılıyor, defter R'de artıda"*. Bu **kaldıraç kırpmalarının** sorunu ve
+  kendi ön-kaydını hak ediyor.
+
+### Yöntem — pahalı ders
+
+**Ön-kayıta yazılmış bir gerekçe yanlış olabilir.** *"TP1'e koşullamak aşırı
+kontrol olur"* diye yazdım; ortak-neden yapısını atlamıştım. Bir değişkeni
+"nedensel yolun üzerinde" ilan etmeden önce **o yolun gerçekten var olup
+olmadığı** sorulmalı — burada boyut fiyatı etkilemediği için yol hiç yoktu.

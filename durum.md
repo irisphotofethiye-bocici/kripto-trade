@@ -1181,3 +1181,46 @@ Bu ölçümde ham sinyali **pozitif** çıktı (11 gün, NOTR, mekaniksiz); önc
 düştü; kapının gerçek ufku 12-24 saatti ve bu **canlı tutma süresinden
 önceden bilinebilirdi**. Bundan sonra bir kapı için ufuk seçilirken
 **o kapının canlı medyan tutma süresine bakılır**, varsayılan kullanılmaz.
+
+---
+
+## 🆕 BOYUTLANDIRMA ÖLÇÜLDÜ — teşhis RİSK PARİTESİNE kaydı (2026-09-04)
+
+Rakamlar `olcumler.md` → *BOYUTLANDIRMA*. Ön-kayıt `ON_KAYIT_boyutlandirma.md` (`161271f`).
+
+### Karar 1 — 🔴 "EŞİT AĞIRLIK" RAKAMI KURAL ÜRETMEZ
+
+Ön-kayıtlı üç ölçüt de geçti (bölünmüş yarı · permütasyon · uç değer) ve
+kayda geçiyor. **Ama yorumu geri çekiyorum:** `notional` yapısı gereği stop
+mesafesiyle ters orantılı, dolayısıyla `|ret| ∝ 1/notional` **mekanik** bir
+bağıntı. Karşı-olgu kısmen boyutlandırma formülünün kendi aritmetiğini ölçüyor.
+
+Ayrıca TP1 katmanı gradyanı çökertiyor (kazanma oranı %82/%53/%26/%17 →
+TP1 almayanlarda %21/%11/%14/%12). Bu, projenin **bir kez geri çektiği** aynı çöküş.
+
+### Karar 2 — 🔑 EYLEME DÖNÜŞEBİLEN KISIM: RİSK PARİTESİ TUTMUYOR
+
+Yüzdeden bağımsız ölçüyle (R katı): defter **R cinsinden ARTIDA**
+(t=+2,05), **dolar cinsinden EKSİDE**. Fark tamamen riskin sabit olmamasından —
+pozisyon başına gerçekleşen dolar riski **4,8 kat** yayılıyor.
+
+**Sebep kodda:** `kaldirac_min`/`kaldirac_max` kırpmaları ve
+`kaldirac_guvenlik_kirp`, hedeflenen sabit riski bozuyor.
+
+📌 **Sıradaki iş bu** — ve **kendi ön-kaydını** gerektirir. Soru dar ve
+mekanik: *"kaldıraç kırpmaları hedef riski ne sıklıkta ve ne kadar bozuyor,
+düzeltilse defter ne olurdu?"*
+
+### Karar 3 — skor boyutu BELİRLEMİYOR
+
+`marjin_pct_hesapla` skoru **%8–12 bandına** sıkıştırıyor ve bant doyuyor
+(`skor~notional` = −0,03). *"Skor boyutu şişiriyor"* açıklaması **yanlış**;
+bir daha bu gerekçeyle öneri yapılmaz.
+
+### Yöntem — pahalı ders, CLAUDE.md'ye de yazıldı
+
+**Ön-kayıta yazılmış bir gerekçe yanlış olabilir.** *"TP1'e koşullamak aşırı
+kontrol olur, çünkü TP1 nedensel yolun üzerinde"* diye yazmıştım. Yanlıştı:
+boyut fiyatı etkilemediği için o yol **hiç yok**; TP1 ile boyutun **ortak
+nedeni** var (stop mesafesi). Bir değişkeni *"yolun üzerinde"* ilan etmeden
+önce **yolun var olup olmadığı** sorulmalı.
