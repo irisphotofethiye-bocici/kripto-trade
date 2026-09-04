@@ -164,7 +164,15 @@ Hüküm metinleri, N, betik ve ölçütler **`olcumler.md`**'de — buraya rakam
 > Dilim listesi 08-27 kapatmasıyla **güncellenmemiş** — hüküm yazmadan önce
 > dilimler yeniden çıkarılmalı.
 >
-> **Durum: hakem düdüğü çaldı, maç raporu yazılmadı.**
+> **Durum: hakem düdüğü çaldı — RAPOR YAZILDI 2026-09-04:**
+> **`hakem-penceresi-hukmu.md`** (dilimli rapor + altı kararın açılışı).
+>
+> Özet: pencere **eksi** kapandı → 1·2·3'ün ortak savunması **düştü**;
+> 5 numaralı iş (A+B stop mesafesi) **serbest kaldı**; 6 (LONG tarafı)
+> **acil hâle geldi** — bot 24 Ağustos'tan beri tek SHORT açmadı, 176
+> ardışık LONG, hepsi zararda. ⚠️ Pencere **kirlendi** (parametreler beş kez
+> değişti) ve dilim listesi **dörde değil sekize** bölünüyor; ikisi de
+> raporda. **Hiçbir kapı kapatılmadı — statüko korundu.**
 
 ```mermaid
 flowchart TD
