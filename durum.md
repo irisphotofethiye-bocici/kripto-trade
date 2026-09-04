@@ -145,6 +145,27 @@ Hüküm metinleri, N, betik ve ölçütler **`olcumler.md`**'de — buraya rakam
 
 ### ⭐ ALTI İŞ TEK HAKEME BAĞLI — ayrı ayrı tartışılmasın
 
+> 🔴🔴 **PENCERE DOLDU — 2026-08-22 03:13:43** (2026-09-04'te fark edildi).
+> Ölçüt *"138 pozisyon **veya** 30 gün"* idi; **pozisyon ölçütü önce doldu.**
+> Takvim ölçütü 2026-09-11'de dolacaktı, ona gerek kalmadı.
+> **13 gün boyunca fark edilmedi** — aşağıdaki graf doğru kaydedilmişti ama
+> onu tetikleyen bir kontrol yoktu. Bu satır o boşluğu kapatmak için var.
+>
+> **Rakam buraya yazılmaz — koştur:**
+>
+> ```bash
+> python -c "import json,datetime as dt; K=[json.loads(l) for l in open('testbot_islemler.jsonl',encoding='utf-8') if l.strip()]; g={}; [g.__setitem__(r['id'], min(g.get(r['id'], dt.datetime.max), dt.datetime.strptime(r['ts'],'%Y-%m-%d %H:%M:%S')-dt.timedelta(hours=float(r.get('tutma_saat') or 0)))) for r in K]; T=dt.datetime(2026,8,12,1,17); print(len([i for i in {r['id'] for r in K if not r.get('kismi')} if g[i]>=T]),'/138 pozisyon')"
+> ```
+>
+> 🔴 **AMA HÜKÜM HENÜZ YAZILAMAZ.** Pencere içinde fren üç kez değişti ve
+> 2026-08-27'de tamamen kapatıldı → pencere **dilimli**. Bu dosyanın kendi
+> kuralı (aşağıda, *"DÖRT dilim"*): *"hüküm yazan bu dilimleri ayrı raporlamak
+> zorundadır; tek sayı üretmek dört farklı kural setini toplamaktır."*
+> Dilim listesi 08-27 kapatmasıyla **güncellenmemiş** — hüküm yazmadan önce
+> dilimler yeniden çıkarılmalı.
+>
+> **Durum: hakem düdüğü çaldı, maç raporu yazılmadı.**
+
 ```mermaid
 flowchart TD
     A["1 · MA50+ucuz kapısı<br/>REDDEDİLDİ · t=−4,05<br/>yine açık (08-12 kullanıcı kararı)"]
@@ -154,7 +175,7 @@ flowchart TD
     D["4 · 1,5R kısmi ezmesi<br/>ölçüm 'kaldır' dedi<br/>kullanıcı 'kalsın' dedi"]
     E["5 · A+B stop mesafesi<br/>A-stop kenarın %65'ini yiyor<br/>defterde: 'pencere sonrası İLK İŞ'"]
     F["6 · LONG tarafı — İKİ AYRI KARAR<br/>a) btc_pay penceresi: ÖLÇÜLDÜ 08-19, AÇILACAK<br/>b) notr_long_acik: ölçütü geçemedi, açık"]
-    W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç 2026-08-12 01:17<br/>ÇÖZÜLDÜ 2026-08-18"}}
+    W{{"HAKEM · canlı ölçüm penceresi<br/>138 POZİSYON veya 30 gün<br/>başlangıç 2026-08-12 01:17<br/>ÇÖZÜLDÜ 2026-08-18<br/>🔴 DOLDU 2026-08-22 — hüküm YAZILMADI"}}
     P["popülasyon itirazı DOĞRULANIR<br/>1 · 2 · 3 ayakta kalır<br/>5 yine ölçülür"]
     M["üç savunma BİRDEN düşer<br/>1 · 2 · 3 birlikte gözden geçirilir<br/>4 zaten tercihe dayanıyordu"]
     A --> S
