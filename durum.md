@@ -1546,3 +1546,50 @@ Daha önce ölçülmüştü, burada teyit edildi. **Kapanmış konu.**
    ön-kayıtlı ölçüt geçmedi. Karar kullanıcıya ait; uygulanırsa
    **yeni pencere** tanımlanmalı ve `[DEĞİŞTİ tarih]` protokolü işletilmeli.
 3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
+
+---
+
+## 🆕 SKOR BİLEŞENLERİ ÖLÇÜLDÜ — yetki vardı, DEĞİŞİKLİK YAPILMADI (2026-09-04)
+
+Rakamlar `olcumler.md` → *SKORUN BEŞ BİLEŞENİ*.
+Ön-kayıt `ON_KAYIT_skor_bilesenleri.md` (`81c95fb`).
+
+### Karar 1 — 🔴 KOD DEĞİŞMEDİ, ve sebebi ön-kayıt
+
+Kullanıcı **tam yetki** verdi (*"istediğin ayarlamayı yap"*). Ön-kayıt
+**koşumdan önce** yazılmıştı ve ölçüt **tutmadı** (K1: t=+1,58 < +2,0,
+üstelik MDE farkı görecek güçte değil). **`radar.py` değiştirilmedi.**
+
+### Karar 2 — skor "yanlış ayarlı" değil, BİLGİ TAŞIMIYOR
+
+| bileşen | payı | durum |
+|---|---|---|
+| `s_oi` | %41 | anlamsız (t=−1,12) **ve rejimler arası işaret değiştiriyor** |
+| `s_vol` | %23 | anlamsız **ve işaret değiştiriyor** |
+| `s_fund (abs)` | %22 | **t=+0,03 — sıfır bilgi** |
+| `s_brk` | %11 | tek sinyalli terim, **ama TERS yönde** (skor puan ekliyor) |
+| `s_comp` | %3 | 🔴 **ölü terim** — çeyrekleri çöküyor, dağılımı yok |
+
+🔑 **Skorun %64'ü (`s_oi`+`s_vol`) BOĞA'da bir şey, NOTR'da tersini söylüyor.**
+Ön-kayıtın yapısal şüphesi doğrulandı: **tek skorla iki yön seçilemez.**
+Ağırlık ayarı bunu çözmez — çözülecek sinyal yok.
+
+### Karar 3 — kodun vadesi geçmiş talimatı KAPANDI
+
+`squeeze_bonus` için kodda *"boğaya girildiğinde yeniden ölçülmelidir"*
+yazıyordu. Ölçüldü: **zararlı tersine dönüş yok**, fayda da yok (BOĞA
++0,493%, t=+0,97). **Terim etkisiz.** Talimat yerine getirildi.
+
+⚠️ Yöntem notu: terim ikili olduğu için çeyrek kesimi çöktü; ön-kayıtlı
+**soru** değişmeden doğru yöntemle (ikili kesim) koşturuldu ve öyle raporlandı.
+
+### Sırada — iki "veri bekleyen" aday
+
+1. **`pos<0.25` koşullu mekanik (V3)** — t=+1,94, MDE'nin hemen altı
+2. **`s_brk`'ın ters çevrilmesi** — ayrı yarıda +0,97 puan, t=+1,58, MDE'nin altı
+
+**İkisi de aynı sınıfta:** yön tutarlı, mekanizma anlaşılır, **N yetersiz**.
+İkinci bir BOĞA epizodu ikisini de sınanabilir hâle getirir.
+Ölçütleri **şimdiden sabit**, sonradan gevşetilmeyecek.
+
+3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi

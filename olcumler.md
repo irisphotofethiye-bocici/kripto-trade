@@ -8076,3 +8076,113 @@ bu kayda geçiyor.
 
 🔑 **Skor ters değil, BOŞ.** *"Ters yönü gösteriyor"* notu bu ölçümle
 **desteklenmedi**; doğru ifade **"ayırmıyor"**.
+
+---
+
+## SKORUN BEŞ BİLEŞENİ — dördü boş, beşincisi TERS. Skor onarılamadı (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_skor_bilesenleri.md` (commit `81c95fb`, **koşumdan önce**)
+**Betik:** `scratchpad/skor_bilesen.py`
+**Hüküm:** 🔴 **DÜŞTÜ → KOD DEĞİŞMEDİ** (ön-kayıt s.7 gereği)
+
+Kullanıcı **tam yetki** verdi (*"istediğin ayarlamayı yap"*). Ön-kayıt
+koşumdan önce yazıldı ve **ölçüt tutmadığı için değişiklik yapılmadı.**
+
+### AŞAMA A — 14 ön-kayıtlı sınama (üst çeyrek − alt çeyrek, ham 4 saat, LONG)
+
+| terim | skordaki payı | BOĞA fark / t | NOTR fark / t |
+|---|---|---|---|
+| `s_oi` | **%41** | −0,504% / **−1,12** | +0,738% / +0,54 |
+| `s_fund (abs)` | %22 | +0,018% / **+0,03** | +0,082% / +0,06 |
+| `s_comp` | %3 | 🔴 **dağılım YOK** | 🔴 **dağılım YOK** |
+| `s_vol` | %23 | −0,472% / −1,01 | +0,445% / +0,57 |
+| **`s_brk`** | %11 | **−1,265% / −2,39** | −1,998% / −1,49 |
+| Ö1 işaretli funding | — | +0,112% / +0,25 | −1,668% / −1,37 |
+
+### 🔑 ÜÇ YAPISAL BULGU
+
+**1. `s_comp` ÖLÜ TERİM.** Çeyrekleri çöküyor — değişken pratikte sabit.
+Tavanı 20 puan, gerçek katkısı 1,3, taşıdığı bilgi **ölçülemiyor bile**.
+
+**2. `s_fund (abs)` sıfır bilgi.** Skorun **%22'si**, t=+0,03. Kelimenin tam
+anlamıyla hiçbir şey. İşaretli hâli (Ö1) de eşiği geçemedi.
+
+**3. 🔴 `s_oi` ve `s_vol` REJİMLER ARASI İŞARET DEĞİŞTİRİYOR.**
+
+```
+s_oi   BOGA -0,504%  ·  NOTR +0,738%
+s_vol  BOGA -0,472%  ·  NOTR +0,445%
+```
+
+Skorun **%64'ü** (s_oi + s_vol) bir rejimde bir şey, diğerinde tersini
+söylüyor. **Tek skorla iki yön seçilemez** — ön-kayıtın açılışındaki yapısal
+şüphe **doğrulandı**.
+
+**4. Tek sinyalli terim `s_brk` ve YANLIŞ YÖNDE.** BOĞA'da t=−2,39: bant
+tepesine yakınlık + son 1 saat kazancı → **daha kötü** ileri getiri.
+**Skor bu terime PUAN EKLİYOR.**
+
+### Ö2 — `squeeze_bonus`: kodun vadesi geçmiş talimatı kapandı
+
+Kod aynen şöyle diyordu: *"Boğada 'sert düşer' tersine dönebilir. **Boğaya
+girildiğinde bu kural YENİDEN ölçülmelidir.**"* 21 Ağustos'ta girildi, ölçülmedi.
+
+⚠️ **Yöntem düzeltmesi:** terim ikili (0/8), çeyrek kesimi onda çöküyor.
+Ön-kayıtlı **soru** değişmeden, doğru yöntemle (ikili kesim) koşturuldu.
+
+```
+NOTR  bonus +0,120%  ·  digeri -0,060%  ·  fark +0,180%  (t +0,16)
+BOGA  bonus -0,359%  ·  digeri -0,852%  ·  fark +0,493%  (t +0,97)
+```
+
+**Zararlı tersine dönüş YOK** — kodun korktuğu şey olmamış. Ama **fayda da yok**
+(ikisi de anlamsız). Terim **etkisiz**. Talimat yerine getirildi.
+
+### AŞAMA B — yeni skor türetildi (aranmadı)
+
+Ön-kayıttaki mekanik kural uygulandı. **Tek terim geçti:** `s_brk`.
+Diğer dördü `|t| < 2,0` ile elendi.
+
+```
+YENI SKOR = 100 x s_brk   (olculen isarete gore TERS cevrilmis)
+```
+
+### AŞAMA C — AYRI YARIDA doğrulama (terimler A'da seçildi, hüküm B'de)
+
+| ölçüm | yeni | eski | fark | t | MDE |
+|---|---|---|---|---|---|
+| **ham** | +0,038% | −0,933% | **+0,971%** | **+1,58** | 1,226 |
+| mekanik | −0,846% | −1,112% | +0,266% | +0,54 | 0,993 |
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** ham fark > 0, t ≥ +2,0 | ❌ **DÜŞTÜ** (+0,971 / t=+1,58) |
+| **K2** ayrı yarıda doğrulama | ✅ yapıldı |
+| **K3** mekanikli de > 0 | ✅ GEÇTİ |
+| **K4** kısır kapı yok (2.767 vs 2.737 aday) | ✅ GEÇTİ |
+
+`MDE 1,226 > |fark| 0,971` → **"göremiyoruz"**.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 3 ✅
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | `s_comp` hiçbir rejimde geçmeyecek | ✅ TUTTU (dağılımı bile yok) |
+| 2 | en az bir terim rejimler arası ZIT işaret verecek | ✅ TUTTU (`s_oi` **ve** `s_vol`) |
+| 3 | `s_oi` skorun %41'i olduğu hâlde anlamlı çıkmayacak | ✅ TUTTU (t=−1,12) |
+
+**Üst üste ikinci kez üçte üç.**
+
+### 🔴 HÜKÜM — yetki vardı, değişiklik YAPILMADI
+
+Kullanıcı kod değişikliği için **tam yetki** verdi. Ön-kayıtlı ölçüt
+(koşumdan önce commit edilmiş) **geçmedi**, dolayısıyla `radar.py`
+**değiştirilmedi.**
+
+**Skor "yanlış ayarlanmış" değil — ölçülebilir bilgi taşımıyor:**
+dört bileşenin dördü boş, beşincisi ters, ve %64'ü rejimler arası işaret
+değiştiriyor. **Ağırlık ayarı bunu çözmüyor** çünkü çözülecek bir sinyal yok.
+
+⚠️ Tek somut aday `s_brk`'ın **ters çevrilmesi** — ayrı yarıda +0,97 puan
+kazandırdı ama saptama eşiğinin altında kaldı. **Veri bekleyen** bir aday;
+`pos<0.25` (V3) ile aynı sınıfta.
