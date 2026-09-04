@@ -259,11 +259,74 @@ varyantın yirmi dokuzu bu şekilde düşmüştür — ön-kayıt yazmadan denen
 hacim kuruluğu. Ama bu, düşen coin olmanın yan ürünü olabilir; ayrı bir bilgi
 taşıyıp taşımadığı ölçülmedi.
 
+### Skorun tersi — ayrı başlık, çünkü zaten ölçüldü
+
+**[EKLENDİ 2026-09-03 — kullanıcı hatırlattı, ilk yazımda eksikti.]**
+
+Raporun ilk hâlinde yalnızca *"skor ters çalışıyor"* yazmıştım. Eksik: **tersi
+de ölçüldü**, hem ham fiyatta hem mekanikle.
+
+**Ham fiyatta ters kenar gerçek ve iki ayrı veri kümesinde doğrulandı.** Yüksek
+skorlu coinler düşüyor, düşük skorlular düşmüyor. İlişki güçlü ve tesadüf
+değil.
+
+**Mekanik uygulandığında ön-kayıtlı testi geçemedi** — ama nasıl düştüğü önemli:
+
+- Yüksek skorluları **satmak**, maliyet **ve fonlama** düşüldükten sonra bile
+  **pozitif** kaldı. Bu, bu projede maliyet sonrası ayakta kalan nadir
+  bulgulardan biri.
+- Ama **zamanla kararlı değil**: pencerenin iki yarısında işaret dönüyor,
+  kenarın tamamı ikinci yarıda toplanıyor. Ön-kayıt bunu şart koşmuştu, ve
+  düştüğü yer burası oldu.
+- İşaret tutarlılığı ölçütünü de **bir gün farkla** kaçırdı.
+- Stop genişliği ayrışması **yok** — yani "mekanik hilesi" savunması kapalı.
+  Düşüş gerçek.
+
+Yani skorun tersi *"işe yaramaz"* değil, **"henüz güvenilmez"**. Farkı önemli:
+biri konuyu kapatır, diğeri ikinci bir pencere ister.
+
+### 🔑 İki bağımsız ölçüm aynı yeri gösteriyor
+
+Bu raporun defter3 bulgusuyla, daha önce yapılmış bir skor ölçümü **aynı sonuca
+varıyor** — ve ikisi farklı evrende, farklı yöntemle, farklı zamanda yapıldı:
+
+- Skor ölçümü, botun kapı öncesi havuzunda on yedi binden fazla LONG işlemi
+  taradı: **skor bandı ne olursa olsun LONG'un tamamı negatif.** Yüksek skorlu
+  bandı çıkarmak bile kurtarmıyor — eşikte uçurum değil **plato** var.
+- Bu rapor, canlı ileri zamanda kırk pozisyonla aynı şeyi buldu: defter3'ün
+  LONG kolu başabaşın on sekiz puan altında.
+
+**İkisinin ortak mesajı: sorun skorun eşiği değil, bu evrende LONG açmak.**
+
+Bu, tek bir ölçümün söyleyebileceğinden daha güçlü bir ifadedir — ama yine de
+hüküm değil: ikisi de tek pencere, ikisinde de ayı verisi yok.
+
 ### Yapılmaması gereken
 
-**Skoru daha çok kullanmak.** Reddedilen girişler en yüksek skorlu gruptu ve en
-çok kaybeden gruptu. Skor bu evrende ters çalışıyor.
+**Skoru bugünkü yönüyle kullanmak.** Botun boğa rejimindeki LONG kapısı, kendi
+skorunun *"düşecek"* dediği coinlerde LONG açıyor. Bu ölçüldü ve o kapının
+işlem başına getirisi belirgin biçimde negatif, stop olma oranı neredeyse
+tümüyle. Reddedilen girişlerin en yüksek skorlu grup olması da aynı olgunun
+başka bir yüzü.
+
+**Skor eşiğini oynatarak kurtarmaya çalışmak.** Ölçüldü: eşikte uçurum yok,
+plato var. Eşiği kaydırmak sayıyı biraz iyileştiriyor ama işareti
+değiştirmiyor.
 
 **Yeni bir giriş sinyali aramak.** Bu rapor, dört kolda giriş anındaki hiçbir
 alanın kazananı kaybedenden ayırmadığını gösteriyor. Daha fazla alan eklemek
 aynı duvara çarpar.
+
+### Ve bir uyarı — mekanik ham kenarı yiyor
+
+Skor ölçümünde kayda değer bir ayrıntı var: ham aşamada **pozitif** olan skor
+bantları, botun mekaniği uygulanınca **hepsi negatife** düşüyor. Aradaki fark
+işlem maliyetinden çok daha büyük — yani farkı yiyen şey **stop mekaniği**.
+
+Bu, raporun 8. bölümündeki "kazanan kollarda kayıp yoğun" gözlemiyle ve bu
+projede daha önce kaydedilmiş *"A-stop ham kenarın üçte ikisini yedi"*
+bulgusuyla aynı yöne bakıyor.
+
+⚠️ Ama o ölçümün kendi uyarısı da aynen geçerli: ham aşama ile mekanik aşama
+**aynı ufka sahip değildi**, o yüzden kaymanın ne kadarı stop, ne kadarı ufuk —
+**ayrılmadı.** Ayrı bir ön-kayıt ister.
