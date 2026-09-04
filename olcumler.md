@@ -7134,3 +7134,121 @@ biraz daha az kötü olan tarafı geçiriyor.
    `CLAUDE.md` kaydı duruyor: A-stop, A+B'nin ham kenarının **%65'ini** yemişti.
    Mekanik aşaması yapılmadan hiçbir kural çıkmaz.
 3. **K1 kıl payı geçti** ve en kötü 3 gün çıkınca kayboluyor.
+
+---
+
+## NOTR'da SHORT — HAM getiri + İKİ REJİMİN BİRLEŞTİRİLMESİ (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_notr_short_ham.md` (commit `107b2e4`, **koşumdan önce**)
+**Betikler:** `scratchpad/notr_short_ham.py` · `rejim_yon_karne.py`
+**Hüküm:** 🔴 **Birincil DÜŞTÜ ama GÜÇSÜZ** — ve asıl bulgu birincilde değil.
+
+### Kullanıcı itirazı — doğrulandı, eksiklik bendeydi
+
+*"11-19 Ağustos NOTR-AYI rejimiydi, iki rejim var; NOTR-SHORT'ta bot artıda
+kalıyordu."* Canlı defterden sınandı:
+
+- Pencere gerçekten **iki rejim**: `NOTR` (08-01…08-21) · `BOGA` (08-21…).
+  Önceki ham ölçüm **yalnız BOGA'ya** bakmıştı.
+- `NOTR-SHORT`: ortalama getiri **+%1,67**, poz-t **+2,61** → iddia **DOĞRU**.
+- Dolar eksi (−1.125) ama kırılım suçluyu gösteriyor:
+  `A+B+MA50` +599 · `A+B` +190 · `NOTR` +10 · **`MA50+ucuz` −1.924**.
+  **`MA50+ucuz` çıkarılınca NOTR-SHORT = +798 $ / 35 pozisyon.**
+
+### Birincil hücre (A+B · SHORT · H=4 saat)
+
+```
+A+B    ort +0,199%  sembol-gun 77  sg-t +0,21  gun-t -0,13  MDE 1,883
+TABAN  ort +0,592%  sembol-gun 789 sg-t +3,22  gun-t +1,51
+A+B - TABAN  -0,394%   t -0,41
+```
+
+K1 ❌ · K2 ❌ → **DÜŞTÜ.** Ama `|ort| < MDE` → **"göremiyoruz"**, "etki yok" değil.
+
+### 🔑 BİRİNCİL HORİZON YANLIŞ SEÇİLMİŞTİ — A+B 12-24 saatte çalışıyor
+
+Ufuk eğrisi (A+B, SHORT):
+
+```
+ 1 sa +0,030 (t+0,09)   ·   4 sa +0,199 (t+0,21)
+12 sa +2,254 (sg-t+1,98 · gun-t+1,95)   ·   24 sa +3,315 (sg-t+2,63 · gun-t+2,49)
+```
+
+Ve bu **canlı veriyle birebir tutuyor**: A+B'nin canlı medyan tutma süresi
+**10,9 saat** (bütün kapıların en uzunu) ve canlı ortalama getirisi **+%2,514** —
+ham 12 saatlik değer **+2,254** ile neredeyse aynı.
+
+⚠️ **Bu POST-HOC bir gözlemdir.** Ön-kayıtlı hücre 4 saatti ve düştü; hükmü
+değiştirmiyorum. Ama *"A+B'nin ufku 12-24 saat"* hipotezi **kendi ön-kaydını
+hak ediyor** — 45 hücrelik ızgaradan seçilmiş bir hücre değil, canlı tutma
+süresinden bağımsız olarak **öngörülebilirdi**.
+
+### ⚠️ MA50 KOLU POZİTİF ÇIKTI — dört önceki ölçümle ÇELİŞİYOR
+
+```
+MA50 (NOTR, SHORT):  1sa +0,714 (t+2,59) · 4sa +1,675 (sg-t+3,53 · gun-t+3,19)
+                    12sa +2,047 (t+2,64) · 24sa +0,012
+```
+
+Önceki dört ölçüm bu kapıyı **negatif** bulmuştu (en güçlüsü: 2 yıl, 21.830 olay,
+−0,079, t=−4,05). **Çelişki kaydediliyor, çözülmüyor.** Ağırlık kıyası:
+
+| | bu ölçüm | 2 yıllık ölçüm |
+|---|---|---|
+| pencere | **11 gün** | **2 yıl** |
+| rejim | yalnız NOTR | üç rejim |
+| mekanik | yok (ham) | var |
+
+**2 yıllık ölçüm baskın kabul edilir.** Bu sonuç onu çürütmez; *"kapının ham
+sinyali bu dar pencerede pozitifti"* der.
+
+### 🔴🔴 ASIL BULGU — İKİ REJİM, TEK PİYASA
+
+İki ölçüm yan yana konunca (her ikisi de `TABAN` = süzgeçsiz taranan evren):
+
+| rejim | taban, LONG yönünde, H=4sa | gün-t |
+|---|---|---|
+| `NOTR` | **−0,592%** (SHORT +0,592 ölçüldü) | +1,51 (SHORT lehine) |
+| `BOGA` | **−0,816%** | −4,94 |
+
+**Alt para evreni İKİ REJİMDE DE aşağı sürükleniyordu.** Rejim etiketi botun
+**yönünü** değiştirdi, piyasa değişmedi. Bot NOTR'da SHORT'tu (doğru yön),
+BOĞA'ya dönünce LONG'a geçti (yanlış yön) — ve kaybın %70'i orada oluştu.
+
+🔑 Bu, kapı tartışmasından **daha temel**: mesele hangi kapının seçtiği değil,
+**rejim etiketinin yönü çevirmesi**. Ve `durum.md`'de kayıtlı: etiket geç ve
+yapışkan (BOĞA'dan çıkmak için BTC'nin −%6,2 düşmesi **ve 3 gün** sürmesi gerek).
+
+### 🔴 İKİNCİ ASIL BULGU — HER KAPI YÜZDE ARTI, DOLAR EKSİ
+
+| kesit | ort getiri % | net $ |
+|---|---|---|
+| SHORT (tümü) | **+1,517%** (t +2,43) | −1.815 |
+| LONG (tümü) | **+0,774%** (t +1,39) | −3.861 |
+| `MA50+ucuz` (NOTR-SHORT) | **+1,098%** | −1.924 |
+
+**Botun seçimi ortalama pozitif getiriyor; parayı kaybettiren BOYUTLANDIRMA.**
+Kazananlar küçük, kaybedenler büyük açılıyor.
+
+⚠️ **Yeni değil ve hâlâ eyleme dönüşmedi:** kayıtlı bulgu (`b386738`) bunu
+bulmuş ama **boyutun TP1 kanalından geçtiğini** (döngüsel) tespit edip
+eyleme dönüştürememişti. Bu ölçüm o bulguyu **üçüncü kez** ve iki ayrı
+rejimde doğruluyor.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 0
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | TABAN SHORT yönünde ~0 veya hafif eksi | ❌ **YANLIŞ** — +0,592%, sg-t +3,22 |
+| 2 | MA50 kolu eksi ya da sıfır | ❌ **YANLIŞ** — +1,675%, gün-t +3,19 |
+| 3 | A+B ham kenarı canlı yüzdesinden büyük | ❌ **YANLIŞ** (birincil ufukta): ham 4sa +0,199 < canlı +2,514. 12 saatte eşitleniyor |
+
+**Üçünde üçü de yanlış.** Aynen yazılıyor.
+
+### Sınırlar
+
+- 30 günlük tek pencere; `MA50` kolu yalnız **11 gün**, `A+B` **18 gün**.
+- Ham ölçüm **fonlamayı içermiyor**; A+B tanımı gereği negatif fonlama seçer →
+  ham kenarı gerçeğinden **yüksek** gösterir. Kayıtlı ölçüm: fonlama A+B'nin
+  kenarının **%83'ünü** yemişti.
+- `A+B` kolunda en büyük sembolün payı %7,8 (PROM) — yoğunlaşma sınırda.

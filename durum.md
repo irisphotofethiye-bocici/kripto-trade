@@ -1117,3 +1117,67 @@ hesaplandı** ve hüküm zayıflamadı, güçlendi. Bundan sonra sembol-gün bir
 kullanan her ölçüm **gün-kümeli t'yi de raporlar**; ayrıca *"en kötü N gün
 çıkarılınca"* dayanıklılık satırı eklenir — bu ölçümde kapı kolunun kırılgan,
 taban kolunun sağlam olduğunu tam o satır gösterdi.
+
+---
+
+## 🆕 İKİ REJİM, TEK PİYASA — teşhis yer değiştirdi (2026-09-04)
+
+Karar burada; rakamlar `olcumler.md` → *NOTR'da SHORT — HAM getiri*.
+Ön-kayıtlar: `ON_KAYIT_boga_long_ham.md` (`59b7a67`) · `ON_KAYIT_notr_short_ham.md` (`107b2e4`).
+
+### Kullanıcı itirazı haklıydı ve ölçümü genişletti
+
+*"İki rejim var, SHORT ayağı başarılıydı"* — doğrulandı. İlk ham ölçüm yalnız
+BOĞA'ya bakıyordu; NOTR eklendi. `MA50+ucuz` çıkarılınca NOTR-SHORT **artıda**.
+
+### Karar 1 — 🔴 TEŞHİS KAPIDA DEĞİL, YÖNDE
+
+Süzgeçsiz taranan evren **iki rejimde de** aşağı sürükleniyordu. Rejim etiketi
+botun **yönünü** çevirdi; piyasa çevrilmedi. Bot NOTR'da SHORT'tu (doğru),
+BOĞA'ya dönünce LONG'a geçti (yanlış), kaybın %70'i orada.
+
+**Sonuç:** *"kapıyı ayarlayalım"* işi teşhisin merkezinde değil. Merkez,
+**rejim etiketinin yön çevirmesi**. Etiketin geç ve yapışkan olduğu zaten
+kayıtlı (yukarıdaki rejim bölümü).
+
+### Karar 2 — 🔴 SIRA DEĞİŞTİ: BOYUTLANDIRMA BİRİNCİ
+
+Üç ayrı kesitte aynı şey: **ortalama yüzde getiri ARTI, dolar EKSİ.**
+SHORT +%1,52 / −1.815 $ · LONG +%0,77 / −3.861 $ · `MA50+ucuz` +%1,10 / −1.924 $.
+
+Botun **seçimi** ortalama pozitif; parayı kaybettiren **boyutlandırma**.
+Bu bulgu üçüncü kez ve iki ayrı rejimde doğrulandı.
+
+⚠️ Kayıtlı engel duruyor: boyut **TP1 kanalından** geçiyor (döngüsel), o yüzden
+daha önce eyleme dönüştürülememişti. **Yeni ölçüm bu döngüselliği kırmayı
+hedeflemeli** — yoksa dördüncü kez aynı yere varılır.
+
+### Karar 3 — ⚠️ A+B'nin UFKU 12-24 SAAT, 4 SAAT DEĞİL
+
+Ön-kayıtlı hücre (4 saat) düştü ve **güçsüzdü**. Ama ufuk eğrisi 12-24 saatte
+anlamlı pozitif ve bu, A+B'nin canlı medyan tutma süresiyle (10,9 saat) ve
+canlı yüzde getirisiyle (+%2,51) **birebir tutuyor**.
+
+🔴 **POST-HOC gözlem — kural değil.** Kendi ön-kaydını hak ediyor; bu satır
+onu bir bulgu olarak değil, **sınanacak hipotez** olarak kaydeder.
+
+### Karar 4 — ⚠️ `MA50+ucuz` ÇELİŞKİSİ AÇIK BIRAKILDI
+
+Bu ölçümde ham sinyali **pozitif** çıktı (11 gün, NOTR, mekaniksiz); önceki
+**dört** ölçüm negatifti (en güçlüsü 2 yıl / 21.830 olay / t=−4,05).
+**2 yıllık ölçüm baskın kabul edilir; kapı hakkında karar DEĞİŞMEDİ.**
+Çelişki kaydedildi, çözülmedi.
+
+### Sırada — güncellendi
+
+1. **Boyutlandırma** — TP1 döngüselliğini kıracak bir tasarımla (yeni ön-kayıt).
+2. **Rejim etiketi** — yön çevirdiği için artık kapılardan önemli.
+3. A+B ufku (12-24 saat) — ayrı ön-kayıt.
+4. Stop mesafesi — hâlâ serbest, hâlâ ölçülmedi.
+
+### Yöntem — kayda geçen
+
+**Ön-kayıtlı ufuk yanlış seçilebilir.** A+B'nin birincil hücresi 4 saatti ve
+düştü; kapının gerçek ufku 12-24 saatti ve bu **canlı tutma süresinden
+önceden bilinebilirdi**. Bundan sonra bir kapı için ufuk seçilirken
+**o kapının canlı medyan tutma süresine bakılır**, varsayılan kullanılmaz.
