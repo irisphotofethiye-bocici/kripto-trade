@@ -7973,3 +7973,106 @@ bir aday; çürütülmüş bir fikir değil.
 
 ⚠️ **Yine de kod değişmez:** portföy aşaması (8 slot, marjin tavanı) yapılmadı
 ve koşullu mekanik çıkış kodunu dallandırır — bakım maliyeti ölçüme dahil değil.
+
+---
+
+## SKORUN TERSİ — DÜŞTÜ, ve önceki notu DÜZELTİYOR (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_skor_tersi.md` (commit `c83e4a8`, **koşumdan önce**)
+**Betik:** `scratchpad/skor_tersi.py`
+**Hüküm:** 🔴 **DÜŞTÜ** — *"skor ters yönü gösteriyor"* **kanıtlanamadı**
+
+Kullanıcı talimatı: *"skor: tersi doğru mu onu notlamıştık, 22 Ağustostan beri
+bütün pozlara bak, skorun tersine işlem alsaydı ne olurdu, skorun poz
+almadaki etkisi ne?"*
+
+Pencere kullanıcının tarihi: **2026-08-22'den itibaren** · 12.435 satır · 12 gün.
+
+### S1 — skor<45 (ters) vs skor≥45 (botun kuralı)
+
+| kol | sembol-gün | ham 4sa | sembol-gün | **mekanikli** |
+|---|---|---|---|---|
+| `skor<45` | 523 | −0,469% | 401 | **−0,781%** |
+| `skor≥45` | 289 | −0,918% | 252 | **−1,173%** |
+| **fark** | | **+0,449%** (t +1,39) | | **+0,392%** (t **+1,22**) |
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** mekanikli fark > 0, t ≥ +2,0 | ❌ **DÜŞTÜ** (+0,392 / t=+1,22) |
+| **K2** ham ve mekanik aynı işaret | ✅ GEÇTİ |
+| **K3** iki yarıda da > 0 | ❌ **DÜŞTÜ** — A yarı **−0,095%**, B yarı +0,879% |
+| **K4** mekanik eşitliği | ✅ GEÇTİ (0,75× / 0,96×) |
+
+`MDE 0,643 > |fark| 0,392` → **"göremiyoruz"**.
+
+🔴 **K3 belirleyici:** ilk yarıda fark **negatif**. Yani ters-işlem tezi
+pencerenin yalnız ikinci yarısında görünüyor — **tekrarlamıyor.**
+
+### 🔑 S2 — SKOR EŞİĞİNİN KATTIĞI DEĞER: **+0,006 PUAN**
+
+```
+taranan evrenin ham getirisi : -0,924%
+skor >= 45'in getirisi       : -0,918%
+esigin kattigi deger         : +0,006 puan
+```
+
+**Eşik adayların %64'ünü kesiyor ve ölçülebilir hiçbir şey katmıyor.**
+Ne iyileştiriyor ne kötüleştiriyor — **etkisiz**.
+
+### Skor bantları — monotonluk YOK (betimleyici)
+
+```
+0-35   ham +0,014  mek -0,537      45-50   ham -1,291  mek -0,889
+35-40  ham -0,311  mek -0,697      50-60   ham +0,381  mek -0,498
+40-45  ham -0,889  mek -0,601      60-200  ham -1,093  mek -1,396
+```
+
+Ham getiride **en iyi bant 50-60**, **en kötü bant 45-50** — yan yana.
+Sıralı bir yapı yok → skor sürekli bir bilgi **taşımıyor**, gürültü.
+
+### 🔴 S3 — GERÇEK DEFTER, ARŞİVİN TERSİNİ SÖYLÜYOR
+
+08-22'den beri **207 gerçek pozisyon**:
+
+```
+skor ~ notional : -0,105   (marjin_pct %8-12'ye DOYUYOR -> teyit edildi)
+skor ~ getiri   : +0,062
+
+skor uctebiri   N   ort skor   ort ret%     net $
+dusuk          69      48,3    +0,444%   -1.761,92
+orta           69      55,8    +0,547%     -987,81
+yuksek         69      69,5    +1,257%   -1.111,20
+```
+
+**Gerçek defterde YÜKSEK skorlu pozisyonlar daha İYİ yüzde getiri verdi**
+(+1,257% vs +0,444%) — arşiv kolunun **tersi**.
+
+### 🔴 ÖNCEKİ NOTUN DÜZELTİLMESİ — bir günlük hassasiyet
+
+Huni ölçümü (08-**21**'den) *"skor ≥ 45 popülasyonu kötüleştiriyor"* demişti
+(taranan −0,816% → skor≥45 −1,132%). Bu ölçüm (08-**22**'den) aynı şeyi
+**−0,924% → −0,918%** buluyor, yani **fark yok**.
+
+**Tek günlük kayma bulguyu ortadan kaldırıyor.** Önceki not **kırılgandı** ve
+bu kayda geçiyor.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 3 ✅
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | ham farkta `skor<45` önde | ✅ TUTTU (+0,449%) |
+| 2 | mekanikli fark ham farktan küçük | ✅ TUTTU (+0,392 < +0,449) |
+| 3 | skor bantlarında monotonluk olmayacak | ✅ TUTTU |
+
+**İlk kez üç tahminin üçü de tuttu.**
+
+### SONUÇ — kullanıcının sorusuna doğrudan cevap
+
+| soru | cevap |
+|---|---|
+| *"skorun tersine işlem alsaydı ne olurdu?"* | Ölçülebilir bir iyileşme **yok**. Yön zayıfça o tarafta ama **anlamlı değil**, **ilk yarıda tersine dönüyor**, ve **gerçek defterde tam tersi**. |
+| *"skorun poz almadaki etkisi ne?"* | **+0,006 puan.** Adayların %64'ünü kesiyor, karşılığında hiçbir şey vermiyor. |
+| *"skorun boyutlandırmadaki etkisi?"* | **Yok** — `marjin_pct` %8-12'ye doyuyor, `skor~notional = −0,105`. Teyit edildi. |
+
+🔑 **Skor ters değil, BOŞ.** *"Ters yönü gösteriyor"* notu bu ölçümle
+**desteklenmedi**; doğru ifade **"ayırmıyor"**.

@@ -1504,3 +1504,45 @@ yön tutarlı, mekanizma ölçülmüş, koşulsuz kontrolü geçti. **Eksik olan
 
 🔴 **Kod değişmez.** Ne K1 geçti ne portföy aşaması yapıldı; ayrıca koşullu
 mekanik çıkış kodunu dallandırır ve bakım maliyeti ölçüme dahil değil.
+
+---
+
+## 🆕 SKOR ÖLÇÜLDÜ — ters değil, BOŞ (2026-09-04)
+
+Rakamlar `olcumler.md` → *SKORUN TERSİ*. Ön-kayıt `ON_KAYIT_skor_tersi.md` (`c83e4a8`).
+
+### Karar 1 — 🔴 "SKOR TERS YÖNÜ GÖSTERİYOR" NOTU DÜZELTİLDİ
+
+Ters-işlem tezi **düştü**: fark +0,392% ama t=+1,22, **ilk yarıda negatif**,
+ve gerçek defterde **tam tersi** (yüksek skorlu pozisyonlar daha iyi yüzde
+getiri verdi). MDE farkı görecek güçte değil.
+
+**Doğru ifade: skor TERS değil, AYIRMIYOR.**
+
+⚠️ Önceki huni notu (08-**21**'den) *"skor kötüleştiriyor"* diyordu; aynı
+ölçüm 08-**22**'den yapılınca fark kayboluyor. **Tek günlük hassasiyet** —
+o not kırılgandı, kayda geçti.
+
+### Karar 2 — 🔑 SKOR EŞİĞİNİN KATTIĞI DEĞER: +0,006 PUAN
+
+Eşik adayların **%64'ünü** kesiyor ve taranan evrene göre **+0,006 puan**
+katıyor. Ne iyi ne kötü — **etkisiz bir filtre**.
+
+📌 Bu, *"girişi engelleyen kısır kapı olmamalı"* kullanıcı kısıtıyla doğrudan
+ilgili: eşik aday sayısını üçte bire indiriyor, karşılığında hiçbir şey vermiyor.
+**Ama gevşetmek de ölçülmüş bir kazanç getirmiyor** — ölçüm "etkisiz" diyor,
+"kaldır" demiyor.
+
+### Karar 3 — skor boyutlandırmayı da belirlemiyor (TEYİT)
+
+`marjin_pct_hesapla` %8-12 bandına doyuyor; `skor ~ notional = −0,105`.
+Daha önce ölçülmüştü, burada teyit edildi. **Kapanmış konu.**
+
+### Sırada
+
+1. 🔑 **`pos<0.25` koşullu mekanik (V3)** — açık aday, veri bekliyor
+   (`ON_KAYIT_pos_kosullu_mekanik.md`, ölçüt sabit)
+2. ⚠️ **Kullanıcı V3'ün uygulanmasını istedi** — portföy aşaması yapılmadı,
+   ön-kayıtlı ölçüt geçmedi. Karar kullanıcıya ait; uygulanırsa
+   **yeni pencere** tanımlanmalı ve `[DEĞİŞTİ tarih]` protokolü işletilmeli.
+3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
