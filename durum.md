@@ -1224,3 +1224,42 @@ kontrol olur, çünkü TP1 nedensel yolun üzerinde"* diye yazmıştım. Yanlı�
 boyut fiyatı etkilemediği için o yol **hiç yok**; TP1 ile boyutun **ortak
 nedeni** var (stop mesafesi). Bir değişkeni *"yolun üzerinde"* ilan etmeden
 önce **yolun var olup olmadığı** sorulmalı.
+
+---
+
+## 🆕 BOYUTLANDIRMA KOLU KAPANDI — kusur bulunamadı (2026-09-04)
+
+Rakamlar `olcumler.md` → *RİSK PARİTESİ*. Ön-kayıt `ON_KAYIT_risk_paritesi.md` (`cd97004`).
+
+### Karar 1 — 🔴 ÖNCEKİ TURUN "EYLEME DÖNÜŞEBİLİR BULGUSU" ÇÜRÜDÜ
+
+Bir önceki blokta *"risk paritesi tutmuyor, risk 4,8 kat yayılıyor"* yazıp bunu
+sıradaki iş ilan etmiştim. Ölçüldü: **gerçekleşen/hedef oranının medyanı 1,000**
+ve **hedefin kendi yayılımı da 4,8 kat**. Yayılım kusur değil, tasarımın kendisi
+(hedef = equity × %1,5; equity 2,26 kat düştü; smart-karşıda yarılama 2 kat).
+
+`kaldirac_max` **hiç bağlamıyor**. Bağlayan `kaldirac_min` (%54).
+
+⚠️ Bir daha *"kaldıraç kırpmaları riski bozuyor"* gerekçesiyle öneri yapılmaz.
+
+### Karar 2 — BOYUTLANDIRMADA KUSUR YOK
+
+İki tur, iki ön-kayıt, elde eyleme dönüşebilir hiçbir şey yok:
+
+| iddia | akıbet |
+|---|---|
+| eşit ağırlık daha iyiydi | ölçütler geçti ama **yorum geri çekildi** — formülün kendi aritmetiği |
+| risk paritesi bozuk | **çürüdü** |
+| `ΣR > 0` → parite tutsa defter artıda | **ZAYIF** — K3 düştü, ikinci yarıda t=+0,78 |
+| bot en iyi işlemlerinde riski kısıyor | **desteklenmedi** (t=+1,17 vs +1,69) |
+
+**Bu bir başarısızlık değil, sonuçtur.** Ön-kayıt olmasaydı bu koldan yanlış bir
+kod değişikliği çıkardı — üstelik ima ettiği değişiklik *"riski zamanla
+azaltmayı bırak"*, yani **düşüş korumasını kaldırmak** olurdu.
+
+### Sırada — güncellendi
+
+1. ~~boyutlandırma~~ **kapandı**
+2. **Rejim etiketi** — yön çevirdiği için en büyük kaldıraç (ölçülmedi)
+3. A+B'nin 12-24 saatlik ufku — post-hoc gözlem, kendi ön-kaydını bekliyor
+4. Stop mesafesi — hâlâ serbest, hâlâ ölçülmedi
