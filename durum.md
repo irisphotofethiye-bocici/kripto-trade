@@ -1263,3 +1263,56 @@ azaltmayı bırak"*, yani **düşüş korumasını kaldırmak** olurdu.
 2. **Rejim etiketi** — yön çevirdiği için en büyük kaldıraç (ölçülmedi)
 3. A+B'nin 12-24 saatlik ufku — post-hoc gözlem, kendi ön-kaydını bekliyor
 4. Stop mesafesi — hâlâ serbest, hâlâ ölçülmedi
+
+---
+
+## 🆕 REJİM ETİKETİ ÖLÇÜLDÜ — bilgi taşıyor, bot TERS kullanıyor (2026-09-04)
+
+Rakamlar `olcumler.md` → *REJİM ETİKETİ*. Ön-kayıt `ON_KAYIT_rejim_etiketi.md` (`32b908f`).
+
+### Karar 1 — 🔴 BOĞA'DA LONG AÇMANIN ÖLÇÜLMÜŞ DAYANAĞI YOK
+
+2 yıl, 611 gün, 566 sembol: `BOGA` günlerinde alt evrenin günlük getirisi
+**ortalamada sıfırın anlamlı biçimde altında**. `NOTR` ve `AYI`'dan da düşük.
+Bot tam orada geniş LONG kuralı işletiyor.
+
+**7 BOĞA epizodunun 6'sı negatif** ve **güncel epizot 7'nin 5'incisi** —
+yani *"bu sefer şanssızlıktı"* savunması **kurulamıyor**.
+
+### Karar 2 — 🔑 ETİKET GÜRÜLTÜ DEĞİL, BU YÜZDEN DAHA CİDDİ
+
+`btc_chg24` sabitlendiğinde fark **duruyor** (%123 korunuyor) → etiket
+fiyatın kılığı değil, **bağımsız bilgi taşıyor**. Gürültü olsaydı zararsız
+olurdu; bilgi taşıyıp ters kullanılması daha kötüdür.
+
+### Karar 3 — ⚠️ AMA "SÜRÜKLENME" DEĞİL, "KUYRUK"
+
+BOĞA'nın negatifliği **en kötü 5 gün** çıkarılınca anlamlılığını kaybediyor
+(medyan yalnız −0,36%). Doğru ifade: *"BOĞA'da her gün düşüyor"* değil,
+**"BOĞA alt evrenin en şişman negatif kuyruğunu taşıyor"** — ve bot orada
+kaldıraçlı LONG açıyor. Bu bir **risk** ifadesidir, sürüklenme değil.
+
+⚠️ Bu yüzden çözüm *"BOĞA'da SHORT aç"* **değildir**. Ölçüm bunu söylemiyor.
+
+### Karar 4 — kullanıcı uyarısı ölçümü kurtardı
+
+*"11-19'u başka rejim, unutma"* → epizot kırılımı zorunlu kılındı.
+O NOTR dilimi (07-25…08-20) alt evrende **+0,231%**, yani hafif **pozitif**
+zemin; bot orada SHORT açıp **yine de kazandı**. **Kapıların lehine** bir
+gözlem ve havuzda erimişti.
+
+### Sırada
+
+1. ~~boyutlandırma~~ kapandı · 2. ~~rejim etiketi~~ **ölçüldü**
+3. **BOĞA-LONG kuralının ne yapılacağı** — üç seçenek var ve hiçbiri henüz
+   ölçülmedi: (a) BOĞA'da LONG'u daraltmak (b) BOĞA'da hiç işlem açmamak
+   (c) etiketin **kuyruk riskini** boyuta yansıtmak. **Yeni ön-kayıt gerekir.**
+4. A+B'nin 12-24 saatlik ufku · 5. Stop mesafesi
+
+### Yöntem — koşumdan önce yakalanan hata
+
+Rejim serisini kendim yeniden yazdım, doğrulanmışla **uyuşmadı** (745 gün vs
+611). Üç hata: SEZON ısınması · HAVA'nın SMA'sı günü içeriyordu ·
+`TEPKI_RALLISI` NOTR'a haritalanmıştı (**doğrusu AYI**).
+**Kural: doğrulanmış kod yeniden YAZILMAZ, ÇAĞRILIR** — ve çağıran betiğe
+seri sınaması konur, uyuşmazsa çalışmayı reddeder.

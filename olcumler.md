@@ -7471,3 +7471,111 @@ hipotezi **desteklenmedi**.
 
 **Boyutlandırmada kusur bulunamadı.** Bu bir başarısızlık değil, bir sonuçtur —
 ve iki tur ön-kayıt olmasaydı bu koldan yanlış bir kod değişikliği çıkardı.
+
+---
+
+## REJİM ETİKETİ — bilgi taşıyor, ama bot onu TERS kullanıyor (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_rejim_etiketi.md` (commit `32b908f`, **koşumdan önce**)
+**Betik:** `scratchpad/rejim_yon_bilgisi.py`
+**Hüküm:** 🔴 **DÜŞTÜ** — ve düşme **yönü** bulgunun kendisi.
+
+### Kurulum
+
+Rejim serisi **doğrulanmış** `rejim_gecis_sayim.py`'den **çağrılır** (yeniden
+yazılmaz — aşağıya bak). 611 gün · `NOTR` 313 · `AYI` 204 · `BOGA` 94.
+Alt evren: 566 sembol, günlük **medyan** getiri, **birim = GÜN**.
+
+### Ana tablo
+
+| rejim | gün | ort % | medyan % | tek-örneklemli t | artı gün |
+|---|---|---|---|---|---|
+| **BOGA** | 93 | **−1,305%** | −0,364% | **−2,47** | %46 |
+| `NOTR` | 313 | −0,309% | −0,110% | −1,50 | %47 |
+| `AYI` | 204 | −0,627% | −0,517% | **−2,84** | %43 |
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** `BOGA − (NOTR∪AYI) > 0`, t ≥ +2 | ❌ **DÜŞTÜ** — fark **−0,871%**, t=−1,58 (ters yön, anlamlı değil) |
+| **K2** `BOGA` ort > 0 → LONG savunulur mu | ❌ **DÜŞTÜ** — −1,305%, t=−2,47 |
+| **K3** `NOTR∪AYI` ort < 0 → SHORT savunulur mu | ✅ **GEÇTİ** |
+
+🔑 **Bot BOĞA'da LONG açıyor. BOĞA, alt evrenin ölçülen EN KÖTÜ rejimi.**
+
+### K4 — etiket fiyatın kılığı DEĞİL
+
+`btc_chg24` çeyrekleri **içinde** fark duruyor: havuz farkının **%123'ü**
+çeyrek içinde kalıyor. Yani etiket, BTC'nin günlük hareketinden **bağımsız
+bilgi taşıyor**.
+
+🔑 **Bu iyi haber değil, kötü haber:** etiket gürültü olsaydı zararsız olurdu.
+Bilgi taşıyor ve **bot onu ters yönde kullanıyor**.
+
+### 🔴 EPİZOT KIRILIMI — kullanıcı uyarısı sayesinde
+
+*"11-19'u başka rejim, unutma"* (kullanıcı). Havuza gömülseydi kaçacaktı:
+
+**7 BOĞA epizodunun 6'sı negatif:**
+
+```
+1/7  2025-10-03  -4,324%  (8 gun)      5/7  2026-08-21  -0,674%  (4 gun) <- GUNCEL
+2/7  2025-01-17  -3,023%  (20 gun)     6/7  2025-07-10  -0,246%  (20 gun)
+3/7  2025-09-12  -1,485%  (11 gun)     7/7  2025-05-06  +0,054%  (27 gun)
+4/7  2025-10-12  -1,288%  (3 gun)
+```
+
+**Güncel epizot 7'nin 5'incisi — istisna DEĞİL, tipik.** Yani *"bu sefer
+şanssızlık oldu"* açıklaması **kurulamıyor**; kural 2 yıldır aynı yönde yanlış.
+
+**Kullanıcının işaret ettiği NOTR dilimi** (2026-07-25…08-20, 27 gün):
+**+0,231%** — az sayıdaki **pozitif** epizottan biri. Yani bot o dönemde
+hafif yükselen bir zemine karşı SHORT açıyordu **ve yine de kazandı**
+(`A+B` +190 · `A+B+MA50` +599). Bu, **kapıların lehine** bir gözlem.
+
+⚠️ **Gerilim kaydediliyor:** 30 günlük ölçümde NOTR, LONG yönünde
+**−0,592%** (H=4sa, aday arşivi) çıkmıştı; burada **+0,231%** (H=24sa, tüm
+arşiv). Farklı ufuk, farklı evren — çelişki değil ama **aynı şey de değil**.
+
+### Gecikme — betimleyici, N=7
+
+Etiket BOĞA'ya dönmeden önceki 7 günde BTC:
+`+9,89 · +2,76 · +5,87 · +4,85 · +11,49 · −6,91 · **+24,27**`
+ortalama **+7,46%** · medyan **+5,87%**
+
+**Güncel geçiş (+%24,27) açık ara en geç kalanı** — ortalamanın üç katı.
+
+### ⚠️ Sağlamlık — BOĞA'nın negatifliği KUYRUK günlerinden
+
+BOĞA günlerinin dağılımı: %10 −7,20 · medyan **−0,36** · %75 +1,76 · %90 +3,30.
+En kötü 5 gün: −28,6 · −12,9 · −11,5 · −10,0 · −9,5.
+**O 5 gün çıkarılınca ort −0,557%, t=−1,39 → anlamlılık kayboluyor.**
+
+🔑 Doğru okuma: *"BOĞA'da her gün düşüyor"* **değil**;
+**"BOĞA, alt evrenin en şişman negatif kuyruğunu taşıyor"** — ve bot tam
+orada kaldıraçlı LONG açıyor. Bu bir **sürüklenme** değil **risk** ifadesidir.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | güncel epizot havuzun alt çeyreğinde (istisna) | ❌ **YANLIŞ** — 7'de 5, **tipik** |
+| 2 | geçiş öncesi BTC ort **%10 üstü** hareket etmiş | ❌ **YANLIŞ** — ort +7,46%, medyan +5,87% (güncel +24,27 istisna) |
+| 3 | `AYI` günleri `NOTR`'dan daha negatif | ✅ **TUTTU** (−0,627 vs −0,309) |
+
+Ayrıca ön-kayıtta *"K1'in geçmesine %60"* demiştim — **düştü**, üstelik
+**ters yönde**. *"K4'ün düşmesine %65"* demiştim — **geçti**.
+**İki beklentim de yanlış çıktı.**
+
+### 🔴 YÖNTEM — koşumdan önce yakalanan hata
+
+İlk denemede rejim serisini **kendim yeniden yazdım** ve doğrulanmış betikle
+**uyuşmadı** (745 gün / AYI 133 vs 611 gün / AYI 204). Üç gerçek hata:
+
+1. SEZON ısınma penceresi (≥21 hafta, `wc[-21:-1]`) atlanmıştı
+2. HAVA'nın SMA'sı **günün kendisini içeriyordu** (doğrusu hariç)
+3. 🔴 `TEPKI_RALLISI` (sezon AYI + hava BOGA) **NOTR'a** haritalanmıştı —
+   **doğrusu AYI**. En büyük fark bundandı.
+
+**Hüküm yazılmadan yakalandı.** Çözüm: doğrulanmış fonksiyon **çağrılıyor**,
+ve betiğe `seri_sinamasi()` kondu — seri beklenen sayıları vermezse betik
+**çalışmayı reddediyor**.
