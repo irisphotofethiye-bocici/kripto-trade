@@ -7877,3 +7877,99 @@ Sekme ~4 saatte bitiyor; almak için **~4 saatte çıkmak** gerekir. Bu bir
 kalmıştır** (`olcumler.md` → sayım). Ayrıca 13 günlük tek epizot.
 
 **Bu kol kapanıyor.**
+
+---
+
+## `pos`'a GÖRE KOŞULLU MEKANİK — düştü ama KAPANMIYOR (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_pos_kosullu_mekanik.md` (commit `bd92dab`, **koşumdan önce**)
+**Betik:** `scratchpad/pos_kosullu_mekanik.py`
+**Hüküm:** **DÜŞTÜ** (K1) · ama K2+K3+K4 geçti ve **güç yetersiz** → *"göremiyoruz"*
+
+Kullanıcı talimatı: *"bunun başka bir yolu olmalı, mekaniği ayarlayalım pos'a göre."*
+
+**Sarmalayıcı sınaması:** parametresiz hâli kaynaktaki `oynat()` ile 400 satırda
+**birebir aynı** (fark 0) → varyantlar dışında davranış değişmedi.
+
+### 🔑 TEŞHİS — çarpıcı olgu
+
+```
+pos<0.25, mevcut mekanik:
+  MFE medyan  +4,98%   ·  %25 +2,74%  ·  %75 +9,83%
+  hic artiya gecmeyen:  17 / 1400  (%1)
+  ama STOP ile biten:   %91
+```
+
+**Bu pozisyonların %99'u artıya geçiyor, medyanda +%5 kâr görüyor, ve %91'i
+stopla kapanıyor.** Yani kâr *var*, alınamıyor.
+
+Stop tetiklenme zamanı: **%59'u 4. saatten SONRA** → teşhis **"çıkış çok geç"**.
+MFE zirvesi medyan **6. saat**. TP1'e ulaşan 260 pozisyonun yalnız **%29'u**
+TP2'ye gidiyor.
+
+### Varyantlar (eşleşmiş: aynı satırlar, farklı çıkış)
+
+| varyant | `pos<0.25` net | fark | eşli t | med. süre | stop% |
+|---|---|---|---|---|---|
+| TABAN (mevcut) | −1,459% | — | — | 6,0 | %91 |
+| **V1** zaman stopu 6 saat | −0,961% | **+0,721%** | +1,69 | 6,0 | %46 |
+| V2 TP1'de %100 çıkış | −1,529% | −0,076% | −0,48 | 5,0 | %78 |
+| **V3** V1+V2 | **−0,833%** | **+0,797%** | **+1,94** | 5,0 | %42 |
+| V4 stop 2,5×ATR | −2,315% | −1,499% | −2,23 | 15,0 | %70 |
+
+🔑 **Kaldıraç zaman stopunda, TP1 politikasında değil:** V1 tek başına
+kazancın neredeyse tamamını veriyor (+0,721 / +0,797). V2 hiçbir şey katmıyor.
+
+### Ölçütler
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **K1** | fark > 0 ve eşli t ≥ **+2,5** | ❌ **DÜŞTÜ** (+0,797 / **t=+1,94**) |
+| **K2** | iki yarıda da > 0 | ✅ GEÇTİ (A +1,077 · B +0,557) |
+| **K3** | 🔴 koşulsuz kontrol | ✅ **GEÇTİ** |
+| **K4** | fark ≥ %0,5 | ✅ GEÇTİ |
+
+**K3 ayrıntısı — kazanç gerçekten `pos`'a özgü:**
+
+```
+pos<0.25  : +0,797%  (t +1,94)
+pos>=0.25 : +0,172%  (t +1,68)
+TUM satir : +0,214%  (t +2,73)
+```
+
+Yani V3 herkese uygulansa kazanç **dörtte bire** iniyor. **30/30 duvarına
+çarpan sıradan bir çıkış sıkılaştırması DEĞİL** — koşulluluk gerçek fark yaratıyor.
+
+### 🔴 NEDEN "KAPANDI" DEMİYORUM
+
+```
+MDE 0,821  ·  |fark| 0,797  ->  GOREMIYORUZ
+```
+
+Fark, örneklemin görebileceğinin **hemen altında**. `t=+1,94`, eşik +2,5
+(dört varyant için düzeltilmiş; tek varyant olsaydı +2,0 idi ve **o da
+geçilemezdi**).
+
+**Bağlayıcı kısıt N:** `pos<0.25` diliminde yalnız **87 sembol-gün**, 13 gün.
+Bu, bulgunun yanlış olduğunu **göstermiyor** — göremediğimizi gösteriyor.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1,5
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | teşhis "erken çıkış" diyecek; MFE zirvesi ilk 4 saatte | ⚠️ **YARIM** — teşhis doğru (%59 sonra), ama MFE zirvesi medyan **6. saat**, ilk 4 saatte olan yalnız %44 |
+| 2 | **V2** en iyi varyant olacak | ❌ **YANLIŞ** — V2 hiçbir şey katmadı (−0,076%); kaldıraç **zaman stopunda** |
+| 3 | V4 (geniş stop) düşecek | ✅ **TUTTU** (−1,499%) |
+
+### Durum — bu kol AÇIK kalıyor
+
+Bu oturumda kapanan dört kolun aksine, burada bulgu **yanlışlanmadı**:
+yön tutarlı · iki yarıda da aynı işaret · mekanizma ölçülmüş · koşulsuz
+kontrolü geçti. **Eksik olan tek şey N.**
+
+**İkinci bir BOĞA epizodu N'i kabaca ikiye katlar** ve aynı fark
+(+%0,8) o zaman `t ≈ 2,7` verir → eşiği geçer. Yani bu, **veri bekleyen**
+bir aday; çürütülmüş bir fikir değil.
+
+⚠️ **Yine de kod değişmez:** portföy aşaması (8 slot, marjin tavanı) yapılmadı
+ve koşullu mekanik çıkış kodunu dallandırır — bakım maliyeti ölçüme dahil değil.

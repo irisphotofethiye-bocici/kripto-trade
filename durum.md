@@ -1450,3 +1450,57 @@ bot stop'a yem olan işlemler açacaktı. `CLAUDE.md`'nin
 ⚠️ **Bu oturumda dört kol kapandı ve dördü de ön-kayıtla kapandı.**
 Hiçbiri "işe yaramadı" değil; dördü de **yanlış bir kod değişikliğini
 engelledi.**
+
+---
+
+## 🆕 `pos`'a GÖRE KOŞULLU MEKANİK — İLK AÇIK KALAN ADAY (2026-09-04)
+
+Rakamlar `olcumler.md` → *`pos`'a GÖRE KOŞULLU MEKANİK*.
+Ön-kayıt `ON_KAYIT_pos_kosullu_mekanik.md` (`bd92dab`).
+
+### Karar 1 — 🔑 ÇARPICI OLGU: kâr VAR, alınamıyor
+
+`pos<0.25` pozisyonlarının **%99'u artıya geçiyor**, MFE medyanı **+%4,98** —
+ve **%91'i stopla** kapanıyor. Kâr yok değil; **tutulamıyor**.
+
+Stopların **%59'u 4. saatten sonra** → teşhis: **çıkış çok geç.**
+
+### Karar 2 — kaldıraç ZAMAN STOPUNDA
+
+| varyant | fark | eşli t |
+|---|---|---|
+| V1 zaman stopu 6 saat | **+0,721%** | +1,69 |
+| V2 TP1'de %100 çıkış | −0,076% | −0,48 |
+| **V3 (V1+V2)** | **+0,797%** | **+1,94** |
+| V4 stop 2,5×ATR | −1,499% | −2,23 |
+
+**V2 hiçbir şey katmıyor; kazancın tamamı zaman stopundan.** V4 (gevşetme)
+belirgin biçimde **kötü**.
+
+### Karar 3 — 🔴 BU KOL KAPANMIYOR, "VERİ BEKLİYOR"
+
+Ön-kayıtlı K1 **düştü** (t=+1,94 < +2,5) **ama**:
+- K2 (iki yarı) ✅ · K3 (koşulsuz kontrol) ✅ · K4 (büyüklük) ✅
+- **MDE 0,821 > |fark| 0,797 → "GÖREMİYORUZ"**
+
+**K3 kritik:** V3 herkese uygulansa kazanç +%0,797 → **+%0,172**'ye iniyor.
+Yani bu **30/30 duvarına çarpan sıradan bir sıkılaştırma DEĞİL** — koşulluluk
+gerçek fark yaratıyor.
+
+**Bağlayıcı kısıt N:** `pos<0.25` diliminde yalnız **87 sembol-gün / 13 gün**.
+İkinci bir BOĞA epizodu N'i kabaca ikiye katlar; aynı fark o zaman
+**t ≈ 2,7** verir ve eşiği geçer.
+
+⚠️ Bu oturumda kapanan dört kolun aksine burada bulgu **yanlışlanmadı** —
+yön tutarlı, mekanizma ölçülmüş, koşulsuz kontrolü geçti. **Eksik olan N.**
+
+### Sırada
+
+1. 🔑 **İkinci BOĞA epizodu bekleniyor** — bu aday o zaman yeniden koşulur.
+   Ölçüt **şimdiden sabit** (`ON_KAYIT_pos_kosullu_mekanik.md`), sonradan
+   gevşetilmeyecek.
+2. **Portföy aşaması** — V3 için (8 slot, marjin tavanı). K1 geçmeden yapılmaz.
+3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
+
+🔴 **Kod değişmez.** Ne K1 geçti ne portföy aşaması yapıldı; ayrıca koşullu
+mekanik çıkış kodunu dallandırır ve bakım maliyeti ölçüme dahil değil.
