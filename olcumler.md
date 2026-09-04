@@ -7689,3 +7689,109 @@ hücre aramasının şans eşiğini geçemiyor.
 
 İkisi de ön-kayıtlı aşama değerlendirmesi, taranmış hücre değil — ama
 **ikisi de istatistiksel olarak zayıf** ve kendi ön-kayıtlarını hak ediyor.
+
+---
+
+## `long_veto` — BİRİNCİL GEÇTİ: veto kestiği dilimde HAKSIZ (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_long_veto.md` (commit `76d1f08`, **koşumdan önce**)
+**Betik:** `scratchpad/long_veto_testi.py`
+**Hüküm:** 🔴 **K2 GEÇTİ — veto haksız** · ⚠️ ama üç ciddi çekinceyle
+
+Kullanıcı talimatı: *"long veto testini yap"*. (Skor kolu kullanıcı kararıyla
+bırakıldı: *"skorun yanılttığını biliyoruz, hatta ters yönü gösteriyor."*)
+
+### Kural ve gerçek ağırlığı
+
+```
+long_veto = pos<0.25  or  chg24<=-40  or  (chg24<0 & oi24>=15)  or  para_cikis
+```
+
+Vetolanan 1.243 satırın **%68'i** tek koşuldan: **`pos < 0.25`** (bandın dibi,
+"düşen bıçak"). Diğerleri marjinal.
+
+### BİRİNCİL — `pos < 0.25`, H = 4 saat (botun medyan tutması 2,2 saat)
+
+| küme | sembol-gün | ham getiri |
+|---|---|---|
+| **`pos < 0.25`** (vetonun kestiği) | 139 | **+0,131%** |
+| `pos ≥ 0.25` (geçirdiği) | 594 | **−1,127%** |
+| **fark** | | **+1,259%** · gün-t **+2,24** · MDE 1,125 |
+
+`|fark| > MDE` → örneklem bu büyüklüğü **görebiliyor**.
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** fark < 0 → veto haklı | ❌ hayır |
+| **K2** fark > 0 ve t ≥ +2,0 → veto **HAKSIZ** | ✅ **EVET** |
+
+🔑 **Bandın dibindeki coinler, botun aldıklarından daha iyi gitti. Veto tam
+olarak onları kesiyor.**
+
+### 🔴 ÇEKİNCE 1 — 24 SAATTE İŞARET DÖNÜYOR
+
+| ufuk | `pos<0.25` | `pos≥0.25` | fark | t |
+|---|---|---|---|---|
+| **4 saat** | +0,131% | −1,127% | **+1,259%** | **+2,24** |
+| **24 saat** | −3,018% | −1,931% | **−1,087%** | −0,89 |
+
+**Dört saatte iyi, yirmi dört saatte kötü.** Mekanizması tutarlı:
+*"düşen bıçak"* önce **sekiyor**, sonra düşmeye devam ediyor.
+
+🔑 Yani veto **4 saatlik tutucu için yanlış, 24 saatlik tutucu için doğru**.
+Bot 2,2 saat tutuyor → ön-kayıtlı birincil ufuk (4 saat) **doğru seçilmişti**,
+ama bulgu **ufka bağlı** ve bu aynen yazılır.
+
+### 🔴 ÇEKİNCE 2 — vetonun GERÇEKLEŞEN etkisi anlamlı DEĞİL
+
+Birincil test **koşulu** tüm popülasyonda sınadı (güç için). Vetonun
+**fiilen kestiği** satırlar çok daha az:
+
+| küme | sembol-gün | ort % | gün-t |
+|---|---|---|---|
+| VETOLANAN | 63 | −0,127% | −0,31 |
+| GEÇEN (LONG kararı) | 207 | −0,804% | −2,14 |
+| **fark** | | **+0,676%** | **+1,20** ⬅ anlamlı **değil** |
+
+Alt-tetik kırılımı (vetolanan içinde): `pos<0.25` **+0,039%** (40 sembol-gün) ·
+`chg24<0 & oi24≥15` **−0,971%** (26) · artık≈`para_cikis` +0,356% (20, 2 gün).
+
+**Yani: koşul genel popülasyonda anlamlı, vetonun kendi etkisi değil.**
+
+### 🔴 ÇEKİNCE 3 — düzeltmek BOĞA-LONG'u KÂRLI YAPMIYOR
+
+Karşı-olgu (ham, mekaniksiz):
+
+```
+bugunku LONG havuzu           -0,804%
++ pos<0.25 kaldirilsa         -0,527%   (+0,277 puan)
++ oi-artis kaldirilsa         -0,669%   (+0,135 puan)
++ TUM veto kaldirilsa         -0,442%   (+0,362 puan)
+```
+
+**Tüm veto kalksa bile havuz −0,442% ile EKSİDE.** Veto kaybın kaynağı değil,
+kaybı bir miktar **büyüten** bir etken.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | alt-tetik 3 (fiyat-düşük+OI) **haklı** çıkacak | ❌ **YANLIŞ** (4 saatte +0,216%, t=+0,49 — etkisiz). 24 saatte haklı yönde (−3,177%) ama t=−1,63 |
+| 2 | alt-tetik 1 havuz sonucunu belirleyecek | ✅ **TUTTU** (%68) |
+| 3 | H=24'te fark H=4'ten **büyük** olacak | ❌ **YANLIŞ** — işaret **döndü** |
+
+### HÜKÜM ve sınır
+
+✅ Ön-kayıtlı birincil ölçüt **geçti** — bu, uzun süredir birincil ölçütü geçen
+**ilk** bulgu.
+
+🔴 **Ama bileşen KALDIRILMAZ.** Üç sebep, üçü de ön-kayıtta yazılıydı:
+1. Ham ölçüm — mekanik (stop/hedef) ve portföy (8 slot) aşamaları yapılmadı.
+2. **13 günlük tek epizot** — ikinci bir BOĞA epizodunda görülmeden kapıya
+   dokunulmaz.
+3. İşaret **24 saatte dönüyor** → bulgu ufka bağlı, ve botun tutma süresi
+   değişirse hüküm de değişir.
+
+**Sonraki adım kod değil, mekanik aşaması:** *"`pos<0.25` adayları botun kendi
+stopuyla oynatılsaydı ne olurdu?"* — çünkü sekme 4 saat sürüyor ve botun stopu
+2 saatte tetikleniyor olabilir.

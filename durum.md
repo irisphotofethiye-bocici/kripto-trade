@@ -1362,3 +1362,47 @@ LONG kapısı seçim değeri **üretmiyor**; ne iyileştiriyor ne kötüleştiri
    En somut aday; ters çalışan bir vetoyu düzeltmek kapıyı **daraltmıyor, açıyor**.
 2. **Skorun BOĞA'daki ters seçiciliği** — skor bandı × getiri, ayrı ön-kayıt.
 3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
+
+---
+
+## 🆕 `long_veto` ÖLÇÜLDÜ — birincil ölçüt GEÇTİ, ilk kez (2026-09-04)
+
+Rakamlar `olcumler.md` → *`long_veto`*. Ön-kayıt `ON_KAYIT_long_veto.md` (`76d1f08`).
+
+### Karar 1 — ✅ VETO, KESTİĞİ DİLİMDE HAKSIZ (4 saatlik ufukta)
+
+`pos < 0.25` (vetonun %68'i, "düşen bıçak" koruması) sağlayan coinler
+**+0,131%**, sağlamayanlar **−1,127%** → fark **+1,259%**, gün-t **+2,24**,
+ve örneklem bu büyüklüğü görecek güçte.
+
+**Bandın dibindekiler, botun aldıklarından daha iyi gitti.**
+
+### Karar 2 — 🔴 AMA BİLEŞEN KALDIRILMAZ. Üç sebep:
+
+1. **İşaret 24 saatte DÖNÜYOR** (+1,259% → −1,087%). Mekanizma tutarlı:
+   düşen bıçak önce **sekiyor**, sonra düşmeye devam ediyor. Veto 4 saatlik
+   tutucu için yanlış, 24 saatlik için doğru. Bot 2,2 saat tutuyor.
+2. **Vetonun GERÇEKLEŞEN etkisi anlamlı değil** (+0,676%, t=+1,20). Anlamlı
+   olan, koşulun **genel popülasyondaki** etkisi — aynı şey değil.
+3. **Tüm veto kalksa bile LONG havuzu eksi** (−0,804% → −0,442%). Veto kaybın
+   **kaynağı değil**, bir miktar büyüteni.
+
+### Karar 3 — sıradaki adım KOD DEĞİL, MEKANİK AŞAMASI
+
+Soru dar ve ölçülebilir: *"`pos<0.25` adayları botun kendi stopuyla
+oynatılsaydı ne olurdu?"* Sekme 4 saat sürüyor; botun stopu 2 saatte
+tetikleniyor olabilir — o hâlde ham kenar mekanikte kaybolur.
+
+⚠️ Ve ikinci bir BOĞA epizodu görülmeden kapıya dokunulmaz (13 günlük tek epizot).
+
+### Not — skor kolu bırakıldı
+
+Kullanıcı kararı: *"skorun yanılttığını biliyoruz, hatta ters yönü gösteriyor."*
+Huni ölçümündeki *"skor ≥ 45 popülasyonu kötüleştiriyor"* bulgusu kayıtlı,
+ölçülmedi.
+
+### Sırada
+
+1. **`pos<0.25` mekanik aşaması** (botun stop/hedefiyle) — ayrı ön-kayıt
+2. İkinci BOĞA epizodu — veri birikmesi bekleniyor
+3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
