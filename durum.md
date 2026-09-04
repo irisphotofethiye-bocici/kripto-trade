@@ -1058,3 +1058,62 @@ doğrulanabilir biçimde alınamadı (`bls.gov` 403; Hazine duyuru arşivi).
    `max_id` alanları saat bileşenini atıp yalnız günü uyguluyor — *doğru gün,
    yanlış saat* döndürüyor. Yalnız X gelişmiş-arama sözdizimi
    (`since:YYYY-MM-DD_HH:MM:SS_UTC`) tutuyor. **"Döndü" başarı değildir.**
+
+---
+
+## 🆕 LONG KİLİDİ ÖLÇÜLDÜ — kapı suçlu değil, YÖN suçlu (2026-09-04)
+
+Karar burada; rakamlar `olcumler.md` → *BOĞA'da LONG — HAM getiri*.
+Ön-kayıt `ON_KAYIT_boga_long_ham.md` (`59b7a67`).
+
+### Bulgu 1 — "LONG kilidi" mecaz değil, tam
+
+BOĞA rejiminde SHORT bir **istisnadır** ve istisna pratikte **ulaşılamaz**:
+24 Ağustos'tan beri 12.594 aday satırında SHORT şartlarını sağlayan **sıfır**
+satır. İlk iki şartı sağlayan 35 satırın tamamı **tek sembol, tek gün**, ve
+üçüncü şart (agresif alım) hepsini kesiyor. Yapısal: bir coin başlarken akıllı
+para short'sa agresif alım zaten yüksek oluyor — **iki şart birbirini yiyor.**
+
+### Bulgu 2 — 🔴 KAPIYI DARALTMAK ÇÖZÜM DEĞİL
+
+Ham getiri ölçüldü (mekaniksiz): kapı kolu eksi, **ama taranan evrenin tamamı
+daha da eksi.** Kapı, tabandan (anlamsız da olsa) **iyi** seçiyor.
+
+**Yani sorun botun neyi seçtiği değil, hangi yöne bastığı.** Bu pencerede BTC
+yükselirken alt paralar düşüyordu; bot BTC-hâkimiyeti artan bir fazda alt para
+satın alıyordu.
+
+⚠️ **Sonuç:** *"BOĞA-LONG'a ek şart koyalım"* önerisi bu ölçüme karşı savunma
+yapmak zorundadır — ek şart kapıyı daraltır, ama kapı zaten tabandan kötü değil.
+
+### Bulgu 3 — `taker` şartı ayırmıyor
+
+SHORT istisnasını kesen şart bu. İki tarafı da ölçüldü: **ikisi de negatif.**
+Şartı gevşetmek SHORT adayı üretir ama *"kazananı seçtiği için"* değil,
+sadece popülasyonu genişlettiği için. Gevşetme gerekçesi **bu ölçümden çıkmaz**.
+
+### Karar — HENÜZ KARAR YOK, ve bu bilinçli
+
+`CLAUDE.md`: **"Şüphede DAİMA statüko."** Bu Aşama 1'dir (ham getiri).
+Kural çıkarmadan önce **mekanik aşaması** gerekiyor: ters yöndeki ham kenarın
+botun kendi stopundan sağ çıkıp çıkmadığı. Kayıt duruyor: A-stop bir kez
+A+B'nin ham kenarının **%65'ini** yemişti.
+
+🔴 **Ve en büyük sınır:** ölçüm **13 gün ve tek rejim epizodu** — üstelik tam
+olarak botun kaybettiği pencere. *"Kaybı kayıp dönemiyle açıklama"* riski
+gerçek. Sonraki BOĞA epizodu için hüküm vermez.
+
+### Sırada
+
+1. **Mekanik aşaması** — ters yön botun stop/hedefiyle sağ kalıyor mu (ayrı ön-kayıt).
+2. **Stop mesafesi** — hakem raporunun 5. maddesi, pencere kilidi kalktı, hâlâ serbest.
+3. Kapıya dokunmak ancak 1 ve 2'den sonra ve **yeni pencere** tanımlanarak.
+
+### Yöntem — kayda geçen
+
+Ön-kayıt birimi **sembol-gün** idi; sembol-günler aynı gün içinde bağımsız
+değil (düşüş gününde bütün altlar birlikte düşer). **Gün-kümeli t ek olarak
+hesaplandı** ve hüküm zayıflamadı, güçlendi. Bundan sonra sembol-gün birimi
+kullanan her ölçüm **gün-kümeli t'yi de raporlar**; ayrıca *"en kötü N gün
+çıkarılınca"* dayanıklılık satırı eklenir — bu ölçümde kapı kolunun kırılgan,
+taban kolunun sağlam olduğunu tam o satır gösterdi.

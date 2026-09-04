@@ -7033,3 +7033,104 @@ Hazine haberi **sürprizdi.** Sürpriz makro haber **hâlâ ölçülmedi.**
 
 Gerçek kol şans kolundan **1,40×** oynak (listeleme ölçümünde 2-4,5× idi). Daha iyi
 ama tam eşit değil; kayda geçiyor.
+
+---
+
+## BOĞA'da LONG — HAM getiri: yön mü yanlış, mekanik mi? (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_boga_long_ham.md` (commit `59b7a67`, **koşumdan önce**)
+**Betikler:** `scratchpad/boga_long_ham.py` · `boga_long_ham_gun.py`
+**Hüküm:** 🔴 **K1 GEÇTİ — yön yanlış.** Ama asıl bulgu ön-kayıtta beklenen değil.
+
+### Soru
+
+Bot BOĞA'da LONG'a kilitli (ölçüldü: 12.594 satırda SHORT adayı **sıfır**) ve
+kaybın ~%70'ini orada üretiyor. Karne iki açıklamayı ayıramıyordu: **yön mü
+yanlış**, yoksa **stop mu öldürüyor** (%95 stop, 2,2 saat medyan ömür)?
+Bu popülasyonda ham getiri **hiç ölçülmemişti**.
+
+### Kurulum
+
+Aday arşivi 08-04…09-04 · BOĞA satırı **13.399** · 224 sembol · 223'ünde mum bulundu.
+Birim **sembol-gün** (satır 7,5 dakikada bir yazılıyor → satır saymak sahte N).
+Mekanik **yok**: stop yok, hedef yok, maliyet yok.
+
+✅ **Zaman dilimi sınaması geçti:** `price` alanı eşlenen barın aralığında —
+**%99,7** (13.176 / 38). Kaydırma (UTC+3 → UTC) doğru.
+✅ **Oynaklık eşitliği:** KAPI/TABAN = **1,14×** → eşit sayılır, K2 zayıflamaz.
+
+### Birincil hücre (KAPI · H=4 saat)
+
+```
+KAPI   ort -0,649%   sembol-gun 246   sg-t -2,06   MDE 0,630
+TABAN  ort -0,816%   sembol-gun 627   sg-t -4,67
+KAPI - TABAN  +0,167%   iki-orneklemli t +0,46
+```
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** ort < 0 ve t ≤ −2,0 | ✅ **GEÇTİ** (−0,649 / −2,06) — kıl payı |
+| **K2** kapı anti-seçici mi | ❌ **DÜŞTÜ** (+0,167 / +0,46) |
+
+### 🔑 ASIL BULGU — kapı suçlu değil, EVRENİN TAMAMI DÜŞÜYOR
+
+`TABAN` = BOĞA'da taranan **her şey**, kapı süzgeci olmadan: **−0,816%**,
+gün-t **−4,94**. Kapı kolundan **daha güçlü** negatif.
+
+**Yani bot kötü seçmiyor — bu pencerede alt paraların tamamı düşüyordu.**
+Kapıyı daraltmak bunu çözmez; kapı zaten tabandan (anlamsız da olsa) **iyi**.
+
+### Gün-kümeli denetim — ön-kayıtta yoktu, eklendi
+
+Sembol-günler aynı gün içinde bağımsız değil (düşüş gününde bütün altlar
+birlikte düşer). Gün düzeyinde toplandı:
+
+| kol | H | sembol-gün t | **gün-t** |
+|---|---|---|---|
+| KAPI | 4 sa | −2,06 | **−2,22** |
+| TABAN | 4 sa | −4,67 | **−4,94** |
+
+Daha sıkı kümelemede hüküm **zayıflamadı, güçlendi**. 13 günün **10'u eksi (%77)**.
+
+⚠️ **Ama kırılganlık gerçek:** en kötü günler çıkarılınca KAPI kolu erir —
+1 gün: t=−1,86 · 2 gün: −1,43 · 3 gün: −0,96. `TABAN` kolu bu erimeyi yaşamıyor.
+**Sağlam olan taban bulgusu, kapı bulgusu değil.**
+
+### Ufuk eğrisi — kayıp süreyle büyüyor
+
+```
+KAPI    1sa -0,084   4sa -0,649   12sa -1,399   24sa -1,881
+TABAN   1sa -0,252   4sa -0,816   12sa -1,249   24sa -1,558
+```
+
+Tek yönlü ve monoton → gürültü değil, **süregelen aşağı sürüklenme**.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | TABAN hafif **ARTI** (BTC pencerede ~%12 yükseldi) | ❌ **YANLIŞ** — −0,816%, gün-t −4,94 |
+| 2 | KAPI − TABAN **negatif** (momentum tepeden alır) | ❌ **YANLIŞ** — +0,167, t +0,46 |
+| 3 | 24 saatte kayıp 4 saatten büyük | ✅ **TUTTU** |
+
+🔑 **1. tahminin yanlış çıkışı bulgunun kendisi:** BTC yükselirken altlar
+düşüyordu. Bot BTC-hâkimiyeti artan bir fazda alt para **satın alıyordu**.
+
+### İkincil (betimleyici, hüküm taşımaz)
+
+`taker ≤ 1,0` → −0,632% · `taker > 1,0` → −0,898%. **İkisi de negatif.**
+SHORT istisnasını kesen şart, kazananı kaybedenden **ayırmıyor**; sadece
+biraz daha az kötü olan tarafı geçiriyor.
+
+`BASLIYOR + smart=SHORT` alt kümesi: 35 satır ama **2 sembol-gün, tek sembol
+(AKE)**. Ham LONG +0,126% → SHORT tarafı −0,126%. **N=2, hiçbir şey söylemez.**
+
+### 🔴 SINIRLAR — bulgudan büyük
+
+1. **13 gün, TEK rejim epizodu** (08-21…09-04) — ve tam olarak botun kaybettiği
+   pencere. *"Kaybı kayıp dönemiyle açıklama"* riski gerçek. Sonraki BOĞA
+   epizodunda ne olacağını **söylemez**.
+2. **Bu Aşama 1.** Ham kenar +0,85% (taban, ters yön) kulağa iyi geliyor ama
+   `CLAUDE.md` kaydı duruyor: A-stop, A+B'nin ham kenarının **%65'ini** yemişti.
+   Mekanik aşaması yapılmadan hiçbir kural çıkmaz.
+3. **K1 kıl payı geçti** ve en kötü 3 gün çıkınca kayboluyor.
