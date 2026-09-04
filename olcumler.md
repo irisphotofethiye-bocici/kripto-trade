@@ -7795,3 +7795,85 @@ kaybı bir miktar **büyüten** bir etken.
 **Sonraki adım kod değil, mekanik aşaması:** *"`pos<0.25` adayları botun kendi
 stopuyla oynatılsaydı ne olurdu?"* — çünkü sekme 4 saat sürüyor ve botun stopu
 2 saatte tetikleniyor olabilir.
+
+---
+
+## `pos<0.25` MEKANİK AŞAMASI — kenar mekanikten SAĞ ÇIKMIYOR (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_pos_mekanik.md` (commit `5338860`, **koşumdan önce**)
+**Betik:** `scratchpad/pos_mekanik.py`
+**Hüküm:** 🔴 **DÜŞTÜ** — ve mekanizma tam olarak öngörülen yerde.
+
+Mekanik kod `stop_mu_sure_mu.py`'den **kaynaktan çağrıldı** (kopyalanmadı) —
+bu oturumda rejim serisini yeniden yazıp üç hata yapmanın dersi.
+
+### Zincirin tamamı
+
+| aşama | `pos<0.25` | `pos≥0.25` | fark | t |
+|---|---|---|---|---|
+| **ham, 4 saat** | +0,023% | −1,410% | **+1,433%** | +1,59 |
+| **MEKANİKLİ** | **−1,470%** | −1,141% | **−0,328%** | −0,60 |
+
+**Korunan pay: −%23.** Kenar yenmedi, **tersine döndü**.
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** mekanikli fark > 0, t ≥ +2,0 | ❌ **DÜŞTÜ** (−0,328%, t=−0,60) |
+| **K2** korunan pay ≥ %50 | ❌ **DÜŞTÜ** (−%23) |
+| **K3** mekanik eşitliği | ✅ **GEÇTİ** — kıyas sağlam |
+
+`|fark| 0,328 < MDE 1,088` → farkın kendisi için **"göremiyoruz"**; ama
+**işaret dönüşü** (+1,433 → −0,328) tek başına belirleyici.
+
+### 🔑 MEKANİZMA — çıkış sebebi dağılımı gösteriyor
+
+```
+pos<0.25   STOP %78 · STOP_TP1SONRASI %13 · TP2 %5  · ZAMAN %4   medyan 6,0 saat
+pos>=0.25  STOP %65 · STOP_TP1SONRASI %18 · TP2 %15 · ZAMAN %2   medyan 3,0 saat
+```
+
+**Sekme 4 saat sürüyor; bot medyanda 6 saat tutuyor.** Yani tam olarak
+sekmenin bittiği ve dönüşün başladığı yere kadar tutuyor. Ve:
+
+- **stop-olma %91 vs %83** — daha çok stop oluyor
+- **TP2 %5 vs %15** — üçte bir oranında hedefe ulaşıyor
+
+Kenar var, **bot onu alacak mekaniğe sahip değil.**
+
+### K3 geçti — kıyas sağlam
+
+stop genişliği 5,85% vs 4,94% (**1,18×**) · stop-olma 1,09× → ikisi de 1,5 kat
+içinde. Yani *"kollar oynaklıkta ayrışıyor, kıyas bozuk"* itirazı **kurulamıyor**.
+
+### ⚠️ Popülasyon değişti — dürüstlük notu
+
+Mekanik, asgari %2 stop şartını sağlamayan **3.150 satırı eliyor** (+698 geçmiş
+yetersiz, +233 seri yok) → 13.003'ten **9.770**'e. Bu alt-popülasyonda ham fark
+**+1,433% ama t=+1,59** (tam popülasyonda +1,259% / t=+2,24 idi).
+**Yani kaybın bir kısmı mekanikten değil, popülasyon daralmasından geliyor.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1,5
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | `pos<0.25` stopu daha geniş → **K3 düşecek** | ⚠️ **YARIM** — stop gerçekten daha geniş (1,18×) ama K3 **geçti** |
+| 2 | TP1 oranı **yüksek**, TP2 oranı düşük | ⚠️ **YARIM** — TP2 düşük ✅ (%5 vs %15) ama TP1 de **düşük** ❌ (%18,6 vs %32,7) |
+| 3 | mekanikli fark ham farktan küçük | ✅ **TUTTU** (dramatik: +1,433 → −0,328) |
+
+### 🔴 SONUÇ — `long_veto`'nun `pos<0.25` bileşeni KALDIRILMAZ
+
+Ham kenar gerçekti ve ön-kayıtlı birincil ölçütü geçmişti. **Mekanik aşaması
+onu tükettiği için öneri düşüyor.** Vetoyu kaldırmak, botun stop'una yem olan
+işlemler eklerdi.
+
+🔑 **Ve bu, mekanik aşamasının neden zorunlu olduğunun somut kanıtı:**
+bu aşama yapılmasaydı *"`pos<0.25` vetosunu kaldır, +%1,26 kenar var"*
+önerisi yazılacaktı.
+
+### Kenarı almanın tek yolu KAPALI — iki bağımsız gerekçeyle
+
+Sekme ~4 saatte bitiyor; almak için **~4 saatte çıkmak** gerekir. Bu bir
+**çıkış sıkılaştırmasıdır** ve bu projede sıkılaştıran **30 varyantın 30'u da
+kalmıştır** (`olcumler.md` → sayım). Ayrıca 13 günlük tek epizot.
+
+**Bu kol kapanıyor.**

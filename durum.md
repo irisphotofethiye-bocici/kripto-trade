@@ -1406,3 +1406,47 @@ Huni ölçümündeki *"skor ≥ 45 popülasyonu kötüleştiriyor"* bulgusu kay�
 1. **`pos<0.25` mekanik aşaması** (botun stop/hedefiyle) — ayrı ön-kayıt
 2. İkinci BOĞA epizodu — veri birikmesi bekleniyor
 3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
+
+---
+
+## 🆕 `pos<0.25` MEKANİK AŞAMASI — kol KAPANDI (2026-09-04)
+
+Rakamlar `olcumler.md` → *`pos<0.25` MEKANİK AŞAMASI*.
+Ön-kayıt `ON_KAYIT_pos_mekanik.md` (`5338860`).
+
+### Karar — 🔴 `long_veto`'nun `pos<0.25` bileşeni KALDIRILMAZ
+
+Ham kenar gerçekti (+%1,43, birincil ölçütü geçmişti). **Mekanik onu
+tüketti ve tersine çevirdi** (−%0,33). Korunan pay **−%23**.
+
+**Mekanizma çıkış sebeplerinde görünüyor:** sekme 4 saat sürüyor, bot medyanda
+**6 saat** tutuyor — yani tam dönüşe kadar. Stop-olma **%91 vs %83**,
+TP2'ye ulaşma **%5 vs %15**.
+
+**Kenar var; botun onu alacak mekaniği yok.**
+
+⚠️ **K3 (mekanik eşitliği) GEÇTİ** (1,18× / 1,09×) — *"kıyas bozuk"* itirazı
+kurulamıyor. Sonuç sağlam.
+
+### 🔑 Bu, mekanik aşamasının neden zorunlu olduğunun kanıtı
+
+Bu aşama atlansaydı *"vetoyu kaldır, +%1,26 kenar var"* önerisi yazılacaktı ve
+bot stop'a yem olan işlemler açacaktı. `CLAUDE.md`'nin
+`ham → mekanik → portföy` sırası bu vakada **doğrudan para kurtardı**.
+
+### Kenarı almanın yolu iki bağımsız gerekçeyle KAPALI
+
+~4 saatte çıkmak gerekir = **çıkış sıkılaştırması** → bu projede sıkılaştıran
+**30 varyantın 30'u da kaldı**. Ayrıca 13 günlük tek epizot.
+
+### Sırada
+
+1. ~~boyutlandırma~~ · ~~rejim etiketi~~ · ~~BOĞA seçimi~~ · ~~`long_veto`~~ — **dördü de kapandı**
+2. **A+B'nin 12-24 saatlik ufku** — post-hoc gözlem, ölçülmedi, canlı veriyle
+   tutarlı (medyan tutma 10,9 saat · canlı +%2,51 ≈ ham 12sa +%2,25)
+3. **Stop mesafesi** — hakem raporunun 5. maddesi, hâlâ ölçülmedi
+4. **İkinci BOĞA epizodu** — veri birikmesi bekleniyor
+
+⚠️ **Bu oturumda dört kol kapandı ve dördü de ön-kayıtla kapandı.**
+Hiçbiri "işe yaramadı" değil; dördü de **yanlış bir kod değişikliğini
+engelledi.**
