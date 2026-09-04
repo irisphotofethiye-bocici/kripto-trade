@@ -1316,3 +1316,49 @@ Rejim serisini kendim yeniden yazdım, doğrulanmışla **uyuşmadı** (745 gün
 `TEPKI_RALLISI` NOTR'a haritalanmıştı (**doğrusu AYI**).
 **Kural: doğrulanmış kod yeniden YAZILMAZ, ÇAĞRILIR** — ve çağıran betiğe
 seri sınaması konur, uyuşmazsa çalışmayı reddeder.
+
+---
+
+## 🆕 BOĞA'DA SEÇİM ÖLÇÜLDÜ — ayırıcı yok, ama HUNİDE iki kusur var (2026-09-04)
+
+Rakamlar `olcumler.md` → *BOĞA'DA SEÇİM*. Ön-kayıt `ON_KAYIT_boga_secim.md` (`2866b50`).
+
+### Kabul edilen kısıt
+
+🔴 **"BOĞA'da işlem açma" seçeneği MASADAN KALKTI** (kullanıcı kararı,
+2026-09-04). Aranan şey **BOĞA içinde daha iyi seçim**.
+
+### Karar 1 — botun verisinde ayırıcı YOK
+
+43 hücre tarandı ve **permütasyonla düzeltildi**: 1.000 kez etiketler
+karıştırılıp tüm tarama tekrarlandı. Şans eseri bulunan en iyi |t|'nin
+**medyanı 2,30**, %95'i **3,12**. Gerçek en iyi **2,94** → eşiği **geçemedi**.
+
+Kazananlar ve kaybedenler 20 alanda birbirine benziyor.
+
+🔑 **Permütasyon olmasaydı bu bir "bulgu" olurdu** ve projenin dördüncü geri
+çekmesi olurdu. Bundan sonra **çok alanlı her tarama permütasyonla düzeltilir**.
+
+### Karar 2 — 🔴 HUNİDE İKİ KUSUR (ikisi de zayıf, ikisi de ön-kayıtlı aşama)
+
+1. **`skor ≥ 45` popülasyonu KÖTÜLEŞTİRİYOR**: taranan −0,816% → skor süzgeci
+   sonrası **−1,132%**. Botun skoru BOĞA'da **ters seçici**.
+2. **`long_veto` TERS çalışıyor**: engellediği dilim **+0,128%**, geçirdiği
+   **−0,855%** (fark +0,983%, t=+1,71). 1.170 satırda devreye girdi.
+
+⚠️ İkisi de **istatistiksel olarak zayıf** (t≤1,71). **Kendi ön-kayıtlarını
+hak ediyorlar** — özellikle `long_veto`, çünkü kaldırmak **kapı değişikliğidir**.
+
+`blowoff` vetosu **doğru** çalışıyor (kötüyü engelliyor) — dokunulmaz.
+
+### Karar 3 — kapı hiçbir şey eklemiyor
+
+Kapıyı geçenle taranan arasındaki fark **+0,071%, t=+0,18**. Yani mevcut
+LONG kapısı seçim değeri **üretmiyor**; ne iyileştiriyor ne kötüleştiriyor.
+
+### Sırada
+
+1. **`long_veto` ölçümü** — engellediği 1.170 satırın karnesi, kendi ön-kaydıyla.
+   En somut aday; ters çalışan bir vetoyu düzeltmek kapıyı **daraltmıyor, açıyor**.
+2. **Skorun BOĞA'daki ters seçiciliği** — skor bandı × getiri, ayrı ön-kayıt.
+3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi

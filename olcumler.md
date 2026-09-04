@@ -7579,3 +7579,113 @@ Ayrıca ön-kayıtta *"K1'in geçmesine %60"* demiştim — **düştü**, üstel
 **Hüküm yazılmadan yakalandı.** Çözüm: doğrulanmış fonksiyon **çağrılıyor**,
 ve betiğe `seri_sinamasi()` kondu — seri beklenen sayıları vermezse betik
 **çalışmayı reddediyor**.
+
+---
+
+## BOĞA'DA SEÇİM — huni ölçüldü, ayırıcı ARANDI ve BULUNAMADI (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_boga_secim.md` (commit `2866b50`, **koşumdan önce**)
+**Betik:** `scratchpad/boga_secim.py`
+**Hüküm:** ayırıcı taraması **DÜŞTÜ** · ama **huni iki somut kusur gösterdi**
+
+Kullanıcı talimatı: *"boğada işlem açmayacaksa bot ne yapacak, bu kabul edilmez.
+19'undan sonra seçtiği coinleri incele; ne olsaydı artıya geçecekleri seçerdi.
+Her aşamayı değerlendir, her ihtimali hesapla."*
+🔴 *"BOĞA'da işlem açma"* seçeneği **masadan kaldırıldı.**
+
+Popülasyon: 13.003 satır · 221 sembol · 13 gün · birim **sembol-gün** · H=4 saat, ham.
+
+### 🔴 AŞAMA A — HUNİ: eleme getiriyi İYİLEŞTİRMİYOR, biri KÖTÜLEŞTİRİYOR
+
+| aşama | satır | sembol-gün | ort % |
+|---|---|---|---|
+| 1. taranan (hacim süzgeci sonrası) | 13.003 | 627 | **−0,816%** |
+| 2. `skor ≥ 45` | 4.642 | 319 | **−1,132%** ⬅ **DAHA KÖTÜ** |
+| 3. kapıyı geçen (LONG kararı) | 642 | 207 | −0,745% |
+
+**Kapı katkısı: +0,071%, t=+0,18** → kapı **hiçbir şey eklemiyor**.
+Ve **skor eşiği popülasyonu kötüleştiriyor**: skoru yüksek olanlar, taranan
+evrenin tamamından daha çok düşüyor.
+
+### 🔴 VETO KARNESİ — `long_veto` TERS ÇALIŞIYOR
+
+| veto | engellenenin getirisi | kalanın getirisi | fark | t | okuma |
+|---|---|---|---|---|---|
+| **`long_veto`** | **+0,128%** | −0,855% | **+0,983%** | **+1,71** | 🔴 **İYİYİ engelliyor** |
+| `blowoff` | −3,641% | −0,855% | −2,786% | −0,92 | ✅ kötüyü engelliyor (anlamsız) |
+
+`long_veto` **1.170 satırda** devreye girdi ve engellediği dilim, geçirdiğinden
+**daha iyiydi**. t=+1,71 → **anlamlı değil**, ama yön net ve bu bir
+**ön-kayıtlı aşama değerlendirmesi**, taranmış hücre değil.
+
+### AŞAMA B — AYIRICI TARAMASI: 43 hücre, hiçbiri şansı geçemedi
+
+En güçlü 10 hücre (ham):
+
+```
+ma50_mesafe (ceyrek)  -2,974%  t -2,94      last1 (ceyrek)       -0,837%  t -2,19
+chg24 (ceyrek)        -2,787%  t -2,61      float_oran (ondalik) +1,202%  t +2,11
+comp (ceyrek)         -1,578%  t -2,60      pos (ondalik)        -1,076%  t -2,10
+rel3 (ceyrek)         -1,350%  t -2,30      pos (ceyrek)         -1,503%  t -2,09
+last3 (ceyrek)        -1,276%  t -2,21      comp (ondalik)       -2,326%  t -2,04
+```
+
+🔴 **PERMÜTASYON — asıl sınama.** Sonuç etiketleri 1.000 kez karıştırıldı ve
+**her seferinde 43 hücrelik taramanın tamamı tekrarlandı**, en büyük |t|
+kaydedildi:
+
+```
+sans dagiliminin en buyuk |t|'si : MEDYAN 2,30 · %95 3,12 · max 4,15
+GERCEK taramanin en iyi |t|'si   : 2,94   ->  yuzdelik %89,7
+```
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** en iyi \|t\|, şans dağılımının üst %5'inde | ❌ **DÜŞTÜ** (2,94 < 3,12) |
+| **K2** iki yarıda aynı işaret | ✅ A −2,079% (t−1,90) · B −3,602% (t−2,40) |
+| **K3** \|fark\| ≥ %1,0 | ✅ GEÇTİ |
+
+→ **DÜŞTÜ.**
+
+🔑 **Permütasyon olmasaydı bu bir "bulgu" olurdu.** *"MA50'den uzak coinler
+daha çok düşüyor, t=−2,94, iki yarıda da ayakta"* diye yazardım — ve
+**43 hücre ararken şans eseri bulunan t'nin medyanı zaten 2,30.**
+Bu, projenin dördüncü geri çekmesi olurdu.
+
+### AŞAMA C — ters soru: kazananlar kaybedenlere BENZİYOR
+
+4 saatte en çok yükselen %10 (**+6,89%**) vs en çok düşen %10 (**−8,94%**) —
+**tüm alanlar neredeyse aynı**:
+
+```
+chg24       +17,5  vs  +19,2      score       41,4  vs  42,0
+ma50_mesafe +15,4  vs  +17,2      pos         0,84  vs  0,88
+vol_x       +10,6  vs  +16,1      oi24        14,3  vs  10,0
+```
+
+En büyük göreli fark `vol_x` (kazananlarda **düşük**) ve `oi24` (kazananlarda
+**yüksek**) — *"daha az hype, daha çok gerçek pozisyonlanma"* yönünde. Ama bu
+ikisi ön-kayıtlı taramada **şans eşiğini geçemedi**.
+
+⚠️ Sonuca göre seçilmiş kümeler — **hüküm taşımaz**, Aşama B zaten önceden ölçtü.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1,5
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | kapı aşaması getiriyi iyileştirmeyecek | ✅ **TUTTU** (+0,071%, t=+0,18) |
+| 2 | `long_veto` doğru çalışacak | ❌ **YANLIŞ** — **ters** çalışıyor |
+| 3 | en iyi ayırıcı `chg24`/`pos` ailesinden | ⚠️ **YARIM** — `ma50_mesafe` çıktı, ama ilk onun hepsi fiyat türevi → *"tek bant"* dersi **tekrarlandı** |
+
+### SONUÇ — kullanıcının sorusuna doğrudan cevap
+
+**"Ne seçseydi kazanırdı?"** → **Botun topladığı verilerde o ayrım YOK.**
+Kazananlar ve kaybedenler 20 alanda birbirine benziyor; en iyi ayırıcı 43
+hücre aramasının şans eşiğini geçemiyor.
+
+**Ama huni iki somut kusur gösterdi ve ikisi de eleme aşamasında:**
+1. **`skor ≥ 45` popülasyonu kötüleştiriyor** (−0,816% → −1,132%)
+2. **`long_veto` iyi adayları engelliyor** (+0,128% vs −0,855%, t=+1,71)
+
+İkisi de ön-kayıtlı aşama değerlendirmesi, taranmış hücre değil — ama
+**ikisi de istatistiksel olarak zayıf** ve kendi ön-kayıtlarını hak ediyor.
