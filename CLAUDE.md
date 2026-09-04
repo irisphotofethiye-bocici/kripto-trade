@@ -135,6 +135,24 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   *"kalıcı kayma, süregelen hata değil"* diye yazıldı. Commit commit ölçülünce fark
   08-13'te **−0,01** çıktı, yani açıklama yanlıştı: hata 08-14'te doğmuş ve
   **büyüyordu**. Doğru hamle formülü bulmak değil, **farkı birkaç zamanda ölçmekti.**
+- 🔴 **ORTAK PAYDALI ORAN, SAHTE KORELASYON URETIR — bu proje iki turda iki kez ısırıldı.**
+  `ret = net/notional` ve `R = net/risk` gibi büyüklüklerde payda **hem ölçtüğün
+  değişken hem de normalleştiricidir**. `notional ~ ret` ya da `risk ~ R`
+  korelasyonu bu yüzden **mekanik olarak** çıkar; piyasa hakkında hiçbir şey
+  söylemez. **Somut vaka:** boyutlandırma ölçümünde `notional ~ ret = −0,30`
+  bulundu ve "büyük pozisyonlar kaybediyor" diye yorumlandı; oysa kod
+  `notional ≈ hedef_risk/stop_frac` diyor, yani `|ret| ∝ 1/notional`
+  **tanım gereği**.
+  **Kural:** boyutla ilgili bir iddia yazmadan önce sor — *"bu büyüklüğün
+  paydasında, karşılaştırdığım değişken var mı?"* Varsa o korelasyon
+  **dayanak olamaz**. Güvenli olan tek şey **boyuttan bağımsız büyüklüğün
+  kendi toplamı/ortalamasıdır** (`ΣR`), korelasyonu değil.
+- 🔴 **"NEDENSEL YOLUN UZERINDE" DEMEDEN ONCE YOLUN VAR OLDUGUNU GOSTER.**
+  Bir ön-kayıta *"TP1'e koşullamak aşırı kontrol olur, çünkü TP1 nedensel yolun
+  üzerinde"* yazıldı ve **yanlıştı**: kâğıt defterde pozisyon boyutu fiyatı
+  etkilemez, dolayısıyla boyut→TP1 yolu **hiç yoktu**. TP1 ile boyutun
+  **ortak nedeni** vardı (stop mesafesi). Aşırı kontrol savunması ancak
+  yol **gösterilebiliyorsa** geçerlidir.
 - **Sayı tekrarlanmaz, sayılır.** "13 çıkış kuralı denendi" cümlesi bu projede
   aylarca tekrarlandı ve **dayanağı yoktu**; kütük doldurulunca gerçek sayım
   ortaya çıktı. Bir rakamı ikinci kez söylemeden önce kaynağını göster.

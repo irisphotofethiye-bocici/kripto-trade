@@ -7377,3 +7377,97 @@ Sebep kodda: `kaldirac_min=3` / `kaldirac_max=10` kırpmaları ve
 kontrol olur"* diye yazdım; ortak-neden yapısını atlamıştım. Bir değişkeni
 "nedensel yolun üzerinde" ilan etmeden önce **o yolun gerçekten var olup
 olmadığı** sorulmalı — burada boyut fiyatı etkilemediği için yol hiç yoktu.
+
+---
+
+## RİSK PARİTESİ — çalışıyormuş. Önceki turun "bulgusu" ÇÜRÜDÜ (2026-09-04)
+
+**Ön-kayıt:** `ON_KAYIT_risk_paritesi.md` (commit `cd97004`, **koşumdan önce**)
+**Betik:** `scratchpad/risk_paritesi.py`
+**Hüküm:** **ZAYIF** (K1+K2 geçti, K3 düştü) · ve **mekanik bölüm önceki
+turun eyleme dönüşebilir dediği bulguyu ÇÜRÜTTÜ**
+
+### Ön-kayıtlı ölçütler
+
+```
+        N     SigmaR    ort R      t
+A     160     +46,90   +0,293   +2,03
+B     161     +15,16   +0,094   +0,78     <- neredeyse sifir
+HAVUZ 321     +62,06   +0,193   +2,05
+```
+
+| ölçüt | sonuç |
+|---|---|
+| **K1** ΣR iki yarıda da > 0 | ✅ GEÇTİ (+46,90 / +15,16) |
+| **K2** ort R > 0, t ≥ +2,0 | ✅ GEÇTİ (kıl payı) |
+| **K3** uç 5'er atılınca ayakta | ❌ **DÜŞTÜ** |
+
+→ **ZAYIF.** Ve R kenarı **ikinci yarıda pratikte yok** (t=+0,78) — yani
+BOĞA/LONG döneminde R avantajı da kayboluyor.
+
+### 🔴 MEKANİK BÖLÜM — önceki turun iddiası ÇÜRÜDÜ
+
+Geçen tur *"risk paritesi tutmuyor, risk $ 4,8 kat yayılıyor"* demiştim ve
+bunu **eyleme dönüşebilir tek bulgu** olarak işaretlemiştim. Ölçüldü:
+
+```
+gerceklesen_risk / hedef_risk  :  MEDYAN 1,000   (%10 0,500 · %90 2,000)
+hedefin +-%20 bandinda         :  %47
+gerceklesen risk yayilimi      :  32,4 -> 156,0   (4,8 kat)
+HEDEF risk yayilimi            :  33,3 -> 159,6   (4,8 kat)   <-- AYNI
+```
+
+🔑 **Gerçekleşen riskin yayılımı, hedefin kendi yayılımıyla BİREBİR aynı.**
+Hedef zaten `equity × %1,5` ve equity pencerede **2,26 kat** düştü; üstüne
+smart-karşıysa **yarılama** var → 2,26 × 2 ≈ 4,5 kat. Gözlenen 4,8 kat.
+
+**Yani 4,8 katlık yayılım bir kusur değil, TASARIMIN KENDİSİ.**
+Kalan ±2 kat sapma da benim `smart_hiz` bayrağını pozisyon bazında yeniden
+üretememem — bot kusuru değil, yeniden üretim sınırı.
+
+**Hangi kısıt bağlıyor:** `kaldirac_min=3` → **%54** · kırpma yok → %46 ·
+`kaldirac_max=10` → **hiç bağlamıyor (%0)**.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 3'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | gerçekleşen risk hedefin **ALTINDA** kalır (küçültme asimetrik) | ❌ **YANLIŞ** — medyan oran tam **1,000**; altında %17, üstünde %36 |
+| 2 | bağlayan kısıt çoğunlukla **`kaldirac_max`** | ❌ **YANLIŞ** — kmax **hiç** bağlamıyor, **kmin** %54 |
+| 3 | yayılımın büyük kısmı equity düşüşüyle açıklanır | ✅ **TUTTU** — ve bu, 1 ve 2'yi geçersiz kılan bulgu |
+
+### Karşı-olgu — artık dayanağı zayıf
+
+```
+gercek P&L                          -4.749,10 $
+esit risk @ gerceklesen medyan      +4.643,08 $
+esit risk @ hedef ortalamasi        +4.271,13 $
+```
+
+⚠️ **Bu rakamlar `ΣR`'ye dayanıyor ve `ΣR` ZAYIF çıktı** (K3 düştü, ikinci
+yarı t=+0,78). Parite de zaten çalıştığına göre, karşı-olgunun ima ettiği
+değişiklik *"riski zamanla azaltmayı bırak"* olur — yani **düşüş korumasını
+kaldırmak**. Bu, ölçümün desteklediği bir öneri değildir.
+
+### Betimleyici — hükme dayanak DEĞİL
+
+`risk $` dilimlerine göre ΣR: +157,66 / +11,05 / −41,98 / −64,67.
+⚠️ Bu tablo `R = net/risk` ortak paydasından **etkilenir**; hüküm yalnız
+ΣR'ye dayanır ve o da zayıf.
+
+**Smart-yarılaması sınandı** (artefaktsız: R boyuttan bağımsız, smart giriş
+anında belli): karşı-yönde ort R **+0,293** (N=70, t=+1,17) vs aynı/nötr
+**+0,166** (N=251, t=+1,69). Yarılanan grup **biraz daha iyi** ama
+**hiçbiri anlamlı değil** → *"bot en iyi işlemlerinde riski kısıyor"*
+hipotezi **desteklenmedi**.
+
+### 🔑 SONUÇ — boyutlandırma kolu KAPANIYOR
+
+İki tur ölçüm sonunda elde eyleme dönüşebilir bir şey **yok**:
+
+1. Eşit-ağırlık karşı-olgusu → kısmen formülün kendi aritmetiği (geri çekildi).
+2. *"Risk paritesi bozuk"* → **çürüdü**, parite çalışıyor.
+3. ΣR > 0 → **zayıf**, uç değere bağımlı, ikinci yarıda yok.
+
+**Boyutlandırmada kusur bulunamadı.** Bu bir başarısızlık değil, bir sonuçtur —
+ve iki tur ön-kayıt olmasaydı bu koldan yanlış bir kod değişikliği çıkardı.
