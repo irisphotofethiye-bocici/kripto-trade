@@ -1,0 +1,34 @@
+========================================================================================
+SKOR — GERCEK DEFTERDE ve NEDEN BOS?
+========================================================================================
+🔴 Bugunku skor olcumu SENTETIK'ti; bugun UC KEZ sentetik-gercek celiskisi
+   cikti. Bu betik GERCEK DEFTERI kullanir.
+
+olculebilen pozisyon: 341
+
+### B) ARALIK SIKISMASI — bot skorun hangi bandini goruyor?
+   min 21.2 · %25 45.8 · medyan 51.3 · %75 60.6 · maks 83.1
+   skor<45 olan pozisyon: 73 (%21.4)   <- kapi 45 istiyor
+
+### A) GERCEK DEFTERDE skor sonucu ongoruyor mu? (skor dilimleri)
+   dilim             N  skor ort    net% ort   dolar ort    kazanan stop% ort
+   Q1 (dusuk)       85      37.1      +1.885       -5.92      44.7%      4.26
+   Q2               85      48.7      +0.247      -21.51      43.5%      4.90
+   Q3               85      56.1      +0.603      -14.57      49.4%      4.49
+   Q4 (yuksek)      86      69.7      +1.025      -18.24      43.0%      5.23
+   Q4 - Q1 : -1.507%  t_gun -0.68  MDE 4.447  -> goremiyoruz
+
+### C) MEKANIZMA — skor NEYI olcuyor?
+   (CLAUDE.md: 'yon degil sadece hareket ongoren sinyal degersizdir,
+    cunku stop mesafesi hareketle buyur')
+   skor ~ STOP MESAFESI (%)   : r = +0.151   <- oynaklik olcusu
+   skor ~ |MFE| (hareket buyuklugu) : r = -0.138   <- HAREKET
+   skor ~ net% (YON+sonuc)          : r = -0.024   <- YON
+
+   stop mesafesi, skor dilimine gore:
+      Q1 (dusuk)    stop %4.26   MFE medyan +0.39%
+      Q2            stop %4.90   MFE medyan +0.28%
+      Q3            stop %4.49   MFE medyan +0.28%
+      Q4 (yuksek)   stop %5.23   MFE medyan +0.50%
+
+Bot dosyalarina yazim: YOK

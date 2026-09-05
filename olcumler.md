@@ -9814,3 +9814,105 @@ başabaş stop) **ölçülmüş ve ikisi de kenarı küçültmüş.** Üçüncü
 gerekiyor ve o fikrin **kendi ön-kaydı** olmalı.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔑 SKOR, GERÇEK DEFTERDE — ve "5 bileşen nasıl etkisiz olur"un CEVABI (2026-09-05)
+
+> Kullanıcı: *"skor hiçbir işe yaramıyorsa neden kullanıyoruz · 5 bileşen nasıl
+> etkisiz olur anlamıyorum."*
+> 🔴 İtiraz haklıydı: bugünkü skor ölçümü **sentetikti** ve bugün **üç kez**
+> sentetik ölçüm gerçek veriyle ters düştü. Bu ölçüm **gerçek defteri** kullanır.
+> Betik: `scratchpad/skor_gercek.py` · **Betimleyici, hüküm yok.**
+
+### A · Gerçek defterde skor sonucu öngörüyor mu — HAYIR
+
+```
+dilim          N   skor ort    net% ort   dolar ort   kazanan   stop% ort
+Q1 (dusuk)    85      37,1      +1,885      -5,92      %44,7      4,26
+Q2            85      48,7      +0,247     -21,51      %43,5      4,90
+Q3            85      56,1      +0,603     -14,57      %49,4      4,49
+Q4 (yuksek)   86      69,7      +1,025     -18,24      %43,0      5,23
+
+Q4 - Q1 : -1,507%   t_gun -0,68   MDE 4,447   -> goremiyoruz
+```
+
+Monotonluk yok; **en düşük skor dilimi en iyi net%'e ve en az dolar zararına
+sahip.** Bu, sentetik ölçümle **aynı yönde** — yani bu bulguda sentetik/gerçek
+çelişkisi **YOK**.
+
+### 🔑 C · MEKANİZMA — asıl cevap burada
+
+```
+skor ~ STOP MESAFESI  : r = +0,151   <- OYNAKLIK ile iliskili
+skor ~ |MFE|          : r = -0,138   <- hareket buyuklugu
+skor ~ net%           : r = -0,024   <- SONUC ile iliskisi SIFIR
+
+stop mesafesi:  Q1 %4,26  ->  Q4 %5,23
+```
+
+**Skor yükseldikçe stop genişliyor, sonuç değişmiyor.**
+
+### 🔑 VE SEBEBİ FORMÜLÜN KENDİSİNDE — [radar.py:123](radar.py#L123)
+
+```python
+s_oi   = clamp(oi24/20)*25 + clamp(oi3/8)*10        # OI DEGISIMI  -> buyukluk
+s_fund = clamp(abs(f)/0.05)*15 + squeeze_bonus      # abs() -> ISARET YOK
+s_comp = clamp((0.8-comp)/0.5)*20                   # SIKISMA      -> oynaklik
+s_vol  = clamp((vol_x-1.5)/3)*20                    # HACIM KATI   -> buyukluk
+s_brk  = clamp((pos-0.7)/0.3)*10 + clamp(last1/4)*5 # konum+momentum -> YON
+```
+
+**Beş bileşenin dördü "ne kadar hareket var" ölçüyor, "hangi yöne" değil.**
+Yalnız `s_brk` (skorun **%11'i**) yön taşıyor.
+
+`s_fund` için kodun kendi notu bunu **kabul ediyor**:
+> *"abs() BİLİNÇLİ olarak DOKUNULMADI. Zemin etüdü bilginin funding'in
+> İŞARETİNDE olduğunu gösterdi…"*
+
+### 🔴 CEVAP: bileşenler "etkisiz" değil — YANLIŞ ŞEYİ ölçüyor
+
+Skor bir **hareket detektörü**. Ve bu projede zaten kayıtlı bir ders var
+(`CLAUDE.md` → `kanal-stochrsi-analizi.md` 13.5):
+
+> *"Yön değil sadece hareket öngören her sinyal DEĞERSİZDİR, çünkü stop
+> mesafesi hareketle büyür."*
+
+Mekanizma tam olarak şu:
+
+```
+yuksek skor -> "buyuk hareket geliyor" (DOGRU tespit)
+            -> ATR buyuk -> STOP GENIS (olculdu: %4,26 -> %5,23)
+            -> ayni R icin daha buyuk fiyat hareketi gerekiyor
+            -> R-normalize sonuc DEGISMIYOR   (olculdu: r = -0,024)
+```
+
+🔑 **Skor doğru çalışıyor; sadece ölçtüğü şey kâr getirmiyor.**
+Beş bileşenin ayrı ayrı "etkisiz" olması tesadüf değil — **beşi de aynı
+büyüklüğü ölçüyor** ve o büyüklük stopa da giriyor, birbirini götürüyor.
+
+Bu, `CLAUDE.md`'nin *"ÖLÇTÜĞÜMÜZ HER ŞEY TEK BANTTAN TÜRÜYOR"* kuralının
+skor içindeki hâli.
+
+### B · Aralık sıkışması — ikincil ama gerçek
+
+```
+gercek pozisyonlarin skoru: min 21,2 · %25 45,8 · medyan 51,3 · maks 83,1
+skor < 45 olan pozisyon: 73 (%21,4)
+```
+
+Bot skorun yalnız üst bandını görüyor (kapı ≥45), ve pozisyonların **%21,4'ü**
+skor kapısından geçmemiş — çünkü `A+B` ve `MA50+ucuz` kapıları skor
+**istemiyor**. Yani skor zaten defterin dörtte birinde devre dışı.
+
+### Yeni bot için ne demek
+
+- Skoru **kapı** olarak kullanmak için gerekçe yok (ölçüldü: kapının kattığı
+  değer **+0,006 puan**)
+- Skoru **boyutlandırmada** kullanmak için de yok (`skor ~ notional ≈ −0,03`)
+- ⚠️ Ama çıkarmak da bedava değil: aday akışını değiştirir → **kendi ön-kaydı** ister
+
+🔑 **Ve asıl ders: yeni botun sinyali YÖN taşımalı.** Hareket büyüklüğü ölçen
+her şey, stop harekete göre ölçeklendiği sürece nötr kalır.
+
+**Bot dosyalarına yazım: YOK.**
