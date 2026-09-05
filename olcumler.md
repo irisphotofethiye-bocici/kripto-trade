@@ -10158,3 +10158,89 @@ normalizasyon gerekti. Sınama (düzenli 8s · düzenli 4s · 48s delik · aral�
 değişimi) **4/4** geçti.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### 🔑 ARŞİV BULGUSU — "30 GÜNLÜK SINIF" ve "EMİR DEFTERİ GEÇMİŞİ YOK" **İKİSİ DE YANLIŞMIŞ** (2026-09-05)
+
+**Tür:** 🟢 **OLGU DÜZELTMESİ** — hipotez sınaması değil, iki kayıtlı olgunun
+doğrudan yoklanması. Ön-kayıt gerekmez (hüküm değil, veri varlığı sorusu).
+**Betikler:** `scratchpad/defter_gecmis_yoklama.py` · `scratchpad/arsiv_30gun_kaniti.py`
+**Tetikleyen:** kullanıcı — *"emir defterinde sinyal bulabilir miyiz?"*
+
+`data.binance.vision` günlük dosyaları yoklandı. İki kayıtlı olgu çürüdü.
+
+#### 1 · "30 günlük sınıf" — ARŞİVDE 2+ YIL VAR
+
+`daily/metrics/<SYM>/` dosyaları dört *"çekilemez"* ucun **ta kendisi**.
+Belirleyici sınama: arşiv vs canlı uç, damga kayması −10…+10 dk tarandı.
+
+```
+alan                               kayma(dk):bagil_hata
+sum_open_interest                  -10:2e-02  -5:2e-02  +0:2e-02  +5:0e+00  +10:2e-02
+count_toptrader_long_short_ratio   -10:3e-02  -5:3e-02  +0:2e-02  +5:3e-04  +10:2e-02
+sum_toptrader_long_short_ratio     -10:3e-02  -5:3e-02  +0:2e-02  +5:2e-05  +10:2e-02
+count_long_short_ratio             -10:2e-02  -5:2e-02  +0:2e-02  +5:3e-04  +10:2e-02
+sum_taker_long_short_vol_ratio     -10:3e+00  -5:3e+00  +0:1e-03  +5:3e+00  +10:3e+00
+
+-> 5/5 alanda bir kaymada bagil hata < 1e-3  =>  AYNI VERI
+```
+
+⚠️ **`create_time` = canlı ucun damgası − 5 dk** (taker hariç, o kaymasız).
+Join'den önce kaydırılmazsa **sessizce %2 hata** girer.
+
+**Kapsam:** 2023-09'a kadar (1100 gün), ~11 kB/sembol/gün.
+
+**Kaydedilmiş kayıp geri alınabilir:** *"58 sembolde 07-23…07-26 arası kalıcı
+olarak gitti"* — dört günün **dördü de arşivde**, tek tek doğrulandı.
+
+🔑 **`topLongShortAccountRatio` hiç arşivlenmemişti** (`radar.py:63` üçünü çekiyor).
+Yani `top_ls − glob_ls`'in *"bulgu yok"* hükmü **karışık bir büyüklük** üzerineydi:
+hem nüfus (üst %20 vs herkes) hem normalizasyon (pozisyon vs hesap) aynı anda
+değişiyordu. **Temiz ayrıştırma ilk kez mümkün:**
+
+```
+topPosition / topAccount  = ayni nufus, boyut asimetrisi   <- HIC olculmedi
+topAccount  / globAccount = ayni normalizasyon, nufus farki <- HIC olculmedi
+```
+
+#### 2 · EMİR DEFTERİ GEÇMİŞİ — VAR, ve İKİ TARAF BİRDEN
+
+`olcumler.md:1190` *"emir defteri geçmişi YOK → yalnız ileriye"* diyordu.
+`daily/bookDepth/<SYM>/` **900+ gün** geriye var:
+
+```
+timestamp,percentage,depth,notional
+2026-08-26 00:00:04,-5.00,891825.24,84013805.96     <- ALIS tarafi
+...
+2026-08-26 23:59:31, 5.00,865711.88,90466597.73     <- SATIS tarafi
+```
+
+- ±%1 · ±%2 · ±%3 · ±%4 · ±%5 seviyeleri, **her iki taraf**
+- **~30 saniyede bir** anlık görüntü (2.880/gün)
+- ~0,5 MB/sembol/gün · küçük altcoinlerde de var (test: SOL·BONK·AEVO·ACH·ZRX)
+
+**Dengesizlik hesaplanabiliyor ve oynuyor** (SOLUSDT, 1 gün):
+
+```
+±1%  medyan -0,0087  %10 -0,0850  %90 +0,1159  std 0,0758
+±2%  medyan +0,0549  %10 -0,0528  %90 +0,2096  std 0,1010
+±5%  medyan +0,0828  %10 +0,0416  %90 +0,1134  std 0,0279
+```
+
+#### 3 · NEDEN BU ÖNEMLİ — bugünkü derse bağlanıyor
+
+Aynı gün ölçüldü: kaydedilen `defter_usdt_20` **tam sıfır** taşıyor
+(`r=−0,003 · t=−0,15`). Sebebi artık açık — o bir **büyüklük** ölçüsü, tıpkı
+skorun %89'u gibi. Emir defterinin **yön** taşıyan büyüklüğü dengesizliktir ve
+**hiç ölçülmedi**.
+
+⚠️ **Ölçülmeden önce bilinen risk:** mikroyapı literatüründe dengesizlik
+**saniye–dakika** ufkunda öngörür. Bot 7,5 dk turla çalışıp **saatlerce** tutuyor.
+Ufuk uyuşmazlığı bu adayın en olası ölüm sebebidir ve ön-kayıtta **ufuk merdiveni**
+(+5dk · +30dk · +1s · +4s · +24s) ilan edilmelidir.
+
+⚠️ **Boyut:** 0,5 MB/sembol/gün. 150 sembol × 365 gün ≈ **27 GB** — kapsam
+ön-kayıtta sınırlandırılmadan indirme başlatılmaz.
+
+**Bot dosyalarına yazım: YOK.**

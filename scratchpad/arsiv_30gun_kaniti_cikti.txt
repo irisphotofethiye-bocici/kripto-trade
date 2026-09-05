@@ -1,0 +1,39 @@
+============================================================================================
+'30 GUNLUK SINIF' ARSIVDE 2+ YIL GERIYE VAR MI?
+============================================================================================
+CLAUDE.md su an: 'ikinci sinif CEKILEMEZ, ancak ARSIVLENIR'
+Bu betik o hukmu sinar.
+
+### 1) BELIRLEYICI SINAMA — arsiv(2026-09-04) vs canli uc, damga kaymasi taranir
+   arsiv kayit: 288  ·  adim: 5 dk
+
+   alan                               kayma(dk):bagil_hata
+   sum_open_interest                  -10:2e-02  -5:2e-02  +0:2e-02  +5:0e+00  +10:2e-02
+   count_toptrader_long_short_ratio   -10:3e-02  -5:3e-02  +0:2e-02  +5:3e-04  +10:2e-02
+   sum_toptrader_long_short_ratio     -10:3e-02  -5:3e-02  +0:2e-02  +5:2e-05  +10:2e-02
+   count_long_short_ratio             -10:2e-02  -5:2e-02  +0:2e-02  +5:3e-04  +10:2e-02
+   sum_taker_long_short_vol_ratio     -10:3e+00  -5:3e+00  +0:1e-03  +5:3e+00  +10:3e+00
+
+   -> 5/5 alanda bir kaymada BAGIL HATA < 1e-3  =>  AYNI VERI
+
+### 2) GERIYE NE KADAR GIDIYOR?
+   metrics   2026-08-06 (  30 gun once): VAR
+   metrics   2026-03-09 ( 180 gun once): VAR
+   metrics   2025-09-05 ( 365 gun once): VAR
+   metrics   2024-09-05 ( 730 gun once): VAR
+   metrics   2023-09-01 (1100 gun once): VAR
+   bookDepth 2026-08-06 (  30 gun once): VAR
+   bookDepth 2025-09-05 ( 365 gun once): VAR
+   bookDepth 2024-03-19 ( 900 gun once): VAR
+
+### 3) KAYDEDILEN KAYIP GERI ALINABILIR MI?
+   CLAUDE.md: '58 sembolde 07-23..07-26 arasi OI/long-short/taker
+              KALICI olarak gitti'
+   2026-07-23 : ARSIVDE VAR
+   2026-07-24 : ARSIVDE VAR
+   2026-07-25 : ARSIVDE VAR
+   2026-07-26 : ARSIVDE VAR
+
+   -> 🔑 KAYIP GERI ALINABILIR — kural duzeltilmeli
+
+Ucretli cagri: YOK · Bot dosyalarina yazim: YOK

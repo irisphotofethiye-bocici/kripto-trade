@@ -115,7 +115,28 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   *"erken fiyat hareketinin başka bir ifadesi"* çıkıyor. **Dizi** özelliği sanmak da
   kurtarmadı (2026-08-19). Gerçekten yeni bilgi **bandın dışındadır**: emir defterinde
   bekleyen likidite · spot-perp basis · çapraz borsa · pozisyon kompozisyonu.
-  Bunlardan `top_ls − glob_ls` bedavaydı ve **denendi, bulgu çıkmadı** (`olcumler.md`).
+
+  **[GÜNCEL 2026-09-05] Dördünün karnesi — üçü ölçüldü, üçü de DÜŞTÜ:**
+
+  | aday | hüküm | not |
+  |---|---|---|
+  | pozisyon kompozisyonu (`top_ls − glob_ls`) | ❌ bulgu yok | ⚠️ **temiz ayrıştırma HİÇ yapılmadı** — `topLongShortAccountRatio` arşivlenmemişti, artık 2 yıl geriye var |
+  | spot-perp basis | ❌ DÜŞTÜ 5/5 | rho −0,0152 · taban 0,020 · etki sönüyor |
+  | çapraz borsa (Binance−Bybit fonlama) | ❌ DÜŞTÜ | rho **+0,0108** — ve **işaret hipotezin TERSİ** |
+  | **bekleyen likidite** | ⏳ **hâlâ ölçülmedi** | aşağıya bak |
+
+  🔑 **Örüntü: iki bant-dışı aday, ikisi de `t>4`, ikisi de etki tabanının ALTINDA.**
+  Bant dışında bilgi **var**, ama tek başına kullanılabilir büyüklükte değil.
+
+  🔴 **BEKLEYEN LİKİDİTE — "ölçüldü" SANILMASIN, ölçülen şey BÜYÜKLÜKTÜ.**
+  Kaydedilen `defter_usdt_20` yalnız **yediğimiz tarafın** toplamıdır ve dolar
+  cinsinden **tam sıfır** taşıyor (`r=−0,003 · t=−0,15`; sembol içinde `+0,022`).
+  Skorun düşme sebebiyle **aynı**: büyüklük ölçüyor, yön ölçmüyor. Emir defterinin
+  yön taşıyan büyüklüğü **DENGESİZLİKTİR** (alış vs satış) ve o hiç kaydedilmedi.
+  ⚠️ **[DEĞİŞTİ 2026-09-05]** *"emir defteri geçmişi YOK → yalnız ileriye"* kaydı
+  **yanlışmış**: `data.binance.vision` → `daily/bookDepth` **iki tarafı da**
+  (±%1…±%5, ~30 sn'de bir, **900+ gün geriye**) yayınlıyor. Geriye test **mümkün**.
+  Boyut: ~0,5 MB/sembol/gün → kapsam ölçümden önce sınırlandırılmalı.
 - ⚠️ **`SEYRELT=24` FAZ KİLİTLER — zamanla ilgili her ölçümde faz kaydır.**
   `klines_1h_uzun` dosyalarının hepsi aynı damgayla indirildi; 24 barlık adım her
   sembolde girişleri **aynı UTC saatine** düşürüyor. Fonlama-saati taramasında bir kova
@@ -230,10 +251,34 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   | **kalıcı** | `/fapi/v1/klines` · `/fapi/v1/fundingRate` | istendiği an 2 yıl geriye |
   | **30 gün** | `/futures/data/openInterestHist` · `topLongShortPositionRatio` · `globalLongShortAccountRatio` · `takerlongshortRatio` | **yalnız 30 gün** (ölçüldü: 29g → N=500, 31g → HTTP 400) |
 
-  İkinci sınıf **çekilemez, ancak ARŞİVLENİR.** *"Hepsini indiririz"* bu sınıf için
+  ~~İkinci sınıf **çekilemez, ancak ARŞİVLENİR.** *"Hepsini indiririz"* bu sınıf için
   yanlıştır: o veri yalnızca **o an kaydediyorsan** vardır. `radar_archive` için
   yazılı olan *"noktasal veridir, kayıp kareler geri gelmez"* kuralı **aynen
-  `perp_seri` için de geçerlidir.**
+  `perp_seri` için de geçerlidir.**~~
+
+  🔴 **[DEĞİŞTİ 2026-09-05] BU YANLIŞMIŞ — "30 günlük" sınıf ARŞİVDE 2+ YIL GERİYE VAR.**
+  `data.binance.vision` günlük **`metrics`** dosyaları bu dört ucun **ta kendisini**
+  taşıyor. Belirleyici sınama koşuldu (`scratchpad/arsiv_30gun_kaniti.py`): arşiv
+  dosyası canlı uçla **damga 5 dk kaydırılınca 5/5 alanda birebir** uyuşuyor
+  (`sum_open_interest` bağıl hata **0e+00**). Kapsam **2023-09**'a kadar (1100 gün),
+  sembol-gün başına ~11 kB.
+
+  ```
+  data/futures/um/daily/metrics/<SYM>/<SYM>-metrics-<YYYY-MM-DD>.zip
+    create_time · sum_open_interest · sum_open_interest_value
+    count_toptrader_long_short_ratio   <- topLongShortAccountRatio (hic arsivlenmemisti)
+    sum_toptrader_long_short_ratio     <- topLongShortPositionRatio
+    count_long_short_ratio             <- globalLongShortAccountRatio
+    sum_taker_long_short_vol_ratio     <- takerlongshortRatio
+  ⚠️ create_time = canli ucun damgasi − 5 dk. Join'den ONCE kaydir.
+  ```
+
+  **Sonuçları:** (1) 30–60 günle sınırlı kalmış her `perp_seri` ölçümü **2 yıla
+  genişletilebilir**; (2) `topLongShortAccountRatio` ile *temiz* pozisyon-kompozisyonu
+  ayrıştırması artık mümkün; (3) `KriptoPerpSeri` görevi **kritik değil** (zararsız,
+  ama kaybı telafi edilebilir).
+  ⚠️ **`radar_archive` için kural AYNEN GEÇERLİ** — o bizim ürettiğimiz skor/karar
+  verisidir, Binance yayınlamaz.
   ⚠️ ~~**`perp_seri_indir.py` ZAMANLANMIŞ GÖREV DEĞİLDİR** — elle koşulan kurtarma
   betiğidir.~~ **[DEĞİŞTİ 2026-08-25]** Artık zamanlanmış görev **VAR**:
   `KriptoPerpSeri`, 2026-08-24'te kurulmuş, her gün **03:30**, son koşum başarılı
@@ -245,6 +290,10 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   pencere istedi; `sembol_indir` var olan dosyayı `os.replace` ile **ezdi**.
   **58 sembolde 07-23…07-26 arası OI/long-short/taker kalıcı olarak gitti**
   (30 günlük pencere oraya artık ulaşmıyor, `perp_seri` git'te takipli değil).
+  ⚠️ **[DEĞİŞTİ 2026-09-05] "kalıcı" YANLIŞMIŞ — o dört gün arşivde DURUYOR**
+  (yukarıdaki `metrics` maddesi; dördü de tek tek doğrulandı). **Kuralın kendisi
+  aynen geçerli:** indirici birleştirmeli, ezmemeli — telafi edilebilir olması
+  veri kaybını meşru yapmaz.
   Betikte `_kapsiyor_mu()` vardı ve *"dosya varsa atla"* hatasını çözüyordu — ama
   **ezme** yolunu hiç kapatmıyordu; iki ayrı hata sanılmıştı.
   **Kural:** arşiv dosyasına yazan her indirici (a) var olanı okur, (b) zaman
