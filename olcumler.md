@@ -9410,3 +9410,69 @@ N=44 · slot seçimi varış sırasına bağlı (kısmen keyfî) · `ONAY_BEKLE`
 beklemeden alındı · kısmi kâr/likidasyon/düşüş freni yok · 15 gün, tek epizot ·
 ve `olcumler.md`'de kayıtlı **açık çelişki**: bugünkü sentetik ölçümler
 *"BOĞA'da SHORT kaybettirir"* demişti, `B`'nin SHORT bacağı ise artıda.
+
+### 🔴 EK — "pos ve diğer adayları ekleyelim" — İKİSİ DE EKLENEMİYOR
+
+> Kullanıcı: *"buna pos ve daha önce uygulayalım dediğimiz şeyleri eklesek nasıl olur?"*
+> **Sayım** (getiri hesaplanmadı), `C` kolunun 171 kararı üzerinde:
+
+```
+pos dagilimi                          s_brk dagilimi (skorun %11'i)
+  < 0,25 (dip-bicak)   0   (%0,0)       s_brk = 0 olan :   0  (%0,0)
+  0,25-0,50            0   (%0,0)       medyan s_brk   : 13,88  (tavan 15)
+  0,50-0,70            1   (%0,6)       skor medyani   : 58,0
+  >= 0,70            170  (%99,4)
+  medyan pos: 1,13
+```
+
+#### 1 · `pos<0.25` koşullu mekanik → **EKLENEMEZ: 0 pozisyon**
+
+`long_veto` zaten `pos < 0.25`'i **her dalda** engelliyor
+([testbot.py:431](testbot.py#L431)). Bir LONG-only defterde dip-bıçak girişi
+**tanım gereği yok.** Medyan `pos` **1,13** — yani 20-bar aralığının **üstünde**.
+
+⚠️ V3 adayı **sentetik** evrende (her radar karesi bir LONG girişi sayıldı)
+ölçülmüştü; botun gerçek LONG defterinde o popülasyon **hiç yok.**
+
+#### 2 · `s_brk` ters çevirme → **EKLENİRSE `C`'Yİ ÖLDÜRÜR**
+
+`C`'nin medyan `s_brk`'ı **13,88 / 15** — yani işlemlerinin neredeyse tamamı
+**maksimum breakout** girişleri (`pos ≥ 0,7` **ve** yüksek `last1`).
+
+🔴 Bugün ölçüldü: `s_brk` skorun **tek sinyal taşıyan** terimi ve **ters** yönde
+(BOĞA'da t=−2,39; yüksek `s_brk` → **daha kötü** getiri).
+
+**Yani `C`'nin işlemleri, tam olarak `s_brk`'ın "kötü" dediği işlemler.**
+`s_brk`'ı düzeltmek `C`'yi **elemek** demek.
+
+#### 🔴 3 · VE BU İKİNCİ ÇELİŞKİ — desen artık belli
+
+| ölçüm | ne diyor | veri |
+|---|---|---|
+| `s_brk` bileşen ölçümü | yüksek `s_brk` = **kötü** (t=−2,39) | sentetik, tüm evren |
+| `C` kolu karşı-olgusu | medyan `s_brk` 13,88, sonuç **+1.162 $** | kapılı, slot-kısıtlı alt küme |
+
+Bugün **aynı şekilde** bir çelişki daha kaydedildi: sentetik ölçüm
+*"BOĞA'da SHORT kaybettirir"* derken `B` kolunun SHORT bacağı artıda çıktı.
+
+🔑 **İki çelişki, tek desen:** *tüm evreni tarayan sentetik ölçümler* ile
+*kapılı + slot-kısıtlı karşı-olgu* **sistematik olarak ters** sonuç veriyor.
+İkisinden biri yanlış ve **hangisi olduğu bilinmiyor.**
+
+**İki olası açıklama, ikisi de sınanabilir:**
+1. Kapılar (`stage` · `smart` · `long_veto`) gerçekten seçiyor; sentetik
+   örnekleme bunu göremiyor.
+2. Karşı-olgu slot sırası yüzünden şanslı; N=44 bunu ayırt edemiyor.
+
+#### Sonuç — kullanıcının sorusuna cevap
+
+| eklenmek istenen | durum |
+|---|---|
+| `pos<0.25` mekaniği | ❌ **eklenemez** — 0 pozisyon |
+| `s_brk` ters çevirme | ❌ **eklenirse `C`'yi eler** — ters yönde çalışıyor |
+| geniş stop (2,5×ATR) | ⚠️ teknik olarak eklenebilir; **ama aynı pencerede denenirse aşırı uydurma** |
+
+🔴 **Bu adaylar bağımsız yapı taşları değil — aynı işlemler hakkında
+BİRBİRİYLE YARIŞAN iddialar.** Üst üste koymak toplama değil, çelişki üretiyor.
+
+**Doğru sıradaki iş, kural eklemek değil: yukarıdaki çelişkiyi çözmek.**
