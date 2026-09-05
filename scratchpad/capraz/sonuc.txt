@@ -1,0 +1,87 @@
+================================================================================================
+CAPRAZ BORSA — BINANCE - BYBIT FONLAMA FARKI
+================================================================================================
+ON-KAYIT: ON_KAYIT_capraz_borsa.md commit a0e52c5 — KOSUMDAN ONCE
+Hipotez: fark yuksek = Binance'te uzun taraf kalabalik -> rho NEGATIF
+
+N gozlem = 1233872  ·  sembol = 460  ·  gun = 730  (2024-09-01 .. 2026-08-31)
+
+### GECERLILIK KAPISI (on-kayit bolum 5)
+   K-a gunluk orana cevirme           02_veri.py sinamasi 4/4 gecti ✅
+   K-c sembol basina >=100 gozlem     en az 128              ✅
+   K-d gun kumesi >= 300              730 gun                ✅
+
+### SAGLAMA — ters yon (bybit - binance) isareti aynalamali
+   duz  rho +0.0108   ·   ters rho -0.0108   ->  ✅ aynaliyor
+
+### C1 🔴 BIRINCIL — gun-kumeli rho
+   TUM PENCERE                rho +0.0108   t +4.11   gun 730
+   esik: |rho| >= 0.020 VE |t| >= 3.0 VE isaret NEGATIF
+   -> C1 DUSTU
+   📌 basis ile AYNI DESEN: t buyuk, etki kucuk. Taban tam bunun icin vardi.
+
+### C2 — dort zaman ceyregi
+   C1  2024-09-01..2025-03-01 rho -0.0039   t -0.59   gun 182
+   C2  2025-03-02..2025-08-30 rho +0.0020   t +0.40   gun 182
+   C3  2025-08-31..2026-02-28 rho +0.0246   t +5.31   gun 182
+   C4  2026-03-01..2026-08-31 rho +0.0203   t +5.24   gun 184
+   -> 3/4 ayni isaret  ->  C2 GECTI
+
+### C3 — rejim
+   BOGA                       rho +0.0002   t +0.02   gun 100
+   NOTR                       rho +0.0049   t +1.39   gun 426
+   AYI                        rho +0.0283   t +6.90   gun 204
+   -> 3/3 ayni isaret  ->  C3 GECTI
+
+### C4 — ELEME: fark, Binance fonlamasinin kopyasi mi?
+   spearman(f_bin, fark) = +0.430   (tavan 0.50, N=205646)
+   -> C4 GECTI
+
+### C5 — Binance fonlamasi uctebirlikleri (karistirici)
+   alt (dusuk fonlama)        rho +0.0212   t +5.12   gun 702
+   orta                       rho +0.0018   t +0.49   gun 729
+   ust (yuksek fonlama)       rho +0.0025   t +0.61   gun 730
+   -> 3/3 ayni isaret  ->  C5 GECTI
+
+### C6 IKINCIL (onceden ilan, GECTI'ye SAYILMAZ) — BUYUK FARK kuyrugu
+   |fark| >= gunun %90'i      rho -0.0002   t -0.03   gun 730
+   N = 126376 (10.2% of 1233872)
+
+### EK RAPOR (hukum tasimaz)
+   farkin AYRISTIRMASI (bası olcumunde belirleyici olmustu):
+     KALICI (sembol ort.)     rho +0.0006   t +0.21   gun 730
+     ZAMANLA DEGISEN          rho +0.0100   t +3.79   gun 730
+   sembol basina gozlem: min 128 · medyan 2285 · maks 5294
+
+================================================================================================
+HUKUM — ON_KAYIT_capraz_borsa.md bolum 6
+================================================================================================
+   C1 DUSTU
+   C2 GECTI
+   C3 GECTI
+   C4 GECTI
+   C5 GECTI
+
+   SONUC: DUSTU
+
+   Coklu karsilastirma (on-kayitta ilan): 5 birincil + 1 ikincil
+   + 4 zaman ceyregi + 3 rejim + 3 fonlama dilimi = 16 hucre
+   ⚠️ Etiket HAM getiri; fonlama/ucret DAHIL DEGIL (gidis-donus %0,19).
+
+Bot dosyalarina yazim: YOK
+
+--- ON-KAYITTA OLMAYAN EK HESAP (post-hoc, hukum DEGIL) ---
+ust ondalik - alt ondalik, gunluk:
+  TUM PENCERE  +0.3927%  t=+5.29  gun 730
+  BOGA         +0.3288%  t=+1.33  gun 100
+  NOTR         +0.2607%  t=+2.83  gun 426
+  AYI          +0.6998%  t=+5.14  gun 204
+Iki bacak maliyet ~%0.38; slipaj haric. Bot 8 slot, ondalik sepeti ~46 pozisyon/taraf.
+
+--- C2/C3 BAGIMSIZLIK KONTROLU (olcumden sonra) ---
+ceyrek                       BOGA   NOTR    AYI
+C1 2024-09-01..2025-03-01      20    162      0
+C2 2025-03-02..2025-08-30      47    120     15
+C3 2025-08-31..2026-02-28      22     71     89
+C4 2026-03-01..2026-08-31      11     73    100
+AYI payi: ilk yari %4 - son yari %52  -> C2 ve C3 AYNI OLGU

@@ -1,0 +1,33 @@
+========================================================================================
+CAPRAZ BORSA INDIRICI — on-kayit a0e52c5
+========================================================================================
+pencere : 2024-09-01 .. 2026-08-31
+sembol  : 460
+hedef   : C:\Users\alper\Desktop\kripto trade\scratchpad\capraz\veri   (🔴 mevcut hicbir arsive dokunulmaz)
+
+[  20/460] AEVOUSDT         binance=4379  bybit=3971   (kalan ~92 dk)
+[  40/460] ARCUSDT          binance=3547  bybit=3634   (kalan ~88 dk)
+[  60/460] AXLUSDT          binance=5069  bybit=8737   (kalan ~84 dk)
+[  80/460] BILLUSDT         binance=699   bybit=707    (kalan ~81 dk)
+[ 100/460] CAKEUSDT         binance=4379  bybit=3971   (kalan ~76 dk)
+[ 120/460] COTIUSDT         binance=2922  bybit=2639   (kalan ~71 dk)
+[ 140/460] DYDXUSDT         binance=2190  bybit=2190   (kalan ~68 dk)
+[ 160/460] EVAAUSDT         binance=1994  bybit=1911   (kalan ~64 dk)
+[ 180/460] GMTUSDT          binance=2982  bybit=3491   (kalan ~60 dk)
+[ 200/460] HUMAUSDT         binance=2773  bybit=2775   (kalan ~55 dk)
+[ 220/460] JELLYJELLYUSDT   binance=3152  bybit=3485   (kalan ~51 dk)
+[ 240/460] LINKUSDT         binance=2190  bybit=2190   (kalan ~47 dk)
+[ 260/460] METISUSDT        binance=4379  bybit=3971   (kalan ~44 dk)
+[ 280/460] NEOUSDT          binance=2190  bybit=2190   (kalan ~40 dk)
+[ 300/460] ORDIUSDT         binance=4379  bybit=3971   (kalan ~36 dk)
+[ 320/460] PRLUSDT          binance=949   bybit=1049   (kalan ~32 dk)
+[ 340/460] RONINUSDT        binance=4379  bybit=3389   (kalan ~27 dk)
+[ 360/460] SLXUSDT          binance=740   bybit=645    (kalan ~23 dk)
+[ 380/460] SUIUSDT          binance=2190  bybit=2190   (kalan ~18 dk)
+[ 400/460] TRUMPUSDT        binance=3541  bybit=3544   (kalan ~14 dk)
+[ 420/460] VETUSDT          binance=2190  bybit=2190   (kalan ~9 dk)
+[ 440/460] XRPUSDT          binance=2190  bybit=2190   (kalan ~5 dk)
+[ 460/460] ZRXUSDT          binance=3055  bybit=3423   (kalan ~0 dk)
+
+BITTI: indirilen 457 · atlandi 3 · hata 0 · sure 104.6 dk
+Mevcut arsivlere yazim: YOK · Bot dosyalarina yazim: YOK

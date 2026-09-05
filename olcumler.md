@@ -10034,3 +10034,127 @@ Kaydedilen `defter_usdt_20` = **yediğimiz taraf**. Emir defterinin gerçek siny
 tarafın **sıfır bilgi** taşıdığını gösterdi (r = −0,003).
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### ❌ ÇAPRAZ BORSA (BINANCE − BYBIT FONLAMA FARKI) — **DÜŞTÜ**, ve işaret **HİPOTEZİN TERSİ** çıktı (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_capraz_borsa.md`, commit `a0e52c5` — koşumdan **önce**.
+**Betikler:** `scratchpad/capraz/00_yoklama.py` · `01_indir.py` · `02_veri.py` · `03_olcum.py`
+**N:** 1.233.872 gözlem · **460 sembol** · **730 gün** (2024-09-01 … 2026-08-31)
+İndirme: 460 sembol, **0 hata, 0 ban**, 104,6 dk, 2,78 M fonlama kaydı.
+
+`CLAUDE.md`'nin bant-dışı listesinden **ikinci** denenen aday (ilki basis).
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **C1** 🔴 | **rho = +0,0108 · t = +4,11** · N=730 gün | ❌ **iki koldan birden** |
+| **C2** dört çeyrek | −0,0039 · +0,0020 · **+0,0246** · **+0,0203** | ✅ 3/4 |
+| **C3** rejim | BOĞA +0,0002 · NÖTR +0,0049 · **AYI +0,0283** | ✅ 3/3 |
+| **C4** eleme | spearman(f_bin, fark) = **+0,430** (tavan 0,50) | ✅ |
+| **C5** fonlama üçte-birlik | **alt +0,0212** · orta +0,0018 · üst +0,0025 | ✅ 3/3 |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### 🔴 C1 İKİ AYRI SEBEPTEN DÜŞTÜ — ve ikincisi daha önemli
+
+```
+1) |rho| = 0,0108  <  taban 0,020        -> etki cok kucuk (basis'in tekrari)
+2) isaret POZITIF  <- on-kayit NEGATIF diyordu
+```
+
+Ön-kayıt açıkça yazmıştı: *"fark yüksek = Binance'te uzun taraf kalabalık →
+`rho < 0`"*. Ölçülen işaret **pozitif**, ve **tesadüf değil**: t=+4,11, çeyreklerin
+3/4'ü, rejimlerin 3/3'ü, fonlama dilimlerinin 3/3'ü pozitif.
+
+🔑 **Yani ekonomik sezgim tersineydi.** Yüksek Binance fonlaması *ortalamaya dönüş*
+değil, **momentum** öncülüyor. Basis'te işaret doğru çıkmıştı; burada çıkmadı.
+
+#### 🔴 DÖRT YÖNLÜ TAHMİNİN ÜÇ BUÇUĞU YANLIŞ
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | *"işaret negatif, \|rho\| < 0,02"* | **yarısı** — büyüklük doğru, **işaret yanlış** |
+| 2 | *"C6 (kuyruk) havuzdan güçlü çıkacak"* | ❌ **rho = −0,0002, t = −0,03 — TAM SIFIR** |
+| 3 | *"AYI'da etki zayıflayacak"* | ❌ **AYI en güçlü yer** (+0,0283 vs BOĞA +0,0002) |
+| 4 | *"fark çoğunlukla kalıcı sembol bileşeni"* | ❌ kalıcı **+0,0006 (sıfır)**, zamanla değişen +0,0100 (t=+3,79) |
+
+Özellikle **2** kayda değer: kuyruk ölçütü ön-kayıta *tam da* yoklamada kalın
+kuyruk görüldüğü için konmuştu. Kuyrukta **hiçbir şey yok.**
+
+#### 🔴 C2 ile C3 BAĞIMSIZ KANIT DEĞİL — aynı olgu
+
+Ölçümden sonra kontrol edildi:
+
+```
+ceyrek                       BOGA   NOTR    AYI
+C1 2024-09-01..2025-03-01      20    162      0
+C2 2025-03-02..2025-08-30      47    120     15
+C3 2025-08-31..2026-02-28      22     71     89
+C4 2026-03-01..2026-08-31      11     73    100
+
+AYI payi: ilk yari %4  ·  son yari %52
+```
+
+*"Etki son iki çeyrekte"* ile *"etki AYI'da"* **aynı cümle**. İki ölçüt sanılan
+şey tek gözlemdir. Ön-kayıt bunu ayırmamıştı — **eksiklik ön-kayıtta.**
+
+#### BASIS İLE AYNA GÖRÜNTÜSÜ
+
+| | basis (08-26) | çapraz borsa (09-05) |
+|---|---|---|
+| işaret | hipotez yönünde (−) | **hipotezin TERSİ (+)** |
+| en güçlü rejim | **BOĞA** −0,0396 | **AYI** +0,0283 |
+| AYI | +0,0002 (yok) | +0,0283 (en güçlü) |
+| zaman | **sönüyor** (→ +0,0004) | **büyüyor** (→ +0,0203) |
+| t | −4,85 | +4,11 |
+| \|rho\| vs 0,020 | 0,0152 ❌ | 0,0108 ❌ |
+
+🔑 **İki bant-dışı aday, ikisi de t>4, ikisi de etki tabanının ALTINDA.**
+Bu artık bir örüntü: bant dışında bilgi **var**, ama tek başına kullanılabilir
+büyüklükte **değil**.
+
+#### ⚠️ ÖN-KAYITTA OLMAYAN EK HESAP — hüküm DEĞİL, kural DEĞİL
+
+Hükmü somutlaştırmak için rho paraya çevrildi (**post-hoc**, ölçütlere sayılmaz):
+
+```
+ust ondalik - alt ondalik, gunluk:
+  TUM PENCERE  +0,3927%  t=+5,29      BOGA +0,3288%  t=+1,33
+  NOTR         +0,2607%  t=+2,83      AYI  +0,6998%  t=+5,14
+```
+
+🔴 **Bu sayı kural yapılamaz, dört sebeple:**
+1. **Ön-kayıtta yoktu.** Birincil ölçüt rho'ydu ve düştü. *"Tabloya bakıp en
+   yüksek sayıyı kural yapmak bu projede reddedilmiş bir davranıştır."*
+2. **Maliyet karşılanmıyor:** uzun+kısa **iki bacak** ≈ %0,38; ölçülen +0,39%.
+   Başabaş. Slipaj (ölçülen medyan %0,0499/bacak) eklenince **altına düşer**.
+3. **Bu botun yapabileceği bir şey değil:** ondalık sepeti her tarafta ~46
+   eşzamanlı pozisyon ister; bot **8 slot**.
+4. AYI hücresi (+0,6998) **seçilmiş hücredir** ve AYI = son bir yıl (yukarı bak).
+
+#### SINIRLAR
+
+- Etiket **ham getiri**; fonlama/ücret dahil değil.
+- Tek ufuk (+24s), ön-kayıtta sabit. Başka ufka **bakılmadı**.
+- `C4 = +0,430` tavana (0,50) yakın — fark, Binance fonlamasından **bağımsız değil**.
+  Yoklamadaki +0,275 yalnız 20 sembolle ölçülmüştü; tam evrende **daha yüksek**.
+- 460 sembol = Binance perp evreninin %87'si; Bybit'te olmayan 64 sembol dışarıda.
+- Çoklu karşılaştırma **16 hücre** (ön-kayıtta ilan edilmişti).
+
+#### 🔑 BİRİM KIRILMASI GERÇEKTİ — ön-kayıtın en değerli kararı
+
+Günlük orana çevirme zorunlu kılınmasaydı ölçümün büyük kısmı **farklı
+birimleri** kıyaslayacaktı:
+
+```
+binance  1s:  63.577 · 2s:    587 · 4s: 994.703 · 8s: 253.851
+bybit    1s: 283.440 · 2s: 65.999 · 4s: 802.289 · 8s: 317.585
+```
+
+1 saatlik kovada **4,5 kat**, 2 saatlikte **112 kat** fark. Ayrıca aralık
+**sembol içinde zamanla değişiyor** → global medyan yetmezdi, yerel
+normalizasyon gerekti. Sınama (düzenli 8s · düzenli 4s · 48s delik · aralık
+değişimi) **4/4** geçti.
+
+**Bot dosyalarına yazım: YOK.**
