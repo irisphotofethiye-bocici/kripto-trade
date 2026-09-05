@@ -1,0 +1,24 @@
+==============================================================================
+BOT NEDEN BUYUK COINLERE ISLEM ALMIYOR? — BETIMLEYICI teshis
+==============================================================================
+🔴 Hipotez testi DEGIL. On-kayit yok, hukum yok, kural cikmaz.
+Evren: testbot.py:1400 ile ayni -> hacme gore ilk 150 (taban $3M)
+
+### HAVUZDAKI SAAT-SEMBOL SAYISI ve KAPI TETIKLEME ORANI
+fiyat kovasi     havuzda     pay%  A_funding MA50 kapisi ATR/fiyat%
+< $0,01            11659     9.4%      9.11%      21.80%      2.42
+$0,01-0,07         22437    18.1%     13.20%      31.92%      3.31
+$0,07-1            40567    32.7%      4.06%       0.00%      1.98
+$1-10              15672    12.6%      2.75%       0.00%      1.43
+$10-100            11698     9.4%      2.11%       0.00%      1.07
+>= $100            22015    17.7%      0.40%       0.00%      0.58
+
+### RADAR SKORU, PIYASA DEGERINE GORE (radar_archive)
+mcap                 N  skor ort skor>=45% vol_x med  oi24 med
+< $100M          57046      17.6      6.1%      0.60      0.60
+$100M-1Mr        45203      13.0      2.9%      0.70      0.06
+$1-10Mr          76170       8.2      0.3%      0.80     -0.21
+>= $10Mr         39554       7.6      0.3%      0.80     -0.12
+
+🔴 Hukum YOK — bu tablo yalnizca MEKANIZMAYI gosterir.
+Bot dosyalarina yazim: YOK

@@ -8858,3 +8858,107 @@ Fiyat eşikleri **sabit dolar** (2 yılda kayar — bu ölçümün kendi bulgusu
 BOĞA 95 gün · likidasyon yok · portföy aşaması yok · kısmi kâr yok.
 
 **Arşive yazım: YOK. Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔬 BOT NEDEN BÜYÜK COİNLERE İŞLEM ALMIYOR? — BETİMLEYİCİ teşhis (2026-09-05)
+
+> 🔴 **HÜKÜM YOK.** Ön-kayıt yok, geçme ölçütü yok, kural çıkmaz. Bu tablo yalnız
+> **mekanizmayı** gösterir. Kullanıcı sorusu: *"bot neden büyük coinlere işlem almıyor"*.
+> Betikler: `scratchpad/neden_kucuk.py` · ham çıktı `neden_kucuk_sonuc.txt`.
+
+### Önce yanlış cevabı eleyelim: büyükler evrenin İÇİNDE
+
+`testbot.py:1400` → `evren.binance_pool("fapi", min_vol=3)[:150]`, ve
+`binance_pool` **hacme göre azalan** sıralıyor. Yani havuz = **en yüksek hacimli
+150 perp**; BTC/ETH/SOL **taranıyor**.
+
+```
+fiyat kovasi     havuzda    pay%
+< $0,01           11.659    9,4%
+$0,01-0,07        22.437   18,1%
+$0,07-1           40.567   32,7%
+$1-10             15.672   12,6%
+$10-100           11.698    9,4%
+>= $100           22.015   17,7%      <- havuzun altida biri
+```
+
+**Havuzun %40'ı $1 üstü.** Sorun tarama değil, **kapılar.**
+
+### DÖRT AYRI KAPI, DÖRDÜ DE AYNI YÖNE ELİYOR
+
+```
+fiyat kovasi    A_funding   MA50 kapisi   ATR/fiyat   asgari_stop %2'yi gecen
+< $0,01            9,11%       21,80%       2,42%            19,9%
+$0,01-0,07        13,20%       31,92%       3,31%            23,4%
+$0,07-1            4,06%        0,00%       1,98%            24,2%
+$1-10              2,75%        0,00%       1,43%            16,6%
+$10-100            2,11%        0,00%       1,07%            13,2%
+>= $100            0,40%        0,00%       0,58%             2,9%
+```
+
+| # | kapı | büyüklerde etkisi |
+|---|---|---|
+| **1** | `MA50+ucuz`: `fiyat ≤ $0,07` | **%0,00** — mekanik, havuzun **%72'sini** tanım gereği dışlıyor |
+| **2** | `asgari_stop_pct = %2` | ≥$100 coinlerin yalnız **%2,9'u** geçiyor (ucuzlarda %23) — **8 kat** |
+| **3** | `A_funding`: `funding ≤ −0,05` | ≥$100'de **%0,40**, ucuzda **%13,20** — **33 kat** |
+| **4** | `skor ≥ 45` | büyük-cap **%0,3**, küçük-cap **%6,1** — **20 kat** |
+
+### Skorun neden büyükleri elediği — `radar_archive`
+
+```
+mcap               N    skor ort   skor>=45%   vol_x med   oi24 med
+< $100M        57.046      17,6        6,1%       0,60       +0,60
+$100M-1Mr      45.203      13,0        2,9%       0,70       +0,06
+$1-10Mr        76.170       8,2        0,3%       0,80       -0,21
+>= $10Mr       39.554       7,6        0,3%       0,80       -0,12
+```
+
+`vol_x` neredeyse **aynı** (0,60 vs 0,80) ama `oi24` medyanı **+0,60 → −0,12**.
+Skorun **%41'i `s_oi`** ([radar.py:123](radar.py#L123)) → büyük coinlerin açık
+pozisyonu sıçramadığı için skor doğal olarak küçük kalıyor.
+
+### 🔑 KÖK NEDEN: OYNAKLIK
+
+```
+ATR / fiyat (medyan):   ucuz %3,31   ·   >= $100  %0,58     -> 5,7 KAT
+A-stop genisligi (med): ucuz %1,18   ·   >= $100  %0,42
+```
+
+Botun stopu en fazla `1,5 × ATR` kadar geniş olabiliyor. ≥$100 bir coinde bu
+**%0,87** eder — `asgari_stop %2` eşiğinin **altında**. Yani büyük bir coin
+diğer üç kapıyı geçse bile **stop kapısında ölür.**
+
+### ⚖️ VE BU BİR HATA DEĞİL — maliyet tarafı bunu destekliyor
+
+Gidiş-dönüş maliyet **%0,13**. Bir ATR'ye oranla:
+
+```
+ucuz coin :  0,13 / 3,31  =  hareketin %3,9'u
+>= $100   :  0,13 / 0,58  =  hareketin %22,4'u      -> 5,7 KAT agir
+```
+
+Aynı mekanikle büyük coin işlemek **maliyet-baskın** olurdu. Yani dört kapının
+ürettiği sonuç, en azından bu ölçekte, **savunulabilir.**
+
+### Defterdeki gerçek dağılım (389 pozisyon · 152 sembol)
+
+```
+giris fiyati:  %25 $0,015  ·  medyan $0,053  ·  %75 $0,231  ·  %90 $1,61
+>= $1  : 47 islem (%12,1)   ·   >= $10 : 7 (%1,8)   ·   >= $100 : 1 (%0,3)
+```
+
+Bot büyükleri **tamamen** dışlamıyor — ama medyanı **$0,053**.
+
+### 🔴 Ne söylüyor, ne söylemiyor
+
+**Söylüyor:** bot yapısı gereği bir **küçük-cap botudur**, ve bu tek bir tasarım
+kararından değil **dört ayrı eşiğin kesişiminden** doğuyor. Hiçbiri "büyükleri
+eleyelim" diye konmamıştı.
+
+**Söylemiyor:** büyük coinlerde kenar olup olmadığını. Bu ölçüm **hiç getiri
+hesaplamadı.** *"Büyüklerde işlem açsak kazanır mıydık"* sorusu ayrı bir
+ön-kayıt ister ve farklı bir mekanik (daha uzun ufuk / daha dar hedef) gerektirir —
+çünkü mevcut mekanik onlarda **maliyet-baskın**.
+
+**Bot dosyalarına yazım: YOK.**
