@@ -8454,3 +8454,70 @@ Likidasyon yok · portföy aşaması yok · kısmi kâr yok · `oi24` bacağı y
 kullanıcının epizodu (08-21…) **ölçülemedi**.
 
 **Veri indirme: YOK. Bot dosyalarına yazım: YOK.**
+
+---
+
+## ⛔ BOĞA HOLDOUT — **KOŞMADI**, kendi geçerlilik kapımda durdu (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_boga_holdout.md`, commit `5144a45` (+ şerh `6843bd8`).
+**Betik:** `scratchpad/boga_holdout.py` · **hüküm YOK — ölçüm hiç çalışmadı.**
+
+### Neden bu ölçüm denendi
+
+Kullanıcı *"21'inden bugüne rejim boğa, elimizde veri olması lazım"* dedi ve
+**haklıydı**. İki kez yanlış söylemişim:
+
+| iddiam | gerçek |
+|---|---|
+| *"22 Ağustos sonrası ölçülemez"* | `perp_seri/*_kline.json` **09-05'e kadar var** |
+| *"`oi24` bacağı ölçülemez"* | `radar_archive`'da **`oi24` zaten var** |
+
+Kapsam sayıldı: **55 bağımsız olay · 13 gün · 27 sembol** (tam A+B: 25 olay).
+
+### Zorunlu sınama üç kez koştu, üçünde de kapı kapalı kaldı
+
+Ön-kayıt: *"zaman ofseti kanıtlanmadan koşulmaz — `last1` korelasyonu ≥ 0,80."*
+
+```
+sinama surumu                              -4       -3       -2
+1) saatlik bar kapanis getirisi         +0,215   +0,511   +0,013
+2) 5dk izgarada kayan 60dk getiri       -0,063   +0,738   -0,055
+3) radar.py:117 TAM tanimi              -0,017   +0,745   -0,031
+```
+
+🔑 **Ofset sorusu KESİN olarak cevaplandı: −3 doğru.** Komşu ofsetler sıfır
+civarında; yanlış hizalama olsaydı bu tablo çıkmazdı.
+🔴 **Ama eşik 0,80'e hiçbir sürümde ulaşılmadı.**
+
+### Tavanın sebebi bulundu — ve GİDERİLEMEZ
+
+```
+radar_archive 'ts' bir DONGU damgasidir:
+  ayni dakika damgasini paylasan sembol -> medyan 42 · maks 50
+```
+
+Radar ~400 sembolü bir döngüde tarıyor; her sembolün **canlı fiyatı farklı bir
+anda** çekiliyor ama hepsi **aynı `ts`**'yi alıyor. Sembol başına çekim anı
+**hiç kaydedilmemiş.** Dolayısıyla dakika düzeyinde hizalama yapısal olarak
+imkânsız ve 0,745 bu verinin **tavanı.**
+
+### 🔴 NEDEN EŞİĞİ ÜÇÜNCÜ KEZ DEĞİŞTİRMEDİM
+
+Sınamayı **iki kez** düzelttim (ikisi de meşruydu: ilkinde yanlış büyüklüğü
+ölçüyordum, ikincisinde `last1`'in tanımını kaynaktan okumamıştım). Üçüncü bir
+ayar — eşiği düşürmek ya da testi *"ofset ayrımı"*na çevirmek — mantıken
+savunulabilir olsa bile, **geçene kadar ayarlamaktan ayırt edilemez.**
+
+Bu projenin tüm disiplini bunu yapmamaya dayanıyor. **Ölçüm koşmadı ve
+koşturulmadı.** Karar kullanıcınındır.
+
+### Elde ne var, ne yok
+
+| | |
+|---|---|
+| ✅ | veri gerçekten var (55 olay / 13 gün), betik hazır ve doğrulanmış |
+| ✅ | zaman hizalaması **−3 olarak kanıtlandı** |
+| ⛔ | ön-kayıtlı geçerlilik kapısı açılmadı → **hiçbir sayı üretilmedi** |
+| ⚠️ | güç zaten kötüydü: MDE ~0,56 vs beklenen etki ~0,29 |
+
+**Veri indirme: YOK. Bot dosyalarına yazım: YOK.**

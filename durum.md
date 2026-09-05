@@ -1691,3 +1691,38 @@ Kullanıcının sezgisi benimkinden iyiydi. Aynen kaydedildi.
 2. `s_brk` ters çevirme — veri bekliyor
 3. **BOĞA'da geniş stop** — veri bekliyor, ölçütü sabit *(YENİ)*
 4. A+B'nin 12-24 saatlik ufku — kendi ön-kaydını bekliyor
+
+---
+
+## 2026-09-05 (3) · BOĞA HOLDOUT — ölçüm KOŞMADI, kapıda durduruldu
+
+**Ön-kayıt:** `ON_KAYIT_boga_holdout.md` (`5144a45` + şerh `6843bd8`).
+**Ayrıntı:** `olcumler.md` → *BOĞA HOLDOUT — KOŞMADI*.
+
+### Karar 1 — kullanıcı iki kez haklı çıktı, veri VAR
+
+*"22 Ağustos sonrası ölçülemez"* ve *"`oi24` ölçülemez"* — **ikisi de yanlıştı.**
+Tek dizine bakıp genelleme yaptım. Israr edilmeseydi bu iş hiç açılmayacaktı.
+**55 bağımsız olay · 13 gün** hazır duruyor.
+
+### Karar 2 — ⛔ ölçüm koşmadı ve zorlanmadı
+
+Ön-kayıtlı geçerlilik kapısı (zaman hizalaması ≥ 0,80) üç sürümde de açılmadı.
+Ofsetin **−3 olduğu kanıtlandı**, ama eşiğe ulaşılamadı çünkü `radar_archive`'ın
+`ts` alanı bir **döngü damgası** (50 sembol aynı dakika) — sembol başına çekim
+anı **hiç kaydedilmemiş**. Tavan yapısal.
+
+🔴 **Eşiği üçüncü kez değiştirmedim.** Sınamayı iki kez düzeltmiştim; üçüncüsü
+*"geçene kadar ayarlamak"*tan ayırt edilemezdi.
+
+### Kullanıcının kararına bırakılan üç seçenek
+
+| # | seçenek | bedeli |
+|---|---|---|
+| **1** | **Kapıyı gevşet** — ofset ayrımını (−3 ≫ komşular) yeterli say | ön-kayıtlı eşik esnetilmiş olur; **kullanıcı kararı olarak** kaydedilir |
+| **2** | **Veri indir** — `fapi/v1/klines` + `fundingRate` kalıcı sınıf, ücretsiz. Tek sorun mevcut arşivi **ezmeyen** bir indirici; deseni `perp_seri_indir.py`'de var | ~10 dk, indirme yasağı kalkmalı |
+| **3** | **Bırak** — güç zaten kötüydü (MDE ~0,56 vs etki ~0,29) | soru ikinci BOĞA epizoduna kalır |
+
+**Şüphede statüko** kuralı gereği varsayılan **3**. Ama seçenek **2** bu sorunun
+tek temiz çözümü: `klines_1h_uzun`'a taze mum eklenirse hem bu pencere hem
+sonraki bütün ölçümler düzelir.

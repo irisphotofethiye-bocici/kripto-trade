@@ -1,0 +1,18 @@
+==============================================================================
+BOGA HOLDOUT — genis stop TAZE veride de tutuyor mu?
+==============================================================================
+ON-KAYIT: ON_KAYIT_boga_holdout.md commit 5144a45 — KOSMADAN once
+Kaynak: perp_seri 5dk -> 1sa  +  radar_archive (kapi + fonlama)
+BIRINCIL OLCUT: GUN BAZINDA ISARET TESTI (tek yonlu binom)
+Aday kol: 2.5x (2 yillik BOGA'da en iyi) — ARANMIYOR, SINANIYOR
+
+perp_seri kline (1sa'e toplanmis) sembol: 151
+arsiv tetigi (ham): 2692 · fonlama serisi olan sembol: 151
+
+  zaman ofseti sinamasi (arsiv last1 vs radar.py:117 tanimi (son saat kapanisindan bu yana)):
+    ofset -4 : korelasyon -0.017  (N=4000)
+    ofset -3 : korelasyon +0.745  (N=4000)
+    ofset -2 : korelasyon -0.031  (N=4000)
+
+SINAMA DUSTU — betik calismayi REDDEDIYOR:
+  - OFSET KORELASYONU DUSUK: 0.745 < 0.80
