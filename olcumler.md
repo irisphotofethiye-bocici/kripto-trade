@@ -9158,3 +9158,100 @@ geri getirilebilir; farkı yaratan **SHORT ağırlığı** ve **TP2'ye kadar tut
 iki gün çıkınca eksi. **Aynı config farklı bir piyasada aynı sonucu vermez.**
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔬 19-21 AĞUSTOS LONG'LARI — kullanıcı tespitinin ölçümü (2026-09-05)
+
+> Kullanıcı: *"yanılmıyorsam o bot LONG'da açıyordu, ve 19-21 arası açtığı
+> LONG'lar isabetliydi, doğru mudur?"*
+> 🔴 **Betimleyici. Ön-kayıt yok, hüküm yok.**
+
+### ✅ 1 · "LONG açıyordu" — DOĞRU, ama azdı ve payı ARTIYORDU
+
+```
+gun           LONG  SHORT     LONG P&L    SHORT P&L
+2026-08-17       0     14        +0,00      +352,99
+2026-08-18       3      3      -222,52      -140,56
+2026-08-19       3      4      +241,49      -294,40
+2026-08-20       7     17      +283,94      -999,93
+2026-08-21       6      7      -419,29      -338,52
+2026-08-22      23      1      +108,23        +8,83
+```
+
+11-19 penceresinde LONG **10 / SHORT 105** — yani %9. Ama 18'inden itibaren
+payı hızla büyüyor.
+
+### ⚠️ 2 · "19-21 isabetliydi" — DOĞRU AMA TARİH BİR GÜN DAR
+
+```
+19-21 LONG   N=16   +106,14 $   ort  +6,63   kazanan %56,2   R_med +0,01
+19-21 SHORT  N=28  -1632,85 $   ort -58,32   kazanan %10,7   R_med -1,02
+```
+
+**Göreli olarak kesinlikle haklısın:** o pencerede LONG artıda, SHORT
+felaket (%10,7 isabet). Yön çağrısı doğruydu.
+
+**Ama günlere ayırınca:**
+
+```
+19-20  LONG 10 -> +525,43 $      SHORT 21 -> -1294,33 $
+21     LONG  6 -> -419,29 $      SHORT  7 ->  -338,52 $
+```
+
+🔑 **LONG başarısı 19-20'ye ait. 21'inde LONG'lar da kaybetti.**
+
+### 🔴 3 · VE İRONİ BURADA — botun etiketi tam ters anda döndü
+
+Botun **kendi** rejim etiketi (defterden, giriş anında):
+
+```
+08-19  NOTR 7
+08-20  NOTR 24
+08-21  NOTR 7 · BOGA 6     <- etiket BURADA donuyor
+08-22  NOTR 1 · BOGA 23
+```
+
+**Bot LONG'ları etiketi NOTR derken kazandı (19-20), etiket BOĞA dediği anda
+kaybetmeye başladı (21).**
+
+Yani rejim etiketi bu dönüşte **geç kalmadı, tam ters zamanlandı**: LONG'un
+işe yaradığı iki günü kaçırdı, işe yaramaz olduğu gün açıldı.
+
+⚠️ N küçük (16 LONG); tek vaka. Ama `durum.md`'de kayıtlı *"etiket 08-21'de
+döndü, hareket 08-19'da başlamıştı"* gözlemine **fiyat etiketi değil, PARA
+etiketi** ekliyor.
+
+### 🔴 4 · VE DEVAM ETMEDİ
+
+```
+11-18 LONG (oncesi)      N=  7    -102,25 $   ort -14,61
+19-21 LONG               N= 16    +106,14 $   ort  +6,63
+22-09-05 LONG (sonrasi)  N=228   -3930,60 $   ort -17,24
+```
+
+İki günlük LONG başarısını **228 işlemlik −3.931 $** izledi.
+
+### 5 · Kazancın niteliği
+
+19-21 LONG'larının **16'sının 16'sı da `STOP` ile kapandı** — yani hiçbiri
+hedefe varmadı; kazananlar **iz-süren stopla** kırpıldı (en iyisi `EDGE`
++222,54, r=0,89). Kaybedenler tam **−1R**.
+
+```
+9 kazanan (kirpilmis)  vs  6 kaybeden (tam -1R)  ->  net +106,14 $
+```
+
+**R medyanı +0,01** — sıfır. Yani *"isabetliydi"* isabet oranından geliyor
+(%56,2), büyüklükten değil.
+
+### Özet
+
+| iddia | sonuç |
+|---|---|
+| bot LONG açıyordu | ✅ **doğru** (11-19'da %9, sonra hızla arttı) |
+| 19-21 LONG'lar isabetliydi | ⚠️ **19-20 için doğru**; 21'inde LONG da kaybetti |
+| SHORT'tan iyiydi | ✅ **kesinlikle** (+106 vs −1.633) |
+| sürdürülebilir bir kenar mıydı | 🔴 **hayır** — sonraki 228 LONG −3.931 $ |
+
+**Bot dosyalarına yazım: YOK.**
