@@ -1,0 +1,51 @@
+==============================================================================
+MA50+UCUZ KAPISI, BOGA PENCERESINDE — hala calisiyor mu?
+==============================================================================
+ON-KAYIT: ON_KAYIT_ma50_boga.md commit 42e6452 — KOSMADAN once
+BIRINCIL: kapinin KENDISI (stop genisligi ikincil/betimleyici)
+Olcu: net% birincil · R ikincil · pencere 2026-08-21 ->
+
+perp_seri sembol (1sa): 151
+fonlama serisi olan sembol: 151
+
+  S3 toplama dogrulugu: GECTI (h/l uclari korunuyor)
+  S2 fonlama dongu-ici |delta| medyani: 0.000000  (esik 0.0050)
+     -> S2 GECTI: damga bulanikligi fonlamayi bozmuyor
+  S1 merdiven: GECTI
+
+### Kollar (botun mevcut A-stopu ile)
+  KAPI      N=235   gun=12  sembol=79    net%  -0.586   R  -0.1895   stop-ol %75  hedef %19
+  K_dar     N=540   gun=13  sembol=83    net%  -0.663   R  -0.2639   stop-ol %74  hedef %13
+  K_genis   N=1223  gun=13  sembol=150   net%  -0.757   R  -0.2563   stop-ol %76  hedef %14
+
+  fonlama DAHIL (islem basi ort: -0.0087 puan)
+
+==============================================================================
+HUKUM — ON_KAYIT_ma50_boga.md bolum 8
+==============================================================================
+K1  kapi - K_dar (net%): +0.5461   t_gun +1.15   MDE 0.9501  -> DUSTU
+K2  kapinin MUTLAK net%: -0.2929   t_gun -0.86   (12 gun) -> DUSTU
+K3  kapi - K_genis (net%): +0.0384   t_gun +0.07  -> GECTI
+K4  guc |fark| >= MDE: 0.5461 vs 0.9501 -> GOREMIYORUZ
+
+SONUC: DUSTU
+
+==============================================================================
+IKINCIL — R olcusu (ayni kollar)
+==============================================================================
+  kapi mutlak R -0.0613 (t -0.57) · kapi-K_dar +0.2730 (t +1.72, MDE 0.3170)
+
+==============================================================================
+IKINCIL/BETIMLEYICI — stop genisligi (GECME OLCUTU YOK)
+==============================================================================
+  kol       stop%      net%         R stop-ol%   hedef%
+  A          3.67    -0.586   -0.1895     75.3     19.1
+  1.5x       4.76    -0.750   -0.2226     70.2     22.1
+  2.5x       7.93    -1.568   -0.2727     62.6     26.0
+  4.0x      12.69    -2.099   -0.2021     48.9     32.3
+  eslesmis fark (kol - A), R:
+    1.5x     -0.0764  t  -1.77  MDE  0.0865  (12 gun)
+    2.5x     -0.1703  t  -2.86  MDE  0.1192  (12 gun)
+    4.0x     -0.1093  t  -1.29  MDE  0.1695  (12 gun)
+
+Veri indirme: YOK · Bot dosyalarina yazim: YOK

@@ -8521,3 +8521,109 @@ koşturulmadı.** Karar kullanıcınındır.
 | ⚠️ | güç zaten kötüydü: MDE ~0,56 vs beklenen etki ~0,29 |
 
 **Veri indirme: YOK. Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔴 MA50+UCUZ KAPISI, BOĞA PENCERESİNDE — **DÜŞTÜ** (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_ma50_boga.md`, commit `42e6452` — koşumdan **önce**.
+**Betik:** `scratchpad/ma50_boga.py` · ham çıktı `scratchpad/ma50_boga_sonuc.txt`
+**Kapsam sayımı:** `scratchpad/ma50_kapsam_sayim.py` (ön-kayıttan önce).
+
+**Kullanıcı sorusu:** *"MA50'yi en son ölçtüğün veriyle ölç, 21'i sonrası.
+Bu ölçümü yapmış mıydın?"* → **Hayır, yapılmamıştı.**
+
+### Bu kapı neden ölçülebildi, fonlama kapısı ölçülemedi
+
+MA50+ucuz'un **iki girdisi de yalnızca mumdan** hesaplanır
+(`fiyat ≤ $0,07` · `ma50_mesafe ≥ %3,72`) → `radar_archive`'a ihtiyaç yok →
+önceki ölçümü durduran **döngü-damgası hizalama sorunu bu kapıda geçersiz.**
+Arşiv yalnız fonlama maliyeti için kullanıldı ve **S2 sınaması bunu doğruladı**
+(döngü-içi `|Δfunding|` medyanı **0,000000** — damga bulanıklığı fonlamayı bozmuyor).
+
+### Sonuç — üç kolun ÜÇÜ DE negatif
+
+```
+kol        N     gun  sembol   net%      R       stop-ol%  hedef%
+KAPI      235    12     79    -0,586   -0,1895     75        19
+K_dar     540    13     83    -0,663   -0,2639     74        13
+K_genis  1223    13    150    -0,757   -0,2563     76        14
+```
+
+`K_dar` = ucuz ama MA50'ye yakın · `K_geniş` = tüm evren. Fonlama **dahil**
+(işlem başı −0,0087 puan — ihmal edilebilir).
+
+| # | ölçüt | değer | sonuç |
+|---|---|---|---|
+| **K1** | kapı − `K_dar` (net%) | +0,5461 · t=+1,15 · MDE 0,9501 | ❌ **DÜŞTÜ** (+ göremiyoruz) |
+| **K2** | kapının **mutlak** net%'i | −0,2929 (gün ort) · t=−0,86 | ❌ **DÜŞTÜ** |
+| **K3** | `K_geniş`'e karşı aynı işaret | +0,0384 · t=+0,07 | ✅ (ama sıfıra eşit) |
+| **K4** | güç | 0,5461 < MDE 0,9501 | ❌ **GÖREMİYORUZ** |
+
+**SONUÇ: DÜŞTÜ.**
+
+### 🔑 ASIL BULGU — zarar KAPIDAN değil, BOĞADA SHORT OLMAKTAN geliyor
+
+Kapı **en az kötü** kolu seçiyor (−0,586 vs −0,663 vs −0,757) ama **hepsi
+zararda.** Sıralama doğru, seviye yanlış. Bir kapı yalnızca *"daha az kaybettiren"*
+işlemler seçiyorsa kapı sorunu çözmüyor — **yön** sorunu var.
+
+⚠️ Ve config'in kendi özel uyarısı (*"boğada ucuz coinler öne geçebilir"*)
+**doğrulanmadı**: ucuz coinler (`K_dar` −0,663) geniş evrenden (`K_geniş` −0,757)
+**daha kötü değil, biraz daha iyi.** Yani mekanizma *"ucuzlar öne geçti"* değil,
+*"boğada short kaybettirir"*.
+
+### 🔴 KODUN VADESİ GEÇMİŞ TALİMATI KAPANDI
+
+`kripto-config.json → _ma50_kapisi_not`: *"rejim değişince ilişki DÖNEBİLİR…
+yeniden ölçülmeden bırakılmamalı."* Boğaya 08-21'de girildi, şimdi ölçüldü.
+**Talimat ifa edildi.** İlişki dönmedi — zaten kapı BOĞA'da **kapalı**.
+
+### ⭐ VE BOTUN MEVCUT KİLİDİ DOĞRULANDI
+
+[testbot.py:484](testbot.py#L484): her iki SHORT kapısı da
+`rejim_ad in ("AYI","NOTR")` koşuluna bağlı → **BOĞA'da ikisi de KAPALI.**
+Bu ölçüm bir **karşı-olgudur**: *"kapı açık olsaydı ne olurdu."*
+Cevap: işlem başına **−%0,586**. **Mevcut kilit doğru çalışıyor** ve bu ölçüm
+onu değiştirme değil, **doğrulama** üretti.
+
+### 🔴 STOP GENİŞLETME BU KAPIDA ZARARLI — ve kapı-özgü olduğu kanıtlandı
+
+(Ön-kayıtta **betimleyici** ilan edildi, geçme ölçütü yoktu — hüküm taşımaz.)
+
+```
+kol      stop%    net%       R      stop-ol%    eslesmis fark (R, kol-A)
+A         3,67   -0,586   -0,1895     75
+1,5x      4,76   -0,750   -0,2226     70        -0,0764  t -1,77
+2,5x      7,93   -1,568   -0,2727     63        -0,1703  t -2,86  <- GORULUR
+4,0x     12,69   -2,099   -0,2021     49        -0,1093  t -1,29
+```
+
+🔑 **Fonlama kapısının BOĞA'daki bulgusunun TAM TERSİ:**
+
+```
+BOGA'da 2,5x'e genislet   ->   A_funding  +0,2934      MA50+ucuz  -0,1703
+```
+
+Ve bu, 2 yıllık rejim kırılımının bu kapı için verdiği işaretle (**−0,0447**)
+**aynı yönde, tutulmuş veride.** Yani *"boğada stopu genişlet"* **genel bir kural
+değildir** — kapıya bağlıdır ve bot geneline uygulanırsa MA50 kapısını **bozar.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — **4'te 4** ✅
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | kapının mutlak net%'i **negatif** çıkacak | ✅ TUTTU (−0,586) |
+| 2 | `K_dar` de negatif çıkacak → zarar **yönden** gelecek | ✅ TUTTU (üç kol da negatif) |
+| 3 | kapı `K_dar`'ı t≥+2 ile geçemeyecek | ✅ TUTTU (t=+1,15) |
+| 4 | stop genişletme burada fonlama kapısından **zayıf** kalacak | ✅ TUTTU — zayıf değil, **zararlı** |
+
+(Bir önceki tur 4'te 1'di; bu tur 4'te 4.)
+
+### Sınırlar
+
+12 gün · 151 sembol (perp_seri kapsamı) · likidasyon yok · portföy aşaması yok ·
+kısmi kâr yok · fonlama arşivden **yaklaşıkla** alındı (S2 ile doğrulandı) ·
+tek BOĞA epizodu.
+
+**Veri indirme: YOK. Bot dosyalarına yazım: YOK.**

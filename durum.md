@@ -1726,3 +1726,45 @@ anı **hiç kaydedilmemiş**. Tavan yapısal.
 **Şüphede statüko** kuralı gereği varsayılan **3**. Ama seçenek **2** bu sorunun
 tek temiz çözümü: `klines_1h_uzun`'a taze mum eklenirse hem bu pencere hem
 sonraki bütün ölçümler düzelir.
+
+---
+
+## 2026-09-05 (4) · MA50 KAPISI BOĞA'DA ÖLÇÜLDÜ — **DÜŞTÜ**, ama kilit doğrulandı
+
+**Ön-kayıt:** `ON_KAYIT_ma50_boga.md` (`42e6452`). **Rakamlar:** `olcumler.md`.
+
+### Karar 1 — kapı BOĞA'da para kaybettiriyor, ama sebep kapı değil
+
+Üç kolun **üçü de** negatif; kapı yalnızca **en az kötü** olanı seçiyor.
+Sıralama doğru, seviye yanlış → sorun **kapıda değil, YÖNDE.**
+K1 ve K2 düştü, güç yetersiz (`|fark| < MDE`).
+
+### Karar 2 — ⭐ BOTUN MEVCUT KİLİDİ DOĞRULANDI, değişiklik gerekmiyor
+
+Her iki SHORT kapısı da `rejim in ("AYI","NOTR")` koşullu → **BOĞA'da kapalı.**
+Bu ölçüm bir **karşı-olgu**: kapı açık olsaydı işlem başına **zarar** ederdi.
+🔴 **Bu, ilk kez bir ölçümün "değiştir" değil "olduğu gibi bırak" dediği yer.**
+
+### Karar 3 — kodun vadesi geçmiş talimatı KAPANDI
+
+`_ma50_kapisi_not`: *"rejim değişince ilişki dönebilir, yeniden ölçülmeden
+bırakılmamalı."* Ölçüldü. İlişki dönmedi; kapı zaten kapalıydı.
+
+### Karar 4 — 🔴 "BOĞA'da stopu genişlet" GENEL KURAL DEĞİL
+
+```
+BOGA'da 2,5x'e genislet:  A_funding +0,2934   ·   MA50+ucuz -0,1703 (GORULUR)
+```
+
+Kapıya bağlı, ve **ters yönde.** Bot geneline uygulanırsa MA50 kapısını bozar.
+Üçüncü "veri bekleyen" aday bu kısıtla birlikte kaydedildi.
+
+### Tahmin karnem: 4'te 4 (önceki tur 4'te 1'di)
+
+### Kullanıcının "3 şey" çerçevesi — bugünkü durum
+
+| # | kaldıraç | durum |
+|---|---|---|
+| **pos** | `pos<0.25` koşullu mekanik (V3) | veri bekliyor, ölçütü sabit |
+| **ma50** | MA50+ucuz kapısı | ✅ **ölçüldü — DÜŞTÜ**, mevcut kilit doğru |
+| **kapının gevşemesi** | BOĞA holdout geçerlilik kapısı | kullanıcı kararı bekliyor (indir / gevşet / bırak) |
