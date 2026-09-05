@@ -9622,3 +9622,110 @@ NOTR modelinden **çok daha basit** bir hipotezdir. Bu haliyle:
 - ve doğruysa **mevcut kuralı sıkılaştırmak** (cooldown süresi) somut bir aday olur
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔴 İLK GİRİŞ / TEKRAR GİRİŞ — **DÜŞTÜ**, ve işaret TERS (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_ilk_tekrar_giris.md`, commit `00f5d5a` — koşumdan **önce**.
+**Betik:** `scratchpad/ilk_tekrar_giris.py` · ham çıktı `ilk_tekrar_giris_sonuc.txt`
+**Kullanıcı:** *"tekrar girişler çok fazla… bunu sına."*
+
+### Sonuç — gerçek defter, 392 pozisyon / 152 sembol
+
+```
+ILK giris     N=152   net% +0,420%   dolar -14,74 $   kazanan %42,1
+TEKRAR giris  N=240   net% +1,347%   dolar -16,01 $   kazanan %46,2
+                      (%61,2 tekrar)
+```
+
+🔴 **Tekrar girişler net%'te DAHA İYİ, kazanma oranı da DAHA YÜKSEK.**
+
+| # | ölçüt | değer | sonuç |
+|---|---|---|---|
+| **K1** | gün-eşleşmiş fark > 0 · t ≥ +2,0 | **−0,463%** · t=−0,48 | ❌ DÜŞTÜ |
+| **K2** | sembol-kümeli aynı işaret | +0,083% (ters) | ❌ DÜŞTÜ |
+| **K3** | \|fark\| ≥ MDE | 0,463 vs **1,943** | ❌ GÖREMİYORUZ |
+| **K4** | dolarda aynı işaret | −2,34 $ | ✅ |
+
+**SONUÇ: DÜŞTÜ.** Giriş sırasında **azalma da yok** — tersine:
+
+```
+sira 1: +0,420%  ·  sira 2: +0,580%  ·  sira 3: +2,108%  ·  sira 4+: +1,698%
+```
+
+### 🔑 SENTETİK ÖLÇÜMLE ÇELİŞKİ — ve bu sefer AÇIKLAMASI BULUNDU
+
+```
+sentetik karsi-olgu :  ilk +3,549%  vs  tekrar -0,645%   (N=33/33)
+gercek defter       :  ilk +0,420%  vs  tekrar +1,347%   (N=152/240)
+```
+
+**İki ölçüm AYNI ŞEYİ ölçmüyor:**
+
+```
+tekrarlarin oncekinden gecen sure (GERCEK defter):
+   medyan 25,1 saat · %25: 10,1 · %75: 96,4 · 4 SAATTEN KISA: 0 (%0)
+```
+
+- **Sentetik "tekrar"** = pozisyon **hâlâ AÇIKKEN** gelen ikinci sinyal
+  (simülasyonda *"aynı sembol açık"* diye elenenler) → **ekleme/piramit**
+- **Gerçek "tekrar"** = önceki pozisyon **KAPANDIKTAN sonra**, medyan **25 saat**
+  sonra yeni giriş → **yeniden giriş**
+
+🔑 **Bunlar farklı şeyler ve ikisi de doğru olabilir:**
+*açık pozisyona eklemek* kötü (zaten yasak), *kapandıktan sonra tekrar girmek*
+kötü **değil**.
+
+### 🔴 ÖNCEKİ DÜZELTMEMİ DE DÜZELTİYORUM
+
+Bir mesaj önce *"ayıran şey ilk giriş / tekrar giriş"* demiştim ve bunu genel
+bir mekanizma gibi sundum. **Gerçek defterde tekrarlanmıyor.** Doğrusu dar:
+*sentetik simülasyonda, pozisyon açıkken gelen ikinci sinyal kötüydü.*
+
+### Kullanıcının işaret ettiği coin — bulundu ama beklenen o değil
+
+```
+ASCII disi sembol adlari:
+   牛来   giris=2   toplam  -3,83 $
+   龙虾   giris=2   toplam -67,53 $
+```
+
+İkisi de **yalnız 2 kez** girilmiş ve zararları küçük. Kullanıcının hatırladığı
+desen büyük olasılıkla **`ONG`**:
+
+```
+ONG   13 giris   -838,22 $   (ort -64,48)
+ONT    9 giris   -690,40 $   (ort -76,71)
+CAP    6 giris   -399,33 $   (ort -66,55)
+```
+
+⚠️ **Gözlem doğru, genelleme yanlış:** `ONG` gerçekten 13 kez girilip 838 $
+kaybettirmiş. Ama bu **tekrar girmenin** değil, **o sembolün** özelliği —
+tekrarların geneli kaybettirmiyor. En çok girilen 10 sembol tüm tekrarların
+yalnız **%31'ini** taşıyor.
+
+### Ön-kayıtlı tahminlerin karnesi — 4'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | havuzlanmış fark, gün-eşleşmişten büyük | ✅ (0,927 > 0,463) |
+| 2 | giriş sırasında monotonluk, sonra düzleşme | ❌ **YANLIŞ** — azalma yok, artış var |
+| 3 | en çok girilen 10 sembol tekrarların yarısından fazlasını taşır | ❌ **YANLIŞ** (%31) |
+| 4 | dolar farkı yüzde farkından büyük görünür | ❌ işaretler ayrıştı |
+
+### 🔴 GÜNÜN META-BULGUSU: ÜÇÜNCÜ SENTETİK-GERÇEK ÇELİŞKİSİ
+
+```
+1. sentetik "BOGA'da SHORT kaybettirir"  vs  karsi-olguda SHORT bacagi ARTIDA
+2. sentetik "yuksek s_brk kotu"          vs  C kolu yuksek s_brk ile ARTIDA
+3. sentetik "tekrar giris kotu"          vs  gercek defterde tekrar DAHA IYI
+```
+
+Üçünde de **sentetik yeniden-kurgu** ile **gerçek/kapılı veri** ters düşüyor.
+Üçüncüsünün sebebi bulundu (tanım farkı). **İlk ikisininki hâlâ açık.**
+
+🔑 **Kural adayı:** sentetik bir ölçüm gerçek defterle çelişiyorsa, önce
+*"ikisi aynı şeyi mi ölçüyor"* sorulur — bugün üç kez sorulmalıydı, bir kez soruldu.
+
+**Bot dosyalarına yazım: YOK.**

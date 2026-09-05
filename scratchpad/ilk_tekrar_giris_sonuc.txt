@@ -1,0 +1,62 @@
+============================================================================================
+ILK GIRIS IYI, TEKRAR GIRIS KOTU MU? — GERCEK DEFTER
+============================================================================================
+ON-KAYIT: ON_KAYIT_ilk_tekrar_giris.md commit 00f5d5a — KOSMADAN once
+🔴 BIRINCIL: GUN-ESLESMIS karsilastirma (kotu-gun karistiricisi)
+
+pozisyon: 392  ·  ayri sembol: 152  ·  ILK 152 / TEKRAR 240  (%61.2 tekrar)
+
+### HAVUZLANMIS (ikincil)
+  ILK giris              N=152  ort   +0.420%  medyan   -2.140  kazanan %42.1
+  TEKRAR giris           N=240  ort   +1.347%  medyan   -2.088  kazanan %46.2
+  ---- dolar ----
+  ILK giris              N=152  ort  -14.736 $  medyan  -67.905  kazanan %42.1
+  TEKRAR giris           N=240  ort  -16.011 $  medyan  -27.470  kazanan %46.2
+  havuzlanmis fark: -0.927%  ·  +1.27 $
+
+### 🔴 GUN-ESLESMIS (BIRINCIL)
+  net%   fark -0.463%  t -0.48  MDE 1.943  (eslesmis gun=25)  -> goremiyoruz
+  dolar  fark -2.34 $  t -0.09  MDE 50.46  (eslesmis gun=25)
+
+### SEMBOL-ESLESMIS (K2)
+  net%   fark +0.083%  t 0.08  MDE 1.964  (eslesmis sembol=96)
+
+### GIRIS SIRASINA GORE (ek rapor)
+  sira         N   net% ort   dolar ort   kazanan
+  1          152     +0.420%      -14.74     42.1%
+  2           96     +0.580%      -17.53     44.8%
+  3           56     +2.108%      -14.97     42.9%
+  4+          88     +1.698%      -15.02     50.0%
+
+### YOGUNLASMA — en cok girilen 10 sembol
+  sembol       giris    toplam $       ort $
+  ONG             13     -838.22      -64.48
+  COTI            12     -371.51      -30.96
+  PROM            10     -163.32      -16.33
+  ONT              9     -690.40      -76.71
+  DOS              8     -211.53      -26.44
+  ROBO             7      -57.49       -8.21
+  MOVE             7     +218.47      +31.21
+  SKR              6     +114.87      +19.14
+  CAP              6     -399.33      -66.55
+  NIL              6     -254.32      -42.39
+  -> en cok girilen 10 sembol tum TEKRARLARIN %31'ini tasiyor
+
+### ASCII DISI SEMBOL ADLARI (kullanicinin isaret ettigi coin)
+  牛来             giris=2   toplam     -3.83 $  ort    -1.91 $  kazanan %50
+  龙虾             giris=2   toplam    -67.53 $  ort   -33.77 $  kazanan %50
+
+### TEKRARLAR ONCEKINDEN KAC SAAT SONRA
+  medyan 25.1 saat · %25 10.1 · %75 96.4 · 4 saatten kisa: 0 (%0)
+
+============================================================================================
+HUKUM — ON_KAYIT_ilk_tekrar_giris.md bolum 5
+============================================================================================
+K1  gun-eslesmis fark > 0 ve t >= +2,0 : -0.463% t=-0.48 -> DUSTU
+K2  sembol-kumeli ayni isaret : +0.083% -> DUSTU
+K3  |fark| >= MDE : 0.463 vs 1.943 -> GOREMIYORUZ
+K4  dolarda ayni isaret : -2.34 $ -> GECTI
+
+SONUC: DUSTU (dusen: K1, K2, K3)
+
+Bot dosyalarina yazim: YOK
