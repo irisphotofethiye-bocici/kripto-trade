@@ -68,7 +68,10 @@ MIN_FUNDING = -0.05       # ustu alinir (botun kapisinin TERSI)
 MAKS_CHG24 = 20.0         # alti alinir (botun pump kapisiyla ayni)
 UST_ESIK = 0.287          # btc_pay UST ceyregi — bu banttayken giris YOK
 
-MAKS_POZ = 8              # botun kendi limitiyle ayni (adil kiyas)
+MAKS_POZ = 0              # [DEGISTI 2026-09-05] 8 -> 0, kullanici: 'yeni girisleri durdur'.
+#   SIFIR = giris_ara() hemen doner; CIKISLAR ETKILENMEZ (tur(): yonet_acik_pozisyonlar
+#   ONCE, giris_ara SONRA). Config'ten okunmuyor, o yuzden burada. GERI ALMA: 8 yap.
+#   ESKI DEGER 8 — 'botun kendi limitiyle ayni (adil kiyas)' (D/9: silinmedi).
 TEKRAR_SAAT = 4.0         # ayni sembole bu kadar saat gecmeden tekrar girme
 ADAY_TAZE_DK = 12.0       # aday arsivinden bu kadar dakikalik pencere okunur
 

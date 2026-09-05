@@ -1874,3 +1874,62 @@ Kapı olması gerekenden **gevşek** çalışıyor. Config'in kendi uyarısı do
 
 **Karar-değeri taşıyan tek bir kaldıraç yok.** Yeni bot kurmak için malzeme
 henüz **yetersiz**.
+
+---
+
+## 🔴 2026-09-05 · YENİ GİRİŞLER DURDURULDU — uygulandı
+
+**Kullanıcı talimatı:** *"yeni girişleri durdur."*
+
+### Ne değişti — üç dosya
+
+| dosya | değişiklik | geri alma |
+|---|---|---|
+| `kripto-config.json` | `testbot.maks_pozisyon` **8 → 0** | değeri **8** yap |
+| `defter2.py` | `MAKS_POZ` **8 → 0** (config'ten okumuyor) | değeri **8** yap |
+| `defter3.py` | `MAKS_POZ` **8 → 0** | değeri **8** yap |
+
+Üçünde de eski değer **silinmedi**, `[DEĞİŞTİ 2026-09-05]` notuyla yanında duruyor (D/9).
+Config yedeği: `kripto-config.json.yedek-20260905-151054`.
+
+### ✅ Çıkış yönetimi ETKİLENMEDİ — koddan doğrulandı
+
+```
+testbot._cycle_ic :  yonet_acik_pozisyonlar()  1728   <- CIKISLAR ONCE
+                     yeni_giris_ara()          1761   <- 1376'da hemen doner
+defter2/3 tur()   :  yonet_acik_pozisyonlar()         <- CIKISLAR ONCE
+                     giris_ara()                      <- 194/195'te hemen doner
+```
+
+`golge` · `ayna` kancaları `yeni_giris_ara` **içinde** olduğu için onlar da durdu.
+`benim` zaten ölüydü (son işlem 08-13).
+
+### Açık pozisyonlar — doğal kapanışa bırakıldı (kullanıcı kararı)
+
+`testbot 5 · golge 7 · ayna 5 · defter2 8 · defter3 8` — hepsi yerinde,
+stop/hedef/zaman ile kendi kapanacak.
+
+### 🔴 UYGULAMA SIRASINDA HATA YAPTIM — kayda geçiyor
+
+İlk denemede config'e not eklerken **sondaki virgülü unuttum** ve
+`kripto-config.json` geçersiz JSON oldu. Bot bu dosyayı her turda okuyor.
+Yedekten **anında** geri alındı, sonra doğru desenle yapıldı:
+
+> **Yazmadan ÖNCE doğrula.** Aday metin bellekte `json.loads` ile ayrıştırıldı,
+> `maks_pozisyon` dışındaki **her alan** eskisiyle karşılaştırıldı, ancak
+> ondan sonra diske yazıldı.
+
+Eski desen (yaz → sonra kontrol et) bir tur boyunca bozuk config bırakabilirdi.
+
+### Ne DURMADI — bilerek
+
+`KriptoRadar` · `KriptoPerpSeri` · `KriptoPiyasa` · `KriptoNobetci` **çalışıyor.**
+Bunlar defter değil, **veri toplar**; durursa 30 günlük sınıfta kalıcı kayıp olur.
+Zamanlanmış görevler de **kapatılmadı** — kapatılırsa çıkış yönetimi de durur ve
+açık pozisyonlar asılı kalır.
+
+### Sırada
+
+1. Bir sonraki turda **teyit**: yeni giriş yok, çıkışlar çalışıyor
+2. Açık pozisyonlar kapanınca zamanlanmış görevler devre dışı bırakılabilir
+3. AYI ayağı için **11-19 Ağustos yapılandırması** git geçmişinden çıkarılacak
