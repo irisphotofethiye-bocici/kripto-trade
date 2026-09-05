@@ -147,3 +147,18 @@ config'ten alınır, **oynatılmaz.**
 Bot · state · defterler · config · zamanlanmış görevler: **hiçbiri.**
 **Veri indirme YOK.** `radar_archive` context'e yüklenmez.
 Betik: `scratchpad/ma50_boga.py` (**bu commit'ten SONRA**).
+
+---
+
+## 🔴 [DEĞİŞTİ 2026-09-05] — aynı ölçüt, DAHA GENİŞ kapsam
+
+İlk koşum `perp_seri`'nin **151** sembolüyle yapıldı ve **K4 açıkça
+"GÖREMİYORUZ"** dedi (`|fark| 0,5461 < MDE 0,9501`). Yani hüküm güçle sınırlıydı.
+
+Kullanıcı onayıyla taze mum indirildi; aynı ölçüm **~566 sembolle** yeniden
+koşuyor. **Bölüm 8'deki K1–K4 değiştirilmemiştir**; eşikler (`$0,07` · `%3,72`)
+config'ten gelir ve oynatılmamıştır.
+
+🔴 **İKİ KOŞUM DA RAPORLANIR.** Güç arttığı için hüküm değişebilir; hangisi
+çıkarsa çıksın **ikisi yan yana** yazılacaktır — sadece iyi olanı seçmek
+bu projede reddedilmiş davranıştır.

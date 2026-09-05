@@ -146,3 +146,31 @@ Bot · state · defterler · config · zamanlanmış görevler: **hiçbiri.**
 **Veri indirme YOK** (kullanıcı talimatı) — yalnız var olan arşivler okunur.
 `radar_archive.jsonl` **context'e yüklenmez**, Python özetler.
 Betik: `scratchpad/boga_holdout.py` (**bu commit'ten SONRA**).
+
+---
+
+## 🔴 [DEĞİŞTİ 2026-09-05] — VERİ KAYNAĞI değişti, ÖLÇÜTLER değişmedi
+
+**Kullanıcı onayı:** *"tamam yap. eldeki veriyi ezme ama."*
+
+| | eski | yeni |
+|---|---|---|
+| fiyat | `perp_seri` 5dk → 1sa (**151** sembol) | `klines_1h_uzun` + `taze_1h` (**~566** sembol) |
+| kapı (funding) | `radar_archive` canlı oran | `funding_gecmis` + `taze_funding` (8 saatlik ödeme) |
+| fonlama maliyeti | arşivden yaklaşık | gerçek ödeme serisi |
+
+🔑 **Bunun sonucu belirleyici: `radar_archive` artık HİÇ KULLANILMIYOR.**
+Ölçümü durduran geçerlilik kapısı (bölüm 6 — döngü damgası hizalaması)
+**konusuz kaldı**; aşılmadı, **gereksizleşti.** Eşik gevşetilmedi.
+
+Ayrıca kapı artık 2 yıllık ölçümün **birebir aynı yöntemiyle** tetikleniyor
+(`fr[k]["r"] <= FUND_ESIK`, `ileri_rr` deseni) → holdout ile ana ölçüm
+**yöntemsel olarak karşılaştırılabilir** hâle geldi.
+
+**Bölüm 7'deki K1–K4 ölçütleri AYNEN geçerlidir** ve değiştirilmemiştir.
+N yeniden sayılacak ve raporlanacaktır (sembol sayısı ~3,7 kat arttığı için
+güç artar; **ölçüt artmaz**).
+
+⚠️ **Veri hiçbir arşive yazılmadı** — indirme ayrı dizinlere (`taze_1h/`,
+`taze_funding/`) gitti, birleştirme **bellekte** yapılıyor.
+Betik: `scratchpad/boga_taze.py`.
