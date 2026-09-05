@@ -10244,3 +10244,110 @@ Ufuk uyuşmazlığı bu adayın en olası ölüm sebebidir ve ön-kayıtta **ufu
 ön-kayıtta sınırlandırılmadan indirme başlatılmaz.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### ❌ EMİR DEFTERİ DENGESİZLİĞİ (OBI) — **DÜŞTÜ**, ve merdiven "hiç yok" dedi (2026-09-06)
+
+**Ön-kayıt:** `ON_KAYIT_obi.md`, commit `0db685f` — koşumdan **önce**.
+**Betikler:** `scratchpad/obi/00_pilot.py` · `01_indir.py` · `02_veri.py` · `03_olcum.py`
+**N:** 513.476 gözlem · **119 sembol** · **180 gün** (2025-09-07 … 2026-08-31)
+İndirme 145 dk; **10 GB ham `bookDepth` akışta işlendi, diske hiç yazılmadı.**
+
+`CLAUDE.md`'nin bant-dışı listesindeki **son** aday.
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **P1** 🔴 ±%1 · +1 saat | **rho = −0,0077 · t = −0,88** | ❌ |
+| **P2** dört çeyrek | +0,002 · −0,015 · −0,042 · +0,025 | ❌ 2/4 |
+| **P3** rejim | BOĞA +0,007 · NÖTR +0,002 · AYI −0,017 | ❌ 1/3 |
+| **P4** eleme | spearman(önceki 1s getiri, OBI) = **−0,037** | ✅ |
+| **P5** getiri üçte-birlik | −0,012 · +0,001 · −0,012 | ✅ 2/3 |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### 🔑 UFUK MERDİVENİ — ön-kaydın en değerli parçası, ve cevabı NET
+
+```
++5 dk   rho -0,0074  t -0,97
++30 dk  rho -0,0044  t -0,54
++1 saat rho -0,0077  t -0,88     <- BIRINCIL
++4 saat rho -0,0031  t -0,38
++24 saat rho +0,0031 t +0,40
+```
+
+Merdiven iki başarısızlığı ayırmak için konmuştu:
+
+```
+hicbir basamakta yok  ->  sinyal YOK
++5dk var, +1s yok     ->  sinyal VAR ama BIZIM ufkumuzda degil
+```
+
+🔑 **Cevap birincisi. Beş basamağın beşi de sıfır — `+5 dakika` dahil.**
+Yani *"mikroyapı sinyali var ama bot çok yavaş"* açıklaması **çürüdü.** Bu proje
+bu ayrımı ilk kez yapabildi ve sonuç en temiz olanı.
+
+#### 🔴 BEKLENTİLERİMİN İKİSİ BİRDEN YANLIŞ
+
+| tahmin | sonuç |
+|---|---|
+| *"+5dk basamağında bir şey görünmesi ~%70"* | ❌ **görünmedi** (t=−0,97) |
+| *"merdiven monotonik sönecek, +5dk en güçlü"* | ❌ **düz sıfır**, sönüm deseni yok |
+| *"P4 geçecek ama sıfırdan uzak"* | ❌ geçti ama **−0,037 = neredeyse tam sıfır** |
+| *"kalıcı sembol bileşeni bir şey taşımayacak"* | ✅ **+0,0004** |
+
+`P4 = −0,037` ayrıca bir olgu: OBI, son saatlik fiyat hareketinin izi **değil**.
+Yani gerçekten bağımsız bilgi — **ama boş bir bilgi.**
+
+#### ⚠️ ±%5 SEVİYESİ EŞİĞİ GEÇTİ — ve KURAL YAPILMIYOR
+
+```
+±%1 (BIRINCIL)  rho -0,0077  t -0,88
+±%2             rho -0,0169  t -2,32
+±%5             rho -0,0455  t -5,79     <- taban 0,020'nin USTUNDE
+```
+
+Seviyede **monotonik** bir desen var. Ama:
+
+1. **Ön-kayıt `±%1`'i birincil ilan etmişti** ve açıkça *"seviye SEÇİLMEYECEK —
+   birincil ±%1'dir, sonuç ne olursa olsun"* yazıyordu. `±%5`'i şimdi seçmek
+   **tam olarak** *"en iyi hücre seçilmez"* ihlalidir.
+2. **İşaret hipotezin TERSİ** (kalın alış → **düşük** getiri).
+3. 🔴 **`P4` elemesi yalnız `±%1` üzerinde koşuldu.** `±%5`'in karıştırıcı durumu
+   **ÖLÇÜLMEDİ** — ve geniş bantta *"fiyat nereden geldi"* izi çok daha güçlü
+   olabilir. Yani `±%5` bulgusunun elemesi **hiç yapılmadı**.
+
+**Not:** ayrı bir ön-kayıtla sınanabilir. Bu satır bir kural önerisi **değildir**.
+
+#### YAPISAL OLGU
+
+```
+OBI ±%1: ort +0,0970 · medyan +0,0955 · std 0,1546 · POZITIF oran %82,1
+```
+
+Defterin alış tarafı **yapısal olarak** daha kalın (pilotta da görülmüştü).
+Kesitsel sıralama bunu soğuruyor; seviyeye bakan hiçbir hüküm yazılmadı.
+
+#### 🔑 BANT-DIŞI LİSTE KAPANDI — ÜÇ ADAY, ÜÇÜ DE DÜŞTÜ
+
+| aday | rho | t | taban 0,020 |
+|---|---|---|---|
+| spot-perp basis | −0,0152 | −4,85 | ❌ |
+| çapraz borsa | +0,0108 | +4,11 | ❌ |
+| **emir defteri (OBI)** | **−0,0077** | **−0,88** | ❌ |
+
+İlk ikisi en azından `t>4` veriyordu — *"yön aynı, güven yalan"*. OBI **onu bile
+vermiyor**: `|t| < 1`, yani sıfırdan ayırt edilemiyor.
+
+⚠️ Geriye kalan tek denenmemiş şey: **pozisyon kompozisyonunun TEMİZ ayrıştırması**
+(`topPosition/topAccount`), ki o da bugün mümkün oldu (`metrics` arşivi).
+
+#### SINIRLAR
+
+- Etiket **ham getiri**; maliyet/slipaj dahil değil (etki sıfır olduğu için önemsiz).
+- `bookDepth` **~30 sn**'de bir; daha ince mikroyapı (emir defteri güncellemeleri,
+  `bookTicker`) **bakılmadı** — o veri USD-M futures'ta yayınlanmıyor.
+- 120 sembol, tohumla rastgele; 119'u geçerli.
+- Çoklu karşılaştırma **21 hücre** (ön-kayıtta ilan edilmişti).
+
+**Bot dosyalarına yazım: YOK.**

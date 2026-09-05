@@ -1,0 +1,84 @@
+================================================================================================
+EMIR DEFTERI DENGESIZLIGI (OBI)
+================================================================================================
+ON-KAYIT: ON_KAYIT_obi.md commit 0db685f — KOSUMDAN ONCE
+Hipotez: alis tarafi kalin -> sonraki getiri yuksek  ->  rho > 0
+BIRINCIL HUCRE: OBI ±%1 · ufuk +1 saat
+
+N gozlem = 513476  ·  sembol = 119  ·  gun = 180  (2025-09-07 .. 2026-08-31)
+
+### GECERLILIK KAPISI (on-kayit bolum 6)
+   G-a OBI cikarim sinamasi           01_indir.py'de gecti   ✅
+   G-b sembol basina >=500 saat       en az 4018             ✅
+   G-c gun kumesi >= 120              180 gun                ✅
+   G-d gun basina >=40 sembol         medyan 119             ✅
+
+### SAGLAMA — -OBI rho'yu tam aynalamali
+   duz -0.0077  ·  ters +0.0077  ->  ✅ aynaliyor
+
+### P1 🔴 BIRINCIL — OBI ±%1 · +1 saat
+   TUM PENCERE                rho -0.0077   t -0.88   gun  180 
+   esik: |rho| >= 0.020 VE |t| >= 3.0   (IKI TARAFLI)
+   olculen isaret: NEGATIF  (hipotez: POZITIF)
+   -> P1 DUSTU
+
+### P2 — dort zaman ceyregi
+   C1  2025-09-07..2025-12-04 rho +0.0020   t +0.11   gun   45 
+   C2  2025-12-06..2026-03-04 rho -0.0149   t -0.85   gun   45 
+   C3  2026-03-06..2026-06-02 rho -0.0423   t -2.75   gun   45 
+   C4  2026-06-04..2026-08-31 rho +0.0245   t +1.45   gun   45 
+   -> 2/4 ayni isaret  ->  P2 DUSTU
+
+### P3 — rejim
+   BOGA                       rho +0.0065   t +0.21   gun   16 
+   NOTR                       rho +0.0016   t +0.11   gun   69 
+   AYI                        rho -0.0168   t -1.41   gun   95 
+   -> 1/3 ayni isaret  ->  P3 DUSTU
+
+### P4 — ELEME: OBI, son 1 saatlik hareketin izi mi?
+   spearman(onceki 1s getiri, OBI) = -0.037  (tavan 0.50, N=256738)
+   -> P4 GECTI
+
+### P5 — onceki getiri uctebirlikleri (karistirici)
+   alt (dusen saat)           rho -0.0119   t -1.52   gun  180 
+   orta                       rho +0.0014   t +0.18   gun  180 
+   ust (yukselen saat)        rho -0.0124   t -1.66   gun  180 
+   -> 2/3 ayni isaret  ->  P5 GECTI
+
+### 🔑 UFUK MERDIVENI (ikincil, GECTI'ye SAYILMAZ)
+   Isi hukum vermek DEGIL: 'sinyal yok' ile 'sinyal var ama BIZIM
+   ufkumuzda degil' ayrimini yapmak.
+   +5 dk                      rho -0.0074   t -0.97   gun  180 
+   +30 dk                     rho -0.0044   t -0.54   gun  180 
+   +1 saat                    rho -0.0077   t -0.88   gun  180 <- BIRINCIL
+   +4 saat                    rho -0.0031   t -0.38   gun  180 
+   +24 saat                   rho +0.0031   t +0.40   gun  180 
+
+### SEVIYE (ikincil) — +1 saat ufkunda
+   ±%1 (BIRINCIL)             rho -0.0077   t -0.88   gun  180 
+   ±%2                        rho -0.0169   t -2.32   gun  180 
+   ±%5                        rho -0.0455   t -5.79   gun  180 
+
+### EK RAPOR (hukum tasimaz)
+   OBI ayristirmasi:
+     KALICI (sembol ort.)     rho +0.0004   t +0.06   gun  180 
+     ZAMANLA DEGISEN          rho -0.0088   t -1.04   gun  180 
+   OBI ±%1 dagilimi: ort +0.0970 · medyan +0.0955 · std 0.1546 · poz oran %82.1
+   sembol basina saat: min 4018 · medyan 4320 · maks 4320
+
+================================================================================================
+HUKUM — ON_KAYIT_obi.md bolum 7
+================================================================================================
+   P1 DUSTU
+   P2 DUSTU
+   P3 DUSTU
+   P4 GECTI
+   P5 GECTI
+
+   SONUC: DUSTU
+
+   MERDIVEN OKUMASI: en guclu basamak +1 saat (rho -0.0077, t -0.88)
+   Coklu karsilastirma (on-kayitta ilan): 21 hucre
+   ⚠️ Etiket HAM getiri; maliyet/slipaj DAHIL DEGIL.
+
+Bot dosyalarina yazim: YOK

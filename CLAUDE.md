@@ -123,10 +123,20 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   | pozisyon kompozisyonu (`top_ls − glob_ls`) | ❌ bulgu yok | ⚠️ **temiz ayrıştırma HİÇ yapılmadı** — `topLongShortAccountRatio` arşivlenmemişti, artık 2 yıl geriye var |
   | spot-perp basis | ❌ DÜŞTÜ 5/5 | rho −0,0152 · taban 0,020 · etki sönüyor |
   | çapraz borsa (Binance−Bybit fonlama) | ❌ DÜŞTÜ | rho **+0,0108** — ve **işaret hipotezin TERSİ** |
-  | **bekleyen likidite** | ⏳ **hâlâ ölçülmedi** | aşağıya bak |
+  | **bekleyen likidite (OBI)** | ❌ **DÜŞTÜ 2026-09-06** | rho **−0,0077 · t −0,88** — sıfırdan ayırt edilemiyor |
 
-  🔑 **Örüntü: iki bant-dışı aday, ikisi de `t>4`, ikisi de etki tabanının ALTINDA.**
-  Bant dışında bilgi **var**, ama tek başına kullanılabilir büyüklükte değil.
+  🔑 **LİSTE KAPANDI: üç aday, üçü de düştü.** İlk ikisi en azından `t>4`
+  veriyordu (*"yön aynı, güven yalan"*); OBI onu bile vermedi.
+
+  🔴 **VE UFUK MERDİVENİ BİR AÇIKLAMAYI ÇÜRÜTTÜ.** OBI ölçümü `+5dk · +30dk ·
+  +1s · +4s · +24s` basamaklarının **beşinde de** sıfır verdi. Yani
+  *"mikroyapı sinyali var ama bot 7,5 dk turla çok yavaş"* savunması **artık
+  kullanılamaz** — o ufukta da bir şey yok. Yeni bir hızlı-sinyal önerisi bu
+  ölçüme karşı savunma yapmak zorundadır.
+
+  ⚠️ Geriye denenmemiş **tek** şey kaldı: pozisyon kompozisyonunun **temiz**
+  ayrıştırması (`topPosition/topAccount`) — `metrics` arşivi sayesinde artık
+  2 yıl geriye mümkün.
 
   🔴 **BEKLEYEN LİKİDİTE — "ölçüldü" SANILMASIN, ölçülen şey BÜYÜKLÜKTÜ.**
   Kaydedilen `defter_usdt_20` yalnız **yediğimiz tarafın** toplamıdır ve dolar
