@@ -80,6 +80,27 @@ hesaplanan gerçek 1 saatlik getiri **korelasyonu ≥ 0,80** olmalı.
 Ayrıca ofset **−4, −3, −2** denenir ve **−3 en yüksek** çıkmalı.
 Düşerse betik **çalışmayı REDDEDER.**
 
+> 🔴 **[DEĞİŞTİ 2026-09-05] — eşik DEĞİL, sınamanın KENDİSİ düzeltildi.**
+> İlk koşumda sınama **düştü** ve betik çalışmayı reddetti (doğru davranış):
+> `−4 → +0,215 · −3 → +0,511 · −2 → +0,013`. Yani **ofsetin −3 olduğu
+> doğrulandı** (diğer ikisini açık ara yeniyor) ama korelasyon 0,80'in altında.
+>
+> **Sebep — sınama yanlış şeyi ölçüyordu:** arşiv anlık görüntüsü saatin
+> *ortasında* alınıyor, dolayısıyla `last1` = *"anlık görüntü anından geriye
+> 60 dakika"*. Ben onu *"tamamlanmış saatlik barın kapanış getirisi"* ile
+> karşılaştırdım. İkisi örtüşür ama aynı büyüklük değildir; 0,51 bu uyuşmazlığın
+> beklenen sonucudur.
+>
+> **Düzeltme:** `perp_seri` **5 dakikalık** veri taşıyor. `last1`'in gerçek
+> karşılığı 5 dakikalık ızgarada hesaplanır: anlık görüntü anına en yakın 5dk
+> barı ile ondan **60 dakika önceki** barın kapanış oranı.
+> **Eşik 0,80 AYNEN KALIR**; ofset sıralaması şartı da aynen kalır.
+>
+> ⚠️ **Neden bu "ölçütü gevşetmek" değil:** (a) bu bir *veri geçerliliği*
+> denetimi, hipotez testi değil; (b) eşik **düşürülmedi**; (c) yanlış ofset
+> saatlerce kaydırırdı ve düzeltilmiş sınama onu **yine yakalardı** — test
+> keskinliğini kaybetmiyor. Eski metin **silinmedi** (D/9).
+
 ## 7 · GEÇME ÖLÇÜTLERİ — sonuç görüldükten sonra değiştirilmez
 
 Birincil: `A_funding` · BOĞA holdout · ölçü `R` · kol **`2.5x`**.
