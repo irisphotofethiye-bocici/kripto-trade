@@ -9476,3 +9476,82 @@ Bugün **aynı şekilde** bir çelişki daha kaydedildi: sentetik ölçüm
 BİRBİRİYLE YARIŞAN iddialar.** Üst üste koymak toplama değil, çelişki üretiyor.
 
 **Doğru sıradaki iş, kural eklemek değil: yukarıdaki çelişkiyi çözmek.**
+
+---
+
+## 🔴 KAPI MI SEÇİYOR, SLOT MU ŞANSLI — **ÇELİŞKİ ÇÖZÜLMEDİ**, ve NOTR modeli ZAYIFLADI (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_kapi_mi_slot_mu.md`, commit `fc88daa` — koşumdan **önce**.
+**Betik:** `scratchpad/kapi_mi_slot_mu.py` · ham çıktı `kapi_mi_slot_mu_sonuc.txt`
+
+### Sonuç
+
+```
+### S1 — SLOT SANSI  (slot UYGULANMADAN, ayni mekanik)
+  alinan (slot gecti)   N=44  gun=15   islem-ort +2,643%   kazanan %50,0
+  alinmayan             N=22  gun=12   islem-ort -0,929%   kazanan %27,3
+  fark +5,229%   t_gun +2,62   MDE 3,995   -> GORULUR
+
+### S2 — KAPI SECIMI
+  kapili (tumu)         N= 66 gun=16   islem-ort +1,452%   kazanan %42,4
+  eslesmis KONTROL      N=412 gun=16   islem-ort +0,139%   kazanan %34,2
+  fark +1,336%   t_gun +1,05   MDE 2,545   -> goremiyoruz
+```
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **K1** | kapı seçimi > 0 · t ≥ +2,0 | ❌ **DÜŞTÜ** (t=1,05) |
+| **K2** | slot farkı MDE altında | ❌ **DÜŞTÜ** — slot farkı **GÖRÜLÜR** |
+
+**Ön-kayıtlı yorum tablosuna göre resmî hüküm: ÇELİŞKİ ÇÖZÜLMEDİ.**
+
+### 🔴 AMA BİLEŞENLER AÇIK BİR ŞEY SÖYLÜYOR
+
+```
+SLOT SANSI    -> GORULUR      (+5,23%, t=2,62)
+KAPI SECIMI   -> GOREMIYORUZ  (+1,34%, t=1,05)
+```
+
+**Slot'a giren 44 işlem +2,64%, giremeyen 22 işlem −0,93%.** Aralarındaki tek
+fark **varış sırası** — kapıları ikisi de geçmişti.
+
+🔑 **Yani `C` kolunun +1.162 $'ı, önemli ölçüde HANGİ 44'ün slota girdiğine
+bağlı; kapıların seçiciliğine değil.**
+
+### 🔴 NOTR MODELİ ZAYIFLADI — ve bunu bir mesaj önce ilan etmiştim
+
+Kullanıcı *"NOTR modelde hemfikiriz değil mi"* diye sordu; cevabım
+*"hemfikirim ama kanıtlanmış olarak değil — ve şimdi koşturacağım ölçüm onu
+çürütebilir"* olmuştu. **Çürüttü.**
+
+`C` kolunun `+2,643%/işlem` başlığı artık **büyük ölçüde slot sırası
+artefaktı** olarak okunmalı. Ön-kayıtlı hükmü (`GEÇTİ`) **geri almıyorum** —
+o ölçüt kendi kurallarıyla geçti — ama **yorumu değişti**: geçen şey
+*"NOTR mantığı kazandırır"* değil, *"o pencerede o 44 işlem kazandırdı"*.
+
+### ⚠️ Sınırlar — bu ölçümün kendisi de zayıf
+
+`S1` **44 vs 22** ile koşuyor; `t=2,62` ve `MDE 3,995`'in **hemen üstünde**.
+Yani *"slot şansı var"* da güçlü kanıt değil — yalnızca *"yok"* diyemiyoruz.
+`S2`'de de `MDE 2,545` gözlenen farkın (**1,336**) neredeyse **iki katı** →
+kapı seçimi için de **güç yetersiz**.
+
+🔑 **Dürüst özet: bu pencerede 66 işlemle bu soru cevaplanamıyor.**
+
+### Ön-kayıtlı tahminlerin karnesi — 4'te 1
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | S1'de görülür fark **çıkmayacak** | ❌ **YANLIŞ** — çıktı (+5,23%, t=2,62) |
+| 2 | kontrolün mutlak getirisi negatif | ⚠️ **kısmi** — işlem-ort **+0,139%**, gün-ort −0,425% |
+| 3 | K1 geçse bile `C`'nin +2,64'ünü açıklamaya yetmez | ✅ tutarlı (kapı etkisi +1,34) |
+| 4 | `s_brk` çelişkisi tam çözülmeyecek | ✅ TUTTU |
+
+### Ne yapılmalı
+
+Çelişki **açık kaldı** ve bu pencerede kapanmıyor. Kapanması için:
+**daha çok slot** (kapasite kısıtı kalksın → alınan/alınmayan ayrımı kaybolur)
+ya da **ikinci bir epizot**. İkisi de ileri yönlü çalışma gerektiriyor —
+geriye dönük bu veriden çıkarılamaz.
+
+**Bot dosyalarına yazım: YOK.**

@@ -1,0 +1,29 @@
+================================================================================================
+KAPI MI SECIYOR, SLOT MU SANSLI?
+================================================================================================
+ON-KAYIT: ON_KAYIT_kapi_mi_slot_mu.md commit fc88daa — KOSMADAN once
+🔴 S1/S2'de SLOT UYGULANMAZ. Pencere 2026-08-19 -> 09-02
+
+kapili karar: 171 · eslesmis kontrol adayi: 1185
+
+### S1 — SLOT SANSI
+  alinan (slot gecti)      N=44   gun=15  islem-ort  +2.643%  gun-ort  +2.788%  kazanan %50.0
+  alinmayan                N=22   gun=12  islem-ort  -0.929%  gun-ort  -2.442%  kazanan %27.3
+  fark +5.229%  t_gun +2.62  MDE 3.995  -> GORULUR
+
+### S2 — KAPI SECIMI
+  kapili (tumu)            N=66   gun=16  islem-ort  +1.452%  gun-ort  +0.911%  kazanan %42.4
+  eslesmis KONTROL         N=412  gun=16  islem-ort  +0.139%  gun-ort  -0.425%  kazanan %34.2
+  fark +1.336%  t_gun +1.05  MDE 2.545  -> goremiyoruz
+
+================================================================================================
+HUKUM — ON_KAYIT_kapi_mi_slot_mu.md bolum 4
+================================================================================================
+K1  S2 fark > 0 ve t_gun >= +2,0 : +1.336%  t=1.05 -> DUSTU
+K2  S1 fark MDE ALTINDA (slot sansi gosterilemedi): 5.229 vs MDE 3.995 -> DUSTU
+K3  kontrolun MUTLAK getirisi: islem-ort +0.139%  (betimleyici)
+
+HUKUM: 🔴 HICBIRI ACIKLAMIYOR -> celiski COZULMEDI.
+
+⚠️ K2 bir YOKLUK testidir: 'slot sansi YOK' degil 'GOSTERILEMEDI'.
+Bot dosyalarina yazim: YOK
