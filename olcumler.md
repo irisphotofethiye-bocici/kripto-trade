@@ -9729,3 +9729,88 @@ yalnız **%31'ini** taşıyor.
 *"ikisi aynı şeyi mi ölçüyor"* sorulur — bugün üç kez sorulmalıydı, bir kez soruldu.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔑 ÇIKIŞ VERİMİ — bugünün en büyük tek rakamı (2026-09-05)
+
+> 🔴 **Betimleyici. Ön-kayıt yok, hüküm yok, kural çıkmaz.**
+> Kullanıcı: *"fark yaratacak ne var elinde"* → bütün gün **girişe** bakıldı;
+> bu, **çıkış** tarafına ilk bakış. Betik: `scratchpad/cikis_verimi.py`
+> Veri: `pozisyon_izleme.jsonl` (`mfe_pct`) × `testbot_islemler.jsonl` (id ile).
+
+### Sonuç — 341 pozisyon
+
+```
+MFE (lehimize EN COK)   medyan  +2,85%
+GERCEKLESEN             medyan  -2,14%
+MAE (aleyhimize EN COK) medyan  -3,18%
+YAKALAMA ORANI (gerceklesen/MFE)   medyan %0,0   ·   ort %39,2
+```
+
+🔑 **Medyan pozisyon %2,85 artıya geçiyor ve %2,14 zararla kapanıyor.
+Yakalama oranının medyanı SIFIR.**
+
+### Çıkış sebebine göre — asıl tablo burada
+
+```
+sebep          N     MFE med   gercek med    toplam $
+STOP         301      +2,50%      -2,52%   -10.601,69
+TP2           34      +9,99%     +13,88%    +5.270,72
+ZAMAN_STOP     6      +7,19%      +1,82%       +191,82
+```
+
+**301 pozisyon stopla kapandı ve −10.602 $ kaybettirdi — ve o pozisyonların
+medyanı +%2,50 kâra geçmişti.** Bütün kayıp tek bir satırda.
+
+### Geri verme, MFE eşiğine göre
+
+```
+MFE >= %1   : 256 pozisyon, 107'si ZARARLA kapandi   (%42)
+MFE >= %3   : 168 pozisyon,  37'si ZARARLA kapandi   (%22)
+MFE >= %5   : 106 pozisyon,   6'si ZARARLA kapandi   (%6)
+MFE >= %10  :  45 pozisyon,   0'i  ZARARLA kapandi   (%0)
+```
+
+🔑 **Geri verme sorunu KÜÇÜK MFE'de yoğunlaşıyor.** %5'e ulaşan pozisyon
+neredeyse hiç zararla kapanmıyor; %1-3'te kalanların **%42'si** kapanıyor.
+
+Yani bu *"kârı erken al"* değil, **"küçük kazanan neden kaybedene dönüşüyor"**
+sorusu — hedef değil **stop yerleşimi** meselesi.
+
+### 🔴 AMA — bu refleks ZATEN TEST EDİLDİ ve DÜŞTÜ
+
+Buradan çıkacak ilk fikir *"başabaşa çek / erken kâr al"* olur. Kayıt:
+
+- **Çıkışı sıkılaştıran 30 varyantın 29'u düştü**; geçen tek varyant çıkışı
+  **gevşetiyordu** (sabit %10 hedef).
+- **Kısmi kâr ölçüldü ve kenarı KÜÇÜLTÜYOR**: `_kismi_pay_not` →
+  kısmi yok +0,301 · %40'ta +0,274 → kenarın **~%9'u** gidiyor.
+  Hedefe ulaşma oranı **değişmiyor** (%29,1 iki kuralda da); değişen, kazananda
+  kazancın kesilmesi.
+- **Kısmi sonrası başabaşa çekme de ölçüldü**: +0,274 → **+0,261** (daha kötü).
+
+⚠️ **Yani "geri veriyoruz" gözlemi doğru, ama bilinen çözümleri denenmiş ve
+kaybettirmiş.** Buradan yeni bir kural çıkarmak, 29/30 sicile karşı savunma
+yapmayı gerektirir.
+
+### En büyük kaçırılanlar (MFE yüksek, zararla kapandı)
+
+```
+MELANIA LONG  MFE +9,65  ->  -2,25%   ZAMAN_STOP
+HOME    SHORT MFE +9,23  ->  -0,93%   STOP
+BICO    SHORT MFE +8,79  ->  -2,82%   STOP
+ZORA    LONG  MFE +6,41  ->  -7,31%   STOP   (-125,27 $)
+TRUMP   LONG  MFE +4,85  -> -11,92%   STOP   (-128,60 $)
+```
+
+### Ne söylüyor, ne söylemiyor
+
+**Söylüyor:** kaybın **tamamı** stop kapanışlarında (−10.602 $), ve o
+pozisyonlar ortalama olarak **artıya geçmişti**. Yakalama oranı medyanı sıfır.
+
+**Söylemiyor:** ne yapılması gerektiğini. Akla gelen iki çözüm (kısmi kâr,
+başabaş stop) **ölçülmüş ve ikisi de kenarı küçültmüş.** Üçüncü bir fikir
+gerekiyor ve o fikrin **kendi ön-kaydı** olmalı.
+
+**Bot dosyalarına yazım: YOK.**

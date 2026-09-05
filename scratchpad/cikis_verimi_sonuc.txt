@@ -1,0 +1,64 @@
+========================================================================================
+CIKIS VERIMI — lehimize giden hareketin ne kadarini aliyoruz?
+========================================================================================
+🔴 Betimleyici. On-kayit yok, hukum yok.
+⚠️ Proje sicili: cikisi SIKILASTIRAN 29/29 kaldi; gecen tek varyant
+   cikisi GEVSETIYORDU. Buradan cikacak oneri buna karsi savunmali.
+
+defter pozisyon: 392 · izleme kaydi olan: 341
+
+olculebilen pozisyon: 341
+
+### TUMU   N=341
+   MFE (lehimize EN COK)   medyan   +2.85%  · %25  +1.01 · %75  +6.61
+   GERCEKLESEN             medyan   -2.14%  · ort  +0.94
+   MAE (aleyhimize EN COK) medyan   -3.18%
+   YAKALAMA ORANI (gerceklesen/MFE, negatifler 0 sayildi):
+      medyan %0.0  ·  ort %39.2
+      MFE >= %1    : 256 pozisyon, bunlarin 107'u ZARARLA kapandi (%42)
+      MFE >= %3    : 168 pozisyon, bunlarin  37'u ZARARLA kapandi (%22)
+      MFE >= %5    : 106 pozisyon, bunlarin   6'u ZARARLA kapandi (%6)
+      MFE >= %10   :  45 pozisyon, bunlarin   0'u ZARARLA kapandi (%0)
+
+### LONG   N=243
+   MFE (lehimize EN COK)   medyan   +2.85%  · %25  +1.02 · %75  +6.23
+   GERCEKLESEN             medyan   -1.03%  · ort  +0.75
+   MAE (aleyhimize EN COK) medyan   -3.27%
+   YAKALAMA ORANI (gerceklesen/MFE, negatifler 0 sayildi):
+      medyan %0.3  ·  ort %35.9
+      MFE >= %1    : 184 pozisyon, bunlarin  73'u ZARARLA kapandi (%40)
+      MFE >= %3    : 118 pozisyon, bunlarin  24'u ZARARLA kapandi (%20)
+      MFE >= %5    :  75 pozisyon, bunlarin   3'u ZARARLA kapandi (%4)
+      MFE >= %10   :  37 pozisyon, bunlarin   0'u ZARARLA kapandi (%0)
+
+### SHORT   N=98
+   MFE (lehimize EN COK)   medyan   +3.05%  · %25  +0.99 · %75  +7.46
+   GERCEKLESEN             medyan   -2.19%  · ort  +1.42
+   MAE (aleyhimize EN COK) medyan   -3.16%
+   YAKALAMA ORANI (gerceklesen/MFE, negatifler 0 sayildi):
+      medyan %0.0  ·  ort %47.4
+      MFE >= %1    :  72 pozisyon, bunlarin  34'u ZARARLA kapandi (%47)
+      MFE >= %3    :  50 pozisyon, bunlarin  13'u ZARARLA kapandi (%26)
+      MFE >= %5    :  31 pozisyon, bunlarin   3'u ZARARLA kapandi (%10)
+      MFE >= %10   :   8 pozisyon, bunlarin   0'u ZARARLA kapandi (%0)
+
+### CIKIS SEBEBINE GORE — MFE ve gerceklesen
+   sebep                N     MFE med   gercek med   toplam $
+   STOP               301      +2.50%       -2.52%  -10601.69
+   TP2                 34      +9.99%      +13.88%   +5270.72
+   ZAMAN_STOP           6      +7.19%       +1.82%    +191.82
+
+### EN BUYUK KACIRILANLAR (MFE yuksek ama zararla kapanmis)
+   sembol     yon         MFE%    gercek%      dolar sebep
+   MELANIA    LONG       +9.65      -2.25     -21.40 ZAMAN_STOP
+   HOME       SHORT      +9.23      -0.93     -14.94 STOP
+   BICO       SHORT      +8.79      -2.82     -31.56 STOP
+   CAP        SHORT      +7.46      -2.08     -13.33 ZAMAN_STOP
+   ZORA       LONG       +6.41      -7.31    -125.27 STOP
+   USELESS    LONG       +5.09      -8.00     -81.89 STOP
+   TRUMP      LONG       +4.85     -11.92    -128.60 STOP
+   T          LONG       +4.40      -8.43     -78.83 STOP
+   BTR        LONG       +4.37     -16.83     -80.93 STOP
+   ONT        LONG       +4.33      -6.69    -136.56 STOP
+
+Bot dosyalarina yazim: YOK
