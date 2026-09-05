@@ -1,0 +1,75 @@
+================================================================================================
+MUM FORMASYONLARI — BOGA penceresi
+================================================================================================
+ON-KAYIT: ON_KAYIT_formasyon.md commit dd66728 — KOSUMDAN ONCE
+BIRINCIL HUCRE: pin bar · +4 saat · F1 = pin_BOGA - pin_AYI
+
+### 0) ZORUNLU SINAMA
+   siniflandirma sinamasi: 6/6 GECTI (cekic · kayan yildiz · doji ·
+      HICBIRI (asiri etiketleme yok) · boga yutan · ayi yutan)
+
+### 1) KAPSAM
+   sembol: 567 · olculebilir bar: 182561 · gun: 14 (2026-08-22 .. 2026-09-04)
+
+### 2) KOL ORTALAMALARI (+4 saat)
+   kol                    N   ort getiri
+   pin+1               9849     -0.1141%
+   pin-1               9853     -0.0040%
+   yutan+1            16360     -0.1030%
+   yutan-1            15511     -0.0201%
+   doji+0             20886     -0.0407%
+   kontrol            19698     -0.0303%
+
+### F1 🔴 BIRINCIL — pin_BOGA - pin_AYI  (+4 saat)
+   gun-eslesmis fark: -0.0547 puan   t = -0.56   gun = 14
+   pozitif gun: 7/14
+   esik: etki >= +0.50 VE t >= +2.5
+   -> F1 DUSTU
+   📌 |etki| = 0.055 < MDE 0.965  ->  'GOREMIYORUZ' bandi
+
+### SAGLAMA — yonler takas edilince isaret donmeli
+   duz -0.0547 · ters +0.0547 -> ✅ ayniyor
+
+### F2 — her yon KENDI kontrolunu geciyor mu?
+   pin_BOGA - kontrol : -0.0551  t -0.84  (pozitif olmali)
+   pin_AYI  - kontrol : -0.0004  t -0.01  (negatif olmali)
+   -> F2 DUSTU
+
+### F3 — ufuk tutarliligi
+   +1 saat    fark -0.0339  t -0.82
+   +4 saat    fark -0.0547  t -0.56   <- BIRINCIL
+   +24 saat   fark -0.0403  t -0.26
+   -> 3/3 ayni isaret -> F3 GECTI
+
+### F4 🔑 NEGATIF KONTROL — doji ONGORMEMELI
+   doji - kontrol: -0.0279 puan  t -1.47  (|etki| < MDE 0.965 olmali)
+   -> F4 GECTI
+
+### F5 🔴 YOGUNLASMA — en iyi 2 gun cikarilinca
+   en iyi 2 gun: 2026-08-26 +0.37, 2026-08-27 +0.34
+   cikarilinca: -0.1227 puan  t -1.22  gun 12
+   -> F5 DUSTU
+
+### IKINCIL (onceden ilan, GECTI'ye SAYILMAZ) — YUTAN
+   yutan_BOGA - yutan_AYI (+4s): -0.1285  t -1.93  gun 14
+
+### EK RAPOR — 'baska adla ayni sey mi?'
+   r(pin yonu, bar getirisi) = -0.148   <- last1'in kiligi mi?
+   r(pin yonu, hacim carpani) = -0.004  <- vol_x'in kiligi mi?
+
+================================================================================================
+HUKUM — ON_KAYIT_formasyon.md bolum 6
+================================================================================================
+   F1 DUSTU
+   F2 DUSTU
+   F3 GECTI
+   F4 GECTI
+   F5 DUSTU
+
+   SONUC: DUSTU
+
+   Coklu karsilastirma (on-kayitta ilan): 18 hucre
+   ⚠️ Pencere TEK REJIM (14/14 BOGA) -> bulgu genellestirilemez.
+   ⚠️ Etiket HAM getiri; maliyet %0,19 dahil DEGIL.
+
+Bot dosyalarina yazim: YOK

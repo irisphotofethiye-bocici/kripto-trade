@@ -10351,3 +10351,88 @@ vermiyor**: `|t| < 1`, yani sıfırdan ayırt edilemiyor.
 - Çoklu karşılaştırma **21 hücre** (ön-kayıtta ilan edilmişti).
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### ❌ MUM FORMASYONLARI — **DÜŞTÜ** (BOĞA penceresi, 2026-09-06)
+
+**Ön-kayıt:** `ON_KAYIT_formasyon.md`, commit `dd66728` — koşumdan **önce**.
+**Betikler:** `scratchpad/formasyon/00_guc.py` (güç) · `01_olcum.py`
+**N:** 182.561 bar · **567 sembol** · **14 gün** (2026-08-22 … 2026-09-04)
+**Pencere kullanıcı kararı:** *"2 yıllık veriyle değil bizim 22 ağustos sonrası
+verimizle test et"* — gerekçe: 2 yıllık veri AYI ağırlıklı, bu pencere BOĞA.
+**Doğrulandı: 14 günün 14'ü de BOĞA.**
+
+| ölçüt | sonuç | |
+|---|---|---|
+| **F1** 🔴 `pin_BOĞA − pin_AYI` (+4s) | **−0,0547 puan · t = −0,56** · 7/14 gün | ❌ |
+| **F2** her yön kendi kontrolünü geçer | BOĞA **−0,055** (pozitif olmalıydı) · AYI −0,000 | ❌ |
+| **F3** ufuk tutarlılığı | −0,034 · −0,055 · −0,040 | ✅ 3/3 (ama **ters** yönde) |
+| **F4** 🔑 negatif kontrol (doji) | −0,0279 · t=−1,47 · `\|etki\|` **< MDE** | ✅ |
+| **F5** 🔴 yoğunlaşma | en iyi 2 gün çıkınca **−0,1227** | ❌ |
+
+**HÜKÜM: DÜŞTÜ.**
+
+#### F1 "GÖREMİYORUZ" BANDINA DÜŞTÜ — ve bu önceden ilan edilmişti
+
+```
+|etki| = 0,055   ·   MDE = 0,965   ->  sifirdan ayirt EDILEMIYOR
+```
+
+Ön-kayıt bölüm 2 tam bunu öngörmüştü: *"0,2–0,97 puan arası etkiler maliyeti
+aşar ama MDE'nin altında kalır; o bantta sonuç GÖREMİYORUZ olur ve ETKİ YOK
+DEĞİLDİR."* **Ama ölçülen etki o bandın da çok altında (0,055)** — yani
+*"kenar var ama göremedik"* savunması burada da zayıf.
+
+#### 🔑 SEÇİM GEREKÇESİ TUTTU — formasyon gerçekten yeni bilgiymiş, ama BOŞ
+
+Pin bar, *"OHLC'nin hiç kullanmadığımız tek parçası"* diye seçilmişti
+(`comp` fitili yalnız **büyüklük**, `pos` yalnız **20 barlık** konum olarak
+kullanıyor). Doğrulandı:
+
+```
+r(pin yonu, barin kendi getirisi) = -0,148   <- last1'in kiligi DEGIL
+r(pin yonu, hacim carpani)        = -0,004   <- vol_x'in kiligi DEGIL
+```
+
+**Yani aday gerçekten bağımsız bilgiydi ve yine boş çıktı.** Bu, basis'in
+dersinin tekrarı: *"yeni bilgi taşımak"* ile *"kullanışlı olmak"* ayrı şeyler.
+
+#### 🔴 DÖRT TAHMİNİN İKİSİ TUTTU
+
+| tahmin | sonuç |
+|---|---|
+| *"en olası sonuç F1'in göremiyoruz bandına düşmesi"* | ✅ **tuttu** |
+| *"doji hiçbir şey göstermeyecek"* | ✅ **tuttu** (F4 geçti) |
+| *"yutan pin'den zayıf çıkacak"* | ❌ **yanlış** — yutan `t=−1,93`, pin `t=−0,56` |
+| *"etki varsa kısa ufukta en güçlü"* | ❌ etki yok; üç ufuk da düz (0,034/0,055/0,040) |
+
+#### ⚠️ İKİ GÖZLEM — kural DEĞİL, aday DA değil
+
+1. **Her iki formasyon da TERS yönde.** `yutan_BOĞA − yutan_AYI = −0,1285`
+   (t=−1,93), `pin` −0,0547. Yani *boğa formasyonları ayı formasyonlarından
+   KÖTÜ*. Yutan conventional anlamlılığa yakın — **ama ikincil hücre, MDE altı,
+   tek rejim, 14 gün ve post-hoc yön dönüşü.** Kural yapılmaz.
+2. 🔴 **F3 "geçti" ama okunuşu yanıltıcı:** üç ufkun üçü de aynı işaretli, fakat
+   o işaret **hipotezin tersi**. Ölçüt tutarlılık istiyordu, yön değil — bu bir
+   ön-kayıt eksiğidir ve not düşülüyor.
+
+#### ZORUNLU SINAMALAR
+
+- **Sınıflandırma sınaması 6/6 geçti** — çekiç · kayan yıldız · doji ·
+  **HİÇBİRİ (aşırı etiketleme yok)** · boğa yutan · ayı yutan.
+  Negatif durum bilerek konmuştu: *"hareket bitişi"* ölçümü olayların **%99,96'sını**
+  etiketleyip ölmüştü. Burada oranlar sağlıklı: pin %5,4 · yutan %8,5 · doji %11,4.
+- **Oynaklık ayrışması YOK** (0,98–1,00× taban) → `chg24` bandının düştüğü tuzak
+  burada yok, mekanikli ölçüm de yanıltmazdı.
+- **Ayna sağlaması geçti** (yönler takas edilince işaret tam döndü).
+
+#### SINIRLAR
+
+- **Tek rejim (14/14 BOĞA)** → genellenemez. Rejim kırılımı yapılamadı.
+- Etiket **ham getiri**; maliyet %0,19 dahil değil (etki zaten sıfıra yakın).
+- Yalnız **üç** formasyon; standart tanımlar, **parametre taraması yok**.
+  Başka formasyonlar denenmedi — ve denenirse çoklu karşılaştırma büyür.
+- Çoklu karşılaştırma **18 hücre** (ön-kayıtta ilan edilmişti).
+
+**Bot dosyalarına yazım: YOK.**
