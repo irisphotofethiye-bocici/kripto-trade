@@ -9348,3 +9348,65 @@ beklemeden alındı · kısmi kâr, likidasyon, düşüş freni **yok** · 13 g�
 tek epizot · sabit $1.000 notional (risk-bazlı boyutlandırma **değil**).
 
 **Bot dosyalarına yazım: YOK.**
+
+### 🟢 EK — kullanıcının tam sorusu: **19'dan itibaren, NOTR + yalnız LONG**
+
+> *"Yani bot 19'dan beri etiket değiştirmeyip NOTR'da kalsaydı ve SHORT
+> açmasaydı artıda mı olacaktı?"*
+
+Pencere **08-19 → 09-02**'ye çekilerek yeniden koşturuldu (ön-kayıtlı kollar,
+ölçüt ve mekanik **değişmedi**; yalnız başlangıç tarihi kullanıcının sorduğu
+güne alındı).
+
+```
+GERCEK BOT (defterden, gercek boyutlandirma)   235 poz   -4630,48 $   LONG 206·SHORT 29
+
+Karsi-olgu (SABIT $1.000 notional, 8 slot):
+A GERCEK (yeniden uretim)   224 poz   -2372,31 $   islem-ort -1,059%   kazanan %25,4
+B NOTR (short dahil)        171 poz    +516,02 $   islem-ort +0,302%   kazanan %33,3
+C NOTR + YALNIZ LONG         44 poz   +1162,78 $   islem-ort +2,643%   kazanan %50,0
+```
+
+**Cevap: EVET.** Ve sorulan kombinasyon (`C`) **üç kolun en güçlüsü.**
+
+#### 🟢 Ve yoğunlaşmada B ile C AYRIŞIYOR — belirleyici fark
+
+```
+B NOTR   artida gun  9/19 · en iyi 2 gun HARIC   -77,37 $   <- COKUYOR
+C LONG   artida gun 10/15 · en iyi 2 gun HARIC  +571,76 $   <- AYAKTA
+                            en iyi 5 islem HARIC +667,60 $   <- AYAKTA
+```
+
+**SHORT'lar dahil edilince kâr iki güne bağlanıyor; yalnız LONG kolu
+sağlam kalıyor.** Yani kullanıcının *"short açmasaydı"* kısıtı **süsleme değil,
+sonucun taşıyıcısı.**
+
+#### ✅ `para_cikis` yanlılığı endişesi ÇÖZÜLDÜ
+
+`C`'nin 171 kararı ile yanlılığın 167'si sayıca yakındı; örtüşme sanıldı.
+Ölçüldü — örtüşme **yok**:
+
+```
+C kolunun 171 kararinin arsivdeki GERCEK karsiligi:
+   karar-yok         129  (%75,4)   <- gercek bot bu adaylarda KARAR VERMEDI
+   LONG/ONAY_BEKLE    38  (%22,2)
+   VETO:long_veto      4   (%2,3)   <- yanliligin etkisi
+```
+
+`C`'nin işlemleri *"veto edilmişken sızan"* işlemler **değil**; NOTR dalının
+**gerçekten farklı** kararları.
+
+#### ⚠️ Ölçek uyarısı — dolar rakamı doğrudan okunamaz
+
+Kollar **sabit $1.000 notional** kullanıyor; gerçek bot **risk-bazlı**
+boyutlandırıyor ve daha büyük açıyor. Kalibrasyon: `A` yeniden üretimi
+**−2.372 $** derken gerçek bot **−4.630 $** kaybetti (≈**1,95 kat**).
+Aynı çarpanla `C` kabaca **+2.200 $** mertebesine denk gelir — ama bu bir
+**kestirimdir**, ölçüm değil.
+
+#### Kalan sınırlar
+
+N=44 · slot seçimi varış sırasına bağlı (kısmen keyfî) · `ONAY_BEKLE` bir tur
+beklemeden alındı · kısmi kâr/likidasyon/düşüş freni yok · 15 gün, tek epizot ·
+ve `olcumler.md`'de kayıtlı **açık çelişki**: bugünkü sentetik ölçümler
+*"BOĞA'da SHORT kaybettirir"* demişti, `B`'nin SHORT bacağı ise artıda.
