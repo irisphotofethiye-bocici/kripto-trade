@@ -260,6 +260,13 @@ büyüklüğünü tek satırda gösteriyor.
 şey: **stop mesafesi A+B için yeniden ölçülmeli.** İki kapı arasındaki asimetri de
 dikkat çekici: MA50+ucuz'un stopu kapıya uyuyor, A+B'nin uymuyor.
 
+> 🔴 **[ŞERH 2026-09-05] BU KUTUNUN ASİMETRİ YORUMU 2 YILLIK VERİDE DESTEKLENMEDİ.**
+> Yukarıdaki kıyas **stopsuz kolu SABİT ufukta** tutuyor — iki kolun tutma süresi
+> eşit değil. Aynı kusur `stop_mu_sure_mu`'da (2026-08-26) işareti **döndürmüştü**.
+> Stop genişliği taraması iki kapıda da koşturuldu: **6 karşılaştırmanın 6'sı da
+> aynı yön** → *"A+B'nin stopu kapısına uymuyor"* **yeniden üretilemedi**.
+> Sayılar ve hüküm: bu dosyada → *STOP MESAFESİ (2026-09-05)*. **İş kapandı.**
+
 **Defterde şöyle yazılı: "Pencere kuralı gereği ŞİMDİ UYGULANMAZ (138 işlem / 30 gün
 dolana kadar parametre donuk). Pencere sonrası İLK İŞ bu."**
 
@@ -8186,3 +8193,142 @@ değiştiriyor. **Ağırlık ayarı bunu çözmüyor** çünkü çözülecek bir
 ⚠️ Tek somut aday `s_brk`'ın **ters çevrilmesi** — ayrı yarıda +0,97 puan
 kazandırdı ama saptama eşiğinin altında kaldı. **Veri bekleyen** bir aday;
 `pos<0.25` (V3) ile aynı sınıfta.
+
+---
+
+## 🔴 STOP MESAFESİ — hakem raporunun 5. maddesi (2026-09-05) — **DÜŞTÜ**
+
+**Ön-kayıt:** `ON_KAYIT_stop_mesafesi.md`, commit `409e514` — koşumdan **önce**.
+**Betik:** `scratchpad/stop_mesafesi.py` · ham çıktı `scratchpad/stop_mesafesi_sonuc.txt`
+**Kapsam sayımı:** `scratchpad/stop_kapsam_sayim.py` (ön-kayıttan önce, yalnız tetik sayar).
+
+### Kapsam — `oi24` bacağı ÖLÇÜLEMEZ, bu koşumdan ÖNCE sayıldı
+
+```
+perp_seri OI olan sembol                  153   (klines 566)
+A_funding tetigi, OI penceresi icinde      64   ayri gun 23   <- UST SINIR
+```
+
+`A+B ⊂ A_funding`, yani gerçek A+B bundan da küçük. **Ölçülen şey A+B'nin
+FUNDING BACAĞI'dır, tam A+B değil.** Aynı kısıt bir kez daha kayıtlı
+(*"oi24 bacağı ölçülemedi"*, satır 123).
+
+### Kollar (ön-kayıtlı dördü, `gainer_stop.py`'nin kümesi — yeni eşik icat YOK)
+
+`A` (mevcut) · `1.5x` · `2.5x` · `4.0x` ATR. Merdiven **monoton** —
+betiğin `sinama()`'sı bunu koşumdan önce doğrular, düşerse çalışmayı reddeder.
+
+### `A_funding` — N=4.343 işlem · 653 gün · 419 sembol (en sık 5 sembol payı %5)
+
+```
+kol      stop%     net%          R    stop-ol%   hedef%    saat
+A         4,55   +0,074    -0,0092       63,4     28,7     19,8
+1.5x      5,53   +0,016    +0,0011       58,4     32,1     22,6
+2.5x      9,22   +0,219    +0,0235       42,2     39,9     32,0
+4.0x     14,74   +0,304    +0,0242       26,8     44,0     40,2
+```
+
+| eşleşmiş fark (kol − A) | **R** (birincil) | `net%` (ikincil) |
+|---|---|---|
+| `1.5x` | +0,0068 · t=+0,49 · MDE 0,028 → göremiyoruz | −0,034 · t=−0,57 → göremiyoruz |
+| `2.5x` | +0,0518 · **t=+1,98** · MDE 0,052 → göremiyoruz | **+0,329 · t=+2,43 → GÖRÜLÜR** |
+| `4.0x` | +0,0577 · t=+1,86 · MDE 0,062 → göremiyoruz | **+0,453 · t=+2,55 → GÖRÜLÜR** |
+
+**Permütasyon** (işaret-çevirme, gün bazında, 2.000 tur): `max|t| = 1,98` → **p = 0,090**.
+
+### 🔴 HÜKÜM: **K1 DÜŞTÜ** — kod DEĞİŞMEDİ
+
+Hiçbir varyant `R` üzerinde `t ≥ +2,0`'a ulaşmadı ve permütasyon `p = 0,090 > 0,05`.
+Ölçüt metni sonuç görüldükten sonra **değiştirilmedi**; K2/K3/K4 uygulanmadı.
+
+⚠️ `2.5x` **t=+1,98** ile eşiğin **kılpayı altında** kaldı ve MDE'yle başa baş
+(+0,0518 vs 0,0522). Bu *"etki yok"* değil, **"göremiyoruz"**.
+
+### ⭐ ASIMETRİ İDDİASI ÇÜRÜTÜLDÜ — ön-kayıtlı yorum kuralıyla
+
+Kayıtlı iddia: A-stop, A+B'nin ham kenarının **%65'ini** yiyor; MA50+ucuz'da **%0**
+→ *"A+B'nin stopu kapısına uymuyor."* Aynı tarama iki kapıda da koşturuldu:
+
+```
+                  A_funding    B_ma50ucuz
+R    1.5x           +0,0068       +0,0373      AYNI yon
+R    2.5x           +0,0518       +0,0530      AYNI yon
+R    4.0x           +0,0577       +0,0549      AYNI yon
+net% 1.5x           -0,0341       -0,0035      AYNI yon
+net% 2.5x           +0,3288       +0,0890      AYNI yon
+net% 4.0x           +0,4528       +0,0670      AYNI yon
+```
+
+**Altı karşılaştırmanın altısı da aynı yön.** Ön-kayıtlı yorum kuralı gereği:
+**asimetri DESTEKLENMEDİ.** Dahası ters yönde — `R` ölçütünü geçen kol
+*"stopu kapısına uyan"* denen `B_ma50ucuz`'da çıktı (`1.5x` t=+2,26 · `2.5x`
+t=+2,04 · permütasyon **p=0,048**). Birincil evren o değildi, hüküm oraya
+**taşınmadı** (en iyi hücre seçilmez).
+
+### 🔑 MEKANİZMA — stop mutlak olarak dar DEĞİL, **%10 HEDEFE GÖRE** dar
+
+Ön-kayıtlı ikincil kol (hedef = 2×risk, yani R ölçeği korunur) tabloyu **tersine
+çeviriyor**:
+
+```
+A_funding, hedef 2R:   A +0,0203   1.5x +0,0170   2.5x +0,0179   4.0x +0,0127
+A_funding, hedef %10:  A -0,0092   1.5x +0,0011   2.5x +0,0235   4.0x +0,0242
+```
+
+**Hedef stopla birlikte ölçeklendiğinde `A` EN İYİ kol.** Genişletmenin kazancı
+yalnız **sabit %10 hedefle** var. Yani sorun stopun kendisi değil,
+**dar stop ile uzak sabit hedefin uyuşmazlığı**: `A` kolunda işlemlerin
+**%63,4'ü** hedefe hiç yaklaşamadan stop oluyor.
+
+⚠️ Bu **betimleyici** bir gözlemdir (ikincil kol, ön-kayıtta *"hüküm taşımaz"*
+diye ilan edildi). Kural adayı olması için **kendi ön-kaydı** gerekir.
+Not: sabit %10 hedefin `MA50+ucuz`'a genişletilmesinin dayanağı zaten
+çürütülmüştü (`durum.md` → beşinci iş) — bu gözlem o açık soruyla **aynı yere** bakıyor.
+
+### Akış (her kol KENDİ %2 elemesiyle — BETİMLEYİCİ, hüküm taşımaz)
+
+```
+A_funding    A=4.343   1.5x=6.611   2.5x=7.206   4.0x=7.242
+B_ma50ucuz   A=4.515   1.5x=9.311   2.5x=10.347  4.0x=10.361
+```
+
+Geniş stop akışı **%52–%106 artırır** — `asgari_stop %2` kapısını daha çok aday geçer.
+Bu **yol etkisi değil akış etkisi**; eşleşmiş testte kasıtlı olarak dışarıda tutuldu.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 4'te 3
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | stop-olma oranı genişlikle monoton düşer, süre uzar | ✅ TUTTU (63,4→26,8 · 19,8→40,2 sa) |
+| 2 | `net%`'te geniş kollar `A`'yı geçer | ✅ TUTTU (+0,33 / +0,45, t=2,43 / 2,55) |
+| 3 | `R`'de geniş kollar `A`'ya **kaybeder** | ❌ **YANLIŞ** — `R` genişlikle **iyileşti** |
+| 4 | asimetri tekrarlanmayacak | ✅ TUTTU (6/6 aynı yön) |
+
+**3. tahmin neden yanlıştı:** genişlik cezasının yol kazancını yiyeceğini
+söylemiştim. Aritmetik tersini gösterdi — `A`'da stop-olma **%63,4** olduğu için
+kaybedilen `−1R`'ler, dar stopun kazandırdığı yüksek `R`'li galibiyetleri
+(%28,7 × 2,20R) tam olarak dengeliyor. İki kol da **sıfıra yakın**; ceza vardı
+ama kazanç da vardı.
+
+### 🔴 %65 KAYDINA ŞERH
+
+`olcumler.md` → *"A+B'nin ham kenarının %65'ini KENDİ STOPUMUZ yiyor"* (satır 245)
+kaydı, **stopsuz kolu SABİT ufukta** tutup A-stop koluyla karşılaştırmıştı;
+iki kolun **tutma süresi eşit değildi**. `stop_mu_sure_mu` (2026-08-26) tam bu
+kusuru yakalayıp işareti **döndürmüştü**. Bu ölçüm üçüncü kanıt:
+
+- İki kapı arasındaki **asimetri yeniden üretilemedi** (6/6 aynı yön)
+- `A` ile neredeyse-stopsuz `4.0x` arasındaki `net%` farkı **0,23 puan** —
+  kayıttaki 6,10 → 2,14 uçurumuna benzemiyor
+
+**Kayıt silinmiyor** (proje kuralı), ama *"A+B'nin stopu kapısına uymuyor"*
+yorumu **2 yıllık veride desteklenmiyor.**
+
+### Sınırlar — ön-kayıtta ilan edildiği gibi
+
+`oi24` bacağı yok · likidasyon modellenmiyor (`4.0x` gerçekte
+`kaldirac_guvenlik_kirp` ile reddedilebilir) · portföy aşaması yok ·
+kısmi kâr (%40 hedef) modellenmiyor · `SEYRELT=24` faz kilitler (bu soruda
+saat boyutu yok, zararsız).
+
+**Bot dosyalarına yazım: YOK.**

@@ -1593,3 +1593,50 @@ yazıyordu. Ölçüldü: **zararlı tersine dönüş yok**, fayda da yok (BOĞA
 Ölçütleri **şimdiden sabit**, sonradan gevşetilmeyecek.
 
 3. A+B'nin 12-24 saatlik ufku · 4. Stop mesafesi
+
+---
+
+## 2026-09-05 · STOP MESAFESİ ÖLÇÜLDÜ — hakem raporunun 5. maddesi **KAPANDI**
+
+**Ön-kayıt:** `ON_KAYIT_stop_mesafesi.md` (commit `409e514`, koşumdan önce).
+**Rakamlar:** `olcumler.md` → *STOP MESAFESİ (2026-09-05)*. Buraya yazılmaz.
+
+### Karar 1 — 🔴 KOD DEĞİŞMEDİ, ölçüt geçmedi
+
+Ön-kayıtlı K1 (`R` farkı · gün-kümeli t ≥ +2,0 · permütasyon p ≤ 0,05) **düştü**.
+En iyi varyant eşiğin **kılpayı altında** ve MDE'yle başa baş → hüküm
+*"etkisiz"* değil **"göremiyoruz"**. K2/K3/K4 uygulanmadı.
+
+### Karar 2 — asimetri iddiası ÇÜRÜTÜLDÜ, iş kapandı
+
+Bu maddenin gerekçesi *"A+B'nin stopu kapısına uymuyor, MA50+ucuz'unki uyuyor"*
+idi. Aynı tarama iki kapıda koşturuldu: **altı karşılaştırmanın altısı da aynı
+yön.** Ön-kayıtlı yorum kuralı gereği asimetri **desteklenmedi**.
+
+Kaynak kaydına (`olcumler.md`, %65 kutusu) **şerh düşüldü** — kayıt silinmedi.
+🔴 **Bu iş listeden düşer.** Hakem raporunun 5. maddesi kapandı.
+
+### Karar 3 — yeni ve daha keskin soru doğdu (henüz ölçülmedi)
+
+Ön-kayıtlı ikincil kol şunu gösterdi: **hedef stopla birlikte ölçeklendiğinde
+botun mevcut stopu EN İYİ kol.** Genişletmenin kazancı yalnız **sabit %10
+hedefle** var. Yani sorun stop değil, **dar stop ile uzak sabit hedefin
+uyuşmazlığı.**
+
+⚠️ **Betimleyicidir, hüküm değildir** — ön-kayıtta öyle ilan edildi. Kural adayı
+olması için kendi ön-kaydı gerekir. Ve bu, zaten açık olan **beşinci işle**
+(sabit %10 hedefin `MA50+ucuz`'a genişletilmesi, dayanağı çürütülmüş) **aynı yere
+bakıyor** — ikisi ayrı tartışılırsa aynı soruya iki kez dayanılır.
+
+### `CLAUDE.md`'ye yeni tuzak eklendi
+
+*"Stopsuz kıyas SÜREYİ de değiştirir"* — üç vakayla. Bu hata sınıfı iki ayrı
+anlatıyı haftalarca ayakta tuttu.
+
+### Sırada — üç iş
+
+1. **`pos<0.25` koşullu mekanik (V3)** — veri bekliyor, ölçütü sabit
+2. **`s_brk`'ın ters çevrilmesi** — veri bekliyor, ölçütü sabit
+3. **A+B'nin 12-24 saatlik ufku** — kendi ön-kaydını bekliyor
+
+*(4. sıradaki "stop mesafesi" bu tarihte kapandı.)*

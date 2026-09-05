@@ -1,0 +1,114 @@
+==============================================================================
+STOP MESAFESI — A+B'nin FUNDING BACAGI (oi24 olculemez, bkz. on-kayit)
+==============================================================================
+ON-KAYIT: ON_KAYIT_stop_mesafesi.md commit 409e514 — KOSMADAN once
+Mekanik: ileri_rr'den CAGRILIR · hedef %10.0 · 72s · maliyet %0.13 · FONLAMA DAHIL
+Eslestirme: asgari_stop %2.0, A koluna gore -> dort kolda AYNI girisler
+
+sinama: GECTI (merdiven monoton · maliyet %0.13 · fonlama medyan |r|=0.0054)
+islenen sembol: 566
+
+### A_funding   N=4343 islem · 653 gun · 419 sembol
+    en sik 5 sembol payi: 5%
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          4.55    +0.074   -0.0092     63.4     28.7    19.8
+  1.5x       5.53    +0.016   +0.0011     58.4     32.1    22.6
+  2.5x       9.22    +0.219   +0.0235     42.2     39.9    32.0
+  4.0x      14.74    +0.304   +0.0242     26.8     44.0    40.2
+
+  eslesmis fark (kol - A), BIRINCIL olcu R:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      +0.0068    +0.49   0.0280     653  goremiyoruz
+  2.5x      +0.0518    +1.98   0.0522     653  goremiyoruz
+  4.0x      +0.0577    +1.86   0.0620     653  goremiyoruz
+
+  eslesmis fark (kol - A), ikincil olcu net%:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      -0.0341    -0.57   0.1199     653  goremiyoruz
+  2.5x      +0.3288    +2.43   0.2709     653  GORULUR
+  4.0x      +0.4528    +2.55   0.3548     653  GORULUR
+
+  permutasyon (isaret-cevirme, gun bazinda, 2000 tur):
+    gozlenen |t|: 1.5x=0.49  2.5x=1.98  4.0x=1.86
+    max|t| = 1.98   ->   p = 0.0900
+  akis (her kol KENDI %2.0 elemesiyle kac aday gecerdi — BETIMLEYICI):
+    A=4343  1.5x=6611  2.5x=7206  4.0x=7242
+
+### B_ma50ucuz   N=4515 islem · 652 gun · 298 sembol
+    en sik 5 sembol payi: 6%
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          3.78    -0.245   -0.0796     71.4     22.0    17.1
+  1.5x       4.84    -0.181   -0.0298     65.2     26.8    20.3
+  2.5x       8.07    -0.112   -0.0056     50.5     34.6    28.9
+  4.0x      12.92    +0.013   +0.0117     34.9     40.1    37.7
+
+  eslesmis fark (kol - A), BIRINCIL olcu R:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      +0.0373    +2.26   0.0330     652  GORULUR
+  2.5x      +0.0530    +2.04   0.0520     652  GORULUR
+  4.0x      +0.0549    +1.82   0.0603     652  goremiyoruz
+
+  eslesmis fark (kol - A), ikincil olcu net%:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      -0.0035    -0.05   0.1403     652  goremiyoruz
+  2.5x      +0.0890    +0.62   0.2872     652  goremiyoruz
+  4.0x      +0.0670    +0.34   0.3983     652  goremiyoruz
+
+  permutasyon (isaret-cevirme, gun bazinda, 2000 tur):
+    gozlenen |t|: 1.5x=2.26  2.5x=2.04  4.0x=1.82
+    max|t| = 2.26   ->   p = 0.0480
+  akis (her kol KENDI %2.0 elemesiyle kac aday gecerdi — BETIMLEYICI):
+    A=4515  1.5x=9311  2.5x=10347  4.0x=10361
+
+==============================================================================
+HUKUM — ON_KAYIT_stop_mesafesi.md bolum 9
+==============================================================================
+K1  R farki > 0 · t_gun >= +2.0 · permutasyon p <= 0.05
+    -> DUSTU: hicbir varyant t>=+2.0 ile pozitif degil
+K2/K3/K4 uygulanmadi (K1 dustu)
+
+SONUC: DUSTU
+
+==============================================================================
+ASIMETRI SORUSU — iki kapinin genislik profili ayni mi?
+==============================================================================
+  R farklari (kol - A):
+    1.5x   A_funding   +0.0068   B_ma50ucuz   +0.0373   -> AYNI yon
+    2.5x   A_funding   +0.0518   B_ma50ucuz   +0.0530   -> AYNI yon
+    4.0x   A_funding   +0.0577   B_ma50ucuz   +0.0549   -> AYNI yon
+  net% farklari (kol - A):
+    1.5x   A_funding   -0.0341   B_ma50ucuz   -0.0035   -> AYNI yon
+    2.5x   A_funding   +0.3288   B_ma50ucuz   +0.0890   -> AYNI yon
+    4.0x   A_funding   +0.4528   B_ma50ucuz   +0.0670   -> AYNI yon
+
+  YORUM KURALI (on-kayitli): profiller niteliksel olarak AYNIYSA
+  asimetri iddiasi (A+B %65 vs MA50+ucuz %0) DESTEKLENMEDI.
+
+==============================================================================
+IKINCIL (on-kayitli, BETIMLEYICI): hedef = 2 x risk — R olcegi korunur
+==============================================================================
+### A_funding   N=4287
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          4.24    +0.186   +0.0203     59.0     34.4    17.4
+  1.5x       5.17    +0.126   +0.0170     57.5     32.5    22.5
+  2.5x       8.62    +0.244   +0.0179     45.6     18.5    41.9
+  4.0x      13.79    +0.298   +0.0127     30.0      6.9    55.8
+  eslesmis fark (kol - A), R:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      -0.0114    -0.71   0.0322     653  goremiyoruz
+  2.5x      +0.0367    +1.35   0.0542     653  goremiyoruz
+  4.0x      +0.0365    +1.26   0.0578     653  goremiyoruz
+
+### B_ma50ucuz   N=4513
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          3.78    -0.259   -0.0664     65.9     30.5    13.3
+  1.5x       4.84    -0.271   -0.0450     64.2     29.3    18.9
+  2.5x       8.06    -0.400   -0.0354     54.4     17.1    37.3
+  4.0x      12.90    -0.282   -0.0047     38.4      5.8    52.0
+  eslesmis fark (kol - A), R:
+  kol          fark    t_gun      MDE     gun gorulur mu
+  1.5x      -0.0043    -0.21   0.0405     652  goremiyoruz
+  2.5x      +0.0032    +0.10   0.0611     652  goremiyoruz
+  4.0x      +0.0169    +0.55   0.0611     652  goremiyoruz
+
+Bot dosyalarina yazim: YOK

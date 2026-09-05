@@ -68,6 +68,19 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   +0,243 vs kontrol +0,035 (t=+3,84) iken A-stop'la +0,051'e iniyordu; ölü sinyal
   taramasında A-stop **A+B'nin ham kenarının %65'ini** yiyordu — MA50+ucuz'da %0.
   Bir kapı "çalışmıyor" derken **kapının mı, stopun mu** çalışmadığı ayrılmalı.
+- 🔴 **AMA TERSİ DE TUZAK: "stopsuz kıyas" SÜREYİ de değiştirir — ÜÇ KEZ ısırdı.**
+  Yukarıdaki kural *"mekanikten arınık ölç"* der ve bu **stopsuz kolu sabit ufukta
+  tutmak** diye uygulandı. Yanlış: stoplu kol **erken çıkar**, stopsuz kol ufkun
+  sonuna kadar durur. Fark *"stopun zararı"* değil, **stop + süre karışımıdır.**
+  **Vakalar:** (1) *"A-stop A+B'nin ham kenarının %65'ini yedi"* — asimetrisi 2 yıllık
+  veride yeniden üretilemedi; (2) *"farkı yiyen şey stop mekaniği"* betimlemesi —
+  ufuk eşleştirilince **işaret döndü**, stop yardım ediyordu; (3) kanal/StochRSI'de
+  aynı desen. İlk ikisi haftalarca *"stopumuz kenarı yiyor"* anlatısını besledi.
+  **Doğrusu — ikisinden biri:** (a) **eşleşmiş süre** — stopsuz kolu, stoplu kolun
+  *kendi gerçekleşen tutma süresi* kadar tut (`stop_mu_sure_mu.py` deseni); ya da
+  (b) **eşleşmiş giriş, farklı genişlik** — her kolun kendi stopu olsun, hiçbiri
+  stopsuz olmasın (`stop_mesafesi.py` deseni). **Sabit ufuk + stopsuz kol = teşhis
+  aracı bile değil.** Ayrıntı ve sayılar `olcumler.md`.
 - 🔴 **KURAL İHLAL EDİLDİ (2026-08-20) — "mekanikten arınık ölç" yetmiyor, ARANACAK
   BİR SINAMA gerek.** Yukarıdaki sıra kuralı yazılıydı ve yine atlandı: `chg24` bant
   ölçümleri doğrudan A-stop + %10 hedefle yapıldı, ham getiri hiç bakılmadı. Sonuç:
