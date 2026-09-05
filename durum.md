@@ -1827,3 +1827,50 @@ Geniş örneklemde **hiçbiri görülür değil** (2.5x −0,088, t=−1,51). İ
    Temiz bir sınama için **kendi ön-kaydıyla, K4'süz** yeniden kurulmalı
 2. `pos<0.25` (V3) · 3. `s_brk` ters çevirme — veri bekliyor
 4. `klines_1h_uzun`'a taze veriyi **dosya olarak** birleştirmek (ayrı onay)
+
+---
+
+## 2026-09-05 (6) · UCUZ vs PAHALI — **DÜŞTÜ**, ve kapının fiyat bacağı şüpheli
+
+**Ön-kayıt:** `ON_KAYIT_pahali_ayna.md` (`5f213c2`). **Rakamlar:** `olcumler.md`.
+
+### Karar 1 — pahalıya çevirmek işe yaramıyor
+
+BOĞA'da iki kol arasındaki fark **−0,026**, MDE **1,019** — kırkta biri.
+K1 ve K3 düştü. **Kod değişmedi.**
+
+### Karar 2 — 🔴 KAPININ FİYAT BACAĞINI DOĞURAN BULGU ŞÜPHELİ
+
+Ön-kayıta *"NÖTR/AYI'da ucuz önde olacak; üretilemezse o bulgu da şüpheli
+demektir"* yazmıştım. **Üretilemedi, tersi çıktı** (NÖTR +0,078 · AYI +0,521
+pahalı lehine). 2026-08-10 yön avının *"ucuz coinler BTC'nin altında kalır"*
+bulgusu 2 yıllık veride **yeniden üretilemiyor.**
+
+### Karar 3 — ⭐ fiyat seviyesi hiçbir rejimde bilgi taşımıyor
+
+Post-hoc mutlak kârlılık: **altı hücrenin altısı da görülemiyor** (en büyük
+`|t|` = 1,36). Ne ucuz ne pahalı. Kapının fiyat bacağı muhtemelen **boş**;
+geriye MA50 bacağı kalır. **Ayrı ön-kayıt ister** — bugün bu pencerede onlarca
+hücreye bakıldı.
+
+### Karar 4 — config'in eşiği kaymış
+
+`$0,07`, kayıtlı gerekçesindeki **%20 dilimi değil** (gerçek: $0,0318).
+Kapı olması gerekenden **gevşek** çalışıyor. Config'in kendi uyarısı doğrulandı.
+
+### Tahmin karnem 4'te 1 (+1 kısmi)
+
+### 🔴 "Yeni bot" envanteri — bugünkü hâl
+
+| aday | durum |
+|---|---|
+| `pos<0.25` koşullu mekanik | tutarlı, **güçsüz** |
+| BOĞA'da geniş stop (`A_funding`) | iki pencerede tutarlı, **en güçlü aday**, resmî hüküm DÜŞTÜ |
+| `s_brk` ters çevirme | tutarlı, **güçsüz** |
+| MA50 kapısı | ayırıyor, **kâr kanıtlanmadı** · BOĞA'da kapalı kalmalı |
+| **fiyat seviyesi (ucuz/pahalı)** | ❌ **hiçbir rejimde bilgi yok** *(YENİ)* |
+| skor (5 bileşen) | ❌ bilgi yok |
+| boyutlandırma / risk paritesi | ✅ çalışıyor, dokunma |
+
+**Karar-değeri taşıyan tek bir kaldıraç yok.** Yeni bot kurmak için malzeme
+henüz **yetersiz**.

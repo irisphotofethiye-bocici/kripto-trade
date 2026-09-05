@@ -8764,3 +8764,97 @@ ama ön-kayıt şerhi *"ikisi de raporlanır"* diyordu ve raporlanıyor.
 13 gün · tek BOĞA epizodu · likidasyon yok · portföy aşaması yok · kısmi kâr yok ·
 A+B alt kümesi yalnız `perp_seri` OI'si olan 153 sembolden.
 **Bot dosyalarına yazım: YOK · mevcut arşivlere yazım: YOK.**
+
+---
+
+## 🔴 UCUZ yerine PAHALI — **DÜŞTÜ**, ve orijinal bulguyu şüpheye düşürdü (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_pahali_ayna.md`, commit `5f213c2` — koşumdan **önce**.
+**Betikler:** `scratchpad/pahali_kapsam.py` (eşik/kapsam, ön-kayıttan önce) ·
+`pahali_ayna.py` (hüküm) · `pahali_mutlak.py` (post-hoc, **bulgu değil**).
+**Kullanıcı sorusu:** *"ma50 ucuz yerine pahalı olsa ne olur"*
+
+### Eşik uydurulmadı — ve yolda bir olgu çıktı
+
+```
+2 yil fiyat dilimleri:  %20 $0,0318 · %50 $0,2236 · %80 $2,3610
+```
+
+🔴 **Config'in "$0,07 = %20 dilim" gerekçesi bu evrende TUTMUYOR** — gerçek %20
+dilimi **$0,0318**. Kapı kayıtlı gerekçesinden **daha gevşek** (~%28-30 dilimi).
+Config'in *"ham fiyat eşiği zamanla kayar"* uyarısı **doğrulandı.**
+Ayna eşiği **$2,3610** (=%80 dilim) buradan geldi, tarama yapılmadı.
+
+### Sonuç
+
+```
+                UCUZ                  PAHALI              PAHALI-UCUZ
+tum pencere  N=16130  -0,152%    N=5914  -0,028%
+NOTR         N=11789  -0,020%    N=3924  +0,208%       +0,0777  t +0,45
+AYI          N= 2501  -0,183%    N= 562  +0,217%       +0,5210  t +1,24
+BOGA         N= 1840  -0,953%    N=1428  -0,770%       -0,0259  t -0,05
+taze pencere N=  553  -0,153%    N= 135  -0,767%       -0,3279  t -0,65
+```
+
+| # | ölçüt | değer | sonuç |
+|---|---|---|---|
+| **K1** | BOĞA'da `PAHALI−UCUZ` > 0 · t ≥ +2,0 | −0,0259 · t=−0,05 | ❌ **DÜŞTÜ** |
+| **K2** | taze pencerede aynı işaret | −0,3279 | ✅ GEÇTİ |
+| **K3** | güç, fark ≥ MDE | 0,026 vs **1,019** | ❌ **GÖREMİYORUZ** |
+
+**SONUÇ: DÜŞTÜ.** BOĞA'da iki kol arasındaki fark **yok denecek kadar küçük**
+(−0,026) ve MDE'nin **kırkta biri**.
+
+### 🔴 ÖN-KAYITTA SÖZ VERİLEN SONUÇ DOĞDU
+
+Tahmin 1'e şunu yazmıştım: *"NÖTR/AYI'da UCUZ önde olacak — orijinal yön avının
+bulgusu (fiyat log10 +1,57) yeniden üretilmeli. **Üretilemezse o bulgu da
+şüpheli demektir.**"*
+
+**Üretilemedi — üstelik TERSİ çıktı:** NÖTR'de `PAHALI−UCUZ` **+0,078**,
+AYI'da **+0,521**. Yani iki rejimde de **pahalı** önde.
+
+🔴 Kendi ön-kayıtlı kuralım gereği: **MA50+ucuz kapısının fiyat bacağını doğuran
+bulgu** (*"ucuz coinler BTC'nin altında kalır"*, 2026-08-10 yön avı)
+**2 yıllık veride yeniden üretilemedi ve ŞÜPHELİDİR.**
+
+### ⭐ POST-HOC — asıl cevap burada (BULGU DEĞİL, ön-kayıtsız)
+
+Mutlak kârlılık, gün-kümeli (`pahali_mutlak.py`):
+
+```
+kol     rejim      N     gun     net%     t_gun     MDE      gorulur mu
+UCUZ    NOTR   11789    599   +0,1050   +0,97   0,2166    goremiyoruz
+UCUZ    AYI     2501     96   -0,1949   -0,94   0,4138    goremiyoruz
+UCUZ    BOGA    1840     95   -0,2028   -0,56   0,7201    goremiyoruz
+PAHALI  NOTR    3924    573   +0,1827   +1,36   0,2695    goremiyoruz
+PAHALI  AYI      562     89   +0,3261   +0,89   0,7322    goremiyoruz
+PAHALI  BOGA    1428     85   -0,2287   -0,63   0,7204    goremiyoruz
+```
+
+🔑 **ALTI HÜCRENİN ALTISI DA GÖRÜLEMİYOR.** En büyük mutlak t **1,36**.
+**Fiyat seviyesi hiçbir rejimde ölçülebilir bilgi taşımıyor** — ne ucuz ne pahalı.
+
+⚠️ Bu, kapının **fiyat bacağının boş** olduğunu düşündürüyor; geriye yalnız
+**MA50 bacağı** kalır. Ama bu **ayrı bir ön-kayıt** ister — bugün bu pencerede
+onlarca hücreye bakıldı, buradan kural çıkmaz.
+
+⚠️ **Gün-ortalaması ile işlem-ortalaması bu tabloda da ayrışıyor**
+(`UCUZ/NOTR`: işlem −0,020 vs gün +0,105). Bu veri setinde iki toplama yöntemi
+sistematik olarak farklı sonuç veriyor — tek başına bir uyarıdır.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — **4'te 1 (+1 kısmi)**
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | NÖTR/AYI'da UCUZ önde (orijinal bulgu yeniden üretilir) | ❌ **YANLIŞ** — tersi çıktı |
+| 2 | BOĞA'da işaret döner (pahalı önde), fark küçük | ❌ işaret dönmedi (−0,026); "küçük" kısmı doğru |
+| 3 | iki kol da BOĞA'da mutlak negatif | ✅ TUTTU (−0,953 · −0,770) |
+| 4 | pahalı kolun stopu belirgin dar, elemesi ağır | ⚠️ **kısmi** — eleme ağır (%90 vs %82) ama stop yalnız %8 dar (2,96 vs 3,22) |
+
+### Sınırlar
+
+Fiyat eşikleri **sabit dolar** (2 yılda kayar — bu ölçümün kendi bulgusu) ·
+BOĞA 95 gün · likidasyon yok · portföy aşaması yok · kısmi kâr yok.
+
+**Arşive yazım: YOK. Bot dosyalarına yazım: YOK.**

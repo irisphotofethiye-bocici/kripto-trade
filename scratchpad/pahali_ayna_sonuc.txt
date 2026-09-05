@@ -1,0 +1,57 @@
+==============================================================================
+UCUZ yerine PAHALI — fiyat seviyesinin isareti rejimle donuyor mu?
+==============================================================================
+ON-KAYIT: ON_KAYIT_pahali_ayna.md commit 5f213c2 — KOSMADAN once
+UCUZ  = fiyat <= $0.0700   ·   PAHALI = fiyat >= $2.3610 (2 yil %80 dilim)
+ikisinde de ma50_mesafe >= %3.72 · SHORT · A-stop · %10 hedef · 72s
+
+  sinama: GECTI (merdiven · ayna esigi ucuzun ustunde)
+
+sembol: 566
+asgari_stop %2.0 elemesi: {'PAHALI_asgari_stop': 51655, 'UCUZ_asgari_stop': 73563}
+
+### TUM PENCERE (2 yil + taze)
+  UCUZ     N=16130  gun=730  sembol=316   net%  -0.152  R  -0.0501  stop%  3.22  stop-ol %74
+  PAHALI   N=5914   gun=708  sembol=156   net%  -0.028  R  -0.0221  stop%  2.96  stop-ol %74
+
+### REJIME GORE (birincil hucre: BOGA)
+  --- BOGA ---
+  UCUZ     N=1840   gun=95   sembol=271   net%  -0.953  R  -0.3121  stop%  3.21  stop-ol %80
+  PAHALI   N=1428   gun=85   sembol=111   net%  -0.770  R  -0.3032  stop%  2.97  stop-ol %80
+           PAHALI - UCUZ :  -0.0259   t_gun  -0.05   MDE  1.0186  -> goremiyoruz
+
+  --- NOTR ---
+  UCUZ     N=11789  gun=599  sembol=310   net%  -0.020  R  -0.0091  stop%  3.21  stop-ol %73
+  PAHALI   N=3924   gun=573  sembol=147   net%  +0.208  R  +0.0638  stop%  2.92  stop-ol %72
+           PAHALI - UCUZ :  +0.0777   t_gun  +0.45   MDE  0.3457  -> goremiyoruz
+
+  --- AYI ---
+  UCUZ     N=2501   gun=96   sembol=298   net%  -0.183  R  -0.0507  stop%  3.30  stop-ol %73
+  PAHALI   N=562    gun=89   sembol=88    net%  +0.217  R  +0.0919  stop%  3.19  stop-ol %70
+           PAHALI - UCUZ :  +0.5210   t_gun  +1.24   MDE  0.8411  -> goremiyoruz
+
+### TAZE PENCERE (2026-08-21 ->) — DOGRULAMA, kesif degil
+  UCUZ     N=553    gun=13   sembol=250   net%  -0.153  R  -0.0918  stop%  3.33  stop-ol %71
+  PAHALI   N=135    gun=13   sembol=52    net%  -0.767  R  -0.2448  stop%  3.09  stop-ol %74
+           PAHALI - UCUZ :  -0.3279   t_gun  -0.65   MDE  1.0130
+
+==============================================================================
+HUKUM — ON_KAYIT_pahali_ayna.md bolum 5
+==============================================================================
+K1  BOGA'da PAHALI - UCUZ > 0 · t_gun >= +2,0 : -0.0259  t -0.05 -> DUSTU
+K2  taze pencerede AYNI isaret : -0.3279 -> GECTI
+K3  guc |fark| >= MDE : 0.0259 vs 1.0186 -> GOREMIYORUZ
+
+SONUC: DUSTU (dusen: K1, K3)
+
+==============================================================================
+YORUM KURALI (on-kayit bolum 5, OLCUT DEGIL)
+==============================================================================
+  PAHALI - UCUZ :  BOGA -0.0259 · NOTR +0.0777 · AYI +0.5210
+  -> fiyat seviyesi bu rejimde belirgin bilgi tasimiyor.
+
+MUTLAK KARLILIK (tahmin 3): BOGA'da iki kol da negatif mi?
+   UCUZ    -0.953%
+   PAHALI  -0.770%
+
+Veri BELLEKTE birlestirildi · arsive yazim: YOK · bot dosyalarina yazim: YOK
