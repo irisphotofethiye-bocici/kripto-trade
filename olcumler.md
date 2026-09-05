@@ -9555,3 +9555,70 @@ ya da **ikinci bir epizot**. İkisi de ileri yönlü çalışma gerektiriyor —
 geriye dönük bu veriden çıkarılamaz.
 
 **Bot dosyalarına yazım: YOK.**
+
+### 🔴 DÜZELTME — "slot şansı" YORUMU YANLIŞTI (2026-09-05, aynı gün)
+
+Kullanıcı *"peki slotu büyütsek"* diye sordu; slot taraması koşturuldu ve
+**4'ten sınırsıza kadar her değerde aynı 44 işlem** çıktı.
+
+```
+171 karardan ne oldu:
+   ALINAN                   44
+   ayni sembol zaten ACIK   95   <- ASIL eleyici
+   4 saat COOLDOWN          17
+   asgari_stop/mekanik      10
+   fiyat yok                 5
+
+   SLOT hic bagladi mi:  HAYIR, HIC
+```
+
+🔴 **`SLOT` kısıtı hiçbir zaman dolmadı.** Dolayısıyla `kapi_mi_slot_mu`
+ölçümünün `S1` karşılaştırmasını *"slot şansı"* diye adlandırmam **yanlıştı**;
+o karşılaştırma başka bir şeyi ölçüyormuş.
+
+**Sayılar doğru, ETİKET yanlıştı.** Ön-kayıtlı hüküm (`K1 düştü · K2 düştü`)
+**geri alınmıyor** — ölçüt kendi metniyle uygulandı; düzeltilen **yorum**.
+
+#### Gerçekte ne ölçülmüş — ve bulgu daha iyi
+
+```
+66 islem, sembolde kacinci giris:
+   ILK giris      N=33   islem-ort  +3,549%   kazanan %54,5
+   TEKRAR giris   N=33   islem-ort  -0,645%   kazanan %30,3
+
+   "alinmayan 22"nin 22'si (%100) TEKRAR girisi
+```
+
+🔑 **Ayıran şey varış sırası ya da şans değil: bir sembole İLK giriş
+kazandırıyor, AYNI sembole tekrar giriş kaybettiriyor.**
+
+Ve simülasyonun *"aynı sembol açıkken tekrar açma"* kuralı **tam olarak
+kaybeden tekrarları eliyor.** Bu bir **mekanizma**, tesadüf değil —
+ve bot bu kurala **zaten sahip**.
+
+#### 🔴 NOTR modeli hakkındaki hükmüm DEĞİŞİYOR
+
+| ne demiştim | doğrusu |
+|---|---|
+| *"kâr slot şansından geliyor"* | ❌ slot hiç bağlamadı |
+| *"tek fark varış sırası"* | ❌ fark **ilk giriş / tekrar giriş** |
+| *"NOTR modeli zayıfladı"* | ⚠️ **kısmen geri alınıyor** — zayıflatan sebep geçersizdi |
+
+`C` kolunun kârı bir **artefakt değil**; mevcut ve makul bir kuralın
+(sembol başına tek açık pozisyon) çalışmasından geliyor.
+
+⚠️ **Ama NOTR modeli yine de kanıtlanmadı** — bunlar hâlâ geçerli:
+kapı seçimi gösterilemedi (`t=1,05`) · holdout yok · ilk-giriş N=**33** ·
+hipotez ile test aynı pencereden.
+
+#### 🔑 VE YENİ, DAHA BASİT BİR SORU DOĞDU
+
+*"İlk giriş iyi, tekrar giriş kötü"* iddiası **rejimden bağımsız** olabilir ve
+NOTR modelinden **çok daha basit** bir hipotezdir. Bu haliyle:
+
+- ön-kayıtsız ve tek pencerede bulundu → **kural değil**
+- ama botun **gerçek defterinde** doğrudan sınanabilir (sembol başına
+  kaçıncı giriş × sonuç)
+- ve doğruysa **mevcut kuralı sıkılaştırmak** (cooldown süresi) somut bir aday olur
+
+**Bot dosyalarına yazım: YOK.**
