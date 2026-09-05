@@ -8627,3 +8627,140 @@ kısmi kâr yok · fonlama arşivden **yaklaşıkla** alındı (S2 ile doğrulan
 tek BOĞA epizodu.
 
 **Veri indirme: YOK. Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔴 BOĞA PENCERESİ, TAZE VERİYLE — iki kapı birden (2026-09-05)
+
+**Ön-kayıtlar:** `ON_KAYIT_boga_holdout.md` (`5144a45`) · `ON_KAYIT_ma50_boga.md`
+(`42e6452`) — **ikisi de koşumdan önce**, ölçütleri değiştirilmedi.
+**Betik:** `scratchpad/boga_taze.py` · ham çıktı `scratchpad/boga_taze_sonuc.txt`
+**İndirici:** `scratchpad/taze_veri_indir.py` (567 sembol · 0 hata · 27,5 dk)
+
+**Veri:** `klines_1h_uzun`+`taze_1h` · `funding_gecmis`+`taze_funding`,
+**bellekte** birleştirildi. Hiçbir arşive yazılmadı; eski dosyalar sağlam
+(BTC hâlâ 08-25'te bitiyor). Pencere **08-21 → 09-02** (72s ileri getiri kesmesi).
+
+🔑 **`radar_archive` HİÇ kullanılmadı** → önceki ölçümü durduran döngü-damgası
+hizalama kapısı **aşılmadı, konusuz kaldı.** Kapı artık 2 yıllık ölçümün
+**birebir aynı yöntemiyle** tetikleniyor.
+Sınamalar: S1 merdiven ✅ · S2 birleştirme sürekliliği **0/120 boşluk** ✅ ·
+S3 fonlama birimi medyan `|r|`=0,0050 ✅
+
+### HÜKÜM 1 — `A_funding` · N=177 · 13 gün · 63 sembol
+
+```
+kol      stop%    net%       R      stop-ol%  hedef%
+A         5,03   -0,692   -0,2452     68,4     22,6
+1.5x      6,09   -0,744   -0,1857     60,5     25,4
+2.5x     10,14   -0,239   -0,1059     44,6     33,9
+4.0x     16,23   -0,523   -0,0890     30,5     37,3
+
+eslesmis fark (kol - A), R:
+1.5x   +0,0814  t+1,41  MDE 0,1153   6/13 gun   binom p 0,7095
+2.5x   +0,1771  t+2,14  MDE 0,1654  10/13 gun   binom p 0,0461
+4.0x   +0,1892  t+2,15  MDE 0,1761  10/13 gun   binom p 0,0461
+```
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **K1** 🔴 birincil · gün işaret testi | 10/13 · p=**0,0461** | ✅ **GEÇTİ** |
+| **K2** ortalama fark > 0 | +0,1771 | ✅ GEÇTİ |
+| **K3** komşu `4.0x` > 0 | +0,1892 | ✅ GEÇTİ |
+| **K4** tam A+B (N=34) işareti ters değil | **−0,1737** (t=−0,88) | ❌ **DÜŞTÜ** |
+
+**SONUÇ 1: DÜŞTÜ.** Ön-kayıt bölüm 7 harfiyen: *GEÇTİ = K1+K2+K3+K4* ·
+*ZAYIF = K2+K3 var, **K1 düştü*** · *aksi DÜŞTÜ*. K1 geçip K4 düşen bileşim
+ZAYIF tanımına girmiyor → **DÜŞTÜ**. Metin yorumlanmadı, uygulandı (D/9).
+
+#### 🔴 BETİĞİM YANLIŞ ETİKET BASTI — ve hata LEHE yöndeydi
+
+İlk sürüm bu durumda **"ZAYIF (K1 düştü)"** yazdı: (a) K1 düşmemişti, (b) ZAYIF
+kategorisi bu bileşimi kapsamıyordu. Düzeltildi, yeniden koşuldu, sonuç **DÜŞTÜ**.
+*Bir betiğin hüküm satırı, ön-kaydın metnine karşı denetlenmelidir.*
+
+#### 🔴 VE K4'ÜN KENDİSİ BENİM TASARIM HATAM
+
+Ön-kayıt bölüm 9, tahmin 4: *"A+B alt kümesi (N=25) **hiçbir şey
+söyleyemeyecek** — MDE her makul etkiden büyük."* Tahmin **tuttu** (t=−0,88).
+Ama K4'ü **tam o büyüklük üzerine** kurmuştum: gürültü düzeyindeki bir işaret
+tesadüfen negatif çıktı ve hükmü batırdı.
+**Ders: bilgisiz kalacağını ÖNGÖRDÜĞÜN bir büyüklük geçme ölçütü yapılmaz.**
+Bu ölçümün hükmü yine de değişmez — kural kuraldır.
+
+#### ⭐ Ama kanıt BİRİKTİ: iki bağımsız pencere aynı şeyi söylüyor
+
+```
+2 yillik BOGA dilimi (klines_1h_uzun)   +0,2934   t+2,06   perm p 0,095   K1 DUSTU
+TAZE holdout       (08-21..09-02)       +0,1771   t+2,14   10/13 gun      K1 GECTI
+```
+
+Farklı pencere, farklı veri kaynağı, **aynı yön ve benzer büyüklük**; ve
+holdout'un **birincil işaret testi geçti.** Resmî hüküm DÜŞTÜ, ama bu aday
+oturumun en çok desteklenen adayı hâline geldi.
+
+### HÜKÜM 2 — `MA50+ucuz` · N=580 · 13 gün · 253 sembol → **GEÇTİ**
+
+```
+kol        N      net%       R      stop-ol%
+MA50      580   -0,193   -0,1123     71,7
+K_dar    1476   -0,790   -0,3257     75,7    (ucuz ama MA50'ye yakin)
+K_genis  3387   -0,771   -0,3080     76,8
+```
+
+| # | ölçüt | değer | sonuç |
+|---|---|---|---|
+| **K1** | kapı − `K_dar` (net%) | **+1,0455 · t=+2,14** | ✅ GEÇTİ |
+| **K2** | mutlak net% | **gün-ort +0,1481 (t=+0,44)** · **işlem-ort −0,1929** | ⚠️ GEÇTİ ama **KIRILGAN** |
+| **K3** | `K_geniş`'e karşı | +0,9059 · t=+1,95 | ✅ GEÇTİ |
+| **K4** | güç | 1,0455 ≥ MDE 0,9786 | ✅ **GÖRÜLÜR** |
+
+**SONUÇ 2: GEÇTİ** — ama K2 üzerinde **ciddi çekince**:
+
+🔴 **Gün-ortalaması ile işlem-ortalamasının İŞARETLERİ TERS** (+0,148 vs −0,193).
+Gün-ortalaması günleri eşit tartar; çok işlemli kötü günler işlem-ortalamasını
+aşağı çekiyor. Üstelik gün-ortalamasının t'si **+0,44** — sıfırdan
+ayrılmıyor. **Yani "kapı kâr ediyor" KANITLANMADI.** Kanıtlanan tek şey K1:
+kapı, ucuz-coin kontrolünden **~1 puan ayrışıyor** ve bu görülür.
+
+#### 🔴 BU KOŞUM ÖNCEKİNİ TERSİNE ÇEVİRDİ — ikisi de yazılıyor
+
+| | 151 sembol (`perp_seri`) | **566 sembol (taze)** |
+|---|---|---|
+| N | 235 | **580** |
+| kapı net% (işlem-ort) | −0,586 | −0,193 |
+| K1 | +0,5461 · t=1,15 ❌ | **+1,0455 · t=2,14 ✅** |
+| K2 (gün-ort) | −0,2929 ❌ | **+0,1481 ✅** |
+| K4 güç | göremiyoruz | **GÖRÜLÜR** |
+| **SONUÇ** | **DÜŞTÜ** | **GEÇTİ** |
+
+Sebep: `perp_seri`'nin 151 sembolü **seçilmiş** bir alt kümedir (radarın izlediği
+semboller); 566'lık küme **tam evren**. Geniş olan daha iyi kestirimdir —
+ama ön-kayıt şerhi *"ikisi de raporlanır"* diyordu ve raporlanıyor.
+
+#### ⚠️ ve ÖNCEKİ CÜMLEMİ ZAYIFLATIYORUM
+
+*"MA50'de stop genişletmek ZARARLI, görülür (t=−2,86)"* demiştim. Geniş örneklemde:
+
+```
+1.5x -0,0415 t-1,08 | 2.5x -0,0881 t-1,51 (MDE 0,1168) | 4.0x -0,0737 t-1,11
+```
+
+**Hiçbiri görülür değil.** İşaret hâlâ negatif ve hâlâ `A_funding`'in tersi
+(+0,1771 **görülür** vs −0,0881 **görülmez**), ama *"zararlı"* iddiası
+**kanıtlanmış değil.** Kapıya-bağlılık gözlemi ayakta, kanıt gücü düştü.
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — **4'te 4** ✅ (holdout)
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | ortalama farkın işareti pozitif | ✅ +0,1771 |
+| 2 | büyüklük +0,29'dan **küçük** olacak | ✅ +0,1771 < +0,2934 |
+| 3 | stop-olma genişlikle monoton düşecek | ✅ 68,4→60,5→44,6→30,5 |
+| 4 | A+B alt kümesi hiçbir şey söyleyemeyecek | ✅ t=−0,88 (ve K4 tasarım hatamı açığa çıkardı) |
+
+### Sınırlar
+
+13 gün · tek BOĞA epizodu · likidasyon yok · portföy aşaması yok · kısmi kâr yok ·
+A+B alt kümesi yalnız `perp_seri` OI'si olan 153 sembolden.
+**Bot dosyalarına yazım: YOK · mevcut arşivlere yazım: YOK.**

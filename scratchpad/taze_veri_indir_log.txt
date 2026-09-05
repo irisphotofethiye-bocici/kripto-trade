@@ -1,0 +1,23 @@
+==========================================================================
+TAZE VERI INDIRME — 567 sembol · 2026-08-20 -> bugun
+==========================================================================
+HEDEF (YENI): C:\Users\alper\Desktop\kripto trade\scratchpad\taze_1h
+HEDEF (YENI): C:\Users\alper\Desktop\kripto trade\scratchpad\taze_funding
+🔴 DOKUNULMAYAN: klines_1h_uzun/ · funding_gecmis/ · perp_seri/
+   (klines_1h_uzun yalnizca sembol ADLARI icin listelendi)
+Hiz: 0.9 sn/istek · bot denetimi her 25 sembolde
+
+  50/567 · ok 50 · atlanan 0 · hata 0 · 2 dk
+  100/567 · ok 100 · atlanan 0 · hata 0 · 5 dk
+  150/567 · ok 150 · atlanan 0 · hata 0 · 7 dk
+  200/567 · ok 200 · atlanan 0 · hata 0 · 10 dk
+  250/567 · ok 250 · atlanan 0 · hata 0 · 12 dk
+  300/567 · ok 300 · atlanan 0 · hata 0 · 14 dk
+  350/567 · ok 350 · atlanan 0 · hata 0 · 17 dk
+  400/567 · ok 400 · atlanan 0 · hata 0 · 19 dk
+  450/567 · ok 450 · atlanan 0 · hata 0 · 22 dk
+  500/567 · ok 500 · atlanan 0 · hata 0 · 24 dk
+  550/567 · ok 550 · atlanan 0 · hata 0 · 27 dk
+
+BITTI — indirilen 567 · atlanan 0 · hata 0 · 27.5 dk
+Bot dosyalarina yazim: YOK · mevcut arsivlere yazim: YOK

@@ -1,0 +1,77 @@
+==============================================================================
+BOGA PENCERESI, TAZE VERIYLE — iki kapi birden
+==============================================================================
+ON-KAYITLAR: boga_holdout 5144a45 · ma50_boga 42e6452 (ikisi de KOSMADAN once)
+VERI: klines_1h_uzun + taze_1h · funding_gecmis + taze_funding (BELLEKTE)
+🔑 radar_archive HIC KULLANILMIYOR -> hizalama kapisi GECERSIZ
+
+sembol: 566 · en gec bar: 2026-09-05 10:00 · 72s kesme: 2026-09-02 10:00
+  S2 birlestirme surekliligi: GECTI (0/120 sembolde bosluk)
+  S3 fonlama birimi: medyan |r| = 0.0050
+  S1 merdiven: GECTI
+
+  oi24 serisi olan sembol (A+B alt kumesi icin): 153
+
+### A_funding   N=177 · 13 gun · 63 sembol
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          5.03    -0.692   -0.2452     68.4     22.6    18.6
+  1.5x       6.09    -0.744   -0.1857     60.5     25.4    23.9
+  2.5x      10.14    -0.239   -0.1059     44.6     33.9    32.7
+  4.0x      16.23    -0.523   -0.0890     30.5     37.3    40.9
+
+### MA50   N=580 · 13 gun · 253 sembol
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          3.32    -0.193   -0.1123     71.7     18.1    15.5
+  1.5x       4.12    -0.160   -0.1320     66.9     20.9    17.9
+  2.5x       6.87    -0.339   -0.1199     55.0     26.0    24.8
+  4.0x      11.00    -0.385   -0.0765     41.4     31.6    31.6
+
+### K_dar   N=1476 · 13 gun · 285 sembol
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          3.19    -0.790   -0.3257     75.7     10.4    23.3
+  1.5x       3.82    -0.854   -0.3251     71.3     11.4    26.2
+  2.5x       6.37    -1.029   -0.2355     54.1     14.0    39.1
+  4.0x      10.19    -1.134   -0.1513     34.3     15.2    50.7
+
+### K_genis   N=3387 · 13 gun · 525 sembol
+  kol       stop%      net%         R stop-ol%   hedef%    saat
+  A          3.07    -0.771   -0.3080     76.8     11.3    20.3
+  1.5x       3.63    -0.752   -0.2859     72.8     13.0    22.8
+  2.5x       6.05    -0.921   -0.2101     57.3     16.4    33.8
+  4.0x       9.68    -0.854   -0.1199     37.6     19.3    45.0
+
+==============================================================================
+HUKUM 1 — A_funding · ON_KAYIT_boga_holdout.md bolum 7
+==============================================================================
+  eslesmis fark (kol - A), olcu R:
+  kol           ort    t_gun      MDE   poz gun   binom p
+  1.5x      +0.0814    +1.41   0.1153    6/13     0.7095
+  2.5x      +0.1771    +2.14   0.1654   10/13     0.0461
+  4.0x      +0.1892    +2.15   0.1761   10/13     0.0461
+
+K1  gun bazinda isaret testi (tek yonlu binom p<=0.05)
+    2.5x: 10/13 gun pozitif -> p=0.0461 -> GECTI
+K2  ortalama fark > 0: +0.1771 -> GECTI
+K3  komsu 4.0x > 0: +0.1892 -> GECTI
+K4  tam A+B (N=34, 11 gun) isaret ters DEGIL: -0.1737 (t -0.88) -> DUSTU
+
+SONUC 1: DUSTU (dusen: K4)
+
+==============================================================================
+HUKUM 2 — MA50+ucuz · ON_KAYIT_ma50_boga.md bolum 8
+==============================================================================
+K1  kapi - K_dar (net%): +1.0455  t +2.14  MDE 0.9786 -> GECTI
+K2  kapinin MUTLAK net%: gun-ort +0.1481  t +0.44  (13 gun) -> GECTI
+      islem-ort -0.1929   -> isaretler TERS (K2 KIRILGAN)
+K3  kapi - K_genis: +0.9059  t +1.95 -> GECTI
+K4  guc |fark| >= MDE: 1.0455 vs 0.9786 -> GORULUR
+
+SONUC 2: GECTI
+
+  MA50'de stop genisligi (BETIMLEYICI, olcut YOK):
+    1.5x     -0.0415  t  -1.08  MDE  0.0772
+    2.5x     -0.0881  t  -1.51  MDE  0.1168
+    4.0x     -0.0737  t  -1.11  MDE  0.1327
+
+Veri: BELLEKTE birlestirildi · hicbir arsive YAZILMADI
+Bot dosyalarina yazim: YOK

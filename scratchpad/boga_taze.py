@@ -389,7 +389,18 @@ def main():
         else:
             K4 = True
             print("K4  tam A+B: N=%d < 10 -> degerlendirilmedi (GECTI sayilir)" % len(ab))
-        h = "GECTI" if (K1 and K2 and K3 and K4) else ("ZAYIF (K1 dustu — guc)" if (K2 and K3) else "DUSTU")
+        # ON-KAYIT bolum 7 METNI: GECTI = K1+K2+K3+K4 · ZAYIF = "K2+K3 var, K1 DUSTU"
+        #   · aksi DUSTU.  [DUZELTME 2026-09-05] Ilk surum, K1 GECIP K4 dustugunde
+        #   "ZAYIF (K1 dustu)" basiyordu: hem etiket yanlisti hem de on-kaydin
+        #   ZAYIF tanimi bu bilesimi KAPSAMIYOR -> dogru kategori DUSTU.
+        #   Hata LEHE yondeydi; kriter metni yorumlanmaz, harfiyen uygulanir (D/9).
+        dusen = [ad for ad, v in (("K1", K1), ("K2", K2), ("K3", K3), ("K4", K4)) if not v]
+        if not dusen:
+            h = "GECTI"
+        elif K2 and K3 and not K1:
+            h = "ZAYIF (K1 dustu)"
+        else:
+            h = "DUSTU (dusen: %s)" % ", ".join(dusen)
         print("\nSONUC 1: %s\n" % h)
 
     # ---------------- MA50: ON_KAYIT_ma50_boga olcutleri ----------------
@@ -409,8 +420,14 @@ def main():
               % (f1, t1 or 0, m1 or 0, "GECTI" if K1 else "DUSTU"))
         mk, tk, _, nk = t_mde(gk)
         K2 = mk is not None and mk > 0
-        print("K2  kapinin MUTLAK net%%: %+.4f  t %+.2f  (%d gun) -> %s"
+        # 🔴 IKI ORTALAMA AYRISABILIR: gun-ortalamasi gunleri esit tartar,
+        #    islem-ortalamasi cok islemli gunleri agir tartar. ISARETLERI TERS
+        #    cikarsa hukum kirilgandir -> IKISI DE basilir, gizlenmez.
+        islem_ort = stx.mean([k["kol"]["A"]["net"] for k in km])
+        print("K2  kapinin MUTLAK net%%: gun-ort %+.4f  t %+.2f  (%d gun) -> %s"
               % (mk, tk or 0, nk, "GECTI" if K2 else "DUSTU"))
+        print("      islem-ort %+.4f   -> isaretler %s"
+              % (islem_ort, "AYNI" if islem_ort * mk > 0 else "TERS (K2 KIRILGAN)"))
         f3, t3, _ = iki_ornek(gk, gg)
         K3 = f1 is not None and f3 is not None and f1 * f3 > 0
         print("K3  kapi - K_genis: %+.4f  t %+.2f -> %s" % (f3, t3 or 0, "GECTI" if K3 else "DUSTU"))

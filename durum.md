@@ -1768,3 +1768,62 @@ Kapıya bağlı, ve **ters yönde.** Bot geneline uygulanırsa MA50 kapısını 
 | **pos** | `pos<0.25` koşullu mekanik (V3) | veri bekliyor, ölçütü sabit |
 | **ma50** | MA50+ucuz kapısı | ✅ **ölçüldü — DÜŞTÜ**, mevcut kilit doğru |
 | **kapının gevşemesi** | BOĞA holdout geçerlilik kapısı | kullanıcı kararı bekliyor (indir / gevşet / bırak) |
+
+---
+
+## 2026-09-05 (5) · TAZE VERİ İNDİRİLDİ, İKİ KAPI YENİDEN ÖLÇÜLDÜ
+
+**Ön-kayıtlar:** `5144a45` · `42e6452` (+ şerhler `14d03e1`).
+**Rakamlar:** `olcumler.md` → *BOĞA PENCERESİ, TAZE VERİYLE*.
+
+### Karar 0 — veri indirildi, hiçbir arşiv ezilmedi
+
+567 sembol · 0 hata · 27,5 dk. Ayrı dizinlere (`taze_1h/`, `taze_funding/`),
+birleştirme **bellekte**. Eski arşivler sağlam. `klines_1h_uzun`'un 11 günlük
+gecikmesi artık ölçümlerde kapanıyor (dosya olarak **birleştirilmedi** —
+istenirse ayrı bir adım).
+
+### Karar 1 — `A_funding`: **DÜŞTÜ**, ama yalnız K4'te
+
+K1 (birincil işaret testi) **geçti** (10/13 gün, p=0,046), K2 ve K3 de geçti;
+**K4** (tam A+B alt kümesi) ters işaretle düştü → ön-kaydın harfine göre **DÜŞTÜ**.
+**Kod değişmedi.**
+
+⚠️ İki öz-eleştiri kütüğe yazıldı: (a) betiğim yanlış etiket bastı ve hata
+**lehe** yöndeydi — düzeltildi; (b) **K4'ü, bilgisiz kalacağını kendi
+ön-kaydımda ÖNGÖRDÜĞÜM bir büyüklük üzerine kurmuştum.** Bu bir tasarım hatası;
+hükmü değiştirmez ama gelecekteki ön-kayıtlar için kural: *öngörülen gürültü
+geçme ölçütü yapılmaz.*
+
+### Karar 2 — 🔴 aday GÜÇLENDİ: iki bağımsız pencere aynı yönü söylüyor
+
+```
+2 yillik BOGA dilimi  +0,2934   K1 DUSTU (perm p 0,095)
+TAZE holdout          +0,1771   K1 GECTI (10/13 gun, p 0,046)
+```
+
+Farklı kaynak, farklı pencere, aynı yön, benzer büyüklük. **Resmî hüküm DÜŞTÜ**
+ama bu, üç "veri bekleyen" adayın **en çok desteklenmişi** oldu.
+
+### Karar 3 — `MA50+ucuz`: **GEÇTİ**, ama K2 kırılgan ve önceki hükmü tersine çevirdi
+
+151 sembollük koşum **DÜŞTÜ** demişti; 566 sembollük koşum **GEÇTİ** diyor.
+İkisi de kütükte. Geniş evren daha iyi kestirim (151'lik küme **seçilmişti**).
+
+🔴 **Ama K2 kırılgan:** gün-ortalaması +0,148 (t=+0,44) ile işlem-ortalaması
+−0,193 **ters işaretli**. *"Kapı kâr ediyor"* **kanıtlanmadı**; kanıtlanan tek
+şey kapının kontrolden **ayrıştığı** (K1, görülür).
+**Kapı BOĞA'da zaten kapalı** → uygulama kararı gerektirmiyor.
+
+### Karar 4 — önceki bir cümlemi zayıflatıyorum
+
+*"MA50'de stop genişletmek zararlı, görülür"* demiştim (t=−2,86, 151 sembol).
+Geniş örneklemde **hiçbiri görülür değil** (2.5x −0,088, t=−1,51). İşaret hâlâ
+`A_funding`'in tersi, ama *"zararlı"* iddiası kanıtlanmış değil.
+
+### Sırada
+
+1. **BOĞA'da geniş stop** — iki pencerede tutarlı, resmî hüküm hâlâ DÜŞTÜ.
+   Temiz bir sınama için **kendi ön-kaydıyla, K4'süz** yeniden kurulmalı
+2. `pos<0.25` (V3) · 3. `s_brk` ters çevirme — veri bekliyor
+4. `klines_1h_uzun`'a taze veriyi **dosya olarak** birleştirmek (ayrı onay)
