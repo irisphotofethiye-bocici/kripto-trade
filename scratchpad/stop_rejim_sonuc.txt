@@ -1,0 +1,126 @@
+==============================================================================
+STOP MESAFESI, REJIME GORE — kullanici itirazi: 'veri ayi rejimi'
+==============================================================================
+ON-KAYIT: ON_KAYIT_stop_rejim.md commit 272f62e — KOSMADAN once
+BIRINCIL olcu: R (DEGISTIRILMEDI) · ikincil: net%
+VERI INDIRME YOK — eldeki veri (kullanici talimati)
+
+sinama: GECTI (merdiven monoton · maliyet %0.13 · fonlama medyan |r|=0.0054)
+rejim gun dagilimi: AYI 84 (%11.7) · BOGA 77 (%10.8) · NOTR 554 (%77.5)
+
+islenen sembol: 566
+
+==============================================================================
+### A_funding   (BIRINCIL)
+==============================================================================
+  islem dagilimi: AYI 880 (%20.3) · BOGA 149 (%3.4) · NOTR 3314 (%76.3)
+  BOGA: gun payi %10.8  vs  islem payi %3.4  -> tetik DAHA SEYREK
+
+  --- BIRINCIL olcu R, rejime gore eslesmis fark (kol - A) ---
+  BOGA           N=149    gun=51   sembol=88  
+      1.5x   fark   +0.0668  t_gun  +0.69  MDE  0.1949  -> goremiyoruz
+      2.5x   fark   +0.2934  t_gun  +2.06  MDE  0.2845  -> GORULUR
+      4.0x   fark   +0.2931  t_gun  +1.94  MDE  0.3027  -> goremiyoruz
+  NOTR           N=3314   gun=530  sembol=404 
+      1.5x   fark   +0.0038  t_gun  +0.24  MDE  0.0317  -> goremiyoruz
+      2.5x   fark   +0.0228  t_gun  +0.78  MDE  0.0581  -> goremiyoruz
+      4.0x   fark   +0.0252  t_gun  +0.72  MDE  0.0703  -> goremiyoruz
+  AYI            N=880    gun=92   sembol=246 
+      1.5x   fark   +0.0480  t_gun  +1.67  MDE  0.0576  -> goremiyoruz
+      2.5x   fark   +0.1305  t_gun  +2.45  MDE  0.1065  -> GORULUR
+      4.0x   fark   +0.1679  t_gun  +2.92  MDE  0.1149  -> GORULUR
+
+  --- ikincil olcu net%, rejime gore ---
+  BOGA           N=149    gun=51   sembol=88  
+      1.5x   fark   +0.1770  t_gun  +0.47  MDE  0.7596  -> goremiyoruz
+      2.5x   fark   +1.4812  t_gun  +2.09  MDE  1.4150  -> GORULUR
+      4.0x   fark   +1.5730  t_gun  +1.75  MDE  1.7942  -> goremiyoruz
+  NOTR           N=3314   gun=530  sembol=404 
+      1.5x   fark   +0.0069  t_gun  +0.10  MDE  0.1363  -> goremiyoruz
+      2.5x   fark   +0.2526  t_gun  +1.75  MDE  0.2891  -> goremiyoruz
+      4.0x   fark   +0.3605  t_gun  +1.90  MDE  0.3790  -> goremiyoruz
+  AYI            N=880    gun=92   sembol=246 
+      1.5x   fark   -0.0762  t_gun  -0.34  MDE  0.4474  -> goremiyoruz
+      2.5x   fark   +0.2345  t_gun  +0.52  MDE  0.9075  -> goremiyoruz
+      4.0x   fark   +0.5564  t_gun  +1.01  MDE  1.0991  -> goremiyoruz
+
+  permutasyon (BOGA, isaret-cevirme, gun bazinda, 2000 tur):
+    gozlenen |t|: 1.5x=0.69  2.5x=2.06  4.0x=1.94
+    max|t| = 2.06   ->   p = 0.0950
+
+  BOGA bloklari (K2 — bloklar on-kayitta sabitlendi):
+    B1  N=15    1.5x -0.0835  2.5x +0.3480  4.0x +0.5763
+    B2  N=49    1.5x +0.0667  2.5x +0.1635  4.0x +0.2314
+    B3  N=24    1.5x +0.0398  2.5x +0.1437  4.0x +0.1494
+
+  KULLANICININ EPIZODU 2026-08-21..2026-08-25 (BETIMLEYICI, hukum YOK):
+    N=4 — cok kucuk, sayi bile verilmez.
+
+==============================================================================
+HUKUM — ON_KAYIT_stop_rejim.md bolum 6
+==============================================================================
+K1  BOGA'da R farki > 0 · t_gun >= +2.0 · permutasyon p <= 0.05
+    aday: 2.5x (+0.2934, t=+2.06)  ·  p=0.0950 -> DUSTU (permutasyon)
+K2/K3/K4 uygulanmadi (K1 dustu)
+
+K4 sorusu yine de raporlanir (BILGI, hukum degil):
+    1.5x   BOGA   +0.0668  NOTR   +0.0038  fark   +0.0630  -> AYNI yon
+    2.5x   BOGA   +0.2934  NOTR   +0.0228  fark   +0.2706  -> AYNI yon
+    4.0x   BOGA   +0.2931  NOTR   +0.0252  fark   +0.2679  -> AYNI yon
+
+SONUC: DUSTU
+==============================================================================
+### B_ma50ucuz   (ikincil, hukum tasimaz)
+==============================================================================
+  islem dagilimi: AYI 621 (%13.8) · BOGA 534 (%11.8) · NOTR 3360 (%74.4)
+  BOGA: gun payi %10.8  vs  islem payi %11.8  -> tetik daha SIK
+
+  --- BIRINCIL olcu R, rejime gore eslesmis fark (kol - A) ---
+  BOGA           N=534    gun=73   sembol=157 
+      1.5x   fark   -0.0160  t_gun  -0.33  MDE  0.0968  -> goremiyoruz
+      2.5x   fark   -0.0447  t_gun  -0.58  MDE  0.1533  -> goremiyoruz
+      4.0x   fark   -0.0179  t_gun  -0.18  MDE  0.1949  -> goremiyoruz
+  NOTR           N=3360   gun=511  sembol=291 
+      1.5x   fark   +0.0468  t_gun  +2.46  MDE  0.0381  -> GORULUR
+      2.5x   fark   +0.0660  t_gun  +2.18  MDE  0.0606  -> GORULUR
+      4.0x   fark   +0.0649  t_gun  +1.87  MDE  0.0695  -> goremiyoruz
+  AYI            N=621    gun=89   sembol=220 
+      1.5x   fark   +0.0546  t_gun  +1.16  MDE  0.0939  -> goremiyoruz
+      2.5x   fark   +0.1089  t_gun  +1.58  MDE  0.1376  -> goremiyoruz
+      4.0x   fark   +0.0842  t_gun  +1.15  MDE  0.1462  -> goremiyoruz
+
+  --- ikincil olcu net%, rejime gore ---
+  BOGA           N=534    gun=73   sembol=157 
+      1.5x   fark   -0.1127  t_gun  -0.57  MDE  0.3930  -> goremiyoruz
+      2.5x   fark   -0.7351  t_gun  -1.82  MDE  0.8072  -> goremiyoruz
+      4.0x   fark   -1.0737  t_gun  -1.66  MDE  1.2947  -> goremiyoruz
+  NOTR           N=3360   gun=511  sembol=291 
+      1.5x   fark   +0.0218  t_gun  +0.27  MDE  0.1629  -> goremiyoruz
+      2.5x   fark   +0.1721  t_gun  +1.02  MDE  0.3370  -> goremiyoruz
+      4.0x   fark   +0.1891  t_gun  +0.83  MDE  0.4553  -> goremiyoruz
+  AYI            N=621    gun=89   sembol=220 
+      1.5x   fark   +0.0935  t_gun  +0.45  MDE  0.4144  -> goremiyoruz
+      2.5x   fark   +0.5791  t_gun  +1.57  MDE  0.7379  -> goremiyoruz
+      4.0x   fark   +0.4891  t_gun  +0.96  MDE  1.0213  -> goremiyoruz
+
+
+==============================================================================
+IKINCIL (on-kayitli, BETIMLEYICI): hedef = 2 x risk, rejime gore
+==============================================================================
+  A_funding / BOGA   N=148
+      A      R  -0.2983   hedef %22   stop-ol %71
+      1.5x   R  -0.2680   hedef %21   stop-ol %68
+      2.5x   R  -0.2015   hedef %10   stop-ol %50
+      4.0x   R  -0.1569   hedef %3   stop-ol %36
+  A_funding / NOTR   N=3274
+      A      R  +0.0579   hedef %36   stop-ol %58
+      1.5x   R  +0.0529   hedef %34   stop-ol %57
+      2.5x   R  +0.0441   hedef %19   stop-ol %45
+      4.0x   R  +0.0372   hedef %7   stop-ol %29
+  A_funding / AYI   N=865
+      A      R  -0.0673   hedef %32   stop-ol %61
+      1.5x   R  -0.0699   hedef %30   stop-ol %59
+      2.5x   R  -0.0438   hedef %18   stop-ol %48
+      4.0x   R  -0.0507   hedef %8   stop-ol %31
+
+Veri indirme: YOK · Bot dosyalarina yazim: YOK

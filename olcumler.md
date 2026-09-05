@@ -8332,3 +8332,125 @@ kısmi kâr (%40 hedef) modellenmiyor · `SEYRELT=24` faz kilitler (bu soruda
 saat boyutu yok, zararsız).
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔴 STOP MESAFESİ, REJİME GÖRE (2026-09-05) — **K1 DÜŞTÜ**, ama tablo değişti
+
+**Ön-kayıt:** `ON_KAYIT_stop_rejim.md`, commit `272f62e` — koşumdan **önce**.
+**Betik:** `scratchpad/stop_rejim.py` (mekanik `stop_mesafesi.py`'den **çağrılır**)
+**Ham çıktı:** `scratchpad/stop_rejim_sonuc.txt`
+
+**Kullanıcı itirazı:** *"2 yıllık veri rejim ayı rejim."*
+⚠️ **Kısmen doğru:** örneklem ayı değil **NÖTR ağırlıklı** (NÖTR %77,5 · AYI %11,7
+· BOĞA %10,8). Ama itirazın çekirdeği **tamamen haklı çıktı.**
+
+⚠️ *"22 Ağustos sonrası"* **ölçülemedi** — veri 08-25'te bitiyor, mekanik 72s ileri
+getiri istiyor, kullanıcı indirmeyi reddetti. Verideki BOĞA bloğu 08-21..08-25 →
+o pencerede **N=4**, sayı bile verilmedi.
+
+### `A_funding` · birincil ölçü `R` · eşleşmiş fark (kol − A)
+
+```
+rejim   N      gun   1.5x                2.5x                4.0x
+BOGA    149     51   +0,0668 t+0,69      +0,2934 t+2,06 GOR   +0,2931 t+1,94
+NOTR   3314    530   +0,0038 t+0,24      +0,0228 t+0,78       +0,0252 t+0,72
+AYI     880     92   +0,0480 t+1,67      +0,1305 t+2,45 GOR   +0,1679 t+2,92 GOR
+```
+
+🔑 **BOĞA etkisi NÖTR'ün 12,9 KATI. AYI 5,7 katı. NÖTR düz.**
+Ve NÖTR işlemlerin **%76,3'ü** — yani önceki hüküm **NÖTR'ün hükmüydü.**
+
+### 🔴 HÜKÜM: **K1 DÜŞTÜ** — permütasyonda, tek bacakta
+
+```
+K1  aday 2.5x (+0,2934, t=+2,06)  ·  permutasyon p=0,0950  ->  DUSTU
+```
+
+Ölçüt `t ≥ +2,0` **VE** `p ≤ 0,05` idi; t geçti, permütasyon geçmedi.
+**Ölçüt gevşetilmedi.** K2/K3/K4 resmen uygulanmadı.
+
+⚠️ **Ama üçü de geçecekti** — dürüstlük gereği yazılıyor:
+
+| # | ölçüt | değer | olurdu |
+|---|---|---|---|
+| K2 | B1/B2/B3'ün ≥2'sinde aynı işaret | +0,348 · +0,164 · +0,144 — **3/3** | ✅ |
+| K3 | komşu hücre aynı işaret | `1.5x` +0,067 · `4.0x` +0,293 | ✅ |
+| K4 | (BOĞA − NÖTR) > 0 | **+0,2706** | ✅ |
+
+**Tek bacakta, kılpayı düştü.** `pos<0.25` ve `s_brk` ile **aynı sınıfta üçüncü aday.**
+
+### ⭐ TETİK SEYREKLİĞİ — operasyonel olarak en önemli satır
+
+```
+BOGA:  gun payi %10,8   vs   islem payi %3,4   -> tetik UC KAT SEYREK
+```
+
+`funding ≤ −0,05` (derin negatif = kalabalık short) **boğada nadirdir.**
+Botun ana SHORT kapısı, tam boğada **susuyor**. Bu, botun BOĞA'da %100 LONG'a
+kayması olgusuyla aynı madalyonun yüzü.
+
+### 🔴 KAPI ASİMETRİSİ — ama KAYITTAKİ ASİMETRİ DEĞİL
+
+`B_ma50ucuz` (ikincil, hüküm taşımaz) **ters** desen veriyor:
+
+```
+             BOGA                NOTR                    AYI
+A_funding    +0,2934 (t+2,06)    +0,0228 (t+0,78)        +0,1305 (t+2,45)
+B_ma50ucuz   -0,0447 (t-0,58)    +0,0660 (t+2,18) GOR    +0,1089 (t+1,58)
+```
+
+**İki kapı ayrışıyor:** `A_funding` trendli rejimlerde (BOĞA/AYI), `B_ma50ucuz`
+NÖTR'de genişlemeden fayda görüyor — BOĞA'da işareti **dönüyor**.
+
+⚠️ **DÜZELTME — kendi önceki cümlemi kısıtlıyorum.** Aynı gün *"altı
+karşılaştırmanın altısı da aynı yön → asimetri desteklenmedi"* yazmıştım.
+O cümle **havuzlanmış örneklem için doğru**, ama soruyu kapatır gibi sunuldu.
+Rejim kırılımında iki kapı **gerçekten ayrışıyor**. Kayıttaki iddia
+(*"A+B'nin stopu kapısına uymuyor"*, koşulsuz) hâlâ yeniden üretilemiyor;
+ama *"iki kapı aynı davranır"* demek de yanlışmış.
+
+### 🔴 2R HEDEF BULGUSU **YALNIZ NÖTR'DE** GEÇERLİYMİŞ
+
+Önceki koşumun en ilgi çekici parçası şuydu: *"hedef stopla ölçeklendiğinde `A`
+en iyi kol → stop dar değil, hedef uzak."* Rejime bölününce:
+
+```
+hedef 2R, A_funding      A         1.5x      2.5x      4.0x
+NOTR                  +0,0579   +0,0529   +0,0441   +0,0372   <- A EN IYI
+BOGA                  -0,2983   -0,2680   -0,2015   -0,1569   <- GENIS daha iyi
+AYI                   -0,0673   -0,0699   -0,0438   -0,0507   <- GENIS daha iyi
+```
+
+**O bulgu bir NÖTR olgusuydu.** Trendli rejimlerde stop, hedef orantılı olsa
+bile **gerçekten dar**. Önceki notun *"sorun stop değil hedef"* çerçevesi
+**NÖTR'e daraltılmalı.**
+
+### Ön-kayıtlı yönlü tahminlerin karnesi — 4'te **1** 🔴
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | BOĞA'da `A_funding` tetiği oransal olarak daha az | ✅ **TUTTU** (%10,8 gün vs %3,4 işlem) |
+| 2 | yön iki rejimde de aynı → K4 düşecek, rejim bu soruyu değiştirmiyor | ❌ **YANLIŞ** — yön aynı ama **büyüklük 13 kat**; K4 geçecekti |
+| 3 | MDE etkinin 2 katından büyük olacak → "göremiyoruz" | ❌ **YANLIŞ** — birincil hücrede MDE 0,2845 < etki 0,2934 |
+| 4 | 2R bulgusu BOĞA'da da duracak (`A` en iyi kalacak) | ❌ **YANLIŞ** — yalnız NÖTR'de duruyor |
+
+**Bu tur kötü geçti ve aynen yazılıyor.** Ortak kök: üçünde de *"etki her yerde
+aynı büyüklükte"* varsaydım. Rejim büyüklüğü değiştiriyor, ve tam da kullanıcının
+söylediği yönde. **Üst üste iki 3/3'ten sonra 1/4.**
+
+### 🔴 ÇOKLU KARŞILAŞTIRMA — bu tablodan hücre seçilmez
+
+3 rejim × 3 kol × 2 ölçü × 2 kapı = **36 hücre.** Permütasyon **yalnız
+`A_funding` × BOĞA × `R`** için koşturuldu (3 karşılaştırma). AYI'nın `t=+2,92`'si
+ve `B_ma50ucuz`/NÖTR'ün `t=+2,46`'sı **düzeltilmemiştir** ve bulgu sayılmaz.
+*"Tabloya bakıp en iyi rejim-kol hücresini kural yapmak"* bu projede reddedilmiş
+davranıştır.
+
+### Sınırlar
+
+BOĞA hücresi **N=149 · 51 gün · 88 sembol** — küçük. B1 bloğu yalnız N=15.
+Likidasyon yok · portföy aşaması yok · kısmi kâr yok · `oi24` bacağı yok ·
+kullanıcının epizodu (08-21…) **ölçülemedi**.
+
+**Veri indirme: YOK. Bot dosyalarına yazım: YOK.**

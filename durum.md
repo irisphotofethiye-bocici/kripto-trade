@@ -1640,3 +1640,54 @@ anlatıyı haftalarca ayakta tuttu.
 3. **A+B'nin 12-24 saatlik ufku** — kendi ön-kaydını bekliyor
 
 *(4. sıradaki "stop mesafesi" bu tarihte kapandı.)*
+
+---
+
+## 2026-09-05 (2) · REJİM KIRILIMI — kullanıcı itirazı DOĞRULANDI
+
+**Ön-kayıt:** `ON_KAYIT_stop_rejim.md` (commit `272f62e`, koşumdan önce).
+**Rakamlar:** `olcumler.md` → *STOP MESAFESİ, REJİME GÖRE*. Buraya yazılmaz.
+
+### Karar 1 — önceki hüküm NÖTR'ün hükmüymüş
+
+Kullanıcı *"2 yıllık veri rejim ayı rejim"* dedi. Örneklem ayı değil **NÖTR**
+ağırlıklı, ama itirazın çekirdeği **haklı çıktı**: işlemlerin dörtte üçü NÖTR ve
+etki orada **düz**. Trendli rejimlerde (BOĞA/AYI) etki **kat kat büyük**.
+
+🔴 **Bu, sadece bu ölçüm için değil, PROJE GENELİ İÇİN bir uyarıdır:**
+2 yıllık havuzlanmış her hüküm fiilen **NÖTR'ün hükmüdür.** Geçmiş
+"2 yılda çürütüldü" kayıtları bu gözle yeniden okunmalı.
+
+### Karar 2 — 🔴 KOD DEĞİŞMEDİ, ölçüt tek bacakta düştü
+
+K1 iki koşuldu (`t ≥ +2,0` **ve** permütasyon `p ≤ 0,05`); t geçti, permütasyon
+geçmedi. **Ölçüt gevşetilmedi.** K2/K3/K4 uygulanmadı — ama üçü de **geçecekti**;
+bu dürüstlük gereği kütüğe yazıldı.
+
+**Üçüncü "veri bekleyen" aday** oldu: `pos<0.25` · `s_brk` · **BOĞA'da geniş stop**.
+
+### Karar 3 — önceki iki notumu KISITLIYORUM
+
+1. *"Asimetri desteklenmedi"* — havuzlanmış örneklem için doğru, ama soruyu
+   kapatır gibi sunuldu. **Rejim kırılımında iki kapı gerçekten ayrışıyor**
+   (`A_funding` trendde, `B_ma50ucuz` NÖTR'de).
+2. *"Sorun stop değil, hedef"* — bu bir **NÖTR olgusuymuş.** Trendli rejimlerde
+   hedef orantılı olsa bile stop gerçekten dar.
+
+### Karar 4 — operasyonel bulgu: ana SHORT kapısı boğada SUSUYOR
+
+`A_funding` tetiği BOĞA'da gün payının **üçte biri** kadar. Botun ana SHORT
+kapısı tam boğada devre dışı kalıyor — bu, BOĞA'da %100 LONG'a kayma olgusuyla
+aynı madalyonun yüzü. **Kayıtlı gözlem, kural değil.**
+
+### Tahmin karnem bu turda 4'te 1
+
+Üç yanlış tahminin ortak kökü: *"etki her rejimde aynı büyüklükte"* varsaydım.
+Kullanıcının sezgisi benimkinden iyiydi. Aynen kaydedildi.
+
+### Sırada
+
+1. `pos<0.25` koşullu mekanik (V3) — veri bekliyor
+2. `s_brk` ters çevirme — veri bekliyor
+3. **BOĞA'da geniş stop** — veri bekliyor, ölçütü sabit *(YENİ)*
+4. A+B'nin 12-24 saatlik ufku — kendi ön-kaydını bekliyor
