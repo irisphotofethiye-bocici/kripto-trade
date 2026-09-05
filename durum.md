@@ -1933,3 +1933,72 @@ açık pozisyonlar asılı kalır.
 1. Bir sonraki turda **teyit**: yeni giriş yok, çıkışlar çalışıyor
 2. Açık pozisyonlar kapanınca zamanlanmış görevler devre dışı bırakılabilir
 3. AYI ayağı için **11-19 Ağustos yapılandırması** git geçmişinden çıkarılacak
+
+---
+
+## 🔴 2026-09-05 · NOTR-AYI BOTU — 11-19 yapılandırması geri getirildi, KAPALI duruyor
+
+**Kullanıcı talimatı:** *"a yolunu yap ve bu NOTR-AYI botu olarak kalsın,
+çalışmasın sadece söylediğimde çalışsın. Ve başka hiçbir yapıyı etkilemesin."*
+
+### Ne değişti — SADECE iki ayar
+
+| ayar | idi | oldu | ne yapar |
+|---|---|---|---|
+| `esikler.btc_pay_short_freni` | 0 | **1** | SHORT freni — geri açıldı |
+| `testbot.maks_dusus_pct` | 0 | **25** | düşüş freni — geri açıldı |
+
+Bu ikisi, **19 Ağustos'tan bugüne değişen tek şeydi** (ölçüldü, `olcumler.md` →
+*11-19 AĞUSTOS PENCERESİ*). İkisi de **korumaydı** ve kaldırılmıştı.
+Eski değerler silinmedi, `_notr_ayi_not` içinde duruyor (D/9).
+Yedek: `kripto-config.json.yedek-20260905-...-notr-ayi-oncesi`.
+
+### ✅ "Başka hiçbir yapıyı etkilemesin" — koddan doğrulandı
+
+```
+btc_pay_short_freni -> yalniz testbot.py:378   (+ panel gosterimi)
+maks_dusus_pct      -> yalniz testbot.py:1742  (+ panel gosterimi)
+
+defter2.py · defter3.py · golge.py · ayna.py  ->  0 referans
+```
+
+**Hiçbir uydu defter bu ayarları okumuyor.** ✓
+
+### ✅ "Çalışmasın" — `maks_pozisyon = 0` kapalı tutuyor
+
+Bot turlarına devam ediyor ama **giriş açmıyor**; çıkış yönetimi çalışıyor
+(açık pozisyonlar 32 → 19'a indi, hepsi doğal kapanışla).
+
+⚠️ **Düşüş freni bir sonraki turda TETİKLENECEK:** zirve 6.320,77 · efektif
+4.357,74 = **−%31,1**, eşik −%25 → `durum = HALT_DUSUS` + Telegram bildirimi.
+Bu **beklenen ve doğru** davranış: fren kapatılmasaydı bot zaten durmuş olacaktı.
+Açık pozisyonlar **etkilenmez** (kodun kendi notu: *"yeni giriş durur; açık
+pozisyonlar yönetilmeye DEVAM eder"*).
+
+### 🔑 ÇALIŞTIRMA — iki adım
+
+```
+1. kripto-config.json -> testbot.maks_pozisyon : 0 -> 8
+2. durum HALT_DUSUS ise:  python testbot.py --devam
+```
+
+### 🔴 SINIR — "yalnız NOTR/AYI" garantisi PROSEDÜREL, kod değil
+
+BOĞA dalı config'le kilitlenemiyor: `esik_short` hem **AYI-SHORT
+([testbot.py:571](testbot.py#L571))** hem **BOĞA-LONG
+([testbot.py:617](testbot.py#L617))** tarafından kullanılıyor. Eşiği yükseltmek
+AYI ayağını da öldürür.
+
+**Yani:** bot BOĞA rejiminde çalıştırılırsa LONG açar. *"Yalnız NOTR/AYI"*
+garantisi şu an **ne zaman çalıştırıldığına** bağlı. Kod düzeyinde kilit
+istenirse ayrı ve küçük bir değişiklik gerekir.
+
+### Değişmeyenler
+
+`maks_pozisyon` (0, kapalı tutan anahtar) · `islem_risk_pct` (1,5) ·
+`asgari_stop_pct` (2,0) · kapı eşikleri · uydu defterler ·
+zamanlanmış görevler (**hiçbiri kapatılmadı** — kapatılırsa çıkış yönetimi durur) ·
+veri toplayıcılar (`Radar` · `PerpSeri` · `Piyasa` · `Nobetci`).
+
+⚠️ Uygulama sırasında nota **Kiril harf** (`ду`) sızdı, tarama ile yakalandı ve
+düzeltildi. Projede kayıtlı bir hata sınıfı.
