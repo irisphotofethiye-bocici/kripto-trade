@@ -1,0 +1,38 @@
+==================================================================================
+GOLGE DEFTER — BOGA PENCERESI (2026-08-21 ->) · olculen araligin CANLI kontrolu
+==================================================================================
+defter: 1285 kayit -> 905 pozisyon (id ile birlestirildi)
+BOGA penceresi: 581 pozisyon · 16 gun
+
+### KAYNAGA GORE KIRILIM (CLAUDE.md: tek kasa rakami yaniltir)
+  golge:pump_long_tezi       N=424   toplam  +2529.66 $  ort   +5.97 $  kazanan %57.8   R_med  -0.01  fonlama   +97.60 $ (N=424)
+  golge:onay_bekle           N=89    toplam  -3125.65 $  ort  -35.12 $  kazanan %41.6   R_med  -0.04  fonlama  +151.80 $ (N=89)
+  golge:long_veto            N=60    toplam  -1275.16 $  ort  -21.25 $  kazanan %48.3   R_med  -0.03  fonlama  +198.30 $ (N=60)
+  golge:stop_cok_dar         N=4     toplam   -174.30 $  ort  -43.58 $  kazanan %25.0   R_med  -1.04  fonlama    +7.35 $ (N=4)
+  golge:blowoff              N=4     toplam    +72.56 $  ort  +18.14 $  kazanan %100.0  R_med  -0.00  fonlama    -1.23 $ (N=4)
+
+  TUMU (bilgi)               N=581   toplam  -1972.89 $  ort   -3.40 $  kazanan %54.4   R_med  -0.01  fonlama  +453.83 $ (N=581)
+
+### YONE GORE — bugunku olcumun ana iddiasi burada sinaniyor
+  SHORT                      N=3     toplam   -114.83 $  ort  -38.28 $  kazanan %33.3   R_med  -1.03  fonlama    +0.00 $ (N=3)
+      gun-kumeli: 1 gun · gun ort yok · t yok
+  LONG                       N=578   toplam  -1858.06 $  ort   -3.21 $  kazanan %54.5   R_med  -0.01  fonlama  +453.83 $ (N=578)
+      gun-kumeli: 16 gun · gun ort -16.70 $ · t -1.63
+
+### REJIM ETIKETI (giriste) — bot BOGA'yi ne zaman gordu
+   BOGA 555 · NOTR 17 · BILINMIYOR 9
+
+### MUTABAKAT — kismi kar suzgeci hatasi (CLAUDE.md olculmus tuzak)
+   DOGRU (id ile birlestirilmis)     :   -1972.89 $
+   YANLIS (kismi olanlar atilirsa)   :  -26742.79 $
+   fark                              :  +24769.90 $   (255 pozisyonda kismi var)
+
+### CAPRAZ KONTROL — sentetik olcum ne demisti?
+   sentetik olcum (bugun): BOGA'da SHORT kaybettirir
+     A_funding -0.692% · MA50 -0.193% · K_genis -0.771% (islem basi net)
+   GOLGE (canli, ayni pencere): SHORT islem basi -0.947% (notional'e gore, N=3)
+     -> isaret AYNI (ikisi de negatif)
+
+🔴 Golge defter bir KENAR OLCUSU DEGILDIR: reddedilen girisler + hic
+   denenmemis bir LONG tezi karisik. Kirilim yukarida; tek rakam okunmaz.
+Bot dosyalarina yazim: YOK

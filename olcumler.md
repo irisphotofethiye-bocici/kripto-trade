@@ -8962,3 +8962,98 @@ hesaplamadı.** *"Büyüklerde işlem açsak kazanır mıydık"* sorusu ayrı bi
 çünkü mevcut mekanik onlarda **maliyet-baskın**.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔬 GÖLGE DEFTER, BOĞA PENCERESİ — sentetik ölçümlerin CANLI kontrolü (2026-09-05)
+
+> Kullanıcı isteği: *"22'den sonrası (boğa) için gölge deftere bak ve ölçtüğümüz
+> o aralıktakileri kontrol et."*
+> Betik: `scratchpad/golge_boga.py` · ham çıktı `golge_boga_sonuc.txt`.
+> 🔴 **Ön-kayıt yok, hüküm yok.** Betimleyici çapraz kontrol.
+
+**Pencere:** 2026-08-21 → 09-05 · **581 pozisyon** (1.285 kayıt, `id` ile
+birleştirildi) · 16 gün.
+
+### Kaynağa göre kırılım — `CLAUDE.md`: tek kasa rakamı yanıltır
+
+```
+kaynak                 N     toplam $     ort $   kazanan   fonlama
+pump_long_tezi       424    +2.529,66     +5,97    %57,8    +97,60
+onay_bekle            89    -3.125,65    -35,12    %41,6   +151,80
+long_veto             60    -1.275,16    -21,25    %48,3   +198,30
+stop_cok_dar           4      -174,30    -43,58    %25,0     +7,35
+blowoff                4       +72,56    +18,14   %100,0     -1,23
+TUMU                 581    -1.972,89     -3,40    %54,4   +453,83
+```
+
+### ⭐ BOTUN VETOLARI BOĞA'DA DOĞRU ÇALIŞMIŞ
+
+`onay_bekle` (−3.126 $) ve `long_veto` (−1.275 $) — botun **reddettiği**
+girişler. İkisi de zararda: bot bu pencerede **~4.400 $ kayıptan kaçınmış.**
+Bu, `long_veto` ölçümünün (bu oturumda *"kaldırmak stop yemi işlem ekler"*)
+canlı teyididir.
+
+### 🔴 `pump_long_tezi` — ÖNCE ARTI SANDIM, YOĞUNLAŞMA ÖLÇÜLÜNCE ÇÖKTÜ
+
+Bu tez `CANLI_ADAYI` listesinde ([golge.py:110](golge.py#L110)) → `zorla=False`,
+yani **canlının bütün kapılarına uyuyor**; sonucu doğrudan canlıya taşınabilir.
+Tetik: `chg24 ≥ %10` **ve** `vol_x ≥ 2,0` → LONG.
+
+```
+dilim             N   gun    toplam $    gun ort    t_gun     MDE
+TUMU            652    26   +2.653,47     -7,45    -0,91    16,33
+BOGA oncesi     228    11     +123,81    -13,29    -0,90    29,59
+BOGA (08-21->)  424    15   +2.529,66     -3,18    -0,34    18,84
+```
+
+🔴 **Toplam artı, ama GÜN ORTALAMASI EKSİ** ve t sıfırdan ayrılmıyor.
+Yoğunlaşma ölçüldü:
+
+```
+en iyi 1 gun  +1.840,14 $  -> toplamin %73'u
+en iyi 2 gun  +3.364,94 $  -> toplamin %133'u
+en iyi 2 gun HARIC       :  -835,28 $
+en iyi 5 ISLEM           :  toplamin %62'si
+artida gun               :  9 / 15
+```
+
+**İki gün ve beş işlem tüm kârı taşıyor.** Bu bir kenar değil, birkaç büyük
+kazanç. `+2.530 $` rakamı tek başına okunursa **yanıltır.**
+
+⚠️ **Bu oturumda kendi ilk okumamı düzelttim:** kaynak tablosunu görünce
+*"pump tezi BOĞA'da kârlı"* diye okudum; gün-kümeli kırılım bunu **çürüttü**.
+
+### 🔴 SHORT ÇAPRAZ KONTROLÜ YAPILAMADI — N=3
+
+Bugünkü sentetik ölçümlerin ana iddiası *"BOĞA'da SHORT kaybettirir"* idi.
+Gölge defterde bu pencerede **yalnız 3 SHORT** var (−114,83 $).
+**N=3 ile doğrulama da çürütme de yapılamaz.** Betiğin bastığı *"işaret aynı"*
+satırı **kanıt değildir**; burada açıkça öyle işaretleniyor.
+
+Sebebi yapısal: bot BOĞA'da SHORT kapılarını kapatıyor
+([testbot.py:484](testbot.py#L484)), gölge de reddedilen girişleri izlediği için
+short akışı kuruyor.
+
+### ⭐ KISMİ KÂR SÜZGECİ TUZAĞI — ölçülmüş en büyük örnek
+
+```
+DOGRU  (id ile birlestirilmis)   :  -1.972,89 $
+YANLIS (kismi olanlar atilirsa)  : -26.742,79 $
+fark                             : +24.769,90 $   (255 pozisyonda kismi var)
+```
+
+`CLAUDE.md`'de kayıtlı örnek **~4.465 $** idi; bu pencerede hata **24.770 $**.
+Kural (*"süzgeç saymak içindir, toplamak için değil"*) burada **beş kat daha
+büyük** bir sapma üretiyor.
+
+### Ne söylüyor, ne söylemiyor
+
+**Söylüyor:** (a) botun BOĞA'daki vetoları para kazandırmış; (b) `pump_long_tezi`
+tek rakamla okunamaz, kârı iki güne bağlı; (c) kısmi-kâr süzgeci hatası bu
+defterde devasa.
+
+**Söylemiyor:** BOĞA'da SHORT'un kaybettirdiğini — o iddia gölgeyle
+**doğrulanamadı** (N=3). Sentetik ölçüm tek dayanak olarak kalıyor.
+
+**Bot dosyalarına yazım: YOK.**
