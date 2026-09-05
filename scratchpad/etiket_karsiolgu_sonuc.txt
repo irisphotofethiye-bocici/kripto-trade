@@ -1,0 +1,34 @@
+====================================================================================================
+ETIKET DONMESEYDI — NOTR'de kalsaydi ne olurdu?
+====================================================================================================
+ON-KAYIT: ON_KAYIT_etiket_karsiolgu.md commit 8757c99 — KOSMADAN once
+Yapilabilirlik: kayitli kararlarin %98,9'u yeniden uretildi (167 sapma,
+  hepsi 'para_cikis' kaynakli LONG vetosu -> karsi-olgu LONG-YANLI).
+
+fiyat serisi olan sembol: 566
+
+### KARARLAR ve SIMULASYON (notional $1.000 sabit, slot=8)
+  A GERCEK     karar=884   {'SHORT': 8, 'LONG': 876} -> pozisyon=191
+  A GERCEK       N=191  {'LONG': 191}          toplam  -1719.78 $  islem-ort -0.900%  gun-ort -1.267%  gun=16  kazanan %27.7
+  B NOTR       karar=3445  {'SHORT': 3309, 'LONG': 136} -> pozisyon=136
+  B NOTR         N=136  {'SHORT': 113, 'LONG': 23} toplam   +971.20 $  islem-ort +0.714%  gun-ort +0.521%  gun=16  kazanan %37.5
+  C NOTR-LONG  karar=136   {'LONG': 136}            -> pozisyon=33
+  C NOTR-LONG    N=33   {'LONG': 33}           toplam   +967.45 $  islem-ort +2.932%  gun-ort +2.555%  gun=13  kazanan %51.5
+
+====================================================================================================
+HUKUM — ON_KAYIT_etiket_karsiolgu.md bolum 6
+====================================================================================================
+K1  B toplam > A toplam : +971.20 $  vs  -1719.78 $  -> GECTI
+K2  gun-kumeli |t| >= 2,0 : fark +1.788%  t=2.46 -> GECTI
+      ilk yari  A  -1012.59 $  B   +282.07 $  fark  +1294.65 $
+      son yari  A   -707.19 $  B   +689.13 $  fark  +1396.32 $
+K3  iki yaride ayni isaret -> GECTI
+
+SONUC: GECTI
+
+K4 (AYRI RAPOR, OLCUT DEGIL) — C vs B:
+      C +967.45 $  vs  B +971.20 $  fark +2.034%  t=1.51
+
+⚠️ SINIR: yol bagimliligi yaklasik · para_cikis yanliligi (+167 LONG) ·
+   ONAY_BEKLE bir tur beklemeden alindi · kismi kar/likidasyon/fren YOK.
+Bot dosyalarina yazim: YOK

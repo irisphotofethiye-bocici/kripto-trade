@@ -9255,3 +9255,96 @@ hedefe varmadı; kazananlar **iz-süren stopla** kırpıldı (en iyisi `EDGE`
 | sürdürülebilir bir kenar mıydı | 🔴 **hayır** — sonraki 228 LONG −3.931 $ |
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🟢 ETİKET DÖNMESEYDİ — **GEÇTİ** (2026-09-05) · oturumun tek geçen ölçümü
+
+**Ön-kayıt:** `ON_KAYIT_etiket_karsiolgu.md`, commit `8757c99` — koşumdan **önce**.
+**Betikler:** `scratchpad/etiket_karsiolgu_dogrulama.py` (yapılabilirlik) ·
+`etiket_karsiolgu.py` (hüküm) · ham çıktı `etiket_karsiolgu_sonuc.txt`
+**Kullanıcı:** *"NOTR çalışmaya devam etseydi ne olurdu, ve short açmasaydı sadece long."*
+
+### ✅ Yapılabilirlik ÖNCE doğrulandı — %98,9
+
+`testbot.karar_yon(rejim_ad, ...)` rejimi parametre alıyor → zorlanabilir.
+14.846 kayıtta kayıtlı kararların **%98,9'u yeniden üretildi**. Sapan 167'nin
+**hepsi tek tip**: `VETO:long_veto → LONG` — kaynağı arşivde olmayan
+`para_cikis` bayrağı, ki yalnız **LONG'u kapatır**.
+🔴 **Yani karşı-olgu bilinen ve tek yönlü biçimde LONG-YANLI.**
+(Eşleşme %95'in altında kalsaydı ölçüm koşturulmayacaktı; eşik önceden yazılıydı.)
+
+### Sonuç — pencere 08-21 → 09-02, notional $1.000 sabit, 8 slot
+
+```
+kol            karar   pozisyon  yon dagilimi        toplam $  islem-ort  gun-ort  kazanan
+A GERCEK         884       191   LONG 191           -1719,78   -0,900%   -1,267%   %27,7
+B NOTR          3445       136   SHORT 113·LONG 23   +971,20   +0,714%   +0,521%   %37,5
+C NOTR-LONG      136        33   LONG 33             +967,45   +2,932%   +2,555%   %51,5
+```
+
+| # | ölçüt | değer | sonuç |
+|---|---|---|---|
+| **K1** | `B` toplam > `A` toplam | **+971,20 vs −1.719,78** | ✅ GEÇTİ |
+| **K2** | gün-kümeli \|t\| ≥ 2,0 | fark +1,788% · **t=2,46** | ✅ GEÇTİ |
+| **K3** | iki yarıda aynı işaret | +1.294,65 / +1.396,32 | ✅ GEÇTİ |
+
+**SONUÇ: GEÇTİ.** Fark **2.691 $** — ve iki yarıda da neredeyse eşit dağılmış.
+
+### 🟢 VE YOĞUNLAŞMA TESTİNDEN SAĞ ÇIKIYOR — bugün bir ilk
+
+```
+B NOTR   en iyi 2 gun HARIC  +377,81 $   ·  en iyi 5 islem HARIC  +474,18 $  · artida gun 8/16
+C LONG   en iyi 2 gun HARIC  +457,85 $   ·  en iyi 5 islem HARIC  +472,28 $  · artida gun 9/13
+```
+
+Bugün **her** bulgu bu adımda çöktü (`pump_long_tezi` %133 · 11-19 penceresi
+%665). **Bu ikisi en iyi 2 gün ve en iyi 5 işlem çıkarıldıktan sonra hâlâ artıda.**
+
+### 🔴 AMA ÜÇ CİDDİ ÇEKİNCE
+
+**1 · Bugünkü sentetik ölçümlerle ÇELİŞİYOR.**
+Gün boyu *"BOĞA'da SHORT kaybettirir"* ölçüldü
+(`A_funding −0,692% · MA50 −0,193% · K_geniş −0,771%`).
+Burada `B`'nin SHORT bacağı **+731,21 $** (113 işlem, %37,2 isabet).
+Olası açıklama: NOTR dalı **seçici** (*"stage aktif + smart hizalı"*), sentetik
+ölçüm ise **her uygun barı** örnekledi. **Çözülmedi — açık çelişki olarak kayda geçiyor.**
+
+**2 · Slot kısıtı seçimi neredeyse keyfî yapıyor.**
+3.445 karardan yalnız **136'sı** pozisyona döndü; seçen şey **varış sırası**.
+Yani `B`'nin kârı *"NOTR dalı iyi seçiyor"*dan değil, **kısmen tesadüften**
+gelebilir. N=113 SHORT için bağımsız bir kenar testi yapılmadı.
+
+**3 · `para_cikis` yanlılığı `C`'yi en çok şişiriyor.**
+Yanlılık **yalnız LONG ekliyor**; `C` tamamen LONG. Yani `C`'nin
+**+2,932%/işlem** başlığı üç kolun **en az güvenilir**i.
+
+### K4 (ayrı rapor, ölçüt DEĞİL) — "sadece LONG" sorusu
+
+```
+C +967,45 $  vs  B +971,20 $   ->  toplamda BASA BAS
+ama islem basina: C +2,932%  vs  B +0,714%   (t=1,51)
+```
+
+`C` aynı parayı **dörtte bir işlemle** kazanıyor (33 vs 136). Bu ilgi çekici
+ama **ölçüt değil**, N=33, ve yukarıdaki 3. çekince tam buraya vuruyor.
+
+### 🔴 Ön-kayıtlı tahminlerin karnesi — **4'te 2**, ve büyük olan YANLIŞ
+
+| # | tahmin | sonuç |
+|---|---|---|
+| 1 | `B` daha AZ işlem açacak | ✅ TUTTU (136 vs 191) |
+| 2 | **`B` yine de NEGATİF olacak** — *"kayıp yönden değil mekanikten"* | ❌ **YANLIŞ** (+971 $) |
+| 3 | `C`, `B`'yi geçemeyecek | ✅ teknik olarak tuttu (+967 vs +971), ama işlem başına **4 kat** önde |
+| 4 | fark t≥2,0'a ulaşmayacak | ❌ **YANLIŞ** (t=2,46) |
+
+🔑 **2. tahmin bu oturumun en büyük hatası.** Beş defterin aynı mekanikle
+kaybetmesine bakıp *"sorun mekanikte, yön değil"* dedim. **Yön belirleyici çıktı.**
+
+### Sınırlar (ön-kayıtta ilan edildiği gibi)
+
+Yol bağımlılığı yaklaşık · `para_cikis` yanlılığı · `ONAY_BEKLE` bir tur
+beklemeden alındı · kısmi kâr, likidasyon, düşüş freni **yok** · 13 gün,
+tek epizot · sabit $1.000 notional (risk-bazlı boyutlandırma **değil**).
+
+**Bot dosyalarına yazım: YOK.**
