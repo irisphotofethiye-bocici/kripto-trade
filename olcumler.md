@@ -9057,3 +9057,104 @@ defterde devasa.
 **doğrulanamadı** (N=3). Sentetik ölçüm tek dayanak olarak kalıyor.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+## 🔬 11-19 AĞUSTOS PENCERESİ — *"elimizdeki en iyi bot oydu"* ölçüldü (2026-09-05)
+
+> Kullanıcı: *"başarılıdan kastım seçtiği coinler bir şekilde büyük oranda artıda
+> kalıyordu, elimizdeki en iyi bot oydu."*
+> Betikler: `scratchpad/pencere_11_19.py` · ham çıktı `pencere_11_19_sonuc.txt`.
+> 🔴 **Betimleyici. Ön-kayıt yok, hüküm yok.**
+
+### ✅ Tespit DOĞRU — tek artı pencere o
+
+```
+pencere                       N   toplam $    ort $  kazanan   gun ort  t_gun  gun
+07-23..08-10 (S9 oncesi)     10    -803,31   -80,33    %40,0   -169,19  -1,68    5
+08-11..08-19  <- KULLANICI  115    +184,98    +1,61    %45,2     -5,59  -0,31    9
+08-20                        24    -715,99   -29,83    %29,2         -      -    1
+08-21..09-05 (BOGA)         243   -4748,27   -19,54    %46,1    -26,96  -3,75   16
+```
+
+**Dört pencerenin yalnız biri artıda** — ve o, kullanıcının işaret ettiği pencere.
+
+### ⚠️ AMA ÜÇ ÇEKİNCE
+
+**1 · Kazanç küçük.** +184,98 $ / 115 işlem = işlem başına **+1,61 $**.
+*"Büyük oranda artıda"* bir büyüklük değil.
+
+**2 · Kazanma oranı aslında DÜŞÜK.** %45,2 — BOĞA penceresinin (%46,1)
+**altında.** Yani *"seçtiği coinler artıda kalıyordu"* gözlemi **isabet
+oranından gelmiyor**; farkı yaratan **kazananların büyüklüğü** (31 TP2).
+
+**3 · 🔴 Yoğunlaşma uç seviyede.**
+
+```
+en iyi 1 gun    +696,01 $  -> toplamin %376'si
+en iyi 2 gun   +1229,97 $  -> toplamin %665'i
+en iyi 5 islem +1640,01 $  -> toplamin %887'si
+en iyi 2 gun HARIC        :  -1044,99 $
+artida gun                :  5 / 9
+gun-kumeli ortalama       :  -5,59 $   (t = -0,31)
+```
+
+**İki günü ve beş işlemi çıkarınca pencere −1.045 $.**
+Gün-kümeli ortalama **negatif** ve sıfırdan ayrılmıyor.
+
+🔑 **Doğru okuma: "en iyi bot" = kaybetmeyen tek yapılandırma. Ölçülmüş bir
+kenarı olan bot DEĞİL.**
+
+### 🔑 PENCEREYİ AYIRAN ASIL ŞEY — yön
+
+```
+yon      : SHORT 105 · LONG 10        <- neredeyse saf SHORT defteri
+cikis    : STOP 80 · TP2 31 · ZAMAN_STOP 4
+en iyi 5 : RVN +395 · AIOT +333 · BICO +324 · IOTX +308 · ME +279  (hepsi SHORT)
+```
+
+Kıyas: BOĞA penceresinde **LONG 232 / SHORT 9**. Yani 11-19 botu, düşen bir
+piyasada **SHORT defteri** işletiyordu — kazancı oradan geldi.
+
+⚠️ Bugünkü kuyruk ölçümüyle birlikte okunmalı: küçük coin short'lamanın yukarı
+kuyruğu 18 kat şişman. O pencere **piyasa düştüğü için** çalıştı.
+
+### ⭐ YAPILANDIRMA KURTARILDI — ve iki ayara indi
+
+`kripto-config.json` git'te izlenmiyor (**0 commit**), ama yedekler duruyor:
+
+```
+yedek-2026-08-11-s9      Aug 11 12:43   S9 (risk %3->%1,5 · asgari_stop %2)
+yedek-2026-08-11-kismi   Aug 11 22:25   kismi kar
+yedek-20260819-134420    Aug 19 13:44   PENCERENIN SONU
+```
+
+**Pencere içinde parametre DEĞİŞMEDİ** (yalnız bildirim ayarları + `kismi_pay`
+resmileşmesi) → *"11-19 botu"* **iyi tanımlı** bir yapılandırma.
+
+**19 Ağustos → bugün arasında değişen SADECE ÜÇ ŞEY:**
+
+| ayar | 19 Ağustos | bugün | ne yapar |
+|---|---|---|---|
+| `esikler.btc_pay_short_freni` | **1** | 0 | SHORT freni — **kapatıldı** |
+| `testbot.maks_dusus_pct` | **25** | 0 | düşüş freni — **kapatıldı** |
+| `testbot.maks_pozisyon` | 8 | 0 | *(bugün ben durdurdum)* |
+
+🔴 **İkisi de KORUMAYDI ve ikisi de kaldırılmış.** Hakem raporunun
+*"kirlenmenin yönü: değişiklikler koruma KALDIRIYORDU"* notu birebir doğrulandı.
+
+**Yani 11-19 botunu geri getirmek iki satır:**
+`btc_pay_short_freni: 1` · `maks_dusus_pct: 25`
+
+⚠️ Düşüş freni açık olsaydı **tetiklenirdi**: zirve 6.320,77 → bugün 4.427,99 =
+**−%29,9**, eşik −%25. Bot kendi kendine duracaktı.
+
+### Ne söylüyor, ne söylemiyor
+
+**Söylüyor:** o pencere tek artı olan; yapılandırması tanımlı ve iki ayarla
+geri getirilebilir; farkı yaratan **SHORT ağırlığı** ve **TP2'ye kadar tutmak**.
+
+**Söylemiyor:** o yapılandırmanın bir **kenarı** olduğunu. Gün-kümeli t=−0,31,
+iki gün çıkınca eksi. **Aynı config farklı bir piyasada aynı sonucu vermez.**
+
+**Bot dosyalarına yazım: YOK.**

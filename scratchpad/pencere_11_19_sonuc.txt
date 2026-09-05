@@ -1,0 +1,49 @@
+================================================================================================
+11-19 AGUSTOS — 'elimizdeki en iyi bot oydu' tespitinin olcumu
+================================================================================================
+🔴 Betimleyici. On-kayit yok, hukum yok.
+
+pencere                          N   toplam $     ort $  kazanan    R_med   gun ort    t_gun     gun
+07-23..08-10  (S9 oncesi)       10    -803.31    -80.33    40.0%    -1.01   -169.19    -1.68       5
+08-11..08-19  <- KULLANICI     115    +184.98     +1.61    45.2%    -0.52     -5.59    -0.31       9
+08-20..08-20                    24    -715.99    -29.83    29.2%    -1.02     +0.00      yok       1
+08-21..09-05  (BOGA)           243   -4748.27    -19.54    46.1%    -1.00    -26.96    -3.75      16
+
+### 11-19 PENCERESI — AYRINTI
+  yon dagilimi : {'SHORT': 105, 'LONG': 10}
+  cikis sebebi : {'STOP': 80, 'TP2': 31, 'ZAMAN_STOP': 4}
+  kismi kar    : 55 / 115 pozisyonda
+  SHORT N=105 toplam    +45.74 $  ort   +0.44  kazanan %43.8
+  LONG  N=10  toplam   +139.24 $  ort  +13.92  kazanan %60.0
+
+  GUNLUK:
+    2026-08-11   11 islem   -1267.33 $
+    2026-08-12    9 islem    +453.32 $
+    2026-08-13   17 islem    +696.01 $
+    2026-08-14   15 islem    -348.16 $
+    2026-08-15   18 islem    +533.96 $
+    2026-08-16   18 islem    +180.18 $
+    2026-08-17   14 islem    +352.99 $
+    2026-08-18    6 islem    -363.08 $
+    2026-08-19    7 islem     -52.91 $
+  artida gun: 5 / 9
+
+  YOGUNLASMA (tek gun/islem tasiyor mu):
+    en iyi 1 gun     +696.01 $ -> toplamin %376'i
+    en iyi 2 gun    +1229.97 $ -> toplamin %665'i
+    en iyi 5 islem  +1640.01 $ -> toplamin %887'i
+    en iyi 2 gun HARIC: -1044.99 $
+
+  EN COK KAZANDIRAN 5 / KAYBETTIREN 5:
+    + RVN        SHORT   +395.31 $  (TP2)
+    + AIOT       SHORT   +333.02 $  (TP2)
+    + BICO       SHORT   +324.49 $  (TP2)
+    + IOTX       SHORT   +307.95 $  (TP2)
+    + ME         SHORT   +279.24 $  (ZAMAN_STOP)
+    - 2Z         SHORT   -159.44 $  (STOP)
+    - 2Z         SHORT   -181.33 $  (STOP)
+    - SQD        SHORT   -264.71 $  (STOP)
+    - PROM       SHORT   -265.37 $  (STOP)
+    - SQD        SHORT   -274.51 $  (STOP)
+
+Bot dosyalarina yazim: YOK
