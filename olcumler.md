@@ -9916,3 +9916,121 @@ skor kapısından geçmemiş — çünkü `A+B` ve `MA50+ucuz` kapıları skor
 her şey, stop harekete göre ölçeklendiği sürece nötr kalır.
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### 🔴 EMİR DEFTERİ DERİNLİĞİ — TEKRAR KOŞUM: ön-kayıt **GEÇTİ (5/5)**, ama yordayıcı **DEFTERİ DEĞİL BOYUTU** taşıyor (2026-09-05)
+
+**Ön-kayıt:** `ON_KAYIT_defter_derinligi.md`, commit `837631d` — **değiştirilmedi.**
+İlk koşum 2026-08-30'da O1'de düşmüştü (`t=−1,99`, eşik −2,5) ve kütüğe
+*"sıradaki adım: ~4 hafta sonra tekrarla, küme 11 → ~40"* yazılmıştı.
+
+**Betikler:** `scratchpad/defter_derinligi.py` (aynen) · yeni ek sınamalar:
+`basi_karistirici.py` · `basi_ic_dis.py` · `basi_ic_stop.py` · `basi_ortak_payda.py`
+
+#### 1 · Ön-kayıt ölçütleri — hepsi geçti
+
+| | ilk koşum (08-30) | bugün (09-05) |
+|---|---|---|
+| N | 1.056 | **1.858** |
+| gün kümesi | 11 | **19** (O1'de eşleşen 17) |
+| O1 gün-kümeli t | −1,99 ❌ | **−3,85** ✅ (15/17 gün) |
+| O2 monotonluk ρ | −1,000 ✅ | **−1,000** ✅ |
+| O3 karıştırıcı | 6/6 ✅ | **7/7** ✅ |
+| O4 defterler | 4/4 ✅ | **5/5** ✅ |
+| O5 permütasyon | p=0,0000 ✅ | **p=0,0000** ✅ |
+
+**Ön-kayıta göre HÜKÜM: GEÇTİ.** Ölçütler değiştirilmedi (D/9).
+
+⚠️ **Ama planlanan güce ULAŞILMADI ve ulaşılamayacak.** Hedef ~40 kümeydi; 19'da
+kaldı çünkü **girişler 2026-09-05'te durduruldu → örneklem DONDU.** Bu bir ara
+bakıştır ve ikinci bakıştır (ilk: 11 küme). Ön-kayıt tekrarı öngördüğü için
+p-hacking değil, ama **planlanan gücün %43'ü**.
+
+#### 2 · 🔴 ASIL BULGU — yordayıcı bir KOSTÜM
+
+Ön-kayıtta olmayan dört ek sınama koşuldu. Üçü bulguyu **destekledi**, dördüncüsü
+**anlamını değiştirdi.**
+
+**Destekleyenler:**
+
+```
+stop genisligi ceyreklere gore : 4,27 / 4,16 / 3,84 / 4,03   (Q1/Q4 = 1,06 kat)
+   -> CLAUDE.md'nin ZORUNLU sinamasi: hucreler oynaklikta AYRISMIYOR ✅
+stop sabitlenince (3 dilim)    : -1,969 / -2,016 / -3,580     3/3 ayni isaret ✅
+slipaj mekanizma mi?           : slipaj farki, getiri farkinin %1,3'u -> HAYIR
+```
+
+**Anlamı değiştiren — `bası`'yı bileşenlerine ayırmak:**
+
+```
+basi = notional / defter_usdt_20
+
+SEMBOL ICINDE, ikisi AYRI AYRI getiriyle:
+   r(notional sapmasi, getiri sapmasi) = -0,428   t = -19,54   <- GUCLU
+   r(DEFTER   sapmasi, getiri sapmasi) = +0,022   t =  +0,92   <- SIFIR
+
+DEFTER DERINLIGI TEK BASINA, dolar cinsinden (N=1.858):
+   r(log defter, DOLAR) = -0,003   t = -0,15                   <- TAM SIFIR
+   Q1 (en sig 4.442$) -4,17 $  ·  Q4 (en derin 103.033$) -7,37 $   -> desen YOK
+```
+
+🔑 **Emir defteri hiçbir şey taşımıyor. Etkinin tamamı `notional`'dan geliyor.**
+`bası`, `notional`'ın gürültülü bir versiyonu — payda yalnızca seyreltiyor:
+
+```
+r(log notional, DOLAR) = -0,431  t=-20,57      <- basi'dan GUCLU
+```
+
+#### 3 · Ortak payda sınaması — eser DEĞİL, ama YENİ de değil
+
+`bası`'nın **payında** notional var, `ret`'in **paydasında** notional var →
+`CLAUDE.md`'nin iki kez ısıran tuzağı. Dolar cinsinden sınandı:
+
+```
+Q4-Q1  ret%  : -3,317 puan
+Q4-Q1  DOLAR : -47,69 $      gun-eslesmis t = -4,02   17/19 gun negatif
+-> isaret AYNI -> saf normalizasyon eseri DEGIL
+```
+
+Ve stop sabitlenince notional hâlâ doları öngörüyor (3/3, r = −0,39…−0,49),
+`r(log notional, log stop) = −0,324` — yani "büyük pozisyon" ile "dar stop" aynı
+şey değil.
+
+**Ama bu bulgu YENİ DEĞİL.** 2026-08-30 kütüğü zaten yazmıştı: *"KAZANAN vs
+KAYBEDEN — TEK AYIRICI POZİSYON BÜYÜKLÜĞÜ"* (`d=−0,69`). Bugünkü ölçüm o bulguyu
+**üçüncü kez** ve daha güçlü biçimde doğruluyor, emir defteri kılığında.
+
+#### 4 · (a) BOYUTLANDIRMA mı (b) COİN SEÇİMİ mi — ilk koşumun açık bıraktığı soru
+
+İlk koşum *"bu hüküm yazılmadan çözülmeli"* demişti (o gün eşleşen sembol = 6).
+Bugün 146 sembolle sabit-etki ayrıştırması yapıldı:
+
+```
+ICERIDE  (sembol sabit) r = -0,358  t = -15,82   <- GUCLU
+DISARIDA (sembol ort.)  r = -0,119  t =  -1,44   <- GORULMUYOR
+```
+
+**Cevap: (a) BOYUTLANDIRMA.** Coin seçimi değil.
+⚠️ Ama (2) ışığında bu *"pozisyonu defter derinliğine göre kırp"* demek **değil** —
+defterin katkısı sıfır. Sadece *"büyük notional kötü"* diyor.
+
+#### 5 · 🔴 NEDEN — MEKANİZMA BİLİNMİYOR
+
+Kâğıt defterde pozisyon büyüklüğü fiyatı **etkileyemez**, ve slipaj farkın
+%1,3'ünü açıklıyor. Yani **nedensel bir kanal gösterilemiyor.** `CLAUDE.md`'nin
+kuralı burada bağlayıcı: *"nedensel yolun üzerinde demeden önce yolun var
+olduğunu göster."* Gösterilemedi → bu bir **korelasyon**, kural değil.
+
+#### 6 · SONUÇ — `CLAUDE.md`'nin 4. bant-dışı adayı HÂLÂ ÖLÇÜLMEDİ
+
+**Bekleyen likidite ölçülmüş sayılmaz.** Sebebi kayıtlıydı ve şimdi kanıtlandı:
+
+> *"Defterin **tek tarafı** saklanıyor → dengesizlik ölçülemez, emir defterinin
+> klasik kenarı hâlâ ölçülmemiş durumda."*
+
+Kaydedilen `defter_usdt_20` = **yediğimiz taraf**. Emir defterinin gerçek sinyali
+**dengesizliktir** (bid vs ask) ve o hiç kaydedilmedi. Bugünkü ölçüm, kaydedilen
+tarafın **sıfır bilgi** taşıdığını gösterdi (r = −0,003).
+
+**Bot dosyalarına yazım: YOK.**
