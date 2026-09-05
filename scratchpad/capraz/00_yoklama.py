@@ -136,8 +136,8 @@ def main():
         try:
             fb = binance_fonlama(s, 200)
             fy = bybit_fonlama(s, 200)
-        except Exception:
-            print("   %-14s HATA %s" % (s, str(e)[:40]))
+        except Exception as hata:
+            print("   %-14s HATA %s" % (s, str(hata)[:40]))
             continue
         ab, ay_ = aralik_saat(fb), aralik_saat(fy)
         es = "EVET" if (ab and ay_ and abs(ab - ay_) < 0.6) else "🔴 HAYIR"
