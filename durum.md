@@ -69,6 +69,7 @@ bilinen zayıflıklar. **Rakam tutmaz.**
 | KriptoIzleyici | 5 dk |
 | KriptoPiyasa | günlük |
 | KriptoPerpSeri | **günlük 03:30** · `ExecutionTimeLimit` PT3H · log `scratchpad/perp_seri_indir.log` |
+| **KriptoNotrLong** | **7,5 dk** · `ExecutionTimeLimit` PT20M · log `notrlong_log.txt` |
 
 🔴 **`KriptoPerpSeri` neden var (2026-08-24 kullanıcı kararı):** Binance
 `futures/data` uçları (OI · top/global long-short · taker) **yalnız 30 gün** tutuyor.
@@ -76,6 +77,11 @@ Bu seriler *çekilemez, ancak arşivlenir* — koşulmadığı her gün penceren
 bir gün **kalıcı olarak** düşer. Görev kurulmadan önce bu gerçekten yaşandı: 58
 sembolde 07-23…07-26 arası gitti (ayrıntı `CLAUDE.md` → mimari tuzaklar).
 Kalıcı uçlar (`klines` · `fundingRate`) bu kapsamda **değil**, onlar her zaman çekilir.
+
+⚠️ **[DEĞİŞTİ 2026-09-06] Yukarıdaki gerekçe ÇÜRÜDÜ** — o veri arşivde 2+ yıl
+geriye var, kaydedilen kayıp da geri alınabilir. Görev artık **kritik değil**
+(zararsız, koşmaya devam edebilir). Olgu ve kanıt `CLAUDE.md` → *iki sınıf veri*
+maddesinde; **buraya kopyalanmıyor.**
 
 Bildirim: yalnız **giriş** olayı Telegram'a gider (`bildirim.olaylar = ["giris"]`).
 
@@ -2002,3 +2008,71 @@ veri toplayıcılar (`Radar` · `PerpSeri` · `Piyasa` · `Nobetci`).
 
 ⚠️ Uygulama sırasında nota **Kiril harf** (`ду`) sızdı, tarama ile yakalandı ve
 düzeltildi. Projede kayıtlı bir hata sınıfı.
+
+---
+
+## 🆕 NOTR-LONG BOTU KURULDU VE BAŞLATILDI (2026-09-06, KULLANICI KARARI)
+
+**Ön-kayıt:** `ON_KAYIT_notr_long_botu.md`, commit `4927f3d` — **kurulmadan önce**.
+**Kod:** `notrlong.py` · **görev:** `KriptoNotrLong` (7,5 dk).
+
+**Karar:** rejim etiketi **zorla `NOTR`**, **yalnız LONG**, sabit %10 hedef,
+kısmi kâr kapalı, iz-süren kapalı. İki kol — tek değişken **skor kapısı**:
+
+| kol | fark |
+|---|---|
+| `n1` | skor kapısı **YOK** |
+| `n2` | skor kapısı **VAR** (`score ≥ 45`), gerisi birebir aynı |
+
+Tek tarama, iki kola **aynı adaylar** → `n1 − n2` doğrudan *"skor kapısı ne
+katıyor"*un cevabı.
+
+**Dayanak:** 2026-09-05 karşı-olgu ölçümü — bugüne kadar **yoğunlaşma testini
+geçen tek olumlu sonuç**. Rakamlar `olcumler.md`'de; **buraya yazılmıyor.**
+
+### Bu botun `defter2`/`defter3`'ten AYRILDIĞI iki yer — ikisi de zorunluydu
+
+1. **Kendi taramasını yapar.** `testbot.maks_pozisyon=0` olunca `yeni_giris_ara`
+   aday taramasından **önce** dönüyor ([testbot.py:1376](testbot.py#L1376)) ve
+   `testbot_aday_arsiv.jsonl` **yazılmıyor**. `defter2`/`defter3` o arşivden
+   besleniyor; bu bot beslenseydi **hiç aday görmezdi**.
+   ⚠️ Aday arşivine **yazmaz** — 6 çözümleyici okuyor.
+2. **Sabit %10 hedefi elle kurar.** `testbot` sabit hedefi yalnız `sebep`
+   `"A+B"`/`"MA50+ucuz"` ile başlarsa atıyor ([testbot.py:1293](testbot.py#L1293));
+   bizim sebebimiz öyle **olamaz** (o alanı 6 çözümleyici okuyor). Pozisyon
+   açıldıktan **sonra** kendi state'inde düzeltiliyor.
+
+### Dokunulmayanlar
+
+`testbot.py` · `golge.py` · `ayna.py` · `benim.py` · `defter2/3` · `radar.py` ·
+`evren.py` · **`kripto-config.json`** · mevcut state/defterler · mevcut
+zamanlanmış görevler: **hiçbiri.**
+Config'te değişiklik **gerekmedi** — `asgari_stop_pct` · `islem_risk_pct` ·
+`kaldirac` · `maks_dusus_pct` · `zaman_stop` zaten ön-kayıtla birebirdi.
+
+### Doğrulamalar
+
+- Güvenli test `scratchpad/notrlong_test.py` — **20/20**, diske yazım **yok**
+  (21 izlenen dosyanın, botun kendi defterleri ve `veto_log.jsonl` dahil,
+  hiçbiri büyümedi).
+- İlk gerçek tur: 3 dk 12 sn, 0 pozisyon → teşhisle **meşru** olduğu gösterildi
+  (10 aday · 2 SHORT kararı yalnız-LONG kuralıyla atıldı · 1 blowoff · 7 karar-yok).
+- Yapısal: `esikler.notr_long_acik = 1` → NOTR-LONG yolu **açık**
+  ([testbot.py:674](testbot.py#L674)); bot ölü doğmamış.
+
+### 🔴 Pencere ve kapatma ölçütü — ön-kayıt bölüm 5 ve 7
+
+```
+SURE : 30 gun          N : kol basina >= 80 KAPANMIS pozisyon
+IKISI BIRDEN dolmadan hukum YOK.
+Pencere boyunca parametre DEGISTIRILMEZ (D/8) — degistirilirse pencere yeniden baslar.
+Dusus freni tetiklenirse (-%25) o kol DURUR.
+N 30 gunde 80'e ulasmazsa -> "olculemedi", UZATILMAZ.
+```
+
+⚠️ **Bilinen risk:** `n2` skor kapısı yüzünden daha az işlem açacak; 80'e
+ulaşamayabilir. Ulaşamazsa ön-kayıt gereği *"ölçülemedi"* yazılır — pencere
+uzatılmaz.
+
+**Okuma komutu:** `python notrlong.py --durum` · canlı rakam hiçbir `.md`
+dosyasından okunmaz.
