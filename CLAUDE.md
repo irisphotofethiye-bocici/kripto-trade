@@ -380,6 +380,18 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   kilit altında **yeniden oku + doğrula**. Ağ çağrısı kilidin **dışında** kalır.
   ⚠️ **ATOMİK YAZIM ≠ ATOMİK İŞLEM.** `ayna.kaydet` ilk günden atomikti ve yetmedi;
   bozulan tek yazım değil, oku-değiştir-yaz bütünlüğüydü.
+- 🔴 **`pozisyon_kapat` KAYDI YAZAR AMA POZİSYONU LİSTEDEN SİLMEZ.**
+  `pozisyon_kapat(st, pos, fiyat, sebep)` deftere kapanış satırını yazar ve
+  `st["equity"]`'yi günceller — ama `st["acik_pozisyonlar"]`'a **dokunmaz**.
+  Silme işini **çağıran** yapıyor: `yonet_acik_pozisyonlar` bir `kalanlar`
+  listesi kurup sona atıyor ([testbot.py:1092](testbot.py#L1092)).
+  **Isırdı (2026-09-06):** defterleri elle kapatan bir betik `pozisyon_kapat`'ı
+  doğrudan çağırdı; beş kapanış kaydı yazıldı, beş pozisyon **hâlâ açık** kaldı.
+  Zamanlanmış görev bir daha koşsaydı aynı pozisyonları **ikinci kez** kapatıp
+  **çift P&L** üretecekti. Kurtaran şey görevlerin önce devre dışı bırakılması oldu.
+  **Kural:** `pozisyon_kapat`/`pozisyon_liq`'i `yonet_acik_pozisyonlar` dışından
+  çağıran her kod, kapanıştan sonra pozisyonu listeden **kendisi düşürmek
+  zorundadır** — ve sonra `acik == 0` diye **doğrulamalıdır**.
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta

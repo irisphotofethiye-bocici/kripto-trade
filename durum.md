@@ -2076,3 +2076,52 @@ uzatılmaz.
 
 **Okuma komutu:** `python notrlong.py --durum` · canlı rakam hiçbir `.md`
 dosyasından okunmaz.
+
+---
+
+## 🆕 TEMİZ SAYFA — ESKİ DEFTERLER KAPATILDI (2026-09-06, KULLANICI KARARI)
+
+**Kullanıcı:** *"paneli düzenle, panelde sadece bu bot olsun. açık tek poz kalmış
+zaten onu da kapat, diğer bütün defterleri kapat, temiz bir sayfa olsun."*
+
+⚠️ **Kullanıcıya düzeltme bildirildi:** açık pozisyon **1 değil 5**'ti — üç ayrı
+işlem, beş kayıt (`AZTEC` testbot+ayna · `VANA` defter2+defter3 · `NEAR` golge).
+
+### Yapılanlar
+
+| ne | nasıl |
+|---|---|
+| 5 pozisyon kapatıldı | `scratchpad/defterleri_kapat.py --uygula` · piyasa fiyatı · sebep **`ELLE_KAPAT_TEMIZ_SAYFA`** |
+| `testbot` · `golge` · `ayna` · `benim` · `defter2` · `defter3` | `durum = KAPANDI_TEMIZ_SAYFA` |
+| `KriptoTestBot` · `KriptoDefter2` · `KriptoDefter3` | görev **Disabled** |
+| panel | **yeni** `notrlong_panel.py`, port 8787 (eski `panel_sunucu.py`'ye dokunulmadı) |
+
+🔴 **Elle müdahale bilinçliydi ve kapanış kayıtlarına etiketlendi.** Sonraki her
+çözümleme `ELLE_KAPAT_TEMIZ_SAYFA` etiketini görüp bu işlemlerin **doğal
+kapanmadığını** ayırt edebilir. Yedekler: `*_state.json.yedek-temizsayfa-20260906`.
+
+### 🔴 KOŞUM SIRASINDA BİR HATA SINIFI ISIRDI — ayrıntı `CLAUDE.md`
+
+`pozisyon_kapat` kaydı yazıyor ama pozisyonu **listeden silmiyor**; beş kapanış
+yazıldı, beş pozisyon açık kaldı. Zamanlanmış görev bir daha koşsaydı **çift
+P&L** üretecekti. Görevler önce devre dışı bırakıldığı için olmadı; çift kapanış
+**olmadığı doğrulandı**. Kural `CLAUDE.md` → mimari tuzaklar; **buraya
+kopyalanmıyor.**
+
+### Çalışmaya devam edenler — ve NEDEN
+
+```
+KriptoNotrLong   yeni bot (7,5 dk)
+KriptoPiyasa     notrlong'un para_rejim() kapisi buradan besleniyor  <- KAPATILAMAZ
+KriptoRadar      radar_archive.jsonl arsivi surer (olcum varligi)
+KriptoPerpSeri   arsiv (artik kritik degil, bkz. yukarisi)
+KriptoIzleyici · KriptoNobetci   izleme/bildirim
+```
+
+### Yeni panel
+
+`python notrlong_panel.py` → `http://127.0.0.1:8787`
+**Salt-okunur** — eski panelde bulunan `ayna_kapat` gibi eylem uçları **bilerek
+yok** (ölçüm penceresine panelden müdahale edilemesin diye).
+Gösterdiği: iki kol yan yana · pencere ilerlemesi (gün/30 ve N/80) · **`N1 − N2`
+farkı** · açık pozisyonlar · son kapanışlar · log.
