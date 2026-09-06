@@ -392,6 +392,27 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   **Kural:** `pozisyon_kapat`/`pozisyon_liq`'i `yonet_acik_pozisyonlar` dışından
   çağıran her kod, kapanıştan sonra pozisyonu listeden **kendisi düşürmek
   zorundadır** — ve sonra `acik == 0` diye **doğrulamalıdır**.
+- 🔴 **`git filter-branch` ÇALIŞMA AĞACINI DA SİLER — geçmişten düşen dosya DİSKTEN de
+  düşer.** Isırdı (2026-09-06): push öncesi denetimde `scratchpad/capraz/` altında
+  yüz MB'lar mertebesinde takipli ölçüm ham verisi çıktı ve geçmişten temizlendi;
+  filter-branch bitince yeniden yazılmış ucu **checkout ettiği için** o dosyalar
+  **çalışma dizininden de yok oldu**. Veri yalnızca **önceden atılmış yedek etiketi**
+  sayesinde geri geldi (`git checkout <etiket> -- <yollar>` ardından `git reset --`
+  ile index'ten düşürme; hash karşılaştırmasıyla birebir doğrulandı).
+  **Kural — sırayla:** (1) `git tag yedek/... HEAD` **önce**; (2) yeniden yazma;
+  (3) düşen yolları yedekten geri al; (4) `git hash-object` ile **içerik eşitliğini
+  doğrula**; (5) `git check-ignore -v` ile artık yoksayıldığını doğrula.
+  ⚠️ **`--prune-empty` KULLANILMAZ:** bu projede commit mesajları laboratuvar
+  defteridir; boşalan bir commit silinirse **ölçüm kaydı** kaybolur.
+  ⚠️ Yeniden yazma **yalnız push edilmemiş** commitlerde serbesttir —
+  `git merge-base --is-ancestor <uzak-uç> HEAD` ile doğrulanır; doğrulanmıyorsa
+  force gerekir ve o **ayrı bir karardır**.
+- 🔴 **ÖLÇÜM HAM VERİSİ `.gitignore`'a ÖLÇÜM BİTİNCE değil, KLASÖR AÇILIRKEN yazılır.**
+  Aynı olayda ortaya çıktı: iki ölçüm klasörü (`capraz`, `obi`) ignore'suz açıldı ve
+  ham veri sessizce commit'lendi. `CLAUDE.md`'nin *"geçmişte ~920 MB veri"* diye engel
+  saydığı sınıfın aynısı — depo bir kez temizlenmişti, ikinci kez kirlendi.
+  **Kural:** `scratchpad/<olcum>/` altına veri indiren bir betik yazıyorsan, indirmeden
+  **önce** ignore satırını ekle. Takipte kalacaklar: `*.py` · `sonuc.txt` · `indir_log.txt`.
 - **Kilit dosyaları süresini ilan eder.** Uzun iş kilidi 4 dakikada bayat sayılırsa
   ikinci süreç kilidi çalar ve iki tur aynı durum üzerinde koşar.
 - **`kismi_kar_r = 0` KAPATMA ANLAMINA GELMEZ — TERSİNİ yapar.** SHORT'ta
