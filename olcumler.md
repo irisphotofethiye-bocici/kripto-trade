@@ -11282,3 +11282,80 @@ KURULUM         R:R 0,97 · basabas %50,7 · stop %10,28 (1,5 x ATR %6,84)
 ```
 
 **Kurulum biliniyordu; ondan kaçınacak kural ölçüt barını geçemedi.**
+
+---
+
+## HEDEF `R`'YE BAĞLI (`m × stop`) — 2026-09-06 · **DÜŞTÜ** · ve mekanizma ÇÖZÜLDÜ
+
+**Ön-kayıt:** `ON_KAYIT_R_bagli_hedef.md` · commit `f309cd1` — koşumdan **önce**
+**Betik:** `scratchpad/r_hedef/01_olcum.py`
+**N = 2.082 · 72 gün** — `A2` kolundaki `N=31/75`'in **27-67 katı**
+`m = 10 / medyan(stop 3,58%) = 2,793` — **türetildi, aranmadı**
+
+### Hüküm
+
+```
+                     ort R    isabet%   amp.basabas
+KESIF   A0         -0,1577     23,1%       31,1%
+        R(m=2,79)  -0,1739     20,6%       28,6%
+HOLDOUT A0         +0,0868     27,6%       29,4%
+        R(m=2,79)  +0,0282     25,3%       29,0%
+
+ESLESMIS FARK:  KESIF -0,0162 (t -0,80) · HOLDOUT -0,0586 (t -1,20, MDE 0,0732)
+
+T1 DUSTU · T2 DUSTU · T3 DUSTU · T4 GECTI (ikisi de negatif) · T5 DUSTU
+                                                              -> DUSTU
+```
+
+`m ∈ {2,3,4,5}` ızgarasının **tamamı** her pencerede negatif.
+
+### 🔑 MEKANİZMA TABLOSU — asıl bulgu burada
+
+```
+stop dilimi       A0 ort R   R(m) ort R      fark
+2,00-2,53          +0,4171      +0,1528    -0,2643   <- DAR stop: AGIR HASAR
+2,53-3,26          +0,0607      +0,0455    -0,0152
+3,26-4,14          +0,2036      +0,1779    -0,0258
+4,15-5,60          -0,1419      -0,1571    -0,0153
+5,61-17,02         -0,1047      -0,0776    +0,0271   <- GENIS stop: hafif fayda
+```
+
+**Mekanizma tasarlandığı gibi çalışıyor** — geniş stoplu işlemlerin hedefi
+`%10 → %20`'ye çıkınca **iyileşiyorlar** (`+0,0271`). Ama dar stopluların hedefi
+`%10 → %6,17`'ye inince **çöküyorlar** (`−0,2643`).
+
+🔴 **Dar stoptaki hasar, geniş stoptaki faydanın ON KATI.**
+
+### 🔑 VE BU, R:R EŞİTSİZLİĞİ HAKKINDAKİ SEZGİYİ TERSİNE ÇEVİRİYOR
+
+`ARX R:R 3,02` vs `UAI R:R 0,97` eşitsizliği **bir kusur değil — kenarın
+YAŞADIĞI yer.** Dar stoplu / yüksek R:R hücresi holdout'ta `+0,4171` ile
+**popülasyonun en iyisi**. R:R'yi eşitlemek, o hücrenin hedefini kesip
+kazancını yok ediyor.
+
+Ve bu, ölçülmüş hedef taramasıyla (`%2,5 → +0,47 · %5 → +1,33 · %10 → +2,19`)
+**birebir tutarlı**: büyük hedef iyi, küçük hedef kötü. `R(m)` çoğunluk için
+hedefi **küçültüyor**.
+
+### 🔑 İKİ ÖLÇÜM AYNI SONUCA, ZIT YÖNLERDEN
+
+```
+R:R esitleme (bu olcum)  -> KOTU, cunku DAR stoplular iyi
+genis stop eleme         -> NEREDEYSE GECTI (t -1,44, fark 0,2546 vs MDE 0,2724)
+                            cunku GENIS stoplular kotu
+```
+
+**İkisi de aynı şeyi söylüyor: dar stop iyi, geniş stop kötü.**
+
+⚠️ Ve bu, aynı gün yazdığım `ON_KAYIT_stop_genislik_yonu.md`'nin hipotezinin
+(*"geniş stop daha iyi"*) **tersidir**. O hipotezi `asgari_stop` tablosundan
+türetmiştim ve **yanlış türetmişim** — o tablo `%10` sabit hedefle isabet
+oranını veriyordu, ortalama `R`'yi değil.
+
+### Sınır
+
+`48s zaman stopu` büyük hedefleri kesiyor olabilir (`stop p90` için hedef
+`%20,25`). Zaman stopunda kapanan oran her iki kolda da `%5-7` — yani bu
+etki **küçük**, açıklamanın tamamı değil.
+
+Çıkış varyantı sayacı: **33 varyantta 1 geçti.**
