@@ -11095,3 +11095,67 @@ stop ~%8,1  ->  AMPIRIK %44,0  ·  FORMUL %43,9
 Fark küçük çünkü zaman stopunda kapanan işlem oranı düşük (**%2–11**).
 `sıkışma` ölçümünde formül **%44,6 vs gerçek** diye yanıltmıştı (orada zaman
 stopu baskındı); burada değil. **Formül ne zaman güvenli, ölçüldü.**
+
+---
+
+## BAŞABAŞ STOPU (kısmi kârsız) — 2026-09-06 · 🟡 BETİMLEYİCİ · işaret yarılar arasında DÖNÜYOR
+
+**Ön-kayıt YOK** — bu bir teşhis koşumudur, hüküm değil.
+**Betikler:** `scratchpad/babas_teshis.py` · `babas_sim.py`
+**Soru (kullanıcı):** *"bot belli bir kâra gelince stopu başabaşın biraz üstüne koysak"*
+
+### Kayıtlı ölçümden farkı
+
+`olcumler.md:60` ve [testbot.py:846](testbot.py#L846) **kısmi kâr SONRASI**
+başabaşı ölçmüştü: `+0,274 → +0,261`. Kullanıcının önerisi **kısmi kârsız**,
+sadece kâr eşiğinde çekme — **o varyant ölçülmemişti.** Bu koşum onu kapatır.
+
+### Yol analizi (N=2.084)
+
+```
+hedefe (+%10) ulasan islem: 529 / 2084 = %25,4
+
+tetik    KAZANANI OLDURUR              KAYBEDENI KURTARIR
++1%      261 (kazananin %49,3)         827
++2%      217 (%41,0)                   668
++3%      172 (%32,5)                   499
++5%       97 (%18,3)                   273
+```
+
+⚠️ Ham sayım başabaş lehine görünüyor — **ama büyüklükler eşit değil**:
+kazananı öldürmek `~3R`, kaybedeni kurtarmak `~1R`.
+
+### Gerçek R etkisi — eşleşmiş girişler, iki yarı ayrı
+
+```
+                     A0       B+1%      B+2%      B+3%      B+5%
+KESIF   (43 gun) -0,1577   -0,0285   -0,0532   -0,0912   -0,1218
+HOLDOUT (29 gun) +0,0868   +0,0183   +0,0191   +0,0188   +0,0519
+
+ESLESMIS FARK (B - A0), gun-kumeli t:
+KESIF    B+1%  +0,1292  t +3,01   |  HOLDOUT  B+1%  -0,0685  t -0,41
+KESIF    B+2%  +0,1045  t +2,78   |  HOLDOUT  B+2%  -0,0677  t -0,45
+KESIF    B+3%  +0,0665  t +2,27   |  HOLDOUT  B+3%  -0,0680  t -0,70
+KESIF    B+5%  +0,0359  t +1,69   |  HOLDOUT  B+5%  -0,0349  t -0,78
+```
+
+🔴 **Dört tetiğin dördünde de işaret DÖNÜYOR.** Keşifte `t=+3,01` gibi güçlü
+görünen bir sonuç holdout'ta negatife düşüyor. Ön-kayıt yazılsaydı `S`/`P`
+ölçütleri **düşerdi**.
+
+### 🔑 MEKANİZMA — bu bir kenar değil, BETA AZALTICI
+
+Seviyeler açıklıyor: **keşifte taban `−0,158`** (kötü dönem) → zararı erken
+kesmek **yardım ediyor**; **holdout'ta taban `+0,087`** (iyi dönem) →
+kazananı erken kesmek **zarar veriyor**.
+
+**Başabaş stopu düşen piyasada iyi, yükselen piyasada kötü.** Yani bir kenar
+üretmiyor; **botun beta maruziyetini azaltıyor.** Bu, bugünkü merkezî bulguyla
+(`alfa −0,108 · beta +0,122`) birebir tutarlı ve onu **üçüncü kez** doğruluyor
+(rejim kapısı · stop genişliği · şimdi başabaş).
+
+### Hüküm
+
+**Kural çıkarılmadı.** Çıkış sayacı `32 varyantta 1` **değişmedi** — bu koşum
+ön-kayıtsızdı ve varyant olarak sayılmaz. Bir hüküm istenirse ayrı ön-kayıt
+gerekir, ama yukarıdaki işaret dönmesi bilinerek yazılmalıdır.
