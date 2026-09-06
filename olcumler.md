@@ -10638,3 +10638,65 @@ Bu üçü olmadan `radar_archive` üzerinde rho tabanlı hiçbir tarama güvenil
 değildir — **daha önce yapılmış rho tabanlı ölçümler de bu ışıkta yeniden
 okunmalıdır** (basis `−0,0152`, çapraz borsa `+0,0108`, OBI `−0,0077`:
 üçü de burada ölçülen `0,027` gürültü tabanının **altında**).
+
+---
+
+## STOP/HEDEF OYNAKLIK ÖLÇEĞİ — 2026-09-06 · **A1 ve A2 DÜŞTÜ** (güç düşük)
+
+**Ön-kayıt:** `ON_KAYIT_stop_hedef_olcek.md` · commit `838c4e5` — koşumdan **önce**
+**Betik:** `scratchpad/stop_olcek/01_olcum.py`
+**Doğuran gözlem:** ORCA'nın pump-içi oynaklığı sakin hâlinin **5,8 katıydı**
+(%2,28 vs %0,39/saat); `%2,66` stop, `1,4 saatlik` bir stoptu; gerçek ömür 0,6 saat.
+
+### Hüküm
+
+| kol | ne değişti | taker AÇIK (N=31) | taker KAPALI (N=75) | sonuç |
+|---|---|---|---|---|
+| **A1** taze ATR | ATR14 → **ATR3** | fark **+0,201 R** (t +0,89) | fark **−0,002 R** (t −0,14) | **DÜŞTÜ** |
+| **A2** ölçekli hedef | %10 → **`4,48 × ATR14`** | fark +0,069 R (t −0,28) | +0,022 R (t −0,44) | **DÜŞTÜ** |
+
+`S5` (iki giriş setinde aynı işaret) **A1'i tam da bunun için yakaladı**:
+bir sette +0,20, ötekinde −0,00. Ve yoğunlaşma testi A1'i yıktı —
+en iyi 2 gün + 5 işlem çıkınca **−0,182**.
+
+⚠️ **Güç düşük:** MDE `0,32–0,72 R`, gözlenen farklar `0,00–0,20 R`.
+Yani *"göremiyoruz"*. Ama bu sefer ölçüt **doğru kurulmuştu** (`S2`: fark MDE'yi
+aşmalı) — bugünkü ilk iki ön-kaydın hatası tekrarlanmadı.
+
+### 🔑 ASIL BULGU — kolların KIYASI değil, SEVİYESİ
+
+**Üç kol da negatif.** Botun **mevcut** yapılandırması (`A0`):
+
+```
+             ort R     stop %   hedef isabeti   medyan sure
+A0 (mevcut)  -0,18     69,3%    25,3%           2 saat
+```
+
+Ve geometri bunu **tam olarak** açıklıyor:
+
+```
+taker ACIK   stop %3,52 · hedef %10 -> R 2,84 -> BASABAS isabet %26,0 · gozlenen %25,8
+taker KAPALI stop %3,71 · hedef %10 -> R 2,70 -> BASABAS isabet %27,1 · gozlenen %25,3
+```
+
+🔴 **Bot başabaşın hemen ALTINDA çalışıyor.** Kenar yok; kayıp maliyet ve
+kıl payı isabet eksiğinden geliyor. Bu, A1/A2 tartışmasından **daha büyük**
+bir bulgu: sorun stopun genişliği değil, **isabet oranının başabaşa eşit
+olması**.
+
+⚠️ **SINIR — bu, karşı-olgunun (+967 $) çürütülmesi DEĞİLDİR.** Farklar:
+giriş kaynağı `radar_archive` (karşı-olgu `testbot_aday_arsiv` kullandı) ·
+pencere 73 gün (karşı-olgu 16 gün) · burada portföy/slot/fonlama yok.
+İki ölçüm **aynı şeyi ölçmüyor**. Ama aynı yöne işaret ediyorlar:
+bugün ölçülen ham hücre getirisi de negatifti (`−2,62%`, artıda %41).
+
+### Kayda geçen sınırlar
+
+- `N=31/75` — bu projede çıkış ölçümleri için **çok küçük**
+- A1'in kendi `asgari_stop` kapısı giriş setini değiştirirdi
+  (3 red · 7 ek / 4 red · 10 ek); eşleşmeyi korumak için **A0 tabanı** kullanıldı
+- 1 saatlik barla fitil tetikleme; aynı barda stop+hedef → **stop** sayıldı
+- Portföy yok: slot çakışması, düşüş freni, fonlama **dahil değil**
+
+**Karar:** `A0` kalır (şüphede daima statüko). Çıkış tarafı sayacı
+**30 varyantta 1 geçti** → **32 varyantta 1 geçti.**
