@@ -37,6 +37,14 @@ IKI KOL — tek degisken: SKOR KAPISI
     Config'te DEGISIKLIK GEREKMEDI — asgari_stop_pct 2,0 · islem_risk_pct 1,5 ·
     kaldirac [3,10] · maks_dusus_pct 25 · zaman_stop 48s zaten on-kayitla birebir.
 
+🔴 print() ICINDE EMOJI YOK — BILEREK.
+    Windows konsolu cp1254; emoji ve varyasyon secicileri o kodlamada YOK ve
+    cikti YONLENDIRILINCE UnicodeEncodeError ile betigi OLDURUR. Bu bot
+    zamanlanmis gorevle ve ciktisi bir dosyaya yonlendirilerek kosacak, yani
+    tam o kosulda. (Olculdu 2026-09-06: emoji/U+26A0/U+FE0F cokertiyor;
+    orta nokta, em-dash ve Turkce harfler cp1254'te VAR, guvenli.)
+    Yorumlarda emoji serbest — onlar basilmiyor.
+
 Kullanim:
     python notrlong.py --baslat     iki kasayi ILK KEZ olusturur
     python notrlong.py --tur        bir tur (yonet + tara + iki kola giris ara)
@@ -161,7 +169,7 @@ def fren_kontrol(st):
     st["zirve"] = tepe
     if st["equity"] <= st["baslangic_bakiye"] * (1 - esik / 100.0):
         st["durum"] = "DURDU"
-        msg = ("[NOTRLONG] 🔴 DUSUS FRENI: equity %.2f $ (baslangic %.0f, -%%%.0f) "
+        msg = ("[NOTRLONG] *** DUSUS FRENI: equity %.2f $ (baslangic %.0f, -%%%.0f) "
                "-> YENI GIRIS YOK. On-kayit bolum 7: bu kol KAPATILIR."
                % (st["equity"], st["baslangic_bakiye"], esik))
         print(msg)
@@ -451,7 +459,7 @@ def durum():
                   % (p["sym"], p["yon"], p.get("kaldirac"), p["giris"], px,
                      (px - p["giris"]) * p["miktar"], p["stop"], p.get("tp2") or 0))
     print()
-    print("⚠️ Pencere: 30 gun VE kol basina >=80 KAPANMIS pozisyon — IKISI BIRDEN")
+    print("UYARI: Pencere: 30 gun VE kol basina >=80 KAPANMIS pozisyon — IKISI BIRDEN")
     print("   dolmadan hukum YOK (on-kayit bolum 5).")
 
 
