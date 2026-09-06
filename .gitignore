@@ -179,3 +179,13 @@ notrlong_elenen.jsonl
 notrlong_log.txt
 notrlong_*_pencere*.jsonl
 yedek_pencere1_*/
+
+# Capraz borsa olcumu ham verisi (2026-09-06) — 216 MB, yeniden indirilebilir
+# Betikler (00..03_*.py) ve sonuc.txt TAKIPTE kalir; yalniz ham veri dislanir
+scratchpad/capraz/veri/
+scratchpad/capraz/panel.jsonl
+
+# OBI olcumu ham verisi (2026-09-06) — bookDepth + fiyat serileri
+scratchpad/obi/fiyat/
+scratchpad/obi/obi/
+scratchpad/obi/panel.jsonl
