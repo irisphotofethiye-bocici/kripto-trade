@@ -199,7 +199,12 @@ def main():
                                           "score": skor, "chg24": 0},
                                          {"smart": smart})
     senaryo = [
-        (E("S1", "izle", 90, "LONG"), None, "1_stage_izle"),
+        # [DEGISTI 2026-09-06] Eski iddia: ("S1","izle",90,"LONG") -> "1_stage_izle".
+        # STAGE KAPISI KALDIRILDI -> 'izle' artik bir kapi DEGIL; skor 90 >= 40 ve
+        # smart LONG oldugu icin huni sonuna kadar gider. karar_yon None dondugu
+        # (stub) ve veto listesi bos oldugu icin dogru etiket "9_bilinmiyor".
+        (E("S1", "izle", 90, "LONG"), None, "9_bilinmiyor"),
+        (E("S1b", "izle", 30, "LONG"), None, "2_skor_dusuk"),
         (E("S2", "BASLIYOR", 30, "LONG"), None, "2_skor_dusuk"),
         (E("S3", "BASLIYOR", 90, "NOTR"), None, "3_smart_degil"),
         (E("S4", "BASLIYOR", 90, "LONG"), ("SHORT", "ANINDA", "x"), "5_short_karari"),
@@ -262,6 +267,46 @@ def main():
                 "acilan=%s" % [x[0] for x in acilanlar])
         kontrol("%s -> karar_yon TEK KEZ cagrildi" % baska, len(cagri) == 1,
                 "cagri=%d" % len(cagri))
+
+    testbot.karar_yon = sahte_karar_yon
+    print()
+
+    # ---------------------------------------------------------------
+    # [YENI 2026-09-06] STAGE KAPISI KALDIRILDI
+    print()
+    print("### 4d) STAGE KAPISI KALDIRILDI — 'izle' adayi da degerlendiriliyor mu?")
+    gorulen = []
+
+    def stage_karar_yon(rejim_ad, r, pillar, kf, veto_out=None, **kw):
+        # stage HAZIRLANIYOR/BASLIYOR ise LONG doner; 'izle' ise None
+        gorulen.append((r.get("stage"), pillar.get("taker")))
+        if r.get("stage") in ("BASLIYOR", "HAZIRLANIYOR"):
+            return ("LONG", "ANINDA", "stage gecti")
+        if veto_out is not None:
+            veto_out.append({"kategori": "long_veto", "detay": "izle", "yon": "LONG"})
+        return None
+
+    testbot.karar_yon = stage_karar_yon
+    gorulen.clear()
+    acilanlar.clear()
+    s = notrlong.yeni_state()
+    notrlong.giris_ara(s, [{"sym": "SG1", "stage": "izle", "score": 90, "chg24": 0}],
+                       {"SG1": {"taker": 0.4, "smart": "LONG"}}, bag)
+    kontrol("'izle' adayi ACILDI", [x[0] for x in acilanlar] == ["SG1"],
+            "acilan=%s" % [x[0] for x in acilanlar])
+    kontrol("ikinci cagri stage=HAZIRLANIYOR + taker=1.0 ile",
+            ("HAZIRLANIYOR", 1.0) in gorulen, "gorulen=%s" % gorulen)
+    kontrol("gercek stage sebebe yazildi",
+            bool(acilanlar) and "gercek stage=izle" in acilanlar[0][2],
+            "sebep=%s" % (acilanlar[0][2][-40:] if acilanlar else "-"))
+
+    # 🔴 GERCEK r NESNESI BOZULMAMALI (stage_giriste dogru kaydedilsin)
+    rr = {"sym": "SG2", "stage": "izle", "score": 90, "chg24": 0}
+    acilanlar.clear()
+    s = notrlong.yeni_state()
+    notrlong.giris_ara(s, [rr], {"SG2": {"taker": 0.4, "smart": "LONG"}}, bag)
+    kontrol("orijinal r['stage'] BOZULMADI ('izle' kaldi)", rr["stage"] == "izle",
+            "r[stage]=%s" % rr["stage"])
 
     testbot.karar_yon = sahte_karar_yon
     print()

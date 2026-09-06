@@ -114,15 +114,39 @@ def durum():
     fy = fiyatlar()
     acik, acik_pnl = [], 0.0
     for p in st.get("acik_pozisyonlar") or []:
-        px = fy.get(p["sym"])
+        # 🔴 HATA DUZELTMESI 2026-09-06: ticker anahtarlari 'ARXUSDT' bicimindedir,
+        #   pozisyon kaydinda ise sembol 'ARX'. Eskiden fy.get("ARX") araniyordu ->
+        #   HER ZAMAN None -> acik PnL ve acik_pnl toplami HEP 0 gorunuyordu.
+        _s = p["sym"]
+        px = fy.get(_s) or fy.get(_s + "USDT")
         yi = 1 if p.get("yon") == "LONG" else -1
         pnl = ((px - p["giris"]) * p["miktar"] * yi) if px else None
         if pnl:
             acik_pnl += pnl
-        acik.append({"sym": p.get("sym"), "yon": p.get("yon"), "giris": p.get("giris"),
-                     "anlik": px, "pnl": pnl, "stop": p.get("stop"),
-                     "hedef": p.get("tp2"), "kaldirac": p.get("kaldirac"),
-                     "skor": p.get("skor_giriste")})
+        g = p.get("giris") or 0
+        marjin = p.get("marjin") or 0
+        notional = (p.get("miktar") or 0) * g
+        stop = p.get("stop")
+        hedef = p.get("tp2")
+        # 🔴 tp1_alindi bu botta "TP1 ALINDI" DEMEK DEGIL: sabit_hedef_kur()
+        #    kismi kari KAPATMAK icin True yapiyor ve tp1=tp2 atiyor.
+        #    Dogru etiket: kismi kar acik mi kapali mi.
+        kismi_kapali = (p.get("cikis_modu") == "sabit_hedef")
+        tp1_gercek = (bool(p.get("tp1_alindi")) and not kismi_kapali)
+        acik.append({
+            "sym": p.get("sym"), "yon": p.get("yon"), "giris": g,
+            "anlik": px, "pnl": pnl,
+            "pnl_pct": ((pnl / marjin * 100.0) if (pnl is not None and marjin) else None),
+            "stop": stop, "hedef": hedef,
+            "stop_pct": (abs(stop - g) / g * 100.0) if (stop and g) else None,
+            "hedef_pct": (abs(hedef - g) / g * 100.0) if (hedef and g) else None,
+            "kaldirac": p.get("kaldirac"), "marjin": marjin, "notional": notional,
+            "risk": p.get("risk_usdt"), "likidasyon": p.get("likidasyon"),
+            "skor": p.get("skor_giriste"), "stage": p.get("stage_giriste"),
+            "giris_ts": (p.get("giris_ts") or "")[:16],
+            "kismi_kapali": kismi_kapali, "tp1_alindi": tp1_gercek,
+            "stop_tasindi": (p.get("stop") != p.get("stop_orijinal")),
+        })
     gun = 0.0
     try:
         b = datetime.datetime.strptime((st.get("baslangic_ts") or "")[:19],
@@ -214,7 +238,7 @@ h3{font-size:13px;margin:22px 0 10px;font-weight:600;color:var(--y2)}
   <span class="sonuk" style="margin-left:auto;font-size:11px" id="zaman"></span></div>
 <main>
   <div class="izgara" id="kartlar"></div>
-  <h3>Açık pozisyonlar</h3><div class="sar" id="acik"></div>
+  <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px">PnL % = marjine göre (kaldıraçlı). <b>kısmi kâr KAPALI</b> = bu bot sabit %10 hedefle çalışır, TP1 yolu tasarım gereği devre dışıdır (ön-kayıt bölüm 2).</div><div class="sar" id="acik"></div>
   <h3>Skor bandına göre sonuç <span class="sonuk" style="font-weight:400">— kapı yok, ölçüm sonradan</span></h3>
   <div class="sar" id="skor"></div>
   <h3>Son kapanışlar</h3><div class="sar" id="son"></div>
@@ -257,13 +281,28 @@ async function yenile(){
    '<div class="not">Ön-kayıt bölüm 7: <b>N 30 günde 80\'e ulaşmazsa</b> sonuç '+
    '<b>"ölçülemedi"</b> olur ve pencere <b>uzatılmaz</b>.</div></div>';
 
-  let ah='<table><tr><th>sembol</th><th>yön</th><th>skor</th><th>giriş</th><th>anlık</th>'+
-         '<th>PnL $</th><th>stop</th><th>hedef</th></tr>';
+  const n0=(v,d0)=>(v===null||v===undefined)?'-':Number(v).toFixed(d0??2);
+  let ah='<table><tr><th>sembol</th><th>yön</th><th>kald.</th><th>marjin $</th>'+
+         '<th>büyüklük $</th><th>risk $</th><th>giriş</th><th>anlık</th>'+
+         '<th>PnL $</th><th>PnL %</th><th>stop</th><th>hedef</th><th>kısmi kâr</th></tr>';
   for(const p of d.acik)
-    ah+='<tr><td>'+p.sym+'</td><td>'+p.yon+'</td><td class="sonuk">'+(p.skor??'-')+'</td>'+
+    ah+='<tr><td><b>'+p.sym+'</b><div class="sonuk" style="font-size:11px">'+
+          (p.giris_ts??'')+' · skor '+(p.skor??'-')+' · '+(p.stage??'-')+'</div></td>'+
+        '<td>'+p.yon+'</td>'+
+        '<td><b>'+(p.kaldirac??'-')+'x</b></td>'+
+        '<td>'+n0(p.marjin)+'</td>'+
+        '<td>'+n0(p.notional)+'</td>'+
+        '<td class="sonuk">'+n0(p.risk)+'</td>'+
         '<td>'+(p.giris??'-')+'</td><td>'+(p.anlik??'-')+'</td>'+
-        '<td class="'+snf(p.pnl)+'">'+isr(p.pnl)+p2(p.pnl)+'</td>'+
-        '<td class="sonuk">'+(p.stop??'-')+'</td><td class="sonuk">'+(p.hedef??'-')+'</td></tr>';
+        '<td class="'+snf(p.pnl)+'"><b>'+isr(p.pnl)+p2(p.pnl)+'</b></td>'+
+        '<td class="'+snf(p.pnl_pct)+'">'+isr(p.pnl_pct)+n0(p.pnl_pct,1)+'%</td>'+
+        '<td class="sonuk">'+(p.stop??'-')+'<div style="font-size:11px">-'+n0(p.stop_pct,2)+'%'+
+          (p.stop_tasindi?' <span title="stop tasindi">↑</span>':'')+
+          '<br>liq '+(p.likidasyon??'-')+'</div></td>'+
+        '<td class="sonuk">'+(p.hedef??'-')+'<div style="font-size:11px">+'+n0(p.hedef_pct,2)+'%</div></td>'+
+        '<td class="sonuk">'+(p.kismi_kapali
+            ? 'KAPALI<div style="font-size:11px">sabit %10 hedef</div>'
+            : (p.tp1_alindi?'<b>TP1 ✔</b>':'açık, alınmadı'))+'</td></tr>';
   $('#acik').innerHTML = d.acik.length? ah+'</table>' : '<div class="bos">Açık pozisyon yok.</div>';
 
   let kh='<table><tr><th>skor bandı</th><th>N</th><th>net $</th><th>kazanan</th></tr>';

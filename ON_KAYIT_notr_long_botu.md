@@ -310,3 +310,85 @@ yazıldı (`.tmp` + `os.replace`), sonra doğrulandı. Panel `10.000,00 · gün 
 yalnız `taker_soguma` atlanıyor (açıldı · ikinci çağrı `taker=1.0` · gerçek
 taker sebebe yazıldı) ve **kapsam sızmıyor** (`long_veto`/`blowoff` açılmıyor,
 `karar_yon` tek kez çağrılıyor). Tüm suite geçti, **diske yazım YOK**.
+
+---
+
+## 13 · 🔴 [DEĞİŞTİ 2026-09-06 20:40] STAGE KAPISI KALDIRILDI
+
+**Kullanıcı kararı:** *"bot hâlâ poz açmıyor, onu poz açacak hâle getir"*
+
+### Sorun — ölçüldü
+
+Taker kaldırıldıktan sonraki 10 turda (99 aday):
+
+```
+1_stage_izle       55  (%55,6)
+5_short_karari     40  (%40,4)      MA50+ucuz -> SHORT -> yalniz-LONG atiyor
+0_tekrar_bekleme    4
+stage AKTIF       0 / 99            <- HICBIRI
+```
+
+Yeni darboğaz `taker` değil **`stage`**: NOTR-LONG dalı
+`stage ∈ (BASLIYOR, HAZIRLANIYOR)` **şart koşuyordu** ve arşivde bu
+kayıtların yalnız **%5,94**'ü.
+
+### Ne değişti
+
+`karar_yon` hâlâ `None` ve adayın **gerçek** `stage`'i `izle` ise, çağrı
+`stage="HAZIRLANIYOR"` ve `taker=1.0` ile **tekrarlanır**. Skor eşiği
+`radar_alert_skor` (40) olur.
+
+🔴 **Kalite filtreleri AÇILMADI:** `asiri_yukselmis` (blowoff) ve `long_veto`
+yamalı çağrıda da **aynen** çalışır. Yalnız `stage` ve `taker` ön-şartı kalkar.
+🔴 **`testbot.py`'ye DOKUNULMADI.** Kapsam yalnız bu defter.
+**Geri alma:** `notrlong.py`'deki bloğu sil.
+
+### Gerekçe — ölçüm bunun TERSİNİ söylüyordu
+
+```
+giris aramasi (2026-09-06, kesif yarisi, A0 mekanigi, LONG):
+   stage == BASLIYOR      -0,4076  (N= 25)   <- bot BUNU sart kosuyordu
+   stage == HAZIRLANIYOR  -0,3300  (N= 84)   <- ve BUNU
+   stage == izle          -0,1346  (N=897)   <- EN AZ KOTU, bot bunu ELIYORDU
+
+OTOPSI-3 (SHORT, 41 gun): BASLIYOR -0,09R (en kotu) · izle +0,07R ·
+   HAZIRLANIYOR +0,19R
+```
+
+**Proje bu dersi bir kez zaten uygulamıştı:** `notr_fade` dalı `stage`
+şartından **çıkarıldı**, gerekçesi ([testbot.py:700](testbot.py#L700)):
+*"bot, en iyi stratejisi için en kötü ölçülmüş ön-şartı dayatıyordu…
+havuzun %89'u 'izle' ve o hücre POZİTİF ölçtü"*. Aynı gerekçe LONG tarafında
+hiç sorulmamıştı.
+
+### Etkisi — ölçüldü
+
+```
+radar_archive kisa listesi (N=57.570, pillar_d uygulanmis):
+   MEVCUT          stage aktif + skor + smart LONG     956  (%1,66)
+   STAGE KALKARSA  skor>=40 + smart LONG             5.945  (%10,33)
+   -> 6,2 KAT aday · tur basina ~0,17 -> ~1,03
+```
+
+### ⚠️ DÜRÜSTLÜK
+
+Üç `stage` hücresinin **üçü de negatif** ölçüldü (`−0,13 … −0,41`).
+Bu değişiklik botu **işlem açar** hâle getirir, **kârlı** hâle **getirmez**.
+Hükmü ölçüm penceresi verecek — `K1..K4` (bölüm 6) **aynen** geçerli.
+
+### Pencere
+
+D/8: değişiklik hangi işlemin açılacağını değiştiriyor → pencere yeniden
+başlar. **Ama PENCERE-2 henüz 0 pozisyonda ve 1,5 saatlik**; kasa `10.000,00`,
+`sonraki_id = 1`. Sıfırlanacak bir sonuç yok → **PENCERE-2 aynen devam eder**,
+başlangıç damgası `2026-09-06 19:13:02` kalır. (Yeniden sıfırlamak yalnız
+takvimi kaydırırdı, hakemliği değiştirmezdi.)
+
+### Doğrulama
+
+`scratchpad/notrlong_test.py` → **yeni bölüm 4d** (4 iddia): `izle` adayı
+açılıyor · ikinci çağrı `stage=HAZIRLANIYOR` + `taker=1.0` · gerçek stage
+sebebe yazılıyor · 🔴 **orijinal `r["stage"]` bozulmuyor** (yani
+`stage_giriste` gerçeği kaydeder). Ayrıca **bölüm 4b'nin `S1` iddiası
+güncellendi** — eski beklenti `1_stage_izle` idi, artık `9_bilinmiyor`;
+eski hâli yorumda **duruyor** (D/9). Tüm suite geçti, **diske yazım YOK**.

@@ -101,7 +101,7 @@ ELENENF = os.path.join(HERE, "notrlong_elenen.jsonl")
 #   yazar. Dolayisiyla olcum penceresini SIFIRLAMAZ. (Kullanici ayrica
 #   "botu yeni kurduk, maliyeti yok" dedi.)
 # [FAIL-SAFE] Yazim hatasi botu DURDURMAZ.
-# ⚠️ SINIR: 1-3. basamaklar (stage/skor/smart) burada YENIDEN URETILIYOR cunku
+# ⚠️ SINIR: skor/smart basamaklari burada YENIDEN URETILIYOR cunku
 #   karar_yon o dallarda adlandirilmis veto URETMEDEN None donuyor. testbot'un
 #   mantigi degisirse bu kopya KAYABILIR ve log yanlis basamak yazabilir —
 #   kayit yalnizca TESHIS icindir, hukum dayanagi degildir. 4-6. basamaklar
@@ -109,13 +109,16 @@ ELENENF = os.path.join(HERE, "notrlong_elenen.jsonl")
 
 
 def _huni_basamagi(r, pillar, vlist):
-    """Aday NOTR-LONG zincirinde NEREDE oldu. Yalnizca KAYIT icin."""
+    """Aday NOTR-LONG zincirinde NEREDE oldu. Yalnizca KAYIT icin.
+
+    [DEGISTI 2026-09-06] stage ve taker KAPI DEGIL artik -> huni de oyle sayar.
+    'izle' adaylari HAZIRLANIYOR esigiyle (radar_alert_skor) degerlendirilir,
+    cunku kod da onlari oyle yeniden deniyor."""
     stage = r.get("stage")
     skor = r.get("score") or 0
-    if stage not in ("BASLIYOR", "HAZIRLANIYOR"):
-        return "1_stage_izle"
     esik_hazir = evren.esik("radar_alert_skor", 40.0)
-    esik = esik_hazir if stage == "HAZIRLANIYOR" else esik_hazir + 5
+    # stage kapisi kalktigi icin 'izle' de HAZIRLANIYOR esigine tabi
+    esik = esik_hazir if stage in ("HAZIRLANIYOR", "izle", None) else esik_hazir + 5
     if skor < esik:
         return "2_skor_dusuk"
     if pillar.get("smart") != "LONG":
@@ -366,6 +369,48 @@ def giris_ara(st, rows, pillars, baglam):
                                     "gercek taker=%s]" % _tk)
             else:
                 vlist = vlist2 or vlist
+        # ----------------------------------------------------------------------------
+
+        # --- STAGE KAPISI KALDIRILDI (2026-09-06, KULLANICI KARARI) ------------------
+        # [NE] karar_yon hala None ve adayin GERCEK stage'i "izle" ise, cagri
+        #   stage="HAZIRLANIYOR" ve taker=1.0 ile TEKRARLANIR. Boylece NOTR-LONG
+        #   dali acilir ve skor esigi radar_alert_skor (40) olur.
+        #   🔴 KALITE FILTRELERI ACILMADI: asiri_yukselmis (blowoff) ve long_veto
+        #   yamali cagrida da AYNEN calisir; yalniz stage ve taker on-sarti kalkar.
+        # [NEDEN] Botun LONG yolu stage in (BASLIYOR, HAZIRLANIYOR) SART kosuyordu
+        #   ama olculen sey bunun TERSI:
+        #     giris aramasi (2026-09-06, kesif yarisi, A0 mekanigi, LONG):
+        #       BASLIYOR     -0,4076 (N= 25)   <- bot BUNU sart kosuyordu
+        #       HAZIRLANIYOR -0,3300 (N= 84)   <- ve BUNU
+        #       izle         -0,1346 (N=897)   <- EN AZ KOTU, bot bunu ELIYORDU
+        #     OTOPSI-3 (SHORT, 41 gun): BASLIYOR -0,09R (en kotu) · izle +0,07R ·
+        #       HAZIRLANIYOR +0,19R
+        #   Proje bu dersi BIR KEZ zaten uygulamisti: notr_fade dali stage sartindan
+        #   CIKARILDI, gerekcesi "bot, en iyi stratejisi icin en kotu olculmus
+        #   on-sarti dayatiyordu; havuzun %89'u izle" (testbot.py:700).
+        # [ETKI — OLCULDU] radar_archive kisa listesi (N=57.570, pillar_d uygulanmis):
+        #     MEVCUT  stage aktif + skor + smart LONG   956  (%1,66)
+        #     STAGE KALKARSA  skor>=40 + smart LONG   5.945  (%10,33)
+        #     -> 6,2 KAT aday
+        # [DURUSTLUK] Ucu de NEGATIF olculdu (-0,13 .. -0,41). Bu degisiklik botu
+        #   ISLEM ACAR hale getirir, KARLI hale getirmez. Olcum penceresi hakemdir.
+        # [KAPSAM] YALNIZ bu defter. testbot.py'ye DOKUNULMADI.
+        # GERI ALMA: asagidaki blogu sil.
+        if (not karar) and r.get("stage") == "izle":
+            vlist3 = []
+            karar = testbot.karar_yon(REJIM_ZORLA,
+                                      dict(r, stage="HAZIRLANIYOR"),
+                                      dict(pillar, taker=1.0), False,
+                                      veto_out=vlist3,
+                                      para_cikis=baglam["para_cikis"],
+                                      btc_pay=baglam["btc_pay"],
+                                      para_durgun=baglam["para_durgun"])
+            if karar:
+                karar = (karar[0], karar[1],
+                         karar[2] + " [stage kapisi KALDIRILDI 2026-09-06; "
+                                    "gercek stage=izle]")
+            else:
+                vlist = vlist3 or vlist
         # ----------------------------------------------------------------------------
 
         if not karar:
