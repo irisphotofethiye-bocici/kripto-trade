@@ -319,6 +319,41 @@ sıkıştırma (compaction) ile kaybolmasını engellemek.
   **Grep'lenebilir refleks:** bir alanla uzun pencere bölmeden önce *"bu alanı yazan
   kod bu pencerede değişti mi"* diye `git log -S"<alan>"` koştur.
 
+- 🔴 **BOT İLE ARŞİV AYNI EVRENE BAKMIYOR — `radar_archive` SÜZGEÇLİ, bot SÜZGEÇSİZ.**
+  Aynı hata sınıfının **kapsama** yüzü: alan var, adı aynı, ama **kayıt yok**.
+
+  ```
+  radar.py        --chg_max 15  -> |chg24| > 15 sembol HAVUZA HIC ALINMAZ
+  erken_kusak_tara()            -> erken_chg24_max = 15 (radar.py:194)
+  testbot.py:1400 · notrlong.py:265 -> binance_pool(..., cryptos=...)
+                                       chg_max VERILMIYOR = None = SUZGEC YOK
+  ```
+
+  Sonuç: arşivde `chg24` yalnız **erken-kuşak** kaydında var ve **tanımı gereği**
+  `|chg24| ≤ 15` (ölçüldü: min −15,00 · max +15,00 · `>20` **sıfır**). Ana radar
+  kaydında (N≈179 bin) alan **hiç yok**. Bot ise `UAI`'yi **+%26,86**'da açtı.
+  `radar.py:186` bunu zaten *"kör nokta **yapısal**"* diye yazmış.
+  **Isırdı (2026-09-07):** *"belli bir yükselişten sonra girmesin"* ölçümü kuruldu;
+  `chg24` mumdan yeniden üretilerek kırpma aşıldı **ama yetmedi** — çünkü o semboller
+  arşivde **kayıt olarak yok**. Mumdan hesaplamak **mevcut kaydın değerini düzeltir,
+  eksik kaydı geri getirmez.** Hipotez düşmedi, **ölçülemedi**.
+  **Kural:** bir alanla kapı önerisi ölçmeden önce sor — *"botun girdiği aralık bu
+  arşivde temsil ediliyor mu?"* Dağılımın **uç sayısını** (`>eşik` kaç kayıt) yazdır;
+  onlu mertebedeyse ölçüm **o bölgeyi göremez** ve hüküm öyle yazılır.
+- 🔴 **"VERİ BEKLİYOR" DİYE BIRAKILAN KOL, KAYNAK TAZELENMEDEN AYNI SAYIYI VERİR.**
+  Isırdı (2026-09-07): `pos<0.25` kolu *"eksik olan N"* diye açık bırakılmıştı;
+  üç gün sonra yeniden koşuldu ve sonuç **birebir aynı** çıktı (`+0,797% · t +1,94`).
+  Sebep arşiv değildi — rejim kesintisiz BOĞA'ydı, kayıt gelmişti; **fiyat verisi
+  donmuştu** (`aday_pencere_1h` son mumu ölçümün koşulduğu günde duruyordu).
+  Aynı sayıyı *"bulgu kararlı"* diye okumak an meselesiydi.
+  **Kural:** yeniden koşumdan **önce** kaynağın **son damgasını oku**; tazelenmemişse
+  koşum bilgi taşımaz. Tazeleme indiricinin kuralına tabidir (birleştir · ezme ·
+  kısalırsa hata) — deseni `scratchpad/aday_pencere_tazele.py`.
+  ⚠️ **Ve ikinci bakış ÇOKLULUKTUR:** açık uçlu *"her hafta bir daha bak"* yanlış
+  pozitif üretir. Bir kol açık bırakılırken **sonraki bakışın N eşiği ilan edilir.**
+  ⚠️ Tazelendiğinde beklentinin **tersi** de olabilir: bu vakada N %10 büyüdü,
+  fark **%30 küçüldü**, `t` düştü. *"N artınca eşiği geçer"* bir **tahmindir**,
+  dayanak değil.
 - **Fonlama pozisyona 2026-08-17'den İTİBAREN atfediliyor.** O tarihten önce açılmış
   pozisyonların fonlaması **geri üretilemez**. Bu olgunun sahibi burasıdır; başka
   dosya kopyalamaz, işaret eder.
