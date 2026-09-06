@@ -10765,3 +10765,68 @@ karıştırılmış veriyle **çok kez** koşturmaktı. Ön-kayıtta böyle yazm
 ⚠️ N eşiğinin altındalar, aday olamadılar; tek yarı. Ama OTOPSI-3'ün SHORT
 tarafında bulduğu deseni (`BASLIYOR` en kötü) LONG'da da düşündürüyor.
 **Ayrı bir ön-kayıt konusudur.**
+
+---
+
+## SIKIŞMA → KIRILIM — 2026-09-06 · **DÜŞTÜ** · ve fikrin ÖNCÜLÜ çürüdü
+
+**Ön-kayıt:** `ON_KAYIT_sikisma_kirilim.md` · commit `03d22de` — koşumdan **önce**
+**Betik:** `scratchpad/sikisma/01_olcum.py`
+**Fikir:** kullanıcı — *"hacim bu kadar yükselmeden girsek… beklemeye alır,
+hangi yöne gidiyorsa ona göre poz açar"*
+
+### 🔴 ÖNCÜL YANLIŞMIŞ — "sıkışmada stop dar olur" ÖLÇÜLDÜ ve DEĞİL
+
+Ön-kayıtta iddia şuydu: *"stop ~%1,5-2 → başabaş %13-16"*. Ölçülen:
+
+```
+                     stop        hedef    BASABAS    GOZLENEN isabet
+sikisma kirilimi    %8,04         %10      %44,6         %24,9
+botun bugunku hali  %3,58         %10      %26,4         %25,4
+```
+
+🔑 **Kova stopu botunkinin İKİ KATINDAN geniş.** `comp < 0,65` demek *"anlık
+aralıklar ATR'ye göre küçük"* demek; **10 barlık aralığın mutlak genişliği**
+yine %8. Yani *"oynaklığı ucuza al"* fikrinin geometrisi **tersine** çalışıyor —
+başabaş %26'dan **%44,6'ya çıkıyor**.
+
+Fikrin dayanağı buydu ve **ölçümle çürüdü.**
+
+### Hüküm
+
+| | N | ort R | isabet | başabaş | C2 farkı |
+|---|---|---|---|---|---|
+| **HAZIRLANIYOR** (birincil) | 334 | +0,1275 | %24,9 | %44,6 | +0,0391 (t **+1,54**, MDE 0,2371) |
+| **`comp<0,65`** (ikincil, güçlü) | 2.044 | **−0,1125** | %20,2 | %38,0 | **−0,0312** (t −0,41) |
+
+```
+BIRINCIL: B1 DUSTU · B2 GECTI · B3 DUSTU · B4 DUSTU · B5 GECTI · B6 GECTI -> DUSTU
+IKINCIL : B1 DUSTU · B2 DUSTU · B3 DUSTU · B4 DUSTU · B6 DUSTU           -> DUSTU
+```
+
+🔑 **N'i 6 kat büyük olan ikincil kol NEGATİF ve şanstan KÖTÜ.** Birincil kolun
+`+0,1275`'i eşleştirilmiş rastgele anı (`+0,0885`) geçemiyor — fark MDE'nin
+**altında**.
+
+### ⚠️ B1'in formülü zaman stopuyla eksik kalıyor — kendi ölçütümün kusuru
+
+`başabaş = 1/(1 + hedef/stop)` **yalnız ikili sonuçta** (stop ya da hedef)
+geçerli. Burada medyan tutma **36 saat** ve zaman stopu 48 saat → işlemlerin
+çoğu **üçüncü bir kapıdan** çıkıyor. Bu yüzden `B1` bu kolda olduğundan katı.
+
+🔴 **Ölçüt yine de DEĞİŞTİRİLMEDİ** (D/9: sonuç görüldükten sonra değişmez) ve
+hüküm zaten `B3`+`B4`'ten de düşüyor — yani `B1` düzeltilse sonuç değişmezdi.
+**Gelecek ön-kayıtlarda başabaş, zaman stopu varsa ampirik hesaplanmalı.**
+
+### Betimleyici — hüküm DEĞİL
+
+```
+yon dagilimi : SHORT 245 · LONG 89   (kirilimlarin %73'u ASAGI)
+SHORT  ort R +0,1843 (N=245)
+LONG   ort R -0,0288 (N= 89)
+hedef 3 x kova: ort R +0,1822 · isabet %6,0 (zaman stopu baskin)
+```
+
+Yön ayrımı bu projenin tekrarlayan bulgusuyla aynı yönde (`defter2`/`defter3`,
+LONG'un bu evrende `t < −4` ile reddi). **Ama hüküm kurmaz** — ikincil, tek
+pencere, N=89/245.
