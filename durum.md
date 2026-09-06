@@ -2175,3 +2175,55 @@ http://127.0.0.1:8787                 panel
 
 **Müdahale eşiği:** ~2 gün (384 tur) hiç pozisyon açılmazsa — o noktada
 *"hiç açmama"* olasılığı **%0,4**. Öncesinde beklenir.
+
+---
+
+## 🆕 ELENEN ADAY KAYDI EKLENDİ (2026-09-06, KULLANICI KARARI)
+
+**Kullanıcı sorusu:** *"botun kurduğumuzdan beri elediği coinlere bak, bunlara
+poz açsaydı şimdi ne olurdu?"* → cevap verilemedi çünkü **bot reddettiklerini
+kaydetmiyordu**. `testbot`'ta bu işi `golge` yapıyor; bu botun karşılığı yoktu.
+**Kullanıcı kararı:** *"yap, botu yeni kurduk müdahale edebiliriz maliyeti yok."*
+
+### Ne eklendi
+
+`notrlong_elenen.jsonl` — her reddedilen aday için bir satır:
+
+```
+ts · sym · kapi · detay · price · score · stage · chg24 · smart · taker
+   · top_ls · glob_ls · funding · pos · vol_x · comp
+```
+
+`kapi` alanı adayın **hangi basamakta** öldüğünü söyler:
+
+| basamak | anlamı |
+|---|---|
+| `0_zaten_acik` · `0_tekrar_bekleme` | kapasite elemesi (filtre değil) |
+| `1_stage_izle` · `2_skor_dusuk` · `3_smart_degil` | NOTR-LONG zincirinin ilk üçü |
+| `4_<veto>` | `karar_yon`'un **gerçek** veto kategorisi (blowoff/long_veto/taker_soguma) |
+| `5_short_karari` | SHORT kararı çıktı, yalnız-LONG kuralıyla atıldı |
+| `6_giris_<kapi>` | karar verildi ama giriş kapısında öldü (rr_veto/asgari_stop…) |
+
+### 🔴 D/8 — pencere SIFIRLANMADI
+
+Bu ekleme **hangi işlemin açılacağını değiştirmiyor**, yalnızca yazıyor.
+`CLAUDE.md`'nin BUG İSTİSNASI ölçütü tam olarak bu: *"bu değişiklik botun hangi
+işlemi açacağını değiştiriyor mu?"* → **hayır**. Ayrıca yazım **fail-safe**;
+hata botu durdurmaz.
+
+⚠️ **Bilinen sınır, koda da yazıldı:** 1-3. basamaklar burada **yeniden
+üretiliyor**, çünkü `karar_yon` o dallarda adlandırılmış veto üretmeden `None`
+dönüyor. `testbot`'un mantığı değişirse bu kopya **kayabilir**. Kayıt
+**teşhis** içindir, hüküm dayanağı değildir. 4-6. basamaklar gerçek veto
+kategorilerinden gelir.
+
+### Doğrulama
+
+- Güvenli test **25/25** — beş yeni iddia: her basamağın doğru etiketi yazması
+  (`1_stage_izle` · `2_skor_dusuk` · `3_smart_degil` · `5_short_karari` ·
+  `0_zaten_acik`)
+- İlk gerçek tur: **10 kayıt**, dağılım `1_stage_izle` 6 · `2_skor_dusuk` 1 ·
+  `5_short_karari` 3
+
+**Okuma:** `scratchpad/notrlong_elenenler.py` bundan sonra `radar_archive`
+yerine **botun kendi kaydını** kullanabilir — rekonstrüksiyon değil, gerçek kayıt.

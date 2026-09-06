@@ -91,6 +91,55 @@ STATEF = os.path.join(HERE, "notrlong_state.json")
 ISLEMLERF = os.path.join(HERE, "notrlong_islemler.jsonl")
 EQUITYF = os.path.join(HERE, "notrlong_equity.jsonl")
 VETOF = os.path.join(HERE, "notrlong_veto.jsonl")
+ELENENF = os.path.join(HERE, "notrlong_elenen.jsonl")
+
+# --- ELENEN ADAY KAYDI (2026-09-06, kullanici karari) ----------------------
+# [NEDEN] Kullanici sordu: "botun eledigi coinlere poz acsaydi ne olurdu?"
+#   Cevap verilemedi cunku bot reddettiklerini KAYDETMIYORDU. testbot'ta bu isi
+#   `golge` defteri yapiyor; bu botun karsiligi yoktu.
+# [D/8 GUVENLIGI] Bu ekleme HANGI ISLEMIN ACILACAGINI DEGISTIRMEZ — yalnizca
+#   yazar. Dolayisiyla olcum penceresini SIFIRLAMAZ. (Kullanici ayrica
+#   "botu yeni kurduk, maliyeti yok" dedi.)
+# [FAIL-SAFE] Yazim hatasi botu DURDURMAZ.
+# ⚠️ SINIR: 1-3. basamaklar (stage/skor/smart) burada YENIDEN URETILIYOR cunku
+#   karar_yon o dallarda adlandirilmis veto URETMEDEN None donuyor. testbot'un
+#   mantigi degisirse bu kopya KAYABILIR ve log yanlis basamak yazabilir —
+#   kayit yalnizca TESHIS icindir, hukum dayanagi degildir. 4-6. basamaklar
+#   karar_yon'un GERCEK veto kategorilerinden gelir.
+
+
+def _huni_basamagi(r, pillar, vlist):
+    """Aday NOTR-LONG zincirinde NEREDE oldu. Yalnizca KAYIT icin."""
+    stage = r.get("stage")
+    skor = r.get("score") or 0
+    if stage not in ("BASLIYOR", "HAZIRLANIYOR"):
+        return "1_stage_izle"
+    esik_hazir = evren.esik("radar_alert_skor", 40.0)
+    esik = esik_hazir if stage == "HAZIRLANIYOR" else esik_hazir + 5
+    if skor < esik:
+        return "2_skor_dusuk"
+    if pillar.get("smart") != "LONG":
+        return "3_smart_degil"
+    if vlist:
+        return "4_" + str(vlist[0].get("kategori"))
+    return "9_bilinmiyor"
+
+
+def _elenen_yaz(r, pillar, kapi, detay=""):
+    """Reddedilen adayi kaydet. FAIL-SAFE."""
+    try:
+        testbot._append_jsonl(ELENENF, {
+            "ts": testbot.now_iso(), "sym": r.get("sym"), "kapi": kapi,
+            "detay": (detay or "")[:120],
+            "price": r.get("price"), "score": r.get("score"),
+            "stage": r.get("stage"), "chg24": r.get("chg24"),
+            "smart": pillar.get("smart"), "taker": pillar.get("taker"),
+            "top_ls": pillar.get("top_ls"), "glob_ls": pillar.get("glob_ls"),
+            "funding": r.get("funding"), "pos": r.get("pos"),
+            "vol_x": r.get("vol_x"), "comp": r.get("comp"),
+        })
+    except Exception:
+        pass
 
 
 def yeni_state():
@@ -268,9 +317,15 @@ def giris_ara(st, rows, pillars, baglam):
         if len(st["acik_pozisyonlar"]) >= MAKS_POZ:
             break
         sym = r["sym"]
-        if sym in acik or _tekrar_var_mi(st, sym):
-            continue
         pillar = pillars.get(sym, {})
+        # KAPASITE elemesi — filtre degil, ama olculmesi gerekiyor: onceki bir
+        # olcumde "ayni sembol zaten ACIK" gercek baglayici kisit cikmisti.
+        if sym in acik:
+            _elenen_yaz(r, pillar, "0_zaten_acik")
+            continue
+        if _tekrar_var_mi(st, sym):
+            _elenen_yaz(r, pillar, "0_tekrar_bekleme", "%.1f saat" % TEKRAR_SAAT)
+            continue
 
         vlist = []
         karar = testbot.karar_yon(REJIM_ZORLA, r, pillar, False, veto_out=vlist,
@@ -278,10 +333,13 @@ def giris_ara(st, rows, pillars, baglam):
                                   btc_pay=baglam["btc_pay"],
                                   para_durgun=baglam["para_durgun"])
         if not karar:
+            _elenen_yaz(r, pillar, _huni_basamagi(r, pillar, vlist),
+                        (vlist[0].get("detay") if vlist else ""))
             bekleyenler.pop(sym, None)
             continue
         yon, mod, sebep = karar
         if yon != "LONG":                    # YALNIZ LONG — SHORT kararlari atilir
+            _elenen_yaz(r, pillar, "5_short_karari", sebep)
             bekleyenler.pop(sym, None)
             continue
 
@@ -298,6 +356,10 @@ def giris_ara(st, rows, pillars, baglam):
                 print("    ACILDI %s LONG (skor %s · chg24 %s · stage %s)"
                       % (sym, r.get("score"), r.get("chg24"), r.get("stage")))
             elif red:
+                # Karar VERILDI ama giris kapisinda oldu (rr_veto / asgari_stop /
+                # kaldirac_guvenlik...). Bunlar ayri bir sinif — kaydedilir.
+                _elenen_yaz(r, pillar, "6_giris_" + str(red[0]["kapi"]),
+                            red[0].get("detay", ""))
                 print("    giris kapisi %s: %s" % (sym, red[0]["kapi"]))
             return bool(ok)
 

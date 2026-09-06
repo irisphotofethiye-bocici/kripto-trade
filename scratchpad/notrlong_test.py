@@ -190,6 +190,44 @@ def main():
     print()
 
     # ---------------------------------------------------------------
+    print("### 4b) ELENEN KAYDI — dogru basamagi yaziyor mu?")
+    kayitlar = []
+    notrlong._elenen_yaz = lambda r, pil, kapi, detay="": kayitlar.append(
+        (r.get("sym"), kapi))
+
+    E = lambda sym, stage, skor, smart: ({"sym": sym, "stage": stage,
+                                          "score": skor, "chg24": 0},
+                                         {"smart": smart})
+    senaryo = [
+        (E("S1", "izle", 90, "LONG"), None, "1_stage_izle"),
+        (E("S2", "BASLIYOR", 30, "LONG"), None, "2_skor_dusuk"),
+        (E("S3", "BASLIYOR", 90, "NOTR"), None, "3_smart_degil"),
+        (E("S4", "BASLIYOR", 90, "LONG"), ("SHORT", "ANINDA", "x"), "5_short_karari"),
+    ]
+    for (rr, pp), krr, beklenen in senaryo:
+        kayitlar.clear()
+        kararlar.clear()
+        if krr:
+            kararlar[rr["sym"]] = krr
+        s = notrlong.yeni_state()
+        notrlong.giris_ara(s, [rr], {rr["sym"]: pp}, bag)
+        bulunan = kayitlar[0][1] if kayitlar else "(kayit YOK)"
+        kontrol("%s -> %s" % (rr["sym"], beklenen), bulunan == beklenen,
+                "yazilan=%s" % bulunan)
+
+    # kapasite elemesi: zaten acik
+    kayitlar.clear()
+    kararlar.clear()
+    s = notrlong.yeni_state()
+    s["acik_pozisyonlar"] = [{"sym": "DUP"}]
+    notrlong.giris_ara(s, [{"sym": "DUP", "stage": "izle", "score": 50, "chg24": 0}],
+                       {"DUP": {}}, bag)
+    kontrol("zaten ACIK sembol -> 0_zaten_acik",
+            kayitlar and kayitlar[0][1] == "0_zaten_acik",
+            "yazilan=%s" % (kayitlar[0][1] if kayitlar else "(yok)"))
+    print()
+
+    # ---------------------------------------------------------------
     print("### 5) FREN aktifken giris ARANMIYOR")
     s3 = notrlong.yeni_state()
     s3["durum"] = "DURDU"
