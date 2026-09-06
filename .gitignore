@@ -169,3 +169,13 @@ scratchpad/makro_pencere/
 scratchpad/aday_pencere_1h/
 scratchpad/taze_1h/
 scratchpad/taze_funding/
+
+# notrlong defteri (2026-09-06) — state/defter/log ASLA commit edilmez
+notrlong_state.json
+notrlong_islemler.jsonl
+notrlong_equity.jsonl
+notrlong_veto.jsonl
+notrlong_elenen.jsonl
+notrlong_log.txt
+notrlong_*_pencere*.jsonl
+yedek_pencere1_*/

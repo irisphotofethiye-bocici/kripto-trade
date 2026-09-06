@@ -281,9 +281,23 @@ PENCERE-2 (HAKEM OLAN)
    olcut           : 30 GUN ve 80 KAPANMIS POZISYON — bolum 5/6 AYNEN gecerli
 ```
 
-⚠️ **State'e dokunulmadı** — kasa sıfırlanmadı, defter silinmedi.
-Pencere **belge düzeyinde** tanımlıdır; `id > 1` süzgeci hakem sayımını verir.
-Bu, `CLAUDE.md`'nin *"ölçüm bota dokunmaz"* kuralına uymanın en az riskli yolu.
+⚠️ ~~**State'e dokunulmadı** — pencere belge düzeyinde tanımlıdır (`id > 1`).~~
+🔴 **[DÜZELTİLDİ 2026-09-06 19:13]** Belge düzeyinde sıfırlama **panelde
+görünmüyordu** (kasa 9.843,84, gün sayacı eski tarihten işliyordu) — kullanıcı
+fark etti: *"botu sıfırlamamışsın, paneli"*. **GERÇEK sıfırlama yapıldı:**
+
+```
+kasa            9.843,84 -> 10.000,00      zirve -> 10.000,00
+baslangic_ts    12:30:49 -> 19:13:02       giris ucreti -> 0,00
+sonraki_id      2 -> 1
+defterler       *_pencere1.jsonl olarak ARSIVLENDI (silinmedi)
+cooldown        KORUNDU (bekleme haklari kaybolmasin)
+```
+
+Betik: `scratchpad/notrlong_pencere_sifirla.py` — görev **devre dışı bırakıldı,
+koşan tur bitirildi** (check-then-act tuzağı), yedek alındı, state **atomik**
+yazıldı (`.tmp` + `os.replace`), sonra doğrulandı. Panel `10.000,00 · gün 0/30
+· N 0/80` gösteriyor. Yedek: `yedek_pencere1_<damga>/`.
 
 ### Ölçütler DEĞİŞMEDİ
 

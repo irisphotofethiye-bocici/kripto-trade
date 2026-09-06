@@ -2252,9 +2252,13 @@ python -c "import json;print(sum(1 for l in open('notrlong_islemler.jsonl',encod
   if l.strip() and json.loads(l).get('id',0)>1 and not json.loads(l).get('kismi')))"
 ```
 
-⚠️ **State'e DOKUNULMADI** — kasa sıfırlanmadı, defter silinmedi. Pencere
-**belge düzeyinde** tanımlıdır (`id > 1`). Taban equity ve canlı kasa için
-`notrlong_state.json` okunur; **bu dosyada rakam tutulmaz**.
+🔴 **[DÜZELTİLDİ 2026-09-06 19:13]** Belge düzeyinde sıfırlama **panele
+yansımıyordu**; kullanıcı fark etti. **Gerçek sıfırlama yapıldı** — kasa,
+zirve, başlangıç damgası, ücret ve `sonraki_id` sıfırlandı; defterler
+`*_pencere1.jsonl` olarak **arşivlendi** (silinmedi); `cooldown` korundu.
+Ayrıntı ve komut: `ON_KAYIT_notr_long_botu.md` bölüm 12.
+Canlı kasa **her zaman** `notrlong_state.json`'dan okunur; **bu dosyada
+rakam tutulmaz**.
 
 ### Kapsam — hangi defterler ETKİLENMEDİ
 
