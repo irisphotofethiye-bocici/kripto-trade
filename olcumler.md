@@ -10700,3 +10700,68 @@ bugün ölçülen ham hücre getirisi de negatifti (`−2,62%`, artıda %41).
 
 **Karar:** `A0` kalır (şüphede daima statüko). Çıkış tarafı sayacı
 **30 varyantta 1 geçti** → **32 varyantta 1 geçti.**
+
+---
+
+## GİRİŞ KAPISI ARAMASI — 2026-09-06 · **BULUNAMADI** (holdout'ta düştü)
+
+**Ön-kayıt:** `ON_KAYIT_giris_arama.md` · commit `fd932ca` — koşumdan **önce**
+**Betik:** `scratchpad/giris_arama/01_arama.py`
+**Evren:** `radar_archive` · `score ≥ 30` · sembol başına 4sa cooldown ·
+A0 mekaniği (ölçücü üçlü stop ATR14 · %10 hedef · 48s · maliyet %0,09)
+**N = 2.082 · 72 gün** · keşif 1.006 (06-25…08-09) · holdout 1.076 (08-09…09-06)
+
+### Taban
+
+```
+tumu    N=2082  ort R -0,0314  isabet %25,4  stop %3,58  basabas %26,4
+```
+
+### 39 hücre arandı, aday OTOMATİK seçildi
+
+Keşifte en iyi: **`dusuk_float == True`** — `N=218 · ort R +0,1159 ·
+isabet %34,9 (başabaş %29,5)`.
+
+### 🔓 Holdout — tek geçiş
+
+| | N | ort R | isabet |
+|---|---|---|---|
+| hücre **içi** | 150 | **+0,0957** | %32,0 (başabaş %31,6) |
+| hücre **dışı** | 926 | **+0,0853** | %26,9 |
+
+```
+fark +0,0104 R  ·  gun-kumeli t +0,18 (24 gun)  ·  MDE 0,4312
+H1 GECTI · H2 DUSTU · H3 DUSTU · H4 GECTI · H5 GECTI  ->  BULUNAMADI
+```
+
+Ön-kayıt bölüm 9 gereği **ikinci aday holdout'a sokulmadı**; arama bitti.
+
+### 🔑 ASIL BULGU — kapı değil, REJİM
+
+```
+kesif  tabani (hucre disi dahil)  -0,1577 R
+holdout tabani (hucre disi)       +0,0853 R
+```
+
+**Taban iki yarı arasında `+0,24 R` kaydı.** Keşifte "iyi" görünen hücre, iyi
+olduğu için değil **tabanın kötü olduğu bir dönemde ölçüldüğü için** öne çıktı.
+Holdout'ta taban yükselince hücrenin üstünlüğü `+0,116`'dan `+0,010`'a indi.
+
+🔴 Yani bu popülasyonun kârlılığını belirleyen şey **hangi coini seçtiğin
+değil, hangi dönemde olduğun**. Bugün ölçülen dört şeyin hepsi bununla tutarlı.
+
+### ⚠️ Kendi tasarımımın zayıf noktası
+
+Negatif kontrol (gün içi permüte edilmiş sahte değişken) **2 hücre** taradı,
+gerçek arama **39**. Sahtenin en iyisi `−0,2218`, gerçek adayın `+0,1159`
+oldu — ama bu karşılaştırma **maksimum-istatistik şişmesini sınırlamıyor**,
+çünkü hücre sayıları farklı. Doğrusu: tüm 39 hücrelik boru hattını
+karıştırılmış veriyle **çok kez** koşturmaktı. Ön-kayıtta böyle yazmadım.
+
+### Betimleyici — hüküm değil (keşif yarısı, N küçük)
+
+`stage == BASLIYOR` **−0,4076** (N=25) · `HAZIRLANIYOR` **−0,3300** (N=84) ·
+`izle` −0,1346 (N=897). Botun LONG kapısı ilk ikisini **şart koşuyor**.
+⚠️ N eşiğinin altındalar, aday olamadılar; tek yarı. Ama OTOPSI-3'ün SHORT
+tarafında bulduğu deseni (`BASLIYOR` en kötü) LONG'da da düşündürüyor.
+**Ayrı bir ön-kayıt konusudur.**
