@@ -1,0 +1,33 @@
+====================================================================================
+POZISYON KOMPOZISYONU (TEMIZ) — metrics indirici (on-kayit a89474a)
+====================================================================================
+sembol : 150  ·  gun: 354  ·  toplam dosya: 53100
+cikti  : C:\Users\alper\Desktop\kripto trade\scratchpad\komp_temiz\metrics
+🔴 klines_1h_uzun'a DOKUNULMUYOR · surdurulebilir · birlestirir
+
+   kalan 140 sembol ·   3.6 dk · ok 1061 / yok 0 / hata 3
+   kalan 130 sembol ·   7.3 dk · ok 4597 / yok 0 / hata 5
+   kalan 120 sembol ·  10.8 dk · ok 8133 / yok 35 / hata 9
+   kalan 110 sembol ·  17.7 dk · ok 11336 / yok 1384 / hata 18
+   kalan 100 sembol ·  21.5 dk · ok 13526 / yok 2005 / hata 21
+   kalan  90 sembol ·  25.3 dk · ok 16385 / yok 2417 / hata 23
+   kalan  80 sembol ·  29.3 dk · ok 19578 / yok 2937 / hata 30
+   kalan  70 sembol ·  35.6 dk · ok 22626 / yok 3820 / hata 34
+   kalan  60 sembol ·  39.6 dk · ok 25140 / yok 4380 / hata 38
+   kalan  50 sembol ·  43.3 dk · ok 28452 / yok 4461 / hata 38
+   kalan  40 sembol ·  47.1 dk · ok 31961 / yok 4466 / hata 41
+   kalan  30 sembol ·  52.8 dk · ok 35493 / yok 4749 / hata 46
+   kalan  20 sembol ·  57.0 dk · ok 38743 / yok 4768 / hata 52
+   kalan  10 sembol ·  61.0 dk · ok 42132 / yok 5099 / hata 53
+   kalan   0 sembol ·  64.6 dk · ok 45215 / yok 5414 / hata 56
+   kalan   0 sembol ·  65.1 dk · ok 45568 / yok 5497 / hata 56
+   kalan   0 sembol ·  66.6 dk · ok 45922 / yok 5584 / hata 56
+   kalan   0 sembol ·  67.2 dk · ok 46276 / yok 5584 / hata 56
+   kalan   0 sembol ·  67.2 dk · ok 46630 / yok 5584 / hata 56
+   kalan   0 sembol ·  67.7 dk · ok 46915 / yok 5584 / hata 56
+   kalan   0 sembol ·  67.8 dk · ok 47251 / yok 5584 / hata 56
+   kalan   0 sembol ·  67.9 dk · ok 47460 / yok 5584 / hata 56
+
+bitti: 67.9 dk · sembol-gun ok 47460 · yok(404) 5584 · hata 56 · atlanan sembol 0
+dosya: 150 sembol
+Bot dosyalarina yazim: YOK

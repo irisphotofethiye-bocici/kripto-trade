@@ -10830,3 +10830,49 @@ hedef 3 x kova: ort R +0,1822 · isabet %6,0 (zaman stopu baskin)
 Yön ayrımı bu projenin tekrarlayan bulgusuyla aynı yönde (`defter2`/`defter3`,
 LONG'un bu evrende `t < −4` ile reddi). **Ama hüküm kurmaz** — ikincil, tek
 pencere, N=89/245.
+
+---
+
+## POZİSYON KOMPOZİSYONU — TEMİZ AYRIŞTIRMA — 2026-09-06 · **BOŞ** · bant-dışı liste KAPANDI
+
+**Ön-kayıt:** `ON_KAYIT_komp_temiz.md` · commit `a89474a` — koşumdan **önce**
+**Betikler:** `scratchpad/komp_temiz/01_indir.py` (67,9 dk · 47.460 sembol-gün) · `02_olcum.py`
+**N = 47.151 sembol-gün · 352 gün · 150 sembol** (2025-09-07 … 2026-08-24)
+
+### Hüküm — hiçbir birincil değişken geçmedi
+
+| değişken | rho | t | G1 (≥2,5) | G2 | G3 | G4 | G5 |
+|---|---|---|---|---|---|---|---|
+| **`komp_temiz`** ⭐ | +0,01494 | **+1,92** | ✗ | ✓ | ✓ | ✓ | ✓ |
+| **`buyukluk_egimi`** ⭐ | −0,00174 | −0,33 | ✗ | ✗ | ✗ | ✓ | ✗ |
+| `sum_top` (= botun `top_ls`'i) | +0,01360 | **+2,44** | ✗ | ✓ | ✓ | ✓ | ✓ |
+| `count_top` | +0,01250 | +1,85 | ✗ | ✓ | ✓ | ✓ | ✓ |
+| `count_glob` | +0,01002 | +1,69 | ✗ | ✓ | ✓ | ✓ | ✓ |
+| `komp_kirli` (eski) | +0,00371 | +0,79 | ✗ | ✗ | ✓ | ✓ | ✓ |
+
+🔑 **Bant-dışı liste TAMAMEN kapandı — dört adayın dördü de düştü**
+(bekleyen likidite · spot-perp basis · çapraz borsa · pozisyon kompozisyonu).
+
+### İki kazanım, hüküm olmasa da
+
+**1 · Birim hatası gerçekti.** Temiz ayrıştırma (`count_top − count_glob`,
+ikisi de **hesap** oranı) `rho +0,01494 / t +1,92`; eski elma-armut
+(`sum_top − count_glob`) `+0,00371 / t +0,79`. **Dört kat fark.**
+`CLAUDE.md`'nin *"denendi, bulgu yok"* kaydının sebebi kısmen **birim
+hatasıydı** — ama düzeltilince de eşiği geçmiyor.
+
+**2 · Yöntem düzeldi.** Permütasyon null'ı bu tasarımda **0,0087–0,0094**
+çıktı; aynı gün önceki (kusurlu) tasarımda **0,0272** idi. Fark: sembol-gün
+başına **tek gözlem** + Fama-MacBeth. Sahte tekrar giderilince gürültü tabanı
+**üçte bire** indi.
+
+### ⚠️ Dürüstlük notları
+
+- `komp_temiz` **G2/G3/G4/G5'i geçti**, yalnız `G1` (t≥2,5) düştü — `t=+1,92`.
+  Eşik 2,5 **koşumdan önce** 6 karşılaştırma için Bonferroni'yle konmuştu.
+  Tek başına bakılsa `p≈0,055` olurdu. **Eşik gevşetilmedi.**
+- 🔴 En yüksek t **botun ZATEN kullandığı** değişkende (`sum_top` = `top_ls`,
+  `smart` etiketinin kaynağı): `+2,44`. Yani "yeni" ayrıştırma, mevcut alanı
+  **geçemedi**.
+- Etki büyüklüğü `rho ≈ 0,015` — istatistiksel olarak sınırda, **ekonomik
+  olarak ihmal edilebilir**.
