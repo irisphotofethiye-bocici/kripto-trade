@@ -11359,3 +11359,62 @@ oranını veriyordu, ortalama `R`'yi değil.
 etki **küçük**, açıklamanın tamamı değil.
 
 Çıkış varyantı sayacı: **33 varyantta 1 geçti.**
+
+---
+
+## STOP MESAFESİ — **LONG** popülasyonunda — 2026-09-06 · **DÜŞTÜ** · ve karıştırıcı DOĞRULANDI
+
+**Ön-kayıt:** `ON_KAYIT_stop_mesafesi_LONG.md` · commit `883791a` — koşumdan **önce**
+**Betik:** `scratchpad/stop_mesafesi_long/01_olcum.py`
+**N = 2.078 · 72 gün** · keşif 1.002 · holdout 1.076 · birincil kol `2.5x`
+Merdiven monotonluk sınaması **geçti**: `A 3,58% → 1,5x 4,80% → 2,5x 8,01% → 4,0x 12,81%`
+
+### Hüküm
+
+```
+ESLESMIS FARK (kol - A):
+           KESIF                 HOLDOUT
+1.5x   +0,0237 t=+1,27       -0,0216 t=-1,24
+2.5x   +0,0494 t=+1,79       -0,0074 t=-0,22     <- BIRINCIL
+4.0x   +0,0791 t=+1,97       -0,0415 t=-0,47
+
+permutasyon (gun bazinda isaret cevirme, 2.000 tur): max|t|=1,24 -> p = 0,5495
+
+U1 DUSTU · U2 DUSTU · U3 DUSTU · U4 DUSTU · U5 DUSTU   -> DUSTU
+```
+
+🔴 **`net%` her genişletilmiş kolda, her pencerede NEGATİF** (`−0,09%` …
+`−0,73%`). Bu, dünkü **SHORT** ölçümünün tersi (orada `+0,219` ve `+0,304`
+ile geçmişti). **LONG ile SHORT bu konuda gerçekten ayrışıyor.**
+
+### 🔑 KARIŞTIRICI DOĞRULANDI — bu akşamki çıkarımım YANLIŞTI
+
+```
+A stop dilimi        A ort R    2.5x ort R        fark
+2,00-2,53            +0,4171      +0,3418      -0,0753
+2,53-3,26            +0,0607      +0,1076      +0,0469
+3,26-4,14            +0,2036      +0,1702      -0,0334
+4,15-5,60            -0,1419      -0,1529      -0,0110
+5,61-17,02           -0,1047      -0,0691      +0,0356
+                            -> 5 dilimin 2'sinde 2.5x daha iyi
+```
+
+**Dar-stop hücresi, stopu `2,5×ATR`'ye GENİŞLETİLDİKTEN SONRA DA en iyi**
+(`+0,3418`), geniş-stop hücresi hâlâ en kötü (`−0,0691`).
+
+🔴 **Yani "dar stop iyi" DEĞİL, "SAKİN COİN iyi".** `stop_pct` gözlemsel
+tabloda **coinin oynaklığının vekiliydi**; stopu değiştirmek hücrelerin
+sırasını **değiştirmiyor**. Bu akşam `R(m)` ölçümünden çıkardığım
+*"dar stop iyi, geniş stop kötü"* hükmü **karıştırıcıdan geliyordu** ve
+bununla **düzeltilmiştir**.
+
+### Ne değişti, ne değişmedi
+
+- Kullanıcının önerisi (**düşük kaldıraç → geniş stop**): ölçüldü, **etki yok**,
+  işaret yarılar arasında dönüyor
+- `geniş stop eleme` ölçümünün *"neredeyse geçti"* hâli **hâlâ ayakta** — ama
+  artık anlamı farklı: **geniş stopu değil, OYNAK COİNİ** eliyor
+- 🔑 Sıradaki doğru soru: **`ATR/fiyat` bir giriş filtresi olarak ölçülmeli.**
+  Bugüne kadar hep stop üzerinden dolaylı bakıldı.
+
+Çıkış/stop varyantı sayacı: **34 varyantta 1 geçti.**
