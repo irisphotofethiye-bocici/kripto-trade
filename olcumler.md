@@ -11015,3 +11015,83 @@ bakılır; eğrinin üstünde bir şey yoksa bilgi yoktur.
 `00_pilot.py` ve `01_geometri.py` **BTC 1 dakikalık barı** indirip işleyen ilk
 betikler (`data.binance.vision → futures/um/monthly/klines/BTCUSDT/1m`,
 ay başına ~44.000 bar, ücretsiz). Kısa vadeli her ölçümde yeniden kullanılabilir.
+
+---
+
+## STOP GENİŞLİĞİ → GETİRİ — 2026-09-06 · **DÜŞTÜ** · ve ÖLÇÜTÜM GEÇERSİZDİ
+
+**Ön-kayıt:** `ON_KAYIT_stop_genislik_yonu.md` · commit `162246b` — koşumdan **önce**
+**Betik:** `scratchpad/stop_genislik/01_olcum.py`
+**N = 2.082 · 72 gün** · keşif 1.006 · holdout 1.076 · A0 mekaniği
+
+### Hüküm
+
+```
+P1 holdout rho > 0            GECTI    <- 🔴 GECERSIZ, asagiya bak
+P2 gun-kumeli t >= 2,0        DUSTU    t = -1,13
+P3 |fark| > MDE               DUSTU    fark -0,2879 · MDE 0,2971
+P4 kesif+holdout ayni isaret  GECTI    <- ayni gecersiz istatistik
+P5 en genis dilim R > 0       DUSTU    -0,1047
+                              -> YON YOK
+```
+
+### 🔴 P1/P4 GEÇERSİZ — ORTAK PAYDA TUZAĞINA KENDİM DÜŞTÜM
+
+`CLAUDE.md`: *"`R = net/risk` gibi büyüklüklerde payda hem ölçtüğün değişken
+hem de normalleştiricidir. `risk ~ R` korelasyonu bu yüzden **mekanik olarak**
+çıkar… **o korelasyon dayanak olamaz.**"*
+
+**`rho(stop_pct, R)` tam da yasaklanan korelasyondur** — `stop_pct`, `R`'nin
+paydasıdır. Ön-kayıta `P1`'i böyle yazdım; **kural yazılıydı ve yine yapıldı.**
+
+Mekanizma da görünür oldu: `rho` **+0,40** çıkarken **medyan bölme tam tersini**
+söylüyor (geniş `−0,057` · dar `+0,231`). Sebep: dar stopta kazanan `R ≈ +4,5`
+kaybeden `−1`; geniş stopta kazanan `≈ +1,25` kaybeden `−1`. Sıra korelasyonu
+**dağılımın şeklini** ölçüyor, ortalamayı değil.
+
+🔑 **Kalıcı kural: `R` ile paydasındaki değişken arasında Spearman KOŞULMAZ.
+Geçerli olan, sabit dolar riskine normalize edilmiş ORTALAMA `R`'dir.**
+
+### Dilim tablosu — iki yarı BİRBİRİNİ TUTMUYOR
+
+```
+                KESIF ort R      HOLDOUT ort R
+stop ~%2,2        -0,2386          +0,4171
+stop ~%2,8        -0,0803          +0,0607
+stop ~%3,6        -0,1933          +0,2036
+stop ~%4,8        -0,1864          -0,1419
+stop ~%8,1        -0,0904          -0,1047
+```
+
+Keşifte **hiçbir dilim pozitif değil** ve desen yok; holdout'ta dar dilimler
+pozitif. **Aynı yönde değiller.**
+
+### 🔴 "STOP TAVANI" FİKRİM DE ÇÜRÜDÜ
+
+Kullanıcıya önerdiğim tavan kuralı iki yarıda **zıt** işaret veriyor:
+
+```
+kural            KESIF              HOLDOUT           ayni isaret
+stop <= %3,0   N=368  -0,1749    N=362  +0,3276         HAYIR
+stop <= %3,5   N=502  -0,1533    N=500  +0,2283         HAYIR
+stop <= %4,0   N=601  -0,1679    N=616  +0,2426         HAYIR
+stop <= %5,0   N=740  -0,1559    N=789  +0,1547         HAYIR
+TUMU           N=1006 -0,1577    N=1076 +0,0868         HAYIR
+```
+
+⚠️ **Ama son satıra dikkat:** kuralsız popülasyon da işaret döndürüyor
+(`−0,158 → +0,087`). Yani farklı olan **kural değil, DÖNEM**. Bugün ölçülen
+rejim bulgusunun (taban `+0,24 R` kaydı) bir tezahürü daha.
+
+### Yan kazanım — başabaş artık AMPİRİK
+
+Ön-kayıt gereği başabaş iki yolla hesaplandı:
+
+```
+stop ~%2,2  ->  AMPIRIK %20,8  ·  FORMUL 1/(1+hedef/stop) %18,3
+stop ~%8,1  ->  AMPIRIK %44,0  ·  FORMUL %43,9
+```
+
+Fark küçük çünkü zaman stopunda kapanan işlem oranı düşük (**%2–11**).
+`sıkışma` ölçümünde formül **%44,6 vs gerçek** diye yanıltmıştı (orada zaman
+stopu baskındı); burada değil. **Formül ne zaman güvenli, ölçüldü.**
