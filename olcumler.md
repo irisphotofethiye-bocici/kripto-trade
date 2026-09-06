@@ -10876,3 +10876,66 @@ başına **tek gözlem** + Fama-MacBeth. Sahte tekrar giderilince gürültü tab
   **geçemedi**.
 - Etki büyüklüğü `rho ≈ 0,015` — istatistiksel olarak sınırda, **ekonomik
   olarak ihmal edilebilir**.
+
+---
+
+## REJİM KAPISI — 2026-09-06 · **7/7 DÜŞTÜ** · ve ALFA hiçbir rejimde artı değil
+
+**Ön-kayıt:** `ON_KAYIT_rejim_kapisi.md` · commit `ee67fb6` — koşumdan **önce**
+**Betik:** `scratchpad/rejim_kapisi/01_olcum.py`
+**N = 57 gün** (bot günü 69, BTC ile ortak 57) · tüm kapılar `t−1` kapanışıyla,
+**look-ahead yok**
+
+### Koşumdan ÖNCE hesaplanan bar
+
+```
+gunluk R = -0,1078 + 0,1220 x BTC%      ->   R>0 icin BTC% > %0,88/gun
+BTC 2 yillik gercek ortalama: +0,070%/gun
+-> kapinin BTC gunluk ortalamasini 12,6 KAT'a cikarmasi gerekirdi
+```
+
+Bu yüzden ölçülen soru daraltıldı: **alfa rejime bağlı mı?**
+
+### Sonuç
+
+```
+TABAN (kapisiz): ort R -0,0610 · ALFA -0,1237 (t -1,98) · BETA +0,1351
+```
+
+| kapı | açık | R açık | fark | t | **ALFA açık** | kapı açıkken BTC ort |
+|---|---|---|---|---|---|---|
+| K1 `btc>sma20` | 35 | −0,0422 | +0,049 | +0,36 | −0,1181 | +0,514% |
+| **K2 `btc>sma50`** | 35 | **+0,0542** | **+0,299** | **+2,35** | **−0,0236** | +0,483% |
+| K3 `btc_mom7>0` | 35 | −0,0510 | +0,026 | +0,19 | −0,1196 | +0,453% |
+| K4 `btc_sakin` | 52 | −0,0762 | −0,172 | −0,40 | −0,1106 | +0,310% |
+| K5 `btcd_dusuyor` | 20 | −0,1798 | −0,204 | −1,53 | −0,1631 | +0,444% |
+| K6 `usdtd_dusuyor` | 31 | −0,0920 | −0,094 | −0,68 | −0,1993 | +0,631% |
+| K7 **botun kendi rejimi** | 19 | −0,0974 | −0,055 | −0,44 | −0,0908 | **+0,267%** |
+
+```
+HICBIR KAPI GECMEDI.   ALFA >= 0 olan kapi: YOK.
+Barin en yakini K6: BTC ort +0,631% vs gereken %0,88 -> 0,25 puan EKSIK.
+```
+
+### 🔑 Üç bulgu
+
+**1 · Alfa hiçbir rejimde artı değil** (−0,024 … −0,199). Kapının işe
+yaramasının tek yolu buydu ve **yok**. Bölüm 1'in aritmetiği bağlayıcı:
+**kâr betadan geliyor, seçimden değil.**
+
+**2 · `K2` (BTC > SMA50) günlük R'yi −0,244'ten +0,054'e çıkarıyor** (t=+2,35,
+eşik 2,5 — **eşik gevşetilmedi**). Ama alfası hâlâ −0,024: iyileşmenin
+**tamamı beta**. Yani "BTC trendin üstündeyken çalış" kuralı botu artıya
+geçirir ama **bir kenar üretmez** — sadece daha az kötü günde kaldıraçlı
+BTC taşır.
+
+**3 · 🔴 Botun KENDİ rejim dedektörü en kötü seçici.** `K7` açıkken BTC
+ortalaması **+0,267%** — basit `SMA20` kuralının (+0,514%) yarısı, ve
+`R açık = −0,0974`. Bot, kendi rejim etiketini kullanarak **kötü günleri**
+seçiyor.
+
+### Kayda geçen kusur
+
+Ön-kayıtta **7 kapı** ilan edildi; betiğin ilk sürümü **6**'sını ölçtü
+(`K7` uygulanmamıştı). Eksik fark edilip **aynı oturumda** eklendi ve
+yeniden koşuldu — sonuç yukarıdadır. Ölçüt değişmedi.
