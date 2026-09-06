@@ -94,13 +94,24 @@ def karne(kayitlar):
     for i, v in poz.items():
         v.sort(key=lambda z: z.get("ts") or "")
         s = v[-1]
+        ilk = v[0]
+        net = sum(t.get("sonuc_usdt") or 0 for t in v)
+        marjin = ilk.get("marjin") or 0
         out.append({
             "id": i, "sym": s.get("sym"), "sebep": s.get("sebep"), "ts": s.get("ts"),
-            "net": sum(t.get("sonuc_usdt") or 0 for t in v),
+            "net": net,
             "fon": sum(t["funding_usdt"] for t in v
                        if t.get("funding_usdt") is not None),
             "tutma": max((t.get("tutma_saat") or 0) for t in v),
             "skor": s.get("skor_giriste"),
+            # --- detay (2026-09-06)
+            "yon": ilk.get("yon"), "giris": ilk.get("giris"), "cikis": s.get("cikis"),
+            "kaldirac": ilk.get("kaldirac"), "marjin": marjin,
+            "notional": ilk.get("notional"),
+            "roi": (net / marjin * 100.0) if marjin else None,
+            "r": s.get("r"),
+            "stage": ilk.get("stage_giriste"), "smart": ilk.get("smart_giriste"),
+            "kismi": len(v) > 1,
         })
     out.sort(key=lambda x: x["ts"] or "")
     return out
@@ -147,6 +158,20 @@ def durum():
             "kismi_kapali": kismi_kapali, "tp1_alindi": tp1_gercek,
             "stop_tasindi": (p.get("stop") != p.get("stop_orijinal")),
         })
+    # --- FUNDING ve MUHASEBE (2026-09-06)
+    # CLAUDE.md: sonuc_usdt FONLAMAYI ICERMEZ; funding dogrudan equity'den duser.
+    fon_acik = sum((p.get("funding_toplam") or 0)
+                   for p in (st.get("acik_pozisyonlar") or []))
+    fon_kapali = sum(k["fon"] for k in kap)
+    ucret = st.get("kumulatif_giris_ucret") or 0
+    realize = sum(k["net"] for k in kap)
+    bas = st.get("baslangic_bakiye") or 0
+    beklenen = bas + realize + fon_kapali + fon_acik - ucret
+    muh = {"baslangic": bas, "realize": realize,
+           "funding_kapali": fon_kapali, "funding_acik": fon_acik,
+           "giris_ucret": ucret, "beklenen": beklenen,
+           "sapma": (st.get("equity") or 0) - beklenen}
+
     gun = 0.0
     try:
         b = datetime.datetime.strptime((st.get("baslangic_ts") or "")[:19],
@@ -182,6 +207,7 @@ def durum():
             "baslangic_ts": st.get("baslangic_ts") or "",
             "son_cycle": st.get("son_cycle_ts"),
             "acik": acik, "acik_pnl": acik_pnl,
+            "muh": muh,
             "kapanan": len(kap), "net": sum(p["net"] for p in kap),
             "kazanan_pct": (100.0 * kaz / len(kap)) if kap else None,
             "fonlama": sum(p["fon"] for p in kap),
@@ -241,7 +267,7 @@ h3{font-size:13px;margin:22px 0 10px;font-weight:600;color:var(--y2)}
   <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px">PnL % = marjine göre (kaldıraçlı). <b>kısmi kâr KAPALI</b> = bu bot sabit %10 hedefle çalışır, TP1 yolu tasarım gereği devre dışıdır (ön-kayıt bölüm 2).</div><div class="sar" id="acik"></div>
   <h3>Skor bandına göre sonuç <span class="sonuk" style="font-weight:400">— kapı yok, ölçüm sonradan</span></h3>
   <div class="sar" id="skor"></div>
-  <h3>Son kapanışlar</h3><div class="sar" id="son"></div>
+  <h3>Kapanan pozisyonlar</h3><div class="bos" style="margin:0 0 6px">ROI % = marjine göre &middot; R = kapanış kaydının R degeri (&#9888; kısmi kâr alınmışsa R yalnız <b>kalan yarıyı</b> gösterir, net $ ise tümünü) &middot; funding ayrı sütunda, net $ içinde <b>değildir</b>.</div><div class="sar" id="son"></div>
   <h3>Log</h3><pre id="log">-</pre>
 </main>
 <script>
@@ -260,7 +286,7 @@ async function yenile(){
   const e=$('#rz'); e.textContent=d.durum;
   e.className='rozet '+(d.durum==='AKTIF'?'iyi':(d.durum==='DURDU'?'kotu':'uyari'));
 
-  const f=d.equity-d.baslangic;
+  const f=d.equity-d.baslangic; const m=d.muh||{};
   $('#kartlar').innerHTML =
    '<div class="kart"><h2>Kasa</h2><div class="alt">başlangıç '+d.baslangic_ts.slice(0,16)+
      ' · son tur '+(d.son_cycle||'-').slice(11,16)+'</div>'+
@@ -272,7 +298,19 @@ async function yenile(){
    '<div class="satir"><span>Kazanan oranı</span><b>'+(d.kazanan_pct==null?'-':d.kazanan_pct.toFixed(0)+'%')+'</b></div>'+
    '<div class="satir"><span>Fonlama</span><b class="'+snf(d.fonlama)+'">'+isr(d.fonlama)+p2(d.fonlama)+' $</b></div>'+
    '</div>'+
-   '<div class="kart"><h2>Ölçüm penceresi</h2>'+
+   '<div class="kart"><h2>Kasa muhasebesi</h2>'+
+   '<div class="alt">CLAUDE.md: <b>sonuc_usdt fonlamayı İÇERMEZ</b> — funding doğrudan kasadan düşer.</div>'+
+   '<table style="margin-top:6px">'+
+   '<tr><td>başlangıç</td><td style="text-align:right">'+p2(m.baslangic)+' $</td></tr>'+
+   '<tr><td>realize P&amp;L (kapanan)</td><td style="text-align:right" class="'+snf(m.realize)+'">'+isr(m.realize)+p2(m.realize)+' $</td></tr>'+
+   '<tr><td>funding — kapanan</td><td style="text-align:right" class="'+snf(m.funding_kapali)+'">'+isr(m.funding_kapali)+p2(m.funding_kapali)+' $</td></tr>'+
+   '<tr><td>funding — açık</td><td style="text-align:right" class="'+snf(m.funding_acik)+'">'+isr(m.funding_acik)+p2(m.funding_acik)+' $</td></tr>'+
+   '<tr><td>giriş ücreti (taker)</td><td style="text-align:right" class="kotu">-'+p2(m.giris_ucret)+' $</td></tr>'+
+   '<tr style="border-top:1px solid #444"><td><b>kasa (equity)</b></td><td style="text-align:right"><b>'+p2(d.equity)+' $</b></td></tr>'+
+   '<tr><td class="sonuk">mutabakat sapması</td><td style="text-align:right" class="sonuk">'+isr(m.sapma)+p2(m.sapma)+' $</td></tr>'+
+   '</table>'+
+   '<div class="alt" style="margin-top:6px">Açık pozisyonların kâr/zararı kasaya <b>henüz yazılmadı</b>.</div></div>'+
+  '<div class="kart"><h2>Ölçüm penceresi</h2>'+
    '<div class="alt">ikisi birden dolmadan hüküm yok</div>'+
    '<div class="satir"><span>Kapanan pozisyon</span><b>'+d.kapanan+' / '+d.n_hedef+'</b></div>'+
    cubuk(d.kapanan,d.n_hedef)+
@@ -313,11 +351,23 @@ async function yenile(){
   $('#skor').innerHTML = d.skor.length? kh+'</table>' :
     '<div class="bos">Henüz kapanan pozisyon yok — skor bandı ölçümü doldukça oluşacak.</div>';
 
-  let sh='<table><tr><th>zaman</th><th>sembol</th><th>skor</th><th>sebep</th><th>net $</th><th>tutma</th></tr>';
+  const nn=(v,k)=>(v===null||v===undefined)?'-':Number(v).toFixed(k??2);
+  let sh='<table><tr><th>zaman</th><th>sembol</th><th>yön</th><th>kald.</th><th>marjin $</th>'+
+         '<th>giriş</th><th>çıkış</th><th>net $</th><th>ROI %</th><th>R</th>'+
+         '<th>funding $</th><th>sebep</th><th>tutma</th></tr>';
   for(const p of d.son)
-    sh+='<tr><td class="sonuk">'+(p.ts||'').slice(5,16)+'</td><td>'+p.sym+'</td>'+
-        '<td class="sonuk">'+(p.skor??'-')+'</td><td class="sonuk">'+p.sebep+'</td>'+
-        '<td class="'+snf(p.net)+'">'+isr(p.net)+p2(p.net)+'</td>'+
+    sh+='<tr><td class="sonuk">'+(p.ts||'').slice(5,16)+'</td>'+
+        '<td><b>'+p.sym+'</b><div class="sonuk" style="font-size:11px">skor '+(p.skor??'-')+
+          ' · '+(p.stage??'-')+(p.kismi?' · <b>kısmi</b>':'')+'</div></td>'+
+        '<td>'+(p.yon??'-')+'</td>'+
+        '<td>'+(p.kaldirac??'-')+'x</td>'+
+        '<td>'+nn(p.marjin)+'</td>'+
+        '<td>'+(p.giris??'-')+'</td><td>'+(p.cikis??'-')+'</td>'+
+        '<td class="'+snf(p.net)+'"><b>'+isr(p.net)+p2(p.net)+'</b></td>'+
+        '<td class="'+snf(p.roi)+'">'+isr(p.roi)+nn(p.roi,1)+'%</td>'+
+        '<td class="'+snf(p.r)+'">'+isr(p.r)+nn(p.r,2)+'</td>'+
+        '<td class="'+snf(p.fon)+'">'+isr(p.fon)+nn(p.fon,3)+'</td>'+
+        '<td class="sonuk">'+p.sebep+'</td>'+
         '<td class="sonuk">'+(p.tutma||0).toFixed(1)+' sa</td></tr>';
   $('#son').innerHTML = d.son.length? sh+'</table>' : '<div class="bos">Henüz kapanan pozisyon yok.</div>';
 
