@@ -11488,3 +11488,102 @@ Bu, **MDE'yi aşan tek ölçüm**. Ve destekleyen üç bağımsız bulgu var:
 
 🔴 **Kural çıkarılmadı** (`V2` düştü, şüphede statüko). Ama bugün *"bakmaya
 değer"* diyebileceğim tek iz budur.
+
+---
+
+## `chg24` TAVANI — 2026-09-07 · **GÖREMİYORUZ** (keşif güçlü, holdout çöktü)
+
+**Ön-kayıt:** `ON_KAYIT_chg24_tavan.md` · commit `1f3f213` — koşumdan **önce**
+**Betik:** `scratchpad/chg24_tavan/01_olcum.py`
+**Kaynak:** kullanıcı — *"bunu nasıl sınırlarız, belli bir yükseliş yapana girmesin"*
+**N = 2.035 · 71 gün** · keşif 986 · holdout 1.049
+
+### 🔴 KOŞUMDAN ÖNCE BULUNAN VERİ TUZAĞI — tasarımı değiştirdi
+
+`radar_archive`'ın `chg24` **alanı** botun `chg24`'ü **değil**:
+
+```
+N=179.298  ana radar kaydi    -> chg24 alani HIC YOK (last1 · last3 · pos var)
+N= 47.848  erken-kusak kaydi  -> chg24 VAR, ama |chg24| <= 15 TANIM GEREGI
+                                 (erken_chg24_max, radar.py:194)
+arsivde: min -15,00 · max +15,00 · >20 olan SIFIR
+```
+
+Bot havuzunu **süzgeçsiz** kuruyor (`chg_max` verilmiyor →
+`testbot.py:1400` · `notrlong.py:265`); `radar.py` arşivi `--chg_max 15`
+ile yazıyor. **Bot ile arşiv farklı evrene bakıyor.** `radar.py:186` bunu
+zaten *"kör nokta yapısal"* diye yazmış.
+→ Alan **okunmadı**, `chg24` **1s mumdan yeniden üretildi**.
+Aynı hata sınıfı: `funding_gecmis` birim kırılması · `rejim` tanım değişimi.
+
+### Birincil — HAM getiri (kural: bantlar oynaklıkta ayrışıyor)
+
+```
+             en dusuk dilim   en yuksek dilim      fark      gun-t     MDE
+KESIF          +1,4046%          -4,4922%        +5,8968%   +2,56       -
+HOLDOUT        -1,4023%          -1,9855%        +0,5831%   +1,17     4,3925
+```
+
+**Keşiften holdout'a etki ondabire indi** (`+5,90 → +0,58`), `t` `+2,56 → +1,17`.
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **C1** | holdout fark > 0 | **GEÇTİ** `+0,5831%` |
+| **C2** | gün-kümeli t ≥ 2,0 | **DÜŞTÜ** `+1,17` |
+| **C3** | \|fark\| > MDE | **DÜŞTÜ** `0,583 < 4,393` |
+| **C4** | keşif+holdout aynı işaret | **GEÇTİ** |
+| **C5** | negatif kontrol temiz | **GEÇTİ** (sahte `−1,3075%` · t `+0,26`) |
+
+**HÜKÜM: GÖREMİYORUZ.**
+
+### 🔑 ASIL BULGU — veri, sorulan bölgeyi GÖREMİYOR
+
+Mumdan üretince `±15` kırpması aşıldı ama **yetmedi**:
+
+```
+min -30,29 · max +23,56 · |chg24|>15 olan 165 (%8,1)
+chg24 > 20 olan:  8 kayit        chg24 > 40 olan:  0
+```
+
+Sebep yapısal: `radar.py` `|chg24| > 15` sembolü **havuza hiç almıyor**, o
+yüzden arşivde o semboller **kayıt olarak yok** — mumdan hesaplamak sadece
+kaydı olanların değerini düzeltir, **eksik kaydı geri getirmez.**
+
+🔴 Bot **UAI'yi +%26,86'da** açtı. Arşivde o bölgede **8 kayıt** var.
+Yani *"+%20'nin üstüne girmesin"* önerisi bu veriyle **sınanamaz** —
+düşen bir hipotez değil, **ölçülemeyen** bir hipotez.
+
+### ⚠️ Mekanik işareti DÖNDÜRÜYOR — 2026-08-20 dersinin tekrarı
+
+```
+HOLDOUT ayni karsilastirma, R ile: dusuk -0,0958 · yuksek +0,1898
+                                   fark -0,2855 (HAM'da +0,5831)
+```
+
+Ham getiride düşük-`chg24` **önde**, A0 mekaniğiyle **geride**. Bu tam olarak
+`CLAUDE.md`'nin kayıtlı vakası (*">40 LONG hücresi gürültü diye gömüldü,
+ham getiride +2,284"*). Ön-kayıt bu yüzden ham getiriyi birincil ilan
+etmişti — karar koşumdan **önce** verilmişti.
+
+### `chg24` ile `pos` ne kadar aynı şey (Spearman YOK, dilim çakışması)
+
+```
+en DUSUK dilim cakismasi : %60,8      (rastgele beklenti %20)
+en YUKSEK dilim cakismasi: %23,3      (rastgele beklentiye YAKIN)
+```
+
+Alt uçta büyük ölçüde **aynı şey** — ve `pos` bir giriş kapısı olarak
+`giris_arama`'da (2026-09-06) zaten arandı, **bulunamadı**. Üst uçta
+ayrışıyorlar; ama üst uç da yukarıdaki kapsama sorunundan muzdarip.
+
+### Betimleyici — hüküm değil
+
+Tavan merdiveni (holdout, taban `−0,839%`): `<+5` → `−0,196%` ·
+`<+10` → `−0,551%` · `<+15` → `−0,561%`. Elenen taraf hep daha kötü
+(`−1,17% · −1,26% · −4,56%`) ama **hiçbiri MDE'ye yakın değil** ve
+`genis_stop`'ta bu yordam kusurlu çıkmıştı — **eşik seçilmedi.**
+
+### Karar
+
+`chg24` tavanı **bota konmadı**. `C2`+`C3` düştü, şüphede statüko.
+Ön-kayıt sayacı: **on dört ön-kayıt, on dördü de geçemedi.**
