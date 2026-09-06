@@ -219,3 +219,80 @@ Bölüm 5, 6 (K1–K4), 7 ve 8 **aynen geçerli**.
 
 ⚠️ **Bu değişiklik sonucu görülmeden yapıldı** — hiçbir pozisyon açılmamıştı,
 dolayısıyla seçilim yok.
+
+---
+
+## 12 · 🔴 [DEĞİŞTİ 2026-09-06] TAKER KAPISI KALDIRILDI — PENCERE SIFIRLANDI
+
+**Kullanıcı kararı:** *"taker kapısını kaldır ön kayıt güncelle pencereyi sıfırla"*
+
+### Ne değişti
+
+`notrlong.giris_ara` içinde: `karar_yon` **yalnızca** `taker_soguma` yüzünden
+`None` döndüyse, aynı çağrı `pillar.taker = 1.0` ile **tekrarlanır**.
+Başka hiçbir veto atlanmaz.
+
+🔴 **`testbot.py`'ye DOKUNULMADI** → `golge` · `ayna` · `defter2` · `defter3` ve
+NOTR-AYI botu **aynen** eski davranışta. Kapsam yalnız bu defter.
+**Geri alma:** `notrlong.py`'deki bloğu sil, kapı kendiliğinden geri gelir.
+
+### Gerekçe — ölçüldü
+
+`ON_KAYIT_taker_kapisi.md` (`08c8876`) → ölçüm `2b01efd`.
+**N=956 · 57 gün · 121 sembol.** Beş ölçütün **beşi de düştü**:
+
+```
+ham fark (+24s)          -0,353     last1-sabitlenmis   -0,293
+gun-kumeli t             -0,79      merdivende ayni isaret  1/5
+yogunlasma (2 gun cik)   -0,807
+sabitleyicilerin BESI DE negatif (last1·last3·pos·vol_x·chg24)
+```
+
+Ve kapının **kararsızlığı** ayrıca ölçüldü (`f9d9884`): karşı-olgunun kendi
+penceresinde `taker≥1.0` kolu **+1,01%**, önceki 40 günde **−4,41%** —
+**işaret dönüyor**.
+
+⚠️ **DÜRÜSTLÜK:** görülen fark MDE'nin (**2,57 puan**) çok altında →
+*"göremiyoruz"*, **"zararı kanıtlandı" DEĞİL**. Söylenebilen tek şey:
+**+2,57 puandan büyük bir yarar YOK.** Karar bu belirsizlik bilinerek verildi.
+
+### Bedeli neydi
+
+```
+kapi adaylarin %56'sini kesiyordu  (arsiv: smart-LONG 367 -> taker>=1.0 161)
+notrlong'da TERMINAL darbogaz      (stage+skor gecen 6 adayin 6'si burada oldu)
+beklenen hiz                        2,06 -> 4,70 poz/gun
+N=80 icin gereken sure              39 gun -> 17 gun   (30 gunluk pencereye SIGAR)
+```
+
+### 🔴 PENCERE SIFIRLANDI (D/8)
+
+Değişiklik **hangi işlemin açılacağını değiştiriyor** → pencere yeniden başlar.
+
+```
+PENCERE-1 (kapanmis, hukumsuz)
+   2026-09-06 11:08 .. 18:38  ·  1 pozisyon (ORCA, id=1, -153,60 $)
+   equity 10.000,00 -> 9.843,84
+
+PENCERE-2 (HAKEM OLAN)
+   baslangic       : 2026-09-06 18:44
+   taban equity    : 9.843,84         <- state DEGISTIRILMEDI
+   sayim           : notrlong_islemler.jsonl icinde  id > 1
+   olcut           : 30 GUN ve 80 KAPANMIS POZISYON — bolum 5/6 AYNEN gecerli
+```
+
+⚠️ **State'e dokunulmadı** — kasa sıfırlanmadı, defter silinmedi.
+Pencere **belge düzeyinde** tanımlıdır; `id > 1` süzgeci hakem sayımını verir.
+Bu, `CLAUDE.md`'nin *"ölçüm bota dokunmaz"* kuralına uymanın en az riskli yolu.
+
+### Ölçütler DEĞİŞMEDİ
+
+`K1..K4` (bölüm 6) ve başarısızlık ölçütleri (bölüm 7) **aynen** geçerlidir.
+*"Biraz daha bekleyelim"* hâlâ **yasak**.
+
+### Doğrulama
+
+`scratchpad/notrlong_test.py` → **yeni bölüm 4c**, 7 iddia:
+yalnız `taker_soguma` atlanıyor (açıldı · ikinci çağrı `taker=1.0` · gerçek
+taker sebebe yazıldı) ve **kapsam sızmıyor** (`long_veto`/`blowoff` açılmıyor,
+`karar_yon` tek kez çağrılıyor). Tüm suite geçti, **diske yazım YOK**.

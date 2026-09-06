@@ -215,6 +215,57 @@ def main():
         kontrol("%s -> %s" % (rr["sym"], beklenen), bulunan == beklenen,
                 "yazilan=%s" % bulunan)
 
+    # ---------------------------------------------------------------
+    # [YENI 2026-09-06] TAKER KAPISI KALDIRILDI — dogru ve YALNIZ o dal
+    print()
+    print("### 4c) TAKER KAPISI KALDIRILDI — sadece taker_soguma atlaniyor mu?")
+    cagri = []
+
+    def taker_karar_yon(rejim_ad, r, pillar, kf, veto_out=None, **kw):
+        # pillar.taker >= 1.0 ise LONG doner; degilse r["_veto"] kategorisini yazar
+        cagri.append(pillar.get("taker"))
+        tk = pillar.get("taker")
+        etiket = r.get("_veto", "taker_soguma")
+        if etiket == "taker_soguma" and (tk or 0) >= 1.0:
+            return ("LONG", "ANINDA", "taker gecti")
+        if veto_out is not None:
+            veto_out.append({"kategori": etiket, "detay": "test", "yon": "LONG"})
+        return None
+
+    testbot.karar_yon = taker_karar_yon
+
+    # (a) YALNIZ taker_soguma -> artik ACILMALI
+    cagri.clear()
+    acilanlar.clear()
+    s = notrlong.yeni_state()
+    notrlong.giris_ara(s, [{"sym": "TK1", "stage": "BASLIYOR", "score": 90,
+                            "chg24": 0, "_veto": "taker_soguma"}],
+                       {"TK1": {"taker": 0.97, "smart": "LONG"}}, bag)
+    kontrol("yalniz taker_soguma -> ACILDI", [x[0] for x in acilanlar] == ["TK1"],
+            "acilan=%s" % [x[0] for x in acilanlar])
+    kontrol("ikinci cagri taker=1.0 ile yapildi", 1.0 in cagri,
+            "cagrilar=%s" % cagri)
+    kontrol("gercek taker sebebe yazildi",
+            bool(acilanlar) and "gercek taker=0.97" in acilanlar[0][2],
+            "sebep=%s" % (acilanlar[0][2][-45:] if acilanlar else "-"))
+
+    # (b) BASKA veto -> ACILMAMALI (kapsam sizmasi kontrolu)
+    for baska in ("long_veto", "blowoff"):
+        cagri.clear()
+        acilanlar.clear()
+        kayitlar.clear()
+        s = notrlong.yeni_state()
+        notrlong.giris_ara(s, [{"sym": "TK2", "stage": "BASLIYOR", "score": 90,
+                                "chg24": 0, "_veto": baska}],
+                           {"TK2": {"taker": 0.5, "smart": "LONG"}}, bag)
+        kontrol("%s -> ACILMADI (kapsam sizmadi)" % baska, not acilanlar,
+                "acilan=%s" % [x[0] for x in acilanlar])
+        kontrol("%s -> karar_yon TEK KEZ cagrildi" % baska, len(cagri) == 1,
+                "cagri=%d" % len(cagri))
+
+    testbot.karar_yon = sahte_karar_yon
+    print()
+
     # kapasite elemesi: zaten acik
     kayitlar.clear()
     kararlar.clear()

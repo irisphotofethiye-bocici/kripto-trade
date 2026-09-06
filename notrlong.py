@@ -332,6 +332,42 @@ def giris_ara(st, rows, pillars, baglam):
                                   para_cikis=baglam["para_cikis"],
                                   btc_pay=baglam["btc_pay"],
                                   para_durgun=baglam["para_durgun"])
+
+        # --- TAKER KAPISI KALDIRILDI (2026-09-06, KULLANICI KARARI) ------------------
+        # [NE] karar_yon YALNIZCA `taker_soguma` yuzunden None donduyse, ayni cagri
+        #   pillar.taker = 1.0 ile TEKRARLANIR. Baska hicbir veto atlanmaz; vlist'te
+        #   tek bir kayit ve kategorisi `taker_soguma` degilse bu dal CALISMAZ.
+        # [NEDEN] ON_KAYIT_taker_kapisi.md (08c8876) · olcum 2b01efd:
+        #   N=956 · 57 gun · 121 sembol. Bes olcutun BESI de dustu
+        #   (ham fark -0,353 · last1-sabitlenmis -0,293 · gun-kumeli t -0,79 ·
+        #    merdivende 1/5 · yogunlasma -0,807). Sabitleyicilerin BESI DE negatif.
+        #   Kapinin KARARSIZLIGI da olculdu: karsi-olgu penceresinde taker>=1.0 kolu
+        #   +1,01% iken onceki 40 gunde -4,41% -> ISARET DONUYOR.
+        # [DURUSTLUK] Gorulen fark MDE'nin (2,57 puan) COK ALTINDA -> 'goremiyoruz',
+        #   'zarari kanitlandi' DEGIL. Soylenebilen: +2,57 puandan buyuk bir YARAR YOK.
+        # [BEDELI] Kapi adaylarin %56'sini kesiyordu (arsiv: smart-LONG 367 ->
+        #   taker>=1.0 161) ve notrlong'da TERMINAL darbogazdi: stage+skor gecen
+        #   6 adayin 6'si da burada oldu. Beklenen hiz 2,06 -> 4,70 poz/gun.
+        # [KAPSAM] YALNIZ bu defter. testbot.py'ye DOKUNULMADI -> golge/ayna/
+        #   defter2/defter3 ve NOTR-AYI botu AYNEN eski davranista.
+        # GERI ALMA: asagidaki blogu sil (kapi kendiliginden geri gelir).
+        if (not karar) and vlist and all(
+                x.get("kategori") == "taker_soguma" for x in vlist):
+            _tk = pillar.get("taker")
+            vlist2 = []
+            karar = testbot.karar_yon(REJIM_ZORLA, r, dict(pillar, taker=1.0), False,
+                                      veto_out=vlist2,
+                                      para_cikis=baglam["para_cikis"],
+                                      btc_pay=baglam["btc_pay"],
+                                      para_durgun=baglam["para_durgun"])
+            if karar:
+                karar = (karar[0], karar[1],
+                         karar[2] + " [taker kapisi KALDIRILDI 2026-09-06; "
+                                    "gercek taker=%s]" % _tk)
+            else:
+                vlist = vlist2 or vlist
+        # ----------------------------------------------------------------------------
+
         if not karar:
             _elenen_yaz(r, pillar, _huni_basamagi(r, pillar, vlist),
                         (vlist[0].get("detay") if vlist else ""))
