@@ -155,3 +155,67 @@ Kullanıcı *"paneli temizle"* dedi. Panel **yalnızca görüntüdür**, ölçü
 tabanı değil. Temizlik = kapanan defterlerin panelden çıkarılması ve yeni
 iki kolun eklenmesi. **Ayrı ve geri alınabilir bir iş**; bu ön-kaydın
 ölçütlerini etkilemez.
+
+---
+
+## 11 · 🔴 [DEĞİŞTİ 2026-09-06] SKOR KAPISI KALDIRILDI — İKİ KOL YERİNE TEK KOL
+
+**Kullanıcı sorusu (2026-09-06):** *"n1 skor kapısı yok, skorun etkisi var mı?"*
+**Kullanıcı kararı:** *"skor kapısını kaldır."*
+
+### Neden — soru bir TASARIM KUSURU açığa çıkardı
+
+Bölüm 4 *"N1: skor kapısı YOK"* diyordu. **Bu ifade yanlıştı.** Skor N1'de
+zaten **üç yerde** iş görüyor:
+
+```
+(a) tara()     : radar.analyze sonucu  score >= 30 suzgeci
+(b) tara()     : kisa liste SKORA GORE siralanip [:10] kirpiliyor
+(c) karar_yon  : skor >= stage_esigi   (BASLIYOR 45 · HAZIRLANIYOR 40)
+```
+
+Ve daha ciddisi: `karar_yon` **zaten** BAŞLIYOR için `≥45` istiyor. N2'nin
+`≥45` kapısı orada **hiçbir şey eklemiyordu**; yalnız HAZIRLANIYOR dalında
+skoru `[40,45)` olanları kesiyordu.
+
+**Arşivde ölçüldü** (`scratchpad/notrlong_skor_etkisi.py`, N=34.618 aday):
+
+```
+ilk uc kapiyi gecen (N1) : 1430
++ skor >= 45      (N2)   : 1308
+FARK                     :  122   ->  %8,5
+```
+
+🔴 **İki kol adayların yalnız %8,5'inde ayrışıyordu.** `N1 − N2` farkı
+gürültüden ayırt edilemezdi; ikincil soru **kurgu gereği cevapsız** kalacaktı.
+
+### Ne değişti
+
+```
+ESKI: iki kol — N1 (skor kapisi yok) · N2 (skor >= 45)
+YENI: TEK KOL — skor kapisi YOK. Dosyalar notrlong_state.json / _islemler.jsonl / ...
+```
+
+**Bölüm 4 (iki kol) ve bölüm 6'nın "İkincil soru (skor)" satırı GEÇERSİZ.**
+Bölüm 5, 6 (K1–K4), 7 ve 8 **aynen geçerli**.
+
+### Gerekçe — neden ayırmak yerine KALDIRMAK
+
+1. **Skorun boş olduğu iki kez ölçüldü** (sentetik + gerçek defter:
+   `r = −0,024`; `Q4−Q1` MDE'nin üçte biri). Üçüncü kez sormak için deneyin
+   yarısını harcamak kötü tahsis.
+2. **Akış kıl payı** — taban 2,75 poz/gün, hedef 2,67. Tek kol, asıl sorunun
+   (`K1`: bu bot para kazanıyor mu) `N=80`'e ulaşma şansını **iki katına** çıkarır.
+3. **Skor sorusu kaybolmuyor:** işlem defteri her girişin `skor_giriste`
+   alanını zaten yazıyor. Kapı kurmadan, **sonradan** aynı defterde ölçülür
+   (`skor_gercek.py` deseni). Bu, kapıyı test etmez ama korelasyonu test eder —
+   ve bugüne kadarki iki ölçüm de zaten korelasyon ölçümüydü.
+
+### Pencere
+
+🔴 **Pencere SIFIRDAN başlar** (D/8). Maliyeti yok: değişiklik anında pencere
+**1,5 saatlikti ve 0 pozisyon** açılmıştı. Eski `n1`/`n2` kasaları
+`arsiv/notrlong_ilk_kurulum/` altına taşındı.
+
+⚠️ **Bu değişiklik sonucu görülmeden yapıldı** — hiçbir pozisyon açılmamıştı,
+dolayısıyla seçilim yok.
