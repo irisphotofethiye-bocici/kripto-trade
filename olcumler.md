@@ -11587,3 +11587,77 @@ Tavan merdiveni (holdout, taban `−0,839%`): `<+5` → `−0,196%` ·
 
 `chg24` tavanı **bota konmadı**. `C2`+`C3` düştü, şüphede statüko.
 Ön-kayıt sayacı: **on dört ön-kayıt, on dördü de geçemedi.**
+
+---
+
+## `pos<0.25` KOŞULLU MEKANİK — **İKİNCİ BAKIŞ** 2026-09-07 · **DÜŞTÜ, ve ZAYIFLADI**
+
+**Ön-kayıt:** `ON_KAYIT_pos_kosullu_mekanik.md` · commit `bd92dab` —
+ölçütler **değiştirilmedi**, betik **değiştirilmedi**.
+**Betik:** `scratchpad/pos_kosullu_mekanik.py` (aynen) ·
+**tazeleme:** `scratchpad/aday_pencere_tazele.py` (yeni)
+
+### Neden ikinci bakış
+
+İlk koşumun (2026-09-04, `c8d409c`) hükmü *"BU KOL KAPANMIYOR — veri
+bekliyor"* idi; bağlayıcı kısıt N'di. Kullanıcı *"ikisini de ölç"* dedi.
+
+⚠️ **İlk yeniden koşum BİREBİR aynı sayıyı verdi** — çünkü fiyat verisi
+donmuştu: `scratchpad/aday_pencere_1h` son mumu **2026-09-04 13:00**,
+yani ölçümün koşulduğu gün. Rejim kesintisiz BOĞA'ydı (09-05/06/07 dahil),
+kayıt gelmişti; eksik olan **mumdu**.
+
+🔑 **Ders:** *"veri bekliyor"* diye bırakılan bir kol, veri **kaynağı**
+tazelenmeden yeniden koşulursa **aynı sayıyı verir ve büyüme sanılabilir.**
+Yeniden koşumdan önce kaynağın son damgası **okunur**.
+
+Tazeleme `CLAUDE.md` kuralıyla yapıldı (birleştir · ezme · kısalırsa hata):
+**288 dosya büyüdü, +16.076 mum, kısalan YOK.**
+
+### Sonuç — N büyüdü, etki KÜÇÜLDÜ
+
+```
+                    sem-gun     fark      esli t      MDE
+09-04 (ilk bakis)       87    +0,797%     +1,94      0,821
+09-07 (ikinci)          96    +0,557%     +1,25      0,890
+```
+
+| # | ölçüt | 09-04 | 09-07 |
+|---|---|---|---|
+| **K1** | fark>0 **ve** t ≥ +2,5 | DÜŞTÜ (+1,94) | **DÜŞTÜ (+1,25)** |
+| **K2** | iki yarıda da > 0 | GEÇTİ (A +1,077 · B +0,557) | GEÇTİ ama **B çöktü** (A +0,992 · **B +0,121**, t +0,22) |
+| **K3** | koşulsuz kontrol | GEÇTİ | GEÇTİ |
+| **K4** | fark ≥ %0,5 | GEÇTİ (0,797) | GEÇTİ **kıl payı** (0,557) |
+
+**HÜKÜM: DÜŞTÜ · GÖREMİYORUZ** (`MDE 0,890 > |fark| 0,557`).
+
+### 🔑 ASIL GÜNCELLEME — beklentinin TERSİ oldu
+
+İlk kayıt *"ikinci bir BOĞA epizodu N'i ikiye katlar; aynı fark o zaman
+t ~ 2,7 verir"* diyordu. **%10 daha fazla veri geldi ve fark %30 küçüldü,
+`t` düştü, `MDE` yükseldi.** `B` yarısı `+0,557 → +0,121`'e indi.
+
+Yani bu kol *"eşiğe yaklaşan"* değil, **uzaklaşan** bir koldur. İlk
+koşumun *"yön tutarlı, eksik olan N"* betimlemesi ikinci bakışta
+**desteklenmedi**.
+
+⚠️ **Çokluluk:** bu aynı hipoteze **ikinci bakış**. Üçüncü bir bakış
+ancak **önceden ilan edilmiş bir N'de** yapılır (bu kayıtla: `pos<0.25`
+diliminde **≥ 150 sembol-gün**), yoksa açık uçlu bakış yanlış-pozitif üretir.
+
+### ⚠️ Post-hoc gözlem — hüküm DEĞİL
+
+```
+V3 pos<0.25 diliminde : +0,557% (t +1,25)
+V3 TUM satirlarda     : +0,211% (t +2,90)
+```
+
+Koşulsuz uygulanan `V3` **daha küçük ama istatistiksel olarak daha
+desteklenmiş** görünüyor. 🔴 Bu **ön-kayıtta birincil değildi** — post-hoc
+bir gözlemdir, hüküm kurulmaz. Ayrıca `V3` çıkışı **sıkılaştırır**
+(48s → 6s zaman stopu) ve çıkış sayacı **32 varyantta 1** geçmiş
+durumdadır; geçen tek varyant **gevşetiyordu**.
+
+### Karar
+
+**Kod değişmedi.** `K1` düştü, şüphede statüko.
