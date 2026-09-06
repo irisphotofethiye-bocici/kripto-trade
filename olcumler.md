@@ -10939,3 +10939,79 @@ seçiyor.
 Ön-kayıtta **7 kapı** ilan edildi; betiğin ilk sürümü **6**'sını ölçtü
 (`K7` uygulanmamıştı). Eksik fark edilip **aynı oturumda** eklendi ve
 yeniden koşuldu — sonuç yukarıdadır. Ölçüt değişmedi.
+
+---
+
+## POLYMARKET 5dk BTC Up/Down — 2026-09-06 · **ÖLÇÜLEMEZ** (erişim) · ama geometri dersi kaldı
+
+**Kaynak:** kullanıcı — `github.com/Novals83/5min-btc-polymarket` incelemesi
+**Betikler:** `scratchpad/polymarket/00_pilot.py` · `01_geometri.py` · `02_yoklama.py`
+🟡 Ön-kayıt YOK — bu bir **yapılabilirlik incelemesi**, hüküm değil.
+
+### Strateji
+
+5 dakikalık BTC Up/Down ikili opsiyonunda, kapanışa ~120 sn kala BTC o aralıkta
+**$70-100** hareket ettiyse o yönde **≤ 0,70** fiyattan al. Başabaş = fiyatın
+kendisi = **%70**.
+
+### Ölçülen — N=2.144 olay, 3 ay (2026-06…08), 1dk BTC barı
+
+```
+P(ayni tarafta kapanir | 3 dk gecti, hareket $70-100) = %92,63  (+-0,56)
+```
+
+### 🔑 Ama bu bir KENAR DEĞİL — GEOMETRİ
+
+Hareket büyüklüğüne göre pürüzsüz ve monoton:
+
+```
+hareket ($)      N    P(ayni taraf)
+20-40         6356      80,65%
+40-70         4853      88,81%
+70-100        2133      92,64%   <- stratejinin bandi
+100-150       1538      95,32%
+150-250        828      97,83%
+250+           255      99,61%
+```
+
+`$70-100` **özel bir yer değil**, eğrinin rastgele bir dilimi. Bilgi yok:
+3 dakikada uzaklaşmış fiyatın 2 dakikada geri dönmesi zordur, hepsi bu.
+**Piyasa yapıcı da aynı eğriyi hesaplar** → adil fiyat ~0,90, `0,70` değil.
+
+### 🔴 Ölçümümün kusuru — koşullandırma
+
+Ölçülen `P(kazanır | hareket)`. Stratejinin ihtiyacı
+`P(kazanır | hareket **VE fiyat ≤ 0,70**)`. İkincisi **piyasanın geometriyle
+22 puan çeliştiği** hücredir ve oradaki olasılık bambaşka olabilir.
+Bugünün tekrarlayan hata sınıfı.
+
+Aritmetik: `q=0,926` iken `0,70`'ten alım işlem başına **%32** getiri, günde
+15 işlem. Böyle bir şey yok → ya teklif hiç gelmiyor ya da geldiğinde `q` düşük.
+
+### ÖLÇÜLEMEZ — sebep erişim
+
+```
+gamma-api.polymarket.com -> 195.175.254.2
+clob.polymarket.com      -> 195.175.254.2
+polymarket.com           -> 195.175.254.2      (BTK engelleme adresi)
+fapi.binance.com         -> 3.168.236.100      (normal)
+```
+
+Polymarket **Türkiye'den DNS düzeyinde engelli**. Fiyat geçmişi çekilemez →
+belirleyici koşullu olasılık **ölçülemez**.
+
+⚠️ Ayrıca `CLAUDE.md`: *"Gerçek emir gönderen kod YOKTUR ve eklenmez"* →
+kenar bulunsa bile mevcut kurallarla uygulanamazdı.
+
+### Kalıcı ders
+
+**"Fiyat zaten hareket etti → aynı yönde kalır" bir sinyal değildir.**
+Ölçüldü: olasılık tamamen mesafe/süre geometrisidir ve `20-40`'tan `250+`'a
+düz bir eğri çizer. Benzer bir momentum fikri önerildiğinde **önce bu eğriye**
+bakılır; eğrinin üstünde bir şey yoksa bilgi yoktur.
+
+### Yan kazanım
+
+`00_pilot.py` ve `01_geometri.py` **BTC 1 dakikalık barı** indirip işleyen ilk
+betikler (`data.binance.vision → futures/um/monthly/klines/BTCUSDT/1m`,
+ay başına ~44.000 bar, ücretsiz). Kısa vadeli her ölçümde yeniden kullanılabilir.
