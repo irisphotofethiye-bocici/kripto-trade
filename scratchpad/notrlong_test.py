@@ -65,6 +65,14 @@ def main():
     print("=" * 84)
     print()
     once = set(glob.glob(os.path.join(KOK, "*")))
+    # Gercek turdan kalma dosyalar MESRU olabilir; onemli olan bu TESTIN
+    # onlari BUYUTMEMESI. O yuzden boyutlar da not ediliyor.
+    izlenen = (glob.glob(os.path.join(KOK, "notrlong_*")) +
+               glob.glob(os.path.join(KOK, "*_islemler.jsonl")) +
+               glob.glob(os.path.join(KOK, "*_state.json")) +
+               [os.path.join(KOK, "veto_log.jsonl"),
+                os.path.join(KOK, "testbot_aday_arsiv.jsonl")])
+    boyut_once = dict((p, os.path.getsize(p)) for p in izlenen if os.path.exists(p))
     stubla()
 
     # ---------------------------------------------------------------
@@ -205,8 +213,16 @@ def main():
     yeni_dosya = sonra - once
     kontrol("kok dizinde YENI DOSYA yok", not yeni_dosya,
             str(sorted(os.path.basename(x) for x in yeni_dosya)) if yeni_dosya else "")
-    kontrol("notrlong_* state/defter dosyasi OLUSMADI",
-            not glob.glob(os.path.join(KOK, "notrlong_*")))
+    # NOT: gercek turdan kalma dosyalar MESRU; onemli olan bu TESTIN onlari
+    # BUYUTMEMESI (yeni satir yazmamasi).
+    buyuyen = []
+    for p, b in boyut_once.items():
+        if os.path.exists(p) and os.path.getsize(p) != b:
+            buyuyen.append("%s %d->%d" % (os.path.basename(p), b, os.path.getsize(p)))
+    kontrol("izlenen dosyalarin HICBIRI buyumedi (%d dosya)" % len(boyut_once),
+            not buyuyen, "; ".join(buyuyen) if buyuyen else "")
+    kontrol("BOTUN kendi defterlerine yazim YOK",
+            not any("testbot_" in x or "veto_log" in x for x in buyuyen))
     kontrol("stub'lanan yazim yollari cagrilmadi ya da YAKALANDI",
             all(e[0] in ("_append_jsonl", "_save_state", "pozisyon_kapat",
                          "pozisyon_liq", "pozisyon_kismi_tp1", "telegram",

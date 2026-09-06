@@ -52,15 +52,32 @@ Kullanim:
 """
 import json, os, sys, time, random, argparse
 
-import testbot
-import evren
-import radar
-from nobetci import telegram_gonder as _tg
-
 HERE = os.path.dirname(os.path.abspath(__file__))
+LOGF = os.path.join(HERE, "notrlong_log.txt")
 
-if sys.stdout is None:
-    sys.stdout = open(os.devnull, "w", encoding="utf-8")
+# 🔴 LOG KURULUMU PROJE MODULLERINDEN ONCE OLMAK ZORUNDA.
+#    testbot.py:46 (ve radar.py:22, nobetci.py:26) "sys.stdout is None ise
+#    devnull'a bagla" yapiyor. `import testbot` once kosarsa stdout ARTIK None
+#    OLMAZ ve buradaki dal HIC CALISMAZ — olculdu (2026-09-06): log dosyasi
+#    olusmadi, stdout 'nul' kaldi. O yuzden bu blok import'larin USTUNDE.
+#    defter2/3 zaten devnull'a yaziyor, yani hatalari GORUNMUYOR; yeni bir bot
+#    icin bu pahali, ilk gunlerde neyin neden acilmadigi gorulmeli.
+if sys.stdout is None:                      # pythonw ile kosarken
+    try:
+        if os.path.exists(LOGF) and os.path.getsize(LOGF) > 5_000_000:
+            os.replace(LOGF, LOGF + ".1")   # basit donusum, tek yedek
+    except Exception:
+        pass
+    try:
+        sys.stdout = open(LOGF, "a", encoding="utf-8", buffering=1)
+        sys.stderr = sys.stdout
+    except Exception:
+        sys.stdout = open(os.devnull, "w", encoding="utf-8")
+
+import testbot          # noqa: E402  (log kurulumu YUKARIDA olmak zorunda)
+import evren            # noqa: E402
+import radar            # noqa: E402
+from nobetci import telegram_gonder as _tg   # noqa: E402
 
 # --- ON-KAYIT bolum 3: BOTUN TANIMI. Burada SABIT, taranmaz. ---
 MAKS_POZ = 8
@@ -361,10 +378,13 @@ def tur():
 
     ⚠️ SIRA ONEMLI: yonetim (cikislar) ONCE, giris arama SONRA — testbot ile ayni.
     Boylece MAKS_POZ dolu olsa bile cikislar isler."""
+    t0 = time.time()
+    print("--- tur %s ---" % testbot.now_iso())
     durumlar = {}
     for kol in KOLLAR:
         st = yukle(kol)
         if not st:
+            print("    kasa yok (once --baslat)")
             return False
         durumlar[kol] = st
 
@@ -406,6 +426,10 @@ def tur():
         kaydet(kol, st)
         equity_yaz(kol, st)
         kapanis_bildir(kol, yeni_kayitlar[kol], st)
+    print("    tur bitti %.1f sn | n1 acik=%d equity=%.2f | n2 acik=%d equity=%.2f"
+          % (time.time() - t0,
+             len(durumlar["n1"]["acik_pozisyonlar"]), durumlar["n1"]["equity"],
+             len(durumlar["n2"]["acik_pozisyonlar"]), durumlar["n2"]["equity"]))
     return True
 
 
