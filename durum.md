@@ -2227,3 +2227,48 @@ kategorilerinden gelir.
 
 **Okuma:** `scratchpad/notrlong_elenenler.py` bundan sonra `radar_archive`
 yerine **botun kendi kaydını** kullanabilir — rekonstrüksiyon değil, gerçek kayıt.
+
+---
+
+## 🔴 2026-09-06 · `notrlong` — TAKER KAPISI KALDIRILDI, PENCERE SIFIRLANDI
+
+**Kullanıcı kararı:** *"taker kapısını kaldır ön kayıt güncelle pencereyi sıfırla"*
+
+**Karar:** `taker ≥ 1.0` kapısı `notrlong`'dan kaldırıldı. Gerekçe, ölçüm ve
+tüm sayılar → `ON_KAYIT_notr_long_botu.md` **bölüm 12** (`[DEĞİŞTİ 2026-09-06]`)
+ve `olcumler.md` → *TAKER KAPISI*. **Buraya rakam yazılmaz.**
+
+### Ölçüm penceresi — hakem olan pencere
+
+```
+PENCERE-1  KAPANDI, HUKUMSUZ   (2026-09-06 11:08 .. 18:38, 1 poz)
+PENCERE-2  HAKEM               baslangic 2026-09-06 18:44
+```
+
+**Sayım komutu** (pencere-2'nin pozisyonları):
+
+```
+python -c "import json;print(sum(1 for l in open('notrlong_islemler.jsonl',encoding='utf-8')
+  if l.strip() and json.loads(l).get('id',0)>1 and not json.loads(l).get('kismi')))"
+```
+
+⚠️ **State'e DOKUNULMADI** — kasa sıfırlanmadı, defter silinmedi. Pencere
+**belge düzeyinde** tanımlıdır (`id > 1`). Taban equity ve canlı kasa için
+`notrlong_state.json` okunur; **bu dosyada rakam tutulmaz**.
+
+### Kapsam — hangi defterler ETKİLENMEDİ
+
+`testbot.py`'ye **dokunulmadı**. `golge` · `ayna` · `defter2` · `defter3` ve
+NOTR-AYI botu **aynen** eski davranışta. Değişiklik yalnız `notrlong.py`
+içindedir ve tek blok silinerek geri alınır.
+
+### 2026-09-06 · NOTR-AYI botu — **KURULMADI (kullanıcı iptali)**
+
+Kullanıcı *"11-19 açık olan botu da aç"* dedi; canlı rejimin **TAM_BOGA**
+olduğu ve o hâlde botun **BOĞA-LONG** açacağı (bkz. yukarıdaki
+*NOTR-AYI BOTU* bölümü, *"garanti PROSEDÜREL, kod değil"*) sunulunca
+**iptal edildi.**
+
+`testbot` aynen **kapalı**: `durum = KAPANDI_TEMIZ_SAYFA` ·
+`maks_pozisyon = 0` · `KriptoTestBot` görevi **Disabled**. Hiçbir dosya
+değişmedi (`git status` temiz).
