@@ -11159,3 +11159,61 @@ kazananı erken kesmek **zarar veriyor**.
 **Kural çıkarılmadı.** Çıkış sayacı `32 varyantta 1` **değişmedi** — bu koşum
 ön-kayıtsızdı ve varyant olarak sayılmaz. Bir hüküm istenirse ayrı ön-kayıt
 gerekir, ama yukarıdaki işaret dönmesi bilinerek yazılmalıdır.
+
+---
+
+## "900 $ POZDA 90 $ KÂR AL + BAŞABAŞ" — 2026-09-06 · 🟡 BETİMLEYİCİ · işaret DÖNÜYOR, net etki SIFIR
+
+**Ön-kayıt YOK** — teşhis koşumu. **Betik:** `scratchpad/kismi_babas_sim.py`
+**Kullanıcı fikri:** marjinin %10'u kâr olunca kısmi kâr al, kalanın stopunu
+başabaşa çek.
+
+### Fikrin canlı karşılığı
+
+```
+sym    kald   marjin$   notional$   risk$  |  tetik fiyat%   tetik $     = R
+ARX      5x    907,25     4536,22  150,00  |        2,00%     90,73    0,60R
+UAI      3x    486,28     1458,84  149,97  |        3,33%     48,63    0,32R
+METIS    3x    810,28     2430,84  130,69  |        3,33%     81,03    0,62R
+```
+
+Yani **%2–3,3 fiyat = 0,32–0,60 R**. Botun eski `TP1`'i `1,5R` idi — bu ondan
+**iki-üç kat daha erken**.
+
+### Sonuç (N=2.082 · 72 gün · eşleşmiş girişler)
+
+```
+pencere         A0       K2_50    K2_100     K3_50    K3_100
+KESIF      -0,1577    -0,0598   -0,0664   -0,0736   -0,0560
+HOLDOUT    +0,0868    +0,0063   -0,0065   +0,0097   +0,0007
+TUMU       -0,0314    -0,0256   -0,0354   -0,0305   -0,0267
+
+ESLESMIS FARK (kol - A0), gun-kumeli t:
+KESIF    K2_50 +0,0979 t+2,30 | HOLDOUT K2_50 -0,0805 t-0,49
+KESIF    K2_100 +0,0913 t+1,82 | HOLDOUT K2_100 -0,0933 t-0,52
+KESIF    K3_50 +0,0841 t+2,34 | HOLDOUT K3_50 -0,0771 t-0,72
+KESIF    K3_100 +0,1018 t+2,25 | HOLDOUT K3_100 -0,0861 t-0,71
+```
+
+🔴 **Dört varyantın dördünde de işaret dönüyor.** Ve `TUMU` satırında fark
+**sıfıra yakın** (`−0,004 … +0,006`) — 72 günde net etki **yok**.
+
+### 🔑 En keskin gözlem
+
+**İyi dönemde kuralın maliyeti neredeyse tüm kazancı yiyor:**
+
+```
+HOLDOUT   A0 +0,0868   ->   kural uygulanirsa +0,0063 … -0,0065
+```
+
+Yani `+0,087`'lik dönem getirisi **sıfıra iniyor**. Kötü dönemde ise zararı
+`−0,158 → −0,060` azaltıyor. **Kural risk transfer ediyor, kenar üretmiyor.**
+
+Bu, aynı gün ölçülen *"başabaş stopu bir beta azaltıcıdır"* bulgusunun
+kısmi-kârlı hâli — ve `olcumler.md:60`'taki kayıtla (`+0,301 → +0,274 → +0,261`)
+**aynı yönde**.
+
+### Hüküm
+
+**Kural çıkarılmadı.** Çıkış sayacı `32 varyantta 1` değişmedi (ön-kayıtsız
+koşum varyant sayılmaz).
