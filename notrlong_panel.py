@@ -157,6 +157,16 @@ def durum():
             "giris_ts": (p.get("giris_ts") or "")[:16],
             "kismi_kapali": kismi_kapali, "tp1_alindi": tp1_gercek,
             "stop_tasindi": (p.get("stop") != p.get("stop_orijinal")),
+            # --- GEOMETRI (2026-09-06): hedef SABIT %, stop ATR'ye bagli ->
+            #     R:R pozisyondan pozisyona degisir, basabas isabet de oyle.
+            "kald_hedef_roi": ((abs(hedef - g) / g * 100.0 * (p.get("kaldirac") or 1))
+                               if (hedef and g) else None),
+            "kald_stop_roi": ((abs(stop - g) / g * 100.0 * (p.get("kaldirac") or 1))
+                              if (stop and g) else None),
+            "rr": ((abs(hedef - g) / abs(stop - g))
+                   if (hedef and stop and abs(stop - g) > 0) else None),
+            "basabas": ((100.0 / (1.0 + abs(hedef - g) / abs(stop - g)))
+                        if (hedef and stop and abs(stop - g) > 0) else None),
         })
     # --- FUNDING ve MUHASEBE (2026-09-06)
     # CLAUDE.md: sonuc_usdt FONLAMAYI ICERMEZ; funding dogrudan equity'den duser.
@@ -264,7 +274,7 @@ h3{font-size:13px;margin:22px 0 10px;font-weight:600;color:var(--y2)}
   <span class="sonuk" style="margin-left:auto;font-size:11px" id="zaman"></span></div>
 <main>
   <div class="izgara" id="kartlar"></div>
-  <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px">PnL % = marjine göre (kaldıraçlı). <b>kısmi kâr KAPALI</b> = bu bot sabit %10 hedefle çalışır, TP1 yolu tasarım gereği devre dışıdır (ön-kayıt bölüm 2).</div><div class="sar" id="acik"></div>
+  <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px"><b>Hedef %10 = FİYAT hareketi</b>, marjinin %10&apos;u değil — marjine göre getiri = fiyat%% &times; kaldıraç. Dolar riski her pozisyonda sabit ($150); kaldıraç R:R&apos;yi <b>değiştirmez</b>. &#9888; Hedef sabit %10, stop ATR&apos;ye bağlı &rarr; <b>R:R ve başabaş pozisyondan pozisyona değişir</b>; başabaş &gt;%35 olan pozisyon kırmızı gösterilir (ölçülen isabet ~%25). PnL % = marjine göre (kaldıraçlı). <b>kısmi kâr KAPALI</b> = bu bot sabit %10 hedefle çalışır, TP1 yolu tasarım gereği devre dışıdır (ön-kayıt bölüm 2).</div><div class="sar" id="acik"></div>
   <h3>Skor bandına göre sonuç <span class="sonuk" style="font-weight:400">— kapı yok, ölçüm sonradan</span></h3>
   <div class="sar" id="skor"></div>
   <h3>Kapanan pozisyonlar</h3><div class="bos" style="margin:0 0 6px">ROI % = marjine göre &middot; R = kapanış kaydının R degeri (&#9888; kısmi kâr alınmışsa R yalnız <b>kalan yarıyı</b> gösterir, net $ ise tümünü) &middot; funding ayrı sütunda, net $ içinde <b>değildir</b>.</div><div class="sar" id="son"></div>
@@ -322,7 +332,8 @@ async function yenile(){
   const n0=(v,d0)=>(v===null||v===undefined)?'-':Number(v).toFixed(d0??2);
   let ah='<table><tr><th>sembol</th><th>yön</th><th>kald.</th><th>marjin $</th>'+
          '<th>büyüklük $</th><th>risk $</th><th>giriş</th><th>anlık</th>'+
-         '<th>PnL $</th><th>PnL %</th><th>stop</th><th>hedef</th><th>kısmi kâr</th></tr>';
+         '<th>PnL $</th><th>PnL %</th><th>stop</th><th>hedef</th>'+
+         '<th>R:R</th><th>başabaş</th><th>kısmi kâr</th></tr>';
   for(const p of d.acik)
     ah+='<tr><td><b>'+p.sym+'</b><div class="sonuk" style="font-size:11px">'+
           (p.giris_ts??'')+' · skor '+(p.skor??'-')+' · '+(p.stage??'-')+'</div></td>'+
@@ -334,10 +345,14 @@ async function yenile(){
         '<td>'+(p.giris??'-')+'</td><td>'+(p.anlik??'-')+'</td>'+
         '<td class="'+snf(p.pnl)+'"><b>'+isr(p.pnl)+p2(p.pnl)+'</b></td>'+
         '<td class="'+snf(p.pnl_pct)+'">'+isr(p.pnl_pct)+n0(p.pnl_pct,1)+'%</td>'+
-        '<td class="sonuk">'+(p.stop??'-')+'<div style="font-size:11px">-'+n0(p.stop_pct,2)+'%'+
+        '<td class="sonuk">'+(p.stop??'-')+'<div style="font-size:11px">-'+n0(p.stop_pct,2)+'% fiyat / -'+n0(p.kald_stop_roi,1)+'% ROI'+
           (p.stop_tasindi?' <span title="stop tasindi">↑</span>':'')+
           '<br>liq '+(p.likidasyon??'-')+'</div></td>'+
-        '<td class="sonuk">'+(p.hedef??'-')+'<div style="font-size:11px">+'+n0(p.hedef_pct,2)+'%</div></td>'+
+        '<td class="sonuk">'+(p.hedef??'-')+'<div style="font-size:11px">+'+n0(p.hedef_pct,2)+'% fiyat'+
+          '<br><b>+'+n0(p.kald_hedef_roi,1)+'% ROI</b></div></td>'+
+        '<td><b>'+n0(p.rr,2)+'</b></td>'+
+        '<td class="'+((p.basabas??0)>35?'kotu':'sonuk')+'">'+n0(p.basabas,1)+'%'+
+          '<div style="font-size:11px">ölçülen ~%25</div></td>'+
         '<td class="sonuk">'+(p.kismi_kapali
             ? 'KAPALI<div style="font-size:11px">sabit %10 hedef</div>'
             : (p.tp1_alindi?'<b>TP1 ✔</b>':'açık, alınmadı'))+'</td></tr>';
