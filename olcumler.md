@@ -11217,3 +11217,68 @@ kısmi-kârlı hâli — ve `olcumler.md:60`'taki kayıtla (`+0,301 → +0,274 �
 
 **Kural çıkarılmadı.** Çıkış sayacı `32 varyantta 1` değişmedi (ön-kayıtsız
 koşum varyant sayılmaz).
+
+---
+
+## GENİŞ STOP ELEME — 2026-09-06 · **HAKLI DEĞİL** (işaret doğru, güç yok) + eşik seçme yordamım kusurlu
+
+**Ön-kayıt:** `ON_KAYIT_genis_stop_eleme.md` · commit `885695b` — koşumdan **önce**
+**Betik:** `scratchpad/genis_stop/01_olcum.py`
+**N = 2.082 · 72 gün** · keşif 1.006 · holdout 1.076
+
+### Eşik seçimi (yalnız keşif) → `X = 5,0`
+
+### Holdout — tek geçiş
+
+```
+hucre ICI  (stop > %5)   N= 287   ort R  -0,0999
+hucre DISI               N= 789   ort R  +0,1547
+TUMU                     N=1076   ort R  +0,0868
+
+fark -0,2546 R · gun-kumeli t -1,44 (29 gun) · MDE 0,2724
+```
+
+```
+W1 hucre ort R < 0        GECTI
+W2 gun-kumeli t <= -2,0   DUSTU   (-1,44)
+W3 |fark| > MDE           DUSTU   (0,2546 < 0,2724)
+W4 holdout N >= 40        GECTI
+W5 kalan > tumu           GECTI
+                          -> HAKLI DEGIL
+```
+
+⚠️ `W3` **kıl payı** düştü (`0,2546` vs `0,2724`). Yani *"göremiyoruz"* —
+etki yok değil, **N yetmedi**.
+
+### 🔑 EKONOMİK OLARAK ANLAMLI, İSTATİSTİKSEL OLARAK KURULMADI
+
+Holdout'ta `stop > %5` girişlerini elemek ortalamayı **`+0,0868 → +0,1547`**
+yapıyor (**%78 iyileşme**) ve elenen dilim `−0,0999`. Ama `t = −1,44`.
+
+### 🔴 NEGATİF KONTROL BİR TASARIM HATAMI YAKALADI
+
+Permüte edilmiş sahte `stop_pct` **de** keşifte `X = 5,0` seçti — ve
+izgaradaki **dört eşiğin dördü de** "koşulu sağlıyor" çıktı.
+
+**Sebep:** keşif yarısının tabanı `−0,158`. Taban negatifken **her alt küme**
+negatif görünür → *"ort R < 0"* koşulu neredeyse **boş bir koşul**.
+
+🔑 **Doğru yordam mutlak değil, GÖRECELİ olmalıydı:** hücre, geri kalandan
+belirgin biçimde kötü olmalı. Bunu ön-kayıta böyle yazmadım.
+
+⚠️ Ama düzenek tamamen çürümedi: sahte değişkenin **holdout**'u `+0,2131`
+(pozitif) verdi, gerçeğinki `−0,0999`. Yani gerçek değişken sahteden
+**ayrışıyor** — sinyal saf gürültü değil, sadece güç yetmiyor.
+
+### Bağlam — UAI
+
+Soru *"UAI'nin düşüşü öngörülebilir miydi"* idi. Ayrım:
+
+```
+FIYAT HAREKETI  -%2,37 = 0,35 ATR  ->  ONGORULEMEZ, siradan gurultu
+                                       (stopa hala %6,69 uzak)
+KURULUM         R:R 0,97 · basabas %50,7 · stop %10,28 (1,5 x ATR %6,84)
+                                    ->  GIRISTE TAMAMEN BILINIYORDU
+```
+
+**Kurulum biliniyordu; ondan kaçınacak kural ölçüt barını geçemedi.**
