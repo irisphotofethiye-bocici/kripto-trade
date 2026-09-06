@@ -2125,3 +2125,53 @@ KriptoIzleyici · KriptoNobetci   izleme/bildirim
 yok** (ölçüm penceresine panelden müdahale edilemesin diye).
 Gösterdiği: iki kol yan yana · pencere ilerlemesi (gün/30 ve N/80) · **`N1 − N2`
 farkı** · açık pozisyonlar · son kapanışlar · log.
+
+---
+
+## 🆕 SKOR KAPISI KALDIRILDI — İKİ KOL → TEK KOL (2026-09-06, KULLANICI KARARI)
+
+**Tetikleyen soru (kullanıcı):** *"n1 skor kapısı yok, skorun etkisi var mı?"*
+**Karar:** *"skor kapısını kaldır."*
+
+**Ön-kayıt:** `ON_KAYIT_notr_long_botu.md` **bölüm 11** `[DEĞİŞTİ 2026-09-06]`
+— eski metin silinmedi (D/9). Bölüm 4 ve bölüm 6'nın *"İkincil soru (skor)"*
+satırı **geçersiz**; bölüm 5 · 6 (K1–K4) · 7 · 8 **aynen geçerli**.
+
+### Neden — soru bir tasarım kusuru açığa çıkardı
+
+*"N1: skor kapısı YOK"* ifadesi **yanlıştı**; skor zaten üç yerde iş görüyordu.
+Ve `karar_yon` BAŞLIYOR için zaten `≥45` istediğinden N2'nin kapısı yalnız
+HAZIRLANIYOR dalında `[40,45)` aralığını kesiyordu. **Ölçüldü:** iki kol
+adayların yalnız **%8,5**'inde ayrışıyordu → fark gürültüden ayırt edilemezdi.
+Rakamlar `olcumler.md` değil, ön-kayıt bölüm 11'de; **buraya kopyalanmıyor.**
+
+### Yapılanlar
+
+| ne | |
+|---|---|
+| `notrlong.py` | tek kol · `SKOR_KAPISI` ve `KOLLAR` sabitleri **kaldırıldı** |
+| dosyalar | `notrlong_state.json` · `_islemler.jsonl` · `_equity.jsonl` · `_veto.jsonl` |
+| eski `n1`/`n2` kasaları | `arsiv/notrlong_ilk_kurulum/` |
+| panel | tek kol · **skor bandına göre sonuç** tablosu eklendi |
+| güvenli test | **20/20**, diske yazım yok · yeni iddia: *"EK skor kapısı YOK → düşük skorlu aday ALINIR"* |
+
+🔴 **Pencere SIFIRDAN başladı.** Maliyeti yok — değişiklik anında pencere
+1,5 saatlikti ve **0 pozisyon** açılmıştı, yani **sonuç görülmeden** yapıldı.
+
+### Skor sorusu kaybolmadı
+
+Defter her girişin `skor_giriste` alanını yazıyor. Kapı kurmadan, **sonradan**
+aynı defterde ölçülecek (`skor_gercek.py` deseni). Panel bunun için **skor
+bandına göre net/kazanan** tablosunu şimdiden gösteriyor.
+
+### İzleme
+
+```
+python scratchpad/notrlong_akis.py    "yolunda mi, ne zaman mudahale" (sayisal esik)
+python scratchpad/notrlong_huni.py    o anki adaylar NEREDE oluyor (6 basamak)
+python notrlong.py --durum            kasa raporu
+http://127.0.0.1:8787                 panel
+```
+
+**Müdahale eşiği:** ~2 gün (384 tur) hiç pozisyon açılmazsa — o noktada
+*"hiç açmama"* olasılığı **%0,4**. Öncesinde beklenir.

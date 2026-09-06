@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""NOTR-LONG PANELI — tek bot, iki kol (2026-09-06, kullanici karari)
+"""NOTR-LONG PANELI — TEK KOL (2026-09-06, kullanici karari)
 
 KULLANICI: "paneli duzenle, panelde sadece bu bot olsun, temiz bir sayfa olsun."
+           "skor kapisini kaldir."  -> iki kol yerine TEK KOL.
 
 NEDEN YENI DOSYA (eski panel_sunucu.py'ye DOKUNULMADI):
    Eski panel 9 sekmelik ve tamami testbot'a ozel — "Bot'un Kafasi", "Bot vs Ben",
    "Defterim", "Coin Ara"... Bu botta o sekmelerin cogunun karsiligi YOK.
-   Eskisini notrlong'a cevirmek hem buyuk hem riskli bir ameliyat olurdu.
-   Bu panel ON-KAYIDIN olctugu seyi gosterir, baska bir sey degil.
 
 NE GOSTERIR:
-   - iki kol YAN YANA (N1 skor kapisiz / N2 skor >= 45)
-   - PENCERE ILERLEMESI: gun X/30 ve kol basina kapanmis pozisyon X/80
-     (on-kayit: IKISI BIRDEN dolmadan hukum YOK)
-   - N1 - N2 farki = olcumun kendisi (skor kapisi ne katiyor)
-   - acik pozisyonlar (canli PnL) · son kapanislar · log kuyrugu
+   - kasa · acik pozisyonlar (canli PnL) · kapanmis pozisyonlar
+   - PENCERE ILERLEMESI: gun X/30 ve kapanmis pozisyon X/80
+     (on-kayit bolum 5: IKISI BIRDEN dolmadan hukum YOK)
+   - SKOR DAGILIMI: kapi kaldirildi ama defter skor_giriste'yi yaziyor;
+     skor sorusu SONRADAN buradan olculecek (on-kayit bolum 11)
+   - son kapanislar · log kuyrugu
 
 SALT-OKUNUR: hicbir state/defter dosyasina YAZMAZ. Islem acma/kapama YOK.
    (Eski panelde 'ayna_kapat' gibi eylem uclari vardi; burada BILEREK yok —
@@ -34,18 +34,15 @@ import json, os, time, argparse, datetime, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KOLLAR = ("n1", "n2")
-KOL_AD = {"n1": "N1 — skor kapisi YOK", "n2": "N2 — skor >= 45"}
+STATEF = os.path.join(HERE, "notrlong_state.json")
+ISLEMLERF = os.path.join(HERE, "notrlong_islemler.jsonl")
+LOGF = os.path.join(HERE, "notrlong_log.txt")
 
-# ON-KAYIT bolum 5: pencere. Burada SABIT, panelden degistirilemez.
+# ON-KAYIT bolum 5: pencere. Panelden degistirilemez.
 PENCERE_GUN = 30
 PENCERE_N = 80
 
-_fiyat_cache = {"ts": 0.0, "d": {}}
-
-
-def _yol(kol, ek):
-    return os.path.join(HERE, "notrlong_%s_%s" % (kol, ek))
+_fiyat = {"ts": 0.0, "d": {}}
 
 
 def _oku_json(p):
@@ -74,17 +71,16 @@ def _oku_jsonl(p):
 
 def fiyatlar():
     """TEK cagrida tum perp fiyatlari, 20 sn cache."""
-    if time.time() - _fiyat_cache["ts"] < 20 and _fiyat_cache["d"]:
-        return _fiyat_cache["d"]
+    if time.time() - _fiyat["ts"] < 20 and _fiyat["d"]:
+        return _fiyat["d"]
     try:
         r = urllib.request.urlopen(
             "https://fapi.binance.com/fapi/v1/ticker/price", timeout=12).read()
-        _fiyat_cache["d"] = dict((x["symbol"], float(x["price"]))
-                                 for x in json.loads(r))
-        _fiyat_cache["ts"] = time.time()
+        _fiyat["d"] = dict((x["symbol"], float(x["price"])) for x in json.loads(r))
+        _fiyat["ts"] = time.time()
     except Exception:
         pass
-    return _fiyat_cache["d"]
+    return _fiyat["d"]
 
 
 def karne(kayitlar):
@@ -99,74 +95,75 @@ def karne(kayitlar):
         v.sort(key=lambda z: z.get("ts") or "")
         s = v[-1]
         out.append({
-            "id": i, "sym": s.get("sym"), "yon": s.get("yon"),
-            "sebep": s.get("sebep"), "ts": s.get("ts"),
+            "id": i, "sym": s.get("sym"), "sebep": s.get("sebep"), "ts": s.get("ts"),
             "net": sum(t.get("sonuc_usdt") or 0 for t in v),
             "fon": sum(t["funding_usdt"] for t in v
                        if t.get("funding_usdt") is not None),
             "tutma": max((t.get("tutma_saat") or 0) for t in v),
+            "skor": s.get("skor_giriste"),
         })
     out.sort(key=lambda x: x["ts"] or "")
     return out
 
 
-def kol_ozet(kol):
-    st = _oku_json(_yol(kol, "state.json"))
+def durum():
+    st = _oku_json(STATEF)
     if not st:
-        return {"var": False, "ad": KOL_AD[kol]}
-    kap = karne(_oku_jsonl(_yol(kol, "islemler.jsonl")))
+        return {"var": False, "simdi": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    kap = karne(_oku_jsonl(ISLEMLERF))
     fy = fiyatlar()
-    acik = []
-    acik_pnl = 0.0
+    acik, acik_pnl = [], 0.0
     for p in st.get("acik_pozisyonlar") or []:
         px = fy.get(p["sym"])
         yi = 1 if p.get("yon") == "LONG" else -1
         pnl = ((px - p["giris"]) * p["miktar"] * yi) if px else None
         if pnl:
             acik_pnl += pnl
-        acik.append({"sym": p.get("sym"), "yon": p.get("yon"),
-                     "giris": p.get("giris"), "anlik": px, "pnl": pnl,
-                     "stop": p.get("stop"), "hedef": p.get("tp2"),
-                     "kaldirac": p.get("kaldirac"), "ts": p.get("acilis_ts")})
-    net = sum(p["net"] for p in kap)
-    kaz = sum(1 for p in kap if p["net"] > 0)
-    # pencere ilerlemesi
-    bas = st.get("baslangic_ts") or ""
+        acik.append({"sym": p.get("sym"), "yon": p.get("yon"), "giris": p.get("giris"),
+                     "anlik": px, "pnl": pnl, "stop": p.get("stop"),
+                     "hedef": p.get("tp2"), "kaldirac": p.get("kaldirac"),
+                     "skor": p.get("skor_giriste")})
     gun = 0.0
     try:
-        b = datetime.datetime.strptime(bas[:19], "%Y-%m-%d %H:%M:%S")
+        b = datetime.datetime.strptime((st.get("baslangic_ts") or "")[:19],
+                                       "%Y-%m-%d %H:%M:%S")
         gun = (datetime.datetime.now() - b).total_seconds() / 86400.0
     except Exception:
         pass
-    return {
-        "var": True, "kol": kol, "ad": KOL_AD[kol], "durum": st.get("durum"),
-        "equity": st.get("equity", 0), "baslangic": st.get("baslangic_bakiye", 0),
-        "acik": acik, "acik_pnl": acik_pnl,
-        "kapanan": len(kap), "net": net,
-        "kazanan_pct": (100.0 * kaz / len(kap)) if kap else None,
-        "fonlama": sum(p["fon"] for p in kap),
-        "son": list(reversed(kap[-12:])),
-        "gun": gun, "gun_hedef": PENCERE_GUN, "n_hedef": PENCERE_N,
-        "baslangic_ts": bas,
-    }
+    kaz = sum(1 for p in kap if p["net"] > 0)
 
+    # SKOR DAGILIMI — kapi kaldirildi, soru SONRADAN buradan olculecek
+    skor_kova = {}
+    for p in kap:
+        if p["skor"] is None:
+            continue
+        k = int(p["skor"] // 10) * 10
+        d = skor_kova.setdefault(k, {"n": 0, "net": 0.0, "kaz": 0})
+        d["n"] += 1
+        d["net"] += p["net"]
+        if p["net"] > 0:
+            d["kaz"] += 1
+    skor = [{"bant": "%d-%d" % (k, k + 9), "n": v["n"], "net": v["net"],
+             "kaz": 100.0 * v["kaz"] / v["n"]} for k, v in sorted(skor_kova.items())]
 
-def durum():
-    d = dict((k, kol_ozet(k)) for k in KOLLAR)
-    n1, n2 = d["n1"], d["n2"]
-    fark = None
-    if n1.get("var") and n2.get("var"):
-        fark = {"net": n1["net"] - n2["net"],
-                "kapanan": n1["kapanan"] - n2["kapanan"],
-                "equity": n1["equity"] - n2["equity"]}
     log = []
     try:
-        with open(os.path.join(HERE, "notrlong_log.txt"),
-                  encoding="utf-8", errors="replace") as f:
+        with open(LOGF, encoding="utf-8", errors="replace") as f:
             log = f.read().splitlines()[-40:]
     except Exception:
         pass
-    return {"kollar": d, "fark": fark, "log": log,
+
+    return {"var": True, "durum": st.get("durum"), "equity": st.get("equity", 0),
+            "baslangic": st.get("baslangic_bakiye", 0),
+            "baslangic_ts": st.get("baslangic_ts") or "",
+            "son_cycle": st.get("son_cycle_ts"),
+            "acik": acik, "acik_pnl": acik_pnl,
+            "kapanan": len(kap), "net": sum(p["net"] for p in kap),
+            "kazanan_pct": (100.0 * kaz / len(kap)) if kap else None,
+            "fonlama": sum(p["fon"] for p in kap),
+            "son": list(reversed(kap[-20:])), "skor": skor,
+            "gun": gun, "gun_hedef": PENCERE_GUN, "n_hedef": PENCERE_N,
+            "log": log,
             "simdi": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 
@@ -184,12 +181,12 @@ h1{margin:0;font-size:16px;font-weight:650;letter-spacing:.2px}
 .rozet{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--cz);color:var(--y2)}
 .rozet.iyi{background:#12261a;color:var(--iyi)} .rozet.kotu{background:#2d1214;color:var(--kotu)}
 .rozet.uyari{background:#2b2412;color:var(--uyari)}
-main{padding:20px;max-width:1180px;margin:0 auto}
-.izgara{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}
+main{padding:20px;max-width:1080px;margin:0 auto}
+.izgara{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
 .kart{background:var(--k);border:1px solid var(--cz);border-radius:10px;padding:16px}
 .kart h2{margin:0 0 3px;font-size:14px;font-weight:600}
 .alt{color:var(--y3);font-size:11px;margin-bottom:12px}
-.buyuk{font-size:26px;font-weight:650;font-variant-numeric:tabular-nums;margin:2px 0 10px}
+.buyuk{font-size:30px;font-weight:650;font-variant-numeric:tabular-nums;margin:2px 0 12px}
 .satir{display:flex;justify-content:space-between;padding:5px 0;
        border-bottom:1px solid var(--cz);font-size:13px}
 .satir:last-child{border-bottom:none}
@@ -199,8 +196,7 @@ main{padding:20px;max-width:1180px;margin:0 auto}
 .cubuk{height:6px;background:var(--cz);border-radius:99px;overflow:hidden;margin:6px 0 3px}
 .cubuk i{display:block;height:100%;background:var(--vurgu)}
 .cubuk i.tam{background:var(--iyi)}
-table{width:100%;border-collapse:collapse;font-size:12.5px;
-      font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
 th{text-align:left;color:var(--y3);font-weight:500;padding:6px 8px;
    border-bottom:1px solid var(--cz);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
 td{padding:6px 8px;border-bottom:1px solid var(--cz)}
@@ -213,13 +209,14 @@ pre{background:var(--bg);border:1px solid var(--cz);border-radius:8px;padding:12
      border-radius:0 8px 8px 0;font-size:12.5px;color:var(--y2);margin:16px 0}
 h3{font-size:13px;margin:22px 0 10px;font-weight:600;color:var(--y2)}
 </style></head><body>
-<div class="ust"><h1>NOTR-LONG</h1>
-  <span class="rozet" id="rz1">-</span><span class="rozet" id="rz2">-</span>
+<div class="ust"><h1>NOTR-LONG</h1><span class="rozet" id="rz">-</span>
+  <span class="sonuk" style="font-size:11px">tek kol · skor kapisi yok</span>
   <span class="sonuk" style="margin-left:auto;font-size:11px" id="zaman"></span></div>
 <main>
-  <div class="izgara" id="kollar"></div>
-  <div id="farkKutu"></div>
+  <div class="izgara" id="kartlar"></div>
   <h3>Açık pozisyonlar</h3><div class="sar" id="acik"></div>
+  <h3>Skor bandına göre sonuç <span class="sonuk" style="font-weight:400">— kapı yok, ölçüm sonradan</span></h3>
+  <div class="sar" id="skor"></div>
   <h3>Son kapanışlar</h3><div class="sar" id="son"></div>
   <h3>Log</h3><pre id="log">-</pre>
 </main>
@@ -231,66 +228,59 @@ const snf=v=>v==null?'':(v>0?'iyi':(v<0?'kotu':'sonuk'));
 function cubuk(o,h){const y=Math.min(100,100*o/h);
   return '<div class="cubuk"><i class="'+(o>=h?'tam':'')+'" style="width:'+y+'%"></i></div>';}
 
-function kolKart(k){
-  if(!k.var) return '<div class="kart"><h2>'+k.ad+'</h2><div class="bos">Başlatılmamış.</div></div>';
-  const f=k.equity-k.baslangic;
-  return '<div class="kart"><h2>'+k.ad+'</h2>'+
-   '<div class="alt">'+k.durum+' · başlangıç '+k.baslangic_ts.slice(0,16)+'</div>'+
-   '<div class="buyuk">'+p2(k.equity)+' $ <span style="font-size:15px" class="'+snf(f)+'">'+
-     isr(f)+p2(f)+'</span></div>'+
-   '<div class="satir"><span>Kapanan pozisyon</span><b>'+k.kapanan+' / '+k.n_hedef+'</b></div>'+
-   cubuk(k.kapanan,k.n_hedef)+
-   '<div class="satir"><span>Pencere günü</span><b>'+k.gun.toFixed(1)+' / '+k.gun_hedef+'</b></div>'+
-   cubuk(k.gun,k.gun_hedef)+
-   '<div class="satir"><span>Realize P&amp;L</span><b class="'+snf(k.net)+'">'+isr(k.net)+p2(k.net)+' $</b></div>'+
-   '<div class="satir"><span>Açık pozisyon</span><b>'+k.acik.length+
-     (k.acik.length?' <span class="'+snf(k.acik_pnl)+'">('+isr(k.acik_pnl)+p2(k.acik_pnl)+' $)</span>':'')+'</b></div>'+
-   '<div class="satir"><span>Kazanan oranı</span><b>'+(k.kazanan_pct==null?'-':k.kazanan_pct.toFixed(0)+'%')+'</b></div>'+
-   '<div class="satir"><span>Fonlama</span><b class="'+snf(k.fonlama)+'">'+isr(k.fonlama)+p2(k.fonlama)+' $</b></div>'+
-   '</div>';
-}
-
 async function yenile(){
   let d; try{ d=await (await fetch('/api/durum')).json(); }catch(e){ return; }
-  const n1=d.kollar.n1, n2=d.kollar.n2;
-  $('#kollar').innerHTML = kolKart(n1)+kolKart(n2);
-  for(const [id,k] of [['#rz1',n1],['#rz2',n2]]){
-    const e=$(id); if(!k.var){e.textContent='-';continue;}
-    e.textContent=k.kol.toUpperCase()+' '+k.durum;
-    e.className='rozet '+(k.durum==='AKTIF'?'iyi':(k.durum==='DURDU'?'kotu':'uyari'));
-  }
   $('#zaman').textContent='yenilendi '+d.simdi;
+  if(!d.var){ $('#kartlar').innerHTML='<div class="kart"><div class="bos">Başlatılmamış.</div></div>'; return; }
 
-  $('#farkKutu').innerHTML = d.fark ?
-   ('<div class="kart" style="margin-top:16px"><h2>Ölçüm: N1 − N2</h2>'+
-    '<div class="alt">Tek değişken skor kapısı. Bu fark, kapının ne kattığının cevabı.</div>'+
-    '<div class="satir"><span>Realize P&amp;L farkı</span><b class="'+snf(d.fark.net)+'">'+
-      isr(d.fark.net)+p2(d.fark.net)+' $</b></div>'+
-    '<div class="satir"><span>Kapanan pozisyon farkı</span><b>'+isr(d.fark.kapanan)+d.fark.kapanan+'</b></div>'+
-    '<div class="not">Pencere <b>30 gün</b> VE kol başına <b>80 kapanmış pozisyon</b> — '+
-    '<b>ikisi birden</b> dolmadan hüküm yok. Bu kutu ilerlemeyi gösterir, sonucu değil.</div></div>') : '';
+  const e=$('#rz'); e.textContent=d.durum;
+  e.className='rozet '+(d.durum==='AKTIF'?'iyi':(d.durum==='DURDU'?'kotu':'uyari'));
 
-  let ah='<table><tr><th>kol</th><th>sembol</th><th>yön</th><th>giriş</th><th>anlık</th>'+
+  const f=d.equity-d.baslangic;
+  $('#kartlar').innerHTML =
+   '<div class="kart"><h2>Kasa</h2><div class="alt">başlangıç '+d.baslangic_ts.slice(0,16)+
+     ' · son tur '+(d.son_cycle||'-').slice(11,16)+'</div>'+
+   '<div class="buyuk">'+p2(d.equity)+' $ <span style="font-size:16px" class="'+snf(f)+'">'+
+     isr(f)+p2(f)+'</span></div>'+
+   '<div class="satir"><span>Realize P&amp;L</span><b class="'+snf(d.net)+'">'+isr(d.net)+p2(d.net)+' $</b></div>'+
+   '<div class="satir"><span>Açık pozisyon</span><b>'+d.acik.length+' / 8'+
+     (d.acik.length?' <span class="'+snf(d.acik_pnl)+'">('+isr(d.acik_pnl)+p2(d.acik_pnl)+' $)</span>':'')+'</b></div>'+
+   '<div class="satir"><span>Kazanan oranı</span><b>'+(d.kazanan_pct==null?'-':d.kazanan_pct.toFixed(0)+'%')+'</b></div>'+
+   '<div class="satir"><span>Fonlama</span><b class="'+snf(d.fonlama)+'">'+isr(d.fonlama)+p2(d.fonlama)+' $</b></div>'+
+   '</div>'+
+   '<div class="kart"><h2>Ölçüm penceresi</h2>'+
+   '<div class="alt">ikisi birden dolmadan hüküm yok</div>'+
+   '<div class="satir"><span>Kapanan pozisyon</span><b>'+d.kapanan+' / '+d.n_hedef+'</b></div>'+
+   cubuk(d.kapanan,d.n_hedef)+
+   '<div class="satir"><span>Gün</span><b>'+d.gun.toFixed(2)+' / '+d.gun_hedef+'</b></div>'+
+   cubuk(d.gun,d.gun_hedef)+
+   '<div class="not">Ön-kayıt bölüm 7: <b>N 30 günde 80\'e ulaşmazsa</b> sonuç '+
+   '<b>"ölçülemedi"</b> olur ve pencere <b>uzatılmaz</b>.</div></div>';
+
+  let ah='<table><tr><th>sembol</th><th>yön</th><th>skor</th><th>giriş</th><th>anlık</th>'+
          '<th>PnL $</th><th>stop</th><th>hedef</th></tr>';
-  let n=0;
-  for(const k of [n1,n2]) if(k.var) for(const p of k.acik){ n++;
-    ah+='<tr><td class="sonuk">'+k.kol+'</td><td>'+p.sym+'</td><td>'+p.yon+'</td>'+
+  for(const p of d.acik)
+    ah+='<tr><td>'+p.sym+'</td><td>'+p.yon+'</td><td class="sonuk">'+(p.skor??'-')+'</td>'+
         '<td>'+(p.giris??'-')+'</td><td>'+(p.anlik??'-')+'</td>'+
         '<td class="'+snf(p.pnl)+'">'+isr(p.pnl)+p2(p.pnl)+'</td>'+
-        '<td class="sonuk">'+(p.stop??'-')+'</td><td class="sonuk">'+(p.hedef??'-')+'</td></tr>';}
-  $('#acik').innerHTML = n? ah+'</table>' : '<div class="bos">Açık pozisyon yok.</div>';
+        '<td class="sonuk">'+(p.stop??'-')+'</td><td class="sonuk">'+(p.hedef??'-')+'</td></tr>';
+  $('#acik').innerHTML = d.acik.length? ah+'</table>' : '<div class="bos">Açık pozisyon yok.</div>';
 
-  let sh='<table><tr><th>kol</th><th>zaman</th><th>sembol</th><th>sebep</th>'+
-         '<th>net $</th><th>tutma</th></tr>';
-  let liste=[];
-  for(const k of [n1,n2]) if(k.var) for(const p of k.son) liste.push([k.kol,p]);
-  liste.sort((a,b)=>(b[1].ts||'').localeCompare(a[1].ts||''));
-  for(const [kol,p] of liste.slice(0,20))
-    sh+='<tr><td class="sonuk">'+kol+'</td><td class="sonuk">'+(p.ts||'').slice(5,16)+'</td>'+
-        '<td>'+p.sym+'</td><td class="sonuk">'+p.sebep+'</td>'+
+  let kh='<table><tr><th>skor bandı</th><th>N</th><th>net $</th><th>kazanan</th></tr>';
+  for(const s of d.skor)
+    kh+='<tr><td>'+s.bant+'</td><td>'+s.n+'</td>'+
+        '<td class="'+snf(s.net)+'">'+isr(s.net)+p2(s.net)+'</td>'+
+        '<td>'+s.kaz.toFixed(0)+'%</td></tr>';
+  $('#skor').innerHTML = d.skor.length? kh+'</table>' :
+    '<div class="bos">Henüz kapanan pozisyon yok — skor bandı ölçümü doldukça oluşacak.</div>';
+
+  let sh='<table><tr><th>zaman</th><th>sembol</th><th>skor</th><th>sebep</th><th>net $</th><th>tutma</th></tr>';
+  for(const p of d.son)
+    sh+='<tr><td class="sonuk">'+(p.ts||'').slice(5,16)+'</td><td>'+p.sym+'</td>'+
+        '<td class="sonuk">'+(p.skor??'-')+'</td><td class="sonuk">'+p.sebep+'</td>'+
         '<td class="'+snf(p.net)+'">'+isr(p.net)+p2(p.net)+'</td>'+
         '<td class="sonuk">'+(p.tutma||0).toFixed(1)+' sa</td></tr>';
-  $('#son').innerHTML = liste.length? sh+'</table>' : '<div class="bos">Henüz kapanan pozisyon yok.</div>';
+  $('#son').innerHTML = d.son.length? sh+'</table>' : '<div class="bos">Henüz kapanan pozisyon yok.</div>';
 
   $('#log').textContent = d.log.length? d.log.join('\n') : '(log henüz yok)';
 }
@@ -328,7 +318,7 @@ def main():
     a = ap.parse_args()
     srv = ThreadingHTTPServer(("127.0.0.1", a.port), Handler)
     print("NOTR-LONG paneli: http://127.0.0.1:%d" % a.port)
-    print("SALT-OKUNUR — hicbir dosyaya yazmaz.")
+    print("SALT-OKUNUR - hicbir dosyaya yazmaz.")
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

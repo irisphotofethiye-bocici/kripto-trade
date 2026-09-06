@@ -66,7 +66,7 @@ def main():
           % (marj, "(RAHAT)" if marj > 1.3 else "(🔴 KIL PAYI — dusuk akis riski)"))
     print()
 
-    st = oku("notrlong_n1_state.json")
+    st = oku("notrlong_state.json")
     if not st:
         print("bot baslatilmamis")
         return
@@ -77,24 +77,22 @@ def main():
         print("baslangic damgasi okunamadi")
         return
     gecen_sa = (datetime.datetime.now() - b).total_seconds() / 3600.0
-    tur = len(satirlar("notrlong_n1_equity.jsonl"))
+    tur = len(satirlar("notrlong_equity.jsonl"))
 
     print("### SIMDIYE KADAR")
     print("   gecen sure : %.2f saat  (%.3f gun)" % (gecen_sa, gecen_sa / 24))
     print("   kosan tur  : %d   (equity logu satiri)" % tur)
-    for kol in ("n1", "n2"):
-        s = oku("notrlong_%s_state.json" % kol)
-        kayit = satirlar("notrlong_%s_islemler.jsonl" % kol)
-        idler = set()
-        for l in kayit:
-            try:
-                k = json.loads(l)
-                if not k.get("kismi"):
-                    idler.add(k.get("id"))
-            except Exception:
-                pass
-        print("   %-3s durum=%-6s acik=%d  kapanmis pozisyon=%d"
-              % (kol, s.get("durum"), len(s.get("acik_pozisyonlar") or []), len(idler)))
+    kayit = satirlar("notrlong_islemler.jsonl")
+    idler = set()
+    for l in kayit:
+        try:
+            k = json.loads(l)
+            if not k.get("kismi"):
+                idler.add(k.get("id"))
+        except Exception:
+            pass
+    print("   durum=%-6s acik=%d  kapanmis pozisyon=%d"
+          % (st.get("durum"), len(st.get("acik_pozisyonlar") or []), len(idler)))
     print()
 
     print("### 1) 0 POZISYON ALARM MI?")
@@ -124,32 +122,21 @@ def main():
 
     print("### 2) N>=80 HEDEFINE YETISIR MI?")
     if tur > 0:
-        for kol in ("n1", "n2"):
-            kayit = satirlar("notrlong_%s_islemler.jsonl" % kol)
-            idler = set()
-            for l in kayit:
-                try:
-                    k = json.loads(l)
-                    if not k.get("kismi"):
-                        idler.add(k.get("id"))
-                except Exception:
-                    pass
-            hiz = len(idler) / max(gecen_sa / 24, 1e-9)
-            tahmin = hiz * PENCERE_GUN
-            print("   %-3s gozlenen hiz %.2f poz/gun -> 30 gunde ~%.0f  %s"
-                  % (kol, hiz, tahmin,
-                     "(yeterli veri yok)" if gecen_sa < 24 else
-                     ("YETER" if tahmin >= PENCERE_N else "🔴 YETMEZ")))
+        hiz = len(idler) / max(gecen_sa / 24, 1e-9)
+        tahmin = hiz * PENCERE_GUN
+        print("   gozlenen hiz %.2f poz/gun -> 30 gunde ~%.0f  %s"
+              % (hiz, tahmin,
+                 "(yeterli veri yok)" if gecen_sa < 24 else
+                 ("YETER" if tahmin >= PENCERE_N else "🔴 YETMEZ")))
         if gecen_sa < 24:
             print("   ⚠️ %.1f saat cok kisa — bu tahmin ANLAMSIZ. En az 1 gun gerek."
                   % gecen_sa)
     print()
-    print("### 3) 🔴 ASIL RISK — N2, N1'den AZ acacak")
-    print("   N2'nin skor kapisi (>=45) akisi kiser. Bugunku tek teshiste 10 adayin")
-    print("   5'i skor>=45 idi (%50). Bu oran LONG kararlarinda da surerse:")
-    print("      N1 taban hizla ~%.0f/30gun  ·  N2 ~%.0f/30gun"
-          % (TABAN_GUN * PENCERE_GUN, TABAN_GUN * PENCERE_GUN * 0.5))
-    print("   -> N2'nin 80'e ULASAMAMASI ciddi bir olasilik.")
+    print("### 3) [DEGISTI 2026-09-06] SKOR KAPISI KALDIRILDI")
+    print("   Eskiden burada 'N2 skor kapisi yuzunden 80'e ulasamaz' riski yaziliydi.")
+    print("   Kapi kaldirilinca o risk KALKTI — tek kol TAM akista kosuyor.")
+    print("   Kalan risk: taban oranin kendisi kil payi (%.2f vs %.2f poz/gun)."
+          % (TABAN_GUN, PENCERE_N / PENCERE_GUN))
     print("   On-kayit bolum 7: 'N 30 gunde 80'e ulasmazsa -> OLCULEMEDI, UZATILMAZ.'")
     print()
     print("Salt-okuma. Bot dosyalarina yazim: YOK")

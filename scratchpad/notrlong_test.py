@@ -87,11 +87,11 @@ def main():
         ic["tg_sessiz"] = (testbot.telegram_gonder is notrlong._sessiz)
         return "ok"
 
-    notrlong._defterde("n1", gozle)
-    kontrol("takas sirasinda _DEFTER n1 defterine bakiyor",
-            ic["defter"].endswith("notrlong_n1_islemler.jsonl"))
-    kontrol("takas sirasinda VETO_LOGF n1'e bakiyor",
-            ic["veto"].endswith("notrlong_n1_veto.jsonl"))
+    notrlong._defterde(gozle)
+    kontrol("takas sirasinda _DEFTER notrlong defterine bakiyor",
+            ic["defter"].endswith("notrlong_islemler.jsonl"))
+    kontrol("takas sirasinda VETO_LOGF notrlong'a bakiyor",
+            ic["veto"].endswith("notrlong_veto.jsonl"))
     kontrol("takas sirasinda telegram SUSTURULMUS", ic["tg_sessiz"])
     d1 = (testbot._DEFTER, testbot.telegram_gonder,
           testbot.toast_gonder, testbot.VETO_LOGF)
@@ -100,7 +100,7 @@ def main():
     def patla():
         raise RuntimeError("test")
     try:
-        notrlong._defterde("n2", patla)
+        notrlong._defterde(patla)
     except RuntimeError:
         pass
     kontrol("HATA firlasa bile geri aliniyor",
@@ -170,25 +170,23 @@ def main():
 
     s1 = notrlong.yeni_state()
     acilanlar.clear()
-    notrlong.giris_ara("n1", s1, rows, pil, bag)
-    n1_semboller = [x[0] for x in acilanlar]
-
-    s2 = notrlong.yeni_state()
-    acilanlar.clear()
-    notrlong.giris_ara("n2", s2, rows, pil, bag)
-    n2_semboller = [x[0] for x in acilanlar]
+    notrlong.giris_ara(s1, rows, pil, bag)
+    alinan = [x[0] for x in acilanlar]
 
     kontrol("karar_yon'a HER ZAMAN 'NOTR' gecildi",
             gorulen_rejim and all(x == "NOTR" for x in gorulen_rejim),
             "gorulen=%s" % sorted(set(gorulen_rejim)))
-    kontrol("SHORT karari ATILDI (CCC hicbir kolda yok)",
-            "CCC" not in n1_semboller and "CCC" not in n2_semboller)
-    kontrol("N1 skor kapisi YOK -> BBB (skor 40) alindi", "BBB" in n1_semboller,
-            "n1=%s" % n1_semboller)
-    kontrol("N2 skor kapisi VAR -> BBB (skor 40) ELENDI", "BBB" not in n2_semboller,
-            "n2=%s" % n2_semboller)
-    kontrol("iki kol da AAA'yi (skor 60) aldi",
-            "AAA" in n1_semboller and "AAA" in n2_semboller)
+    kontrol("SHORT karari ATILDI (CCC alinmadi)", "CCC" not in alinan,
+            "alinan=%s" % alinan)
+    # [DEGISTI 2026-09-06] Eski iddia "N2 skor kapisi BBB'yi eler" idi.
+    # Skor kapisi KALDIRILDI (on-kayit bolum 11) -> dogru iddia TERSI:
+    # dusuk skorlu aday da ALINMALI, cunku EK kapi yok.
+    kontrol("EK skor kapisi YOK -> BBB (skor 40) ALINDI", "BBB" in alinan,
+            "alinan=%s" % alinan)
+    kontrol("yuksek skorlu AAA da alindi", "AAA" in alinan)
+    kontrol("SKOR_KAPISI sabiti koddan KALKTI",
+            not hasattr(notrlong, "SKOR_KAPISI"))
+    kontrol("KOLLAR sabiti koddan KALKTI", not hasattr(notrlong, "KOLLAR"))
     print()
 
     # ---------------------------------------------------------------
@@ -196,14 +194,14 @@ def main():
     s3 = notrlong.yeni_state()
     s3["durum"] = "DURDU"
     acilanlar.clear()
-    n = notrlong.giris_ara("n1", s3, rows, pil, bag)
+    n = notrlong.giris_ara(s3, rows, pil, bag)
     kontrol("durum=DURDU -> 0 giris", n == 0 and not acilanlar)
 
     print("### 6) MAKS_POZ dolu iken giris ARANMIYOR (cikislar etkilenmez)")
     s4 = notrlong.yeni_state()
     s4["acik_pozisyonlar"] = [{"sym": "Z%d" % i} for i in range(notrlong.MAKS_POZ)]
     acilanlar.clear()
-    n = notrlong.giris_ara("n1", s4, rows, pil, bag)
+    n = notrlong.giris_ara(s4, rows, pil, bag)
     kontrol("acik == MAKS_POZ -> 0 giris", n == 0 and not acilanlar)
     print()
 

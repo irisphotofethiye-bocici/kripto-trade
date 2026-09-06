@@ -1,54 +1,58 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-NOTR-LONG BOTU — iki kol (2026-09-06, kullanici karari).
+NOTR-LONG BOTU — TEK KOL (2026-09-06, kullanici karari).
 
-ON-KAYIT: ON_KAYIT_notr_long_botu.md, commit 4927f3d — KURULMADAN ONCE yazildi.
-Tasarim orada; burada YENIDEN YAZILMAZ, yalnizca UYGULANIR.
+ON-KAYIT: ON_KAYIT_notr_long_botu.md, commit 4927f3d — kurulmadan ONCE yazildi.
+   🔴 BOLUM 11 [DEGISTI 2026-09-06]: skor kapisi KALDIRILDI, iki kol -> tek kol.
+   Tasarim orada; burada YENIDEN YAZILMAZ, yalnizca UYGULANIR.
 
 NE: Rejim etiketi ZORLA "NOTR" tutulur ve YALNIZ LONG acilir.
-    Dayanak: 2026-09-05 karsi-olgu olcumu — 08-19..09-02 penceresinde gercek bot
-    -4.630,48 $ iken "NOTR kalsa + yalniz LONG" kolu +1.162,78 $ yapiyordu
-    (K1/K2/K3 gecti; bugune kadar YOGUNLASMA testini gecen TEK olumlu sonuc).
+    Dayanak: 2026-09-05 karsi-olgu olcumu — 08-21..09-02 penceresinde gercek bot
+    -1.719,78 $ iken "NOTR + yalniz LONG" kolu +967,45 $ yapiyordu ve
+    YOGUNLASMA testinden sag cikan TEK olumlu sonuctu.
 
-IKI KOL — tek degisken: SKOR KAPISI
-    N1: skor kapisi YOK
-    N2: skor kapisi VAR (score >= 45), baska her sey N1 ile BIREBIR AYNI
-    Ikisi AYNI TURDA, AYNI adaylarla, AYNI mekanikle kosar -> N1-N2 farki
-    dogrudan "skor kapisi ne katiyor"un cevabidir.
+🔴 NEDEN TEK KOL (eski iki-kollu tasarim kaldirildi):
+    "N1: skor kapisi YOK" ifadesi YANLISTI — skor zaten uc yerde is goruyor:
+      (a) tara(): radar.analyze sonucu score >= 30 suzgeci
+      (b) tara(): kisa liste SKORA GORE siralanip [:10] kirpiliyor
+      (c) karar_yon: skor >= stage_esigi  (BASLIYOR 45 · HAZIRLANIYOR 40)
+    Ve karar_yon zaten BASLIYOR icin >=45 istedigi icin, N2'nin >=45 kapisi
+    yalnizca HAZIRLANIYOR dalinda [40,45) araligini kesiyordu.
+    ARSIVDE OLCULDU (N=34.618): iki kol adaylarin yalniz %8,5'inde ayrisiyordu
+    -> fark gurultuden ayirt edilemezdi.
+    SKOR SORUSU KAYBOLMADI: defter her girisin `skor_giriste` alanini yaziyor,
+    sonradan ayni defterde olculur (skor_gercek.py deseni).
 
 🔴 KENDI TARAMASINI YAPAR — defter2/defter3'ten AYRILDIGI TEK YER.
     Sebep olculdu (2026-09-05): testbot.maks_pozisyon=0 olunca yeni_giris_ara
     aday taramasindan ONCE donuyor (testbot.py:1376) ve testbot_aday_arsiv.jsonl
     YAZILMIYOR. defter2/3 o arsivden besleniyor; bu bot beslenseydi HIC aday
     gormezdi. O yuzden evren/radar dogrudan cagrilir.
-    ⚠️ testbot_aday_arsiv.jsonl'e YAZMAZ — 6 cozumleyici onu okuyor
-    (CLAUDE.md: "arsive yeni tip kayit KARISTIRILMAZ").
+    ⚠️ testbot_aday_arsiv.jsonl'e YAZMAZ — 6 cozumleyici onu okuyor.
 
 🔴 SABIT %10 HEDEF ELLE KURULUR.
     testbot.yeni_giris_ac sabit hedefi YALNIZ sebep "A+B"/"MA50+ucuz" ile
     baslarsa atiyor (testbot.py:1293). Bizim sebebimiz oyle olamaz — o alani 6
-    cozumleyici okuyor, kirletmek kapi karnesini bozar. Cozum: pozisyon
-    ACILDIKTAN SONRA kendi state'imizde duzeltilir. testbot'a dokunulmaz.
-
-🔴 DOKUNULMAYANLAR: testbot.py · golge.py · ayna.py · benim.py · defter2/3 ·
-    radar.py · evren.py · kripto-config.json · mevcut state/defterler ·
-    mevcut zamanlanmis gorevler. HICBIRI.
-    Config'te DEGISIKLIK GEREKMEDI — asgari_stop_pct 2,0 · islem_risk_pct 1,5 ·
-    kaldirac [3,10] · maks_dusus_pct 25 · zaman_stop 48s zaten on-kayitla birebir.
+    cozumleyici okuyor. Cozum: pozisyon ACILDIKTAN SONRA kendi state'imizde
+    duzeltilir. testbot'a dokunulmaz. Bu ayrica config'teki kismi_pay'i BYPASS
+    eder (on-kayit: kismi kar KAPALI).
 
 🔴 print() ICINDE EMOJI YOK — BILEREK.
     Windows konsolu cp1254; emoji ve varyasyon secicileri o kodlamada YOK ve
-    cikti YONLENDIRILINCE UnicodeEncodeError ile betigi OLDURUR. Bu bot
-    zamanlanmis gorevle ve ciktisi bir dosyaya yonlendirilerek kosacak, yani
-    tam o kosulda. (Olculdu 2026-09-06: emoji/U+26A0/U+FE0F cokertiyor;
-    orta nokta, em-dash ve Turkce harfler cp1254'te VAR, guvenli.)
-    Yorumlarda emoji serbest — onlar basilmiyor.
+    cikti YONLENDIRILINCE UnicodeEncodeError ile betigi OLDURUR. (Olculdu
+    2026-09-06: emoji/U+26A0/U+FE0F cokertiyor; orta nokta, em-dash ve Turkce
+    harfler cp1254'te VAR, guvenli.) Yorumlarda emoji serbest — basilmiyor.
+
+🔴 DOKUNULMAYANLAR: testbot.py · golge.py · ayna.py · benim.py · defter2/3 ·
+    radar.py · evren.py · kripto-config.json. HICBIRI.
+    Config'te DEGISIKLIK GEREKMEDI — asgari_stop_pct 2,0 · islem_risk_pct 1,5 ·
+    kaldirac [3,10] · maks_dusus_pct 25 · zaman_stop 48s zaten on-kayitla birebir.
 
 Kullanim:
-    python notrlong.py --baslat     iki kasayi ILK KEZ olusturur
-    python notrlong.py --tur        bir tur (yonet + tara + iki kola giris ara)
-    python notrlong.py --durum      iki kolu yan yana raporlar
+    python notrlong.py --baslat     kasayi ILK KEZ olusturur
+    python notrlong.py --tur        bir tur (yonet + tara + giris ara)
+    python notrlong.py --durum      rapor
 """
 import json, os, sys, time, random, argparse
 
@@ -56,12 +60,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 LOGF = os.path.join(HERE, "notrlong_log.txt")
 
 # 🔴 LOG KURULUMU PROJE MODULLERINDEN ONCE OLMAK ZORUNDA.
-#    testbot.py:46 (ve radar.py:22, nobetci.py:26) "sys.stdout is None ise
+#    testbot.py:46 (ayrica radar.py:22, nobetci.py:26) "sys.stdout is None ise
 #    devnull'a bagla" yapiyor. `import testbot` once kosarsa stdout ARTIK None
 #    OLMAZ ve buradaki dal HIC CALISMAZ — olculdu (2026-09-06): log dosyasi
 #    olusmadi, stdout 'nul' kaldi. O yuzden bu blok import'larin USTUNDE.
-#    defter2/3 zaten devnull'a yaziyor, yani hatalari GORUNMUYOR; yeni bir bot
-#    icin bu pahali, ilk gunlerde neyin neden acilmadigi gorulmeli.
 if sys.stdout is None:                      # pythonw ile kosarken
     try:
         if os.path.exists(LOGF) and os.path.getsize(LOGF) > 5_000_000:
@@ -81,16 +83,14 @@ from nobetci import telegram_gonder as _tg   # noqa: E402
 
 # --- ON-KAYIT bolum 3: BOTUN TANIMI. Burada SABIT, taranmaz. ---
 MAKS_POZ = 8
-SKOR_KAPISI = 45.0          # yalniz N2
 SABIT_HEDEF_PCT = 10.0      # kismi kar KAPALI, iz-suren KAPALI
 TEKRAR_SAAT = 4.0
 REJIM_ZORLA = "NOTR"
 
-KOLLAR = ("n1", "n2")
-
-
-def _yol(kol, ek):
-    return os.path.join(HERE, "notrlong_%s_%s" % (kol, ek))
+STATEF = os.path.join(HERE, "notrlong_state.json")
+ISLEMLERF = os.path.join(HERE, "notrlong_islemler.jsonl")
+EQUITYF = os.path.join(HERE, "notrlong_equity.jsonl")
+VETOF = os.path.join(HERE, "notrlong_veto.jsonl")
 
 
 def yeni_state():
@@ -100,45 +100,44 @@ def yeni_state():
             "son_giris": {}, "son_cycle_ts": None}
 
 
-def yukle(kol):
+def yukle():
     try:
-        with open(_yol(kol, "state.json"), encoding="utf-8") as f:
+        with open(STATEF, encoding="utf-8") as f:
             return json.load(f)
     except Exception:
         return None
 
 
-def kaydet(kol, st):
+def kaydet(st):
     """ATOMIK yazim (.tmp + os.replace) — CLAUDE.md kurali.
     golge.py duz json.dump kullaniyor ve defteri 2026-08-11'de 314 $ saptirmisti."""
-    yol = _yol(kol, "state.json")
-    tmp = yol + ".tmp"
+    tmp = STATEF + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(st, f, ensure_ascii=False, indent=2)
-    os.replace(tmp, yol)
+    os.replace(tmp, STATEF)
 
 
 def _sessiz(*a, **kw):
     return None
 
 
-def _defterde(kol, fn, *a, **kw):
-    """testbot fonksiyonunu BU kolun defterine yonlendirerek + SESSIZ calistir.
+def _defterde(fn, *a, **kw):
+    """testbot fonksiyonunu BU deftere yonlendirerek + SESSIZ calistir.
 
     DORT takas, finally ile MUTLAKA geri alinir (defter2 deseni):
       _DEFTER        -> kapanan islemler bu deftere yazilsin
       telegram/toast -> bota ait olmayan hareket bot bildirimi gibi gitmesin
-      VETO_LOGF      -> botun veto_log.jsonl'ine SIZMASIN (golge.py'de eksik olan koruma)
+      VETO_LOGF      -> botun veto_log.jsonl'ine SIZMASIN (golge.py'de eksik koruma)
 
     ⚠️ testbot._aynala zaten "_DEFTER is not None -> aynalamaz" korumasi tasiyor,
        yani bu takas ayna sizintisini da kapatir (CLAUDE.md'de UC KEZ isiran sinif).
     """
     eski = (testbot._DEFTER, testbot.telegram_gonder,
             testbot.toast_gonder, testbot.VETO_LOGF)
-    testbot._DEFTER = _yol(kol, "islemler.jsonl")
+    testbot._DEFTER = ISLEMLERF
     testbot.telegram_gonder = _sessiz
     testbot.toast_gonder = _sessiz
-    testbot.VETO_LOGF = _yol(kol, "veto.jsonl")
+    testbot.VETO_LOGF = VETOF
     try:
         return fn(*a, **kw)
     finally:
@@ -151,14 +150,12 @@ def sabit_hedef_kur(st, yon):
     """Yeni acilan pozisyonu SABIT %10 HEDEF moduna cevirir.
 
     testbot.py:1293-1322'deki 'ab_hedef > 0 ve pay == 0' dalinin BIREBIR ayni
-    alanlari yazilir. Neden burada: o dal yalniz sebep "A+B"/"MA50+ucuz" ile
-    baslarsa calisiyor; bizim sebebimiz oyle olamaz (sebep alanini 6 cozumleyici
-    okuyor). Yalnizca KENDI state'imize dokunur.
+    alanlari yazilir. Yalnizca KENDI state'imize dokunur.
 
     Etkisi (testbot'un kendi kodundan):
-      trailing_guncelle  -> cikis_modu=="sabit_hedef" ise ERKEN DONER (iz-suren KAPALI)
-      tp1_efektif_hesapla-> bu modda ATLANIR
-      tp1_alindi=True    -> kismi kar yolu KAPALI
+      trailing_guncelle   -> cikis_modu=="sabit_hedef" ise ERKEN DONER (iz-suren KAPALI)
+      tp1_efektif_hesapla -> bu modda ATLANIR
+      tp1_alindi=True     -> kismi kar yolu KAPALI
     """
     if not st["acik_pozisyonlar"]:
         return False
@@ -171,7 +168,7 @@ def sabit_hedef_kur(st, yon):
     pos["cikis_modu"] = "sabit_hedef"
     pos["sabit_hedef_pct"] = SABIT_HEDEF_PCT
     pos["tp2"] = round(hedef, 6)
-    pos["tp1_alindi"] = True          # kismi kar KAPALI (config kismi_pay'i BYPASS edilir)
+    pos["tp1_alindi"] = True          # kismi kar KAPALI (config kismi_pay BYPASS)
     pos["tp1"] = pos["tp2"]
     pos["kaynak"] = "notrlong"
     return True
@@ -182,8 +179,7 @@ def fren_kontrol(st):
     esik = float(testbot._c("maks_dusus_pct", 25))
     if esik <= 0 or st["durum"] != "AKTIF":
         return
-    tepe = max(st.get("zirve", st["baslangic_bakiye"]), st["equity"])
-    st["zirve"] = tepe
+    st["zirve"] = max(st.get("zirve", st["baslangic_bakiye"]), st["equity"])
     if st["equity"] <= st["baslangic_bakiye"] * (1 - esik / 100.0):
         st["durum"] = "DURDU"
         msg = ("[NOTRLONG] *** DUSUS FRENI: equity %.2f $ (baslangic %.0f, -%%%.0f) "
@@ -210,7 +206,7 @@ def _tekrar_var_mi(st, sym):
 def tara():
     """KENDI aday taramasi. testbot.yeni_giris_ara'nin tarama kismiyla ayni,
     ama karar/giris kismi YOK ve aday arsivine YAZMAZ.
-    -> [(r, pillar)] skor sirali kisa liste"""
+    -> (rows, pillars)"""
     min_vol = float(testbot._c("min_vol_musd", 3))
     havuz_n = int(testbot._c("tarama_havuz_n", 150))
     cryptos = evren.cg_universe()
@@ -248,11 +244,12 @@ def tara():
     return rows, pillars
 
 
-def giris_ara(kol, st, rows, pillars, baglam):
-    """Bir kol icin karar + giris. -> acilan sayisi
+def giris_ara(st, rows, pillars, baglam):
+    """Karar + giris. -> acilan sayisi
 
     Rejim ZORLA 'NOTR'. YALNIZ LONG. Vetolar AYNEN (long_veto/blowoff/onay_bekle
-    karar_yon'un icinde; asgari_stop ve rr kapisi yeni_giris_ac'in icinde)."""
+    karar_yon'un icinde; asgari_stop ve rr kapisi yeni_giris_ac'in icinde).
+    EK SKOR KAPISI YOK — on-kayit bolum 11."""
     if st["durum"] != "AKTIF":
         return 0
     if len(st["acik_pozisyonlar"]) >= MAKS_POZ:
@@ -287,25 +284,21 @@ def giris_ara(kol, st, rows, pillars, baglam):
         if yon != "LONG":                    # YALNIZ LONG — SHORT kararlari atilir
             bekleyenler.pop(sym, None)
             continue
-        # --- TEK DEGISKEN: skor kapisi (yalniz N2) ---
-        if kol == "n2" and (r.get("score") or 0) < SKOR_KAPISI:
-            bekleyenler.pop(sym, None)
-            continue
 
-        sebep_tam = "NOTRLONG-%s: rejim zorla NOTR + yalniz LONG | %s" % (kol.upper(), sebep)
+        sebep_tam = "NOTRLONG: rejim zorla NOTR + yalniz LONG | %s" % sebep
 
         def _ac(ek=""):
             red = []
-            ok = _defterde(kol, testbot.yeni_giris_ac, st, sym, "LONG", r, pillar,
+            ok = _defterde(testbot.yeni_giris_ac, st, sym, "LONG", r, pillar,
                            sebep_tam + ek, zorla=False, rejim_ad=REJIM_ZORLA,
                            kaynak="notrlong", red_out=red)
             if ok:
                 sabit_hedef_kur(st, "LONG")
                 st.setdefault("son_giris", {})[sym] = testbot.now_iso()
-                print("[%s] ACILDI %s LONG (skor %s · chg24 %s)"
-                      % (kol, sym, r.get("score"), r.get("chg24")))
+                print("    ACILDI %s LONG (skor %s · chg24 %s · stage %s)"
+                      % (sym, r.get("score"), r.get("chg24"), r.get("stage")))
             elif red:
-                print("[%s] giris kapisi %s: %s" % (kol, sym, red[0]["kapi"]))
+                print("    giris kapisi %s: %s" % (sym, red[0]["kapi"]))
             return bool(ok)
 
         if mod == "ANINDA":
@@ -328,9 +321,9 @@ def giris_ara(kol, st, rows, pillars, baglam):
     return acilan
 
 
-def equity_yaz(kol, st):
+def equity_yaz(st):
     try:
-        testbot._append_jsonl(_yol(kol, "equity.jsonl"), {
+        testbot._append_jsonl(EQUITYF, {
             "ts": testbot.now_iso(), "equity": round(st["equity"], 2),
             "acik_pnl": round(testbot.acik_pnl_toplam(st), 2),
             "acik_sayisi": len(st["acik_pozisyonlar"]), "durum": st["durum"]})
@@ -338,15 +331,15 @@ def equity_yaz(kol, st):
         pass
 
 
-def _defter_kayitlari(kol):
+def _defter_kayitlari():
     try:
-        with open(_yol(kol, "islemler.jsonl"), encoding="utf-8") as f:
+        with open(ISLEMLERF, encoding="utf-8") as f:
             return [json.loads(l) for l in f if l.strip()]
     except Exception:
         return []
 
 
-def kapanis_bildir(kol, yeni, st):
+def kapanis_bildir(yeni, st):
     """Bu turda deftere DUSEN kayitlari bildirir.
     ⚠️ CLAUDE.md: P&L TOPLARKEN kismi kayitlar DAHIL; POZISYON SAYARKEN haric."""
     if not yeni:
@@ -357,11 +350,11 @@ def kapanis_bildir(kol, yeni, st):
                      % ("YARIM" if k.get("kismi") else "KAPANDI", k.get("sym"),
                         k.get("sonuc_usdt") or 0.0, k.get("sebep"),
                         k.get("tutma_saat") or 0.0))
-    tum = _defter_kayitlari(kol)
+    tum = _defter_kayitlari()
     toplam = sum(t.get("sonuc_usdt") or 0 for t in tum)
     kapanan = len({t.get("id") for t in tum if not t.get("kismi")})
-    msg = ("[NOTRLONG-%s] " % kol.upper() + " | ".join(satir)
-           + "\nkasa $%.2f | acik %d/%d | kapanan poz %d | defter toplami %+.2f$"
+    msg = ("[NOTRLONG] " + " | ".join(satir)
+           + "\nkasa $%.2f | acik %d/%d | kapanan poz %d/80 | defter toplami %+.2f$"
              " (fonlama HARIC; kasa farkina dahil)"
            % (st["equity"], len(st["acik_pozisyonlar"]), MAKS_POZ, kapanan, toplam))
     print(msg)
@@ -373,39 +366,28 @@ def kapanis_bildir(kol, yeni, st):
 
 # ---------------------------------------------------------------------------
 def tur():
-    """Bir tur: her iki kolun acik pozisyonlarini yonet, SONRA tek tarama yapip
-    iki kola da AYNI adaylari ver.
-
+    """Bir tur: acik pozisyonlari yonet, SONRA tara ve giris ara.
     ⚠️ SIRA ONEMLI: yonetim (cikislar) ONCE, giris arama SONRA — testbot ile ayni.
     Boylece MAKS_POZ dolu olsa bile cikislar isler."""
     t0 = time.time()
     print("--- tur %s ---" % testbot.now_iso())
-    durumlar = {}
-    for kol in KOLLAR:
-        st = yukle(kol)
-        if not st:
-            print("    kasa yok (once --baslat)")
-            return False
-        durumlar[kol] = st
+    st = yukle()
+    if not st:
+        print("    kasa yok (once --baslat)")
+        return False
 
-    # 1) ACIK POZISYONLARI YONET (cikislar)
-    yeni_kayitlar = {}
-    for kol, st in durumlar.items():
-        yeni_kayitlar[kol] = []
-        if st["acik_pozisyonlar"]:
-            n0 = len(_defter_kayitlari(kol))
-            _defterde(kol, testbot.yonet_acik_pozisyonlar, st)
-            yeni_kayitlar[kol] = _defter_kayitlari(kol)[n0:]
-        fren_kontrol(st)
+    yeni_kayit = []
+    if st["acik_pozisyonlar"]:
+        n0 = len(_defter_kayitlari())
+        _defterde(testbot.yonet_acik_pozisyonlar, st)
+        yeni_kayit = _defter_kayitlari()[n0:]
+    fren_kontrol(st)
 
-    # 2) TEK TARAMA — iki kol AYNI adaylari gorur (tek degisken skor kapisi kalsin)
-    aktif = [k for k, s in durumlar.items()
-             if s["durum"] == "AKTIF" and len(s["acik_pozisyonlar"]) < MAKS_POZ]
-    if aktif:
+    if st["durum"] == "AKTIF" and len(st["acik_pozisyonlar"]) < MAKS_POZ:
         try:
             rows, pillars = tara()
         except Exception as e:
-            print("[notrlong] tarama hatasi (tur atlandi): %s" % str(e)[:100])
+            print("    tarama hatasi (tur atlandi): %s" % str(e)[:100])
             rows, pillars = [], {}
         if rows:
             _pr = evren.para_rejim()
@@ -414,22 +396,17 @@ def tur():
                 bp = evren.btc_pay_akisi()
             except Exception:
                 bp = None
-            baglam = {"para_cikis": bool(_pr and _pr.get("rejim") == "PARA CIKIYOR"),
-                      "para_durgun": bool(_pr and _pr.get("rejim") == "PARA DURGUN"),
-                      "btc_pay": bp}
-            for kol in aktif:
-                giris_ara(kol, durumlar[kol], rows, pillars, baglam)
+            giris_ara(st, rows, pillars, {
+                "para_cikis": bool(_pr and _pr.get("rejim") == "PARA CIKIYOR"),
+                "para_durgun": bool(_pr and _pr.get("rejim") == "PARA DURGUN"),
+                "btc_pay": bp})
 
-    # 3) KAYDET + LOG + BILDIR
-    for kol, st in durumlar.items():
-        st["son_cycle_ts"] = testbot.now_iso()
-        kaydet(kol, st)
-        equity_yaz(kol, st)
-        kapanis_bildir(kol, yeni_kayitlar[kol], st)
-    print("    tur bitti %.1f sn | n1 acik=%d equity=%.2f | n2 acik=%d equity=%.2f"
-          % (time.time() - t0,
-             len(durumlar["n1"]["acik_pozisyonlar"]), durumlar["n1"]["equity"],
-             len(durumlar["n2"]["acik_pozisyonlar"]), durumlar["n2"]["equity"]))
+    st["son_cycle_ts"] = testbot.now_iso()
+    kaydet(st)
+    equity_yaz(st)
+    kapanis_bildir(yeni_kayit, st)
+    print("    tur bitti %.1f sn | acik=%d equity=%.2f"
+          % (time.time() - t0, len(st["acik_pozisyonlar"]), st["equity"]))
     return True
 
 
@@ -446,61 +423,56 @@ def _karne(kayitlar):
         out[i] = {"sym": s.get("sym"), "sebep": s.get("sebep"),
                   "net": sum(t.get("sonuc_usdt") or 0 for t in v),
                   "fon": sum(t["funding_usdt"] for t in v
-                             if t.get("funding_usdt") is not None)}
+                             if t.get("funding_usdt") is not None),
+                  "skor": s.get("skor_giriste")}
     return out
 
 
 def durum():
-    print("=== NOTR-LONG BOTU (on-kayit 4927f3d) ===")
+    st = yukle()
+    if not st:
+        print("NOTR-LONG: henuz baslatilmadi ('python notrlong.py --baslat').")
+        return
+    poz = _karne(_defter_kayitlari())
+    v = list(poz.values())
+    net = sum(p["net"] for p in v)
+    print("=== NOTR-LONG BOTU (on-kayit 4927f3d, bolum 11 ile TEK KOL) ===")
     print("Karar: rejim ZORLA %s · YALNIZ LONG · sabit %%%.0f hedef · kismi kar KAPALI"
           % (REJIM_ZORLA, SABIT_HEDEF_PCT))
-    print("Kol farki: N1 skor kapisi YOK · N2 skor >= %.0f" % SKOR_KAPISI)
+    print("EK SKOR KAPISI YOK (on-kayit bolum 11 — kullanici karari 2026-09-06)")
     print()
-    print("  %-5s %-8s %10s %6s %6s %11s %9s %10s"
-          % ("kol", "durum", "equity", "acik", "poz", "net $", "kazanan", "fonlama"))
-    for kol in KOLLAR:
-        st = yukle(kol)
-        if not st:
-            print("  %-5s (baslatilmadi)" % kol)
-            continue
-        poz = _karne(_defter_kayitlari(kol))
-        v = list(poz.values())
-        net = sum(p["net"] for p in v)
-        kaz = (100.0 * sum(1 for p in v if p["net"] > 0) / len(v)) if v else 0
-        fon = sum(p["fon"] for p in v)
-        print("  %-5s %-8s %10.2f %6d %6d %+11.2f %8.0f%% %+10.2f"
-              % (kol, st["durum"], st["equity"], len(st["acik_pozisyonlar"]),
-                 len(v), net, kaz, fon))
+    print("Durum : %s | Bakiye: $%.0f -> $%.2f | Acik: %d/%d"
+          % (st["durum"], st["baslangic_bakiye"], st["equity"],
+             len(st["acik_pozisyonlar"]), MAKS_POZ))
+    print("Kapanan pozisyon: %d / 80   ·   Toplam P&L: %+.2f$" % (len(v), net))
+    if v:
+        kaz = sum(1 for p in v if p["net"] > 0)
+        print("Kazanan: %d (%%%.0f)  ·  Fonlama: %+.2f$"
+              % (kaz, 100.0 * kaz / len(v), sum(p["fon"] for p in v)))
     print()
-    for kol in KOLLAR:
-        st = yukle(kol)
-        if not st or not st["acik_pozisyonlar"]:
-            continue
-        print("  --- %s acik pozisyonlar ---" % kol)
-        for p in st["acik_pozisyonlar"]:
-            px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
-            print("   %-10s %-5s %sx giris=%.6g anlik=%.6g PnL=%+.2f$ stop=%.6g hedef=%.6g"
-                  % (p["sym"], p["yon"], p.get("kaldirac"), p["giris"], px,
-                     (px - p["giris"]) * p["miktar"], p["stop"], p.get("tp2") or 0))
+    for p in st["acik_pozisyonlar"]:
+        px = testbot.fiyat_fapi(p["sym"]) or p["giris"]
+        print("  %-10s %-5s %sx giris=%.6g anlik=%.6g PnL=%+.2f$ stop=%.6g hedef=%.6g"
+              % (p["sym"], p["yon"], p.get("kaldirac"), p["giris"], px,
+                 (px - p["giris"]) * p["miktar"], p["stop"], p.get("tp2") or 0))
     print()
-    print("UYARI: Pencere: 30 gun VE kol basina >=80 KAPANMIS pozisyon — IKISI BIRDEN")
-    print("   dolmadan hukum YOK (on-kayit bolum 5).")
+    print("Pencere: 30 gun VE >=80 KAPANMIS pozisyon - IKISI BIRDEN dolmadan")
+    print("hukum YOK (on-kayit bolum 5).")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--baslat", action="store_true", help="iki kasayi ILK KEZ olustur")
+    ap.add_argument("--baslat", action="store_true", help="kasayi ILK KEZ olustur")
     ap.add_argument("--tur", action="store_true")
     ap.add_argument("--durum", action="store_true")
     a = ap.parse_args()
     if a.baslat:
-        for kol in KOLLAR:
-            if yukle(kol):
-                print("NOTRLONG-%s zaten var — atlandi (kasa SIFIRLANMADI)." % kol.upper())
-            else:
-                kaydet(kol, yeni_state())
-                print("NOTRLONG-%s olusturuldu: %s" % (kol.upper(), _yol(kol, "state.json")))
+        if yukle():
+            print("NOTRLONG zaten var - atlandi (kasa SIFIRLANMADI).")
+        else:
+            kaydet(yeni_state())
+            print("NOTRLONG olusturuldu: %s" % STATEF)
     elif a.tur:
-        print("tur tamam" if tur() else "kasa yok — once --baslat")
+        print("tur tamam" if tur() else "kasa yok - once --baslat")
     else:
         durum()
