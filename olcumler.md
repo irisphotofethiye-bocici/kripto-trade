@@ -10436,3 +10436,64 @@ dersinin tekrarı: *"yeni bilgi taşımak"* ile *"kullanışlı olmak"* ayrı ş
 - Çoklu karşılaştırma **18 hücre** (ön-kayıtta ilan edilmişti).
 
 **Bot dosyalarına yazım: YOK.**
+
+---
+
+### 🟡 BOĞA BACAĞI — 14 GÜNLÜK PENCEREMİZ DOSYAYLA KIYASLANAMIYOR (2026-09-06)
+
+**Tür:** 🟡 **BETİMLEYİCİ** — ön-kayıt yok, hüküm yok, kural çıkmaz.
+**Betik:** `scratchpad/boga_bacagi_bugun.py`
+**Tetikleyen:** kullanıcı — *"elimizdeki 14 günlük boğa verisi burdakiyle tutuyor mu?"*
+
+#### 1 · Örtüşme YOK
+
+```
+boga_bacagi_islemler.json : 2019-07-23 .. 2026-07-13   (N=410)
+bizim pencere             : 2026-08-22 .. 2026-09-04
+ortak kayit               : 0
+```
+
+Aynı işlemleri kıyaslamak **mümkün değil**. Yapılabilen tek şey aynı kuralı
+boşluk döneminde koşturmaktı.
+
+#### 2 · Kural taze veride koşuldu — ama N çok küçük
+
+Önbellek `2026-08-09`'da bitiyordu; **ezmeden** birleştirildi (+5.546 bar,
+artık `2026-09-06`'ya kadar).
+
+```
+bosluk (2026-07-14 -> bugun)  COZULEN  N=1   net +1,976
+                              KIRPIK   N=3   net +0,358   (30 gunu dolduramadi)
+BIZIM 14 GUN                           N=1   net +0,973   (NEAR, 08-22, 16 gun)
+```
+
+🔴 **Pencerede 25 büyük sembolde toplam BİR tetik oluştu.** F1'in örnekleme
+hızı bunu açıklıyor: 2020-21'de 19 ayda 132 işlem ≈ ayda 7. 14 günde beklenen
+~3; biz 1 gördük. **N=1 hiçbir şey söylemez** — *"tutuyor mu"* sorusu bu kural
+için **cevapsız**.
+
+#### 3 · 🔑 KIYAS YERİNE ASIL BULGU — dosyanın kendi son dönemi
+
+```
+[dosya] 2020-21 BOGA   N=132  net +0,299  kazanan %45
+[dosya] 2023-24 BOGA   N=170  net +0,071  kazanan %39
+[dosya] 2022 AYI       N= 31  net +0,072  kazanan %39
+[dosya] 2025-26 SON    N= 62  net -0,531  kazanan %16   <- KESKIN AYRISMA
+```
+
+**2025-26 dönemi geçmiş boğalardan keskin biçimde ayrışıyor** ve bu N=62'ye
+dayanıyor, N=1'e değil. Kazanma oranı %39-45'ten **%16**'ya düşmüş.
+
+⚠️ Bu bir hüküm değil — dönem ayrımı takvimseldi ve `2025-26 SON` etiketi
+orijinal ölçümde kurulmuştu. Ama *"bugünkü boğa 2021 boğasına benziyor mu"*
+sorusuna eldeki en iyi veri bu ve cevabı **hayır** yönünde.
+
+#### 4 · SINIRLAR
+
+- **N=1** — pencere ölçüm için değil, kuralın örnekleme hızı için kısa.
+- Kural **spot günlük** barla ölçülüyor; bot **perp saatlik** ile çalışıyor.
+- `KIRPIK` kayıtlar 30 günü dolduramadı, ayrı tutuldu — karıştırmak yanlı olurdu.
+- Orijinal hüküm **KALDI** (`olcumler.md:132`): +0,046R vs kontrol +0,062R.
+  Bu betik o hükmü **değiştirmez**.
+
+**Bot dosyalarına yazım: YOK** (yalnız `klines_cache` birleştirilerek güncellendi).
