@@ -10565,3 +10565,76 @@ terminal darboğaz yaşıyor (stage+skor geçen 6 adayın 6'sı burada öldü).
 
 **Karar verilmedi** — kaldırma `notrlong`'un hangi işlemi açacağını değiştirir
 (D/8 → pencere sıfırlanır) ve kullanıcı onayı gerektirir.
+
+---
+
+## FONLAMA + LONG/SHORT BİRİKMESİ — 2026-09-06 · **HÜKÜM YOK** (negatif kontrol düşürdü)
+
+**Ön-kayıt:** `ON_KAYIT_funding_ls_birikme.md` · commit `19bbb73` — koşumdan **önce**
+**Betikler:** `scratchpad/fund_ls/01_mum_indir.py` · `02_olcum.py` · çıktı `sonuc.txt`
+**Soru:** `funding` · `oi24` · `oi3` · `top_ls` · `glob_ls` · `top_ls−glob_ls`
+NOTR-LONG için ileri getiriye bilgi taşıyor mu?
+
+**N = 229.754 kayıt · 73 gün · 460 sembol.** Zaman hizası doğrulandı (`+3 sa`,
+medyan bağıl hata `0,00352`).
+
+#### 🔴 G5 DÜŞTÜ — hüküm yazılmadı
+
+| negatif kontrol | sabitlenmiş rho | eşik `0,020` |
+|---|---|---|
+| `vol_x` (yön avında rastgele ölçülmüştü) | **+0,0664** | **GEÇTİ (kötü)** |
+| `funding_karisik` (gün içi permütasyon) | **+0,0272** | **GEÇTİ (kötü)** |
+
+Ön-kayıt bölüm 8: negatif kontrol eşiği geçerse **ölçüm çöpe atılır**. Atıldı.
+
+#### Neden düştü — SAHTE TEKRAR (pseudo-replication)
+
+```
+kayit                : 230.582
+tekil sembol-gun     :   5.082
+kayit / sembol-gun   :    45,4      <- her gozlem ~45 kez tekrarlaniyor
+ardisik iki kayit +24s getirinin 23,75 SAATINI paylasiyor
+
+varsayilan MDE (bagimsizlik varsayimi) : 0,0058   <- ON-KAYITTA BUNU KULLANDIM
+sembol-gun bazli MDE                   : 0,0393
+permutasyonun OLCTUGU gercek taban     : 0,0272
+```
+
+🔴 **Etki tabanını (`0,020`) yine gürültü tabanının ALTINA koydum.** `taker`
+ön-kaydında MDE'yi hiç hesaplamamıştım; burada hesapladım ama **bağımsızlık
+varsaydım** — 15 dakikada bir örneklenen, 24 saatlik örtüşen getiriler
+bağımsız değil. **Aynı hata sınıfı, arka arkaya ikinci kez.**
+
+#### 🔑 En güvenilir satır: GÜN-KÜMELİ t — hepsi düştü
+
+Kümelemeyi doğru yapan tek istatistik ve **hiçbir değişken geçmedi**:
+
+```
+funding +1,22 · oi3 +1,25 · komp -1,38 · top_ls -0,31 · glob_ls -0,45
+oi24    -0,29 · vol_x -0,78 · funding_karisik -0,02      (esik |t| >= 2,0)
+```
+
+Bu, negatif kontrol arızasıyla **tutarlı**: rho büyük görünüyor çünkü N şişik;
+gün bazında kümelenince ortada bir şey kalmıyor.
+
+#### Betimleyici — hüküm DEĞİL, ileride kullanılmak üzere
+
+`funding` sabitlenmiş rho `+0,0567`, merdivende **5/5** aynı işaret, iki
+yarıda da pozitif (`A +0,0257` · `B +0,0643`) ve permütasyon tabanının
+(`0,0272`) **iki katı**. `oi24` `−0,0301`, 5/5, iki yarıda da negatif.
+İkisi de A+B kapısının bacakları — geçerlerse bile *"yeni sinyal"* değil,
+*"bilinen kenarın LONG aynası"* olurdu.
+
+⚠️ `glob_ls` ve `komp` **iki yarıda işaret DÖNDÜRDÜ** → G2 zaten düşmüştü.
+`komp` için `CLAUDE.md`'nin *"bulgu yok"* kaydı **değişmedi**.
+
+#### Doğru tasarım ne olurdu (yeniden koşulursa)
+
+1. **Sembol-gün başına TEK gözlem** (örtüşen getiri yok)
+2. Analitik MDE yerine **permütasyon/blok-bootstrap ile ampirik null**
+3. Etki tabanı o null'dan **türetilir**, önceden uydurulmaz
+
+Bu üçü olmadan `radar_archive` üzerinde rho tabanlı hiçbir tarama güvenilir
+değildir — **daha önce yapılmış rho tabanlı ölçümler de bu ışıkta yeniden
+okunmalıdır** (basis `−0,0152`, çapraz borsa `+0,0108`, OBI `−0,0077`:
+üçü de burada ölçülen `0,027` gürültü tabanının **altında**).

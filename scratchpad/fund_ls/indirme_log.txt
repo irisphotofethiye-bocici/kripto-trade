@@ -1,0 +1,35 @@
+================================================================================
+FUNDING + L/S OLCUMU — ileri fiyat mumlari (on-kayit 19bbb73)
+================================================================================
+arsiv sembolu       : 461
+cikti dizini        : C:\Users\alper\Desktop\kripto trade\scratchpad\fund_ls\klines
+🔴 klines_1h_uzun'a DOKUNULMUYOR
+
+   16/461 AERGO      HATA: HTTP 400: https://fapi.binance.com/fapi/v1/klines?symbol=AERGOUSDT&interval=1h&startTime=1781913600000&limit=1500
+   20/461 AIA        1886 bar (eski 0)
+   40/461 AR         1886 bar (eski 0)
+   60/461 AXS        1886 bar (eski 0)
+   80/461 BILL       1886 bar (eski 0)
+  100/461 CAKE       1886 bar (eski 0)
+  120/461 CRV        1886 bar (eski 0)
+  140/461 EGLD       1886 bar (eski 0)
+  160/461 FET        1886 bar (eski 0)
+  180/461 GPS        1886 bar (eski 0)
+  200/461 ICNT       1886 bar (eski 0)
+  220/461 KAVA       1886 bar (eski 0)
+  240/461 MANTA      1886 bar (eski 0)
+  260/461 MOVE       1886 bar (eski 0)
+  280/461 NVDA       1886 bar (eski 0)
+  300/461 PEOPLE     1886 bar (eski 0)
+  320/461 QNT        1886 bar (eski 0)
+  340/461 S          1886 bar (eski 0)
+  360/461 SNXX       1416 bar (eski 0)
+  380/461 SUI        1886 bar (eski 0)
+  400/461 TRB        1886 bar (eski 0)
+  420/461 VANA       1886 bar (eski 0)
+  440/461 XRP        1886 bar (eski 0)
+  460/461 牛来         171 bar (eski 0)
+  461/461 龙虾         1886 bar (eski 0)
+
+bitti: 460 basarili · 1 hata
+Bot dosyalarina yazim: YOK · eski mum dizini degismedi

@@ -1,0 +1,87 @@
+====================================================================================================
+FONLAMA + LONG/SHORT BIRIKMESI — ON_KAYIT_funding_ls_birikme.md (19bbb73)
+🔴 TARAMA. Gecen degisken bile BOTA EKLENMEZ; ayri on-kayitla mekanikli olculur.
+====================================================================================================
+mum dosyasi: 460 sembol
+ileri getirisi hesaplanabilen kayit: 229754
+
+### 0) ZAMAN DAMGASI HIZASI (kayma +3 sa, on-kayit bolum 4)
+   medyan bagil hata: 0.00352   (ust sinir 0.010)
+   -> hiza dogrulandi
+
+### 1) POPULASYONLAR ve GUC
+   pop                N     gun gorulebilir rho
+   P1 TAM        229754      73         0.0058
+   P2 GENIS        1653      67         0.0689
+   P3 DAR           956      57         0.0907
+
+### 2) 🔴 BIRINCIL SONUC — P1 · +24s · last1 SABITLENMIS (G1)
+   degisken                 N    ham rho  SABIT rho        MDE   G1 (>=0.020)
+   funding             225301    +0.0583    +0.0567     0.0059   GECTI  
+   oi24                225286    -0.0302    -0.0301     0.0059   GECTI  
+   oi3                 225286    +0.0187    +0.0162     0.0059   dustu  
+   top_ls               56064    +0.0290    +0.0270     0.0118   GECTI  
+   glob_ls              56054    +0.0020    -0.0000     0.0118   dustu  
+   komp                 56043    +0.0089    +0.0087     0.0118   dustu  
+   vol_x               225385    +0.0507    +0.0664     0.0059   GECTI  NEG-KONTROL
+   funding_karisik     225301    +0.0264    +0.0272     0.0059   GECTI  NEG-KONTROL
+
+### 3) KARARLILIK — iki zaman yarisi (G2)
+   A: 2026-06-24 .. 2026-08-06 (N=111824)  ·  B: 2026-08-06 .. 2026-09-06 (N=117930)
+   degisken           A (sabit)   B (sabit)   G2
+   funding              +0.0257     +0.0643   AYNI
+   oi24                 -0.0273     -0.0300   AYNI
+   oi3                  +0.0324     +0.0010   AYNI
+   top_ls               +0.0249     +0.0048   AYNI
+   glob_ls              -0.0055     +0.0023   DONDU
+   komp                 +0.0172     -0.0152   DONDU
+   vol_x                +0.0340     +0.0428   AYNI
+   funding_karisik      +0.0037     +0.0225   AYNI
+
+### 4) UFUK MERDIVENI — P1, last1 sabitlenmis (G3)
+   degisken               +1s       +4s      +12s      +24s      +48s   G3
+   funding            +0.0310   +0.0459   +0.0574   +0.0567   +0.0424   5/5 OK
+   oi24               -0.0073   -0.0104   -0.0192   -0.0301   -0.0270   5/5 OK
+   oi3                +0.0093   +0.0119   +0.0186   +0.0162   +0.0148   5/5 OK
+   top_ls             +0.0275   +0.0351   +0.0454   +0.0270   +0.0135   5/5 OK
+   glob_ls            +0.0010   -0.0035   -0.0037   -0.0000   -0.0117   4/5 OK
+   komp               +0.0153   +0.0253   +0.0277   +0.0087   +0.0073   5/5 OK
+   vol_x              +0.0265   +0.0368   +0.0679   +0.0664   +0.0909   5/5 OK
+   funding_karisik    +0.0159   +0.0231   +0.0219   +0.0272   +0.0202   5/5 OK
+
+### 5) GUN-KUMELI t — medyan bolme, P1, +24s (G4)
+   degisken                  t      gun   G4 (|t|>=2,0)
+   funding               +1.22       72   dustu
+   oi24                  -0.29       72   dustu
+   oi3                   +1.25       72   dustu
+   top_ls                -0.31       65   dustu
+   glob_ls               -0.45       65   dustu
+   komp                  -1.38       65   dustu
+   vol_x                 -0.78       72   dustu
+   funding_karisik       -0.02       72   dustu
+
+### 6) P2/P3 — karar ilgisi (hukum KURMAZ, MDE ustunde degilse 'goremiyoruz')
+   --- P2 GENIS (N=1653 · MDE 0.0689) ---
+      funding          N= 1643  sabit rho  +0.2268  MDE 0.0691  -> GORULUR
+      oi24             N= 1643  sabit rho  +0.0395  MDE 0.0691  -> goremiyoruz
+      oi3              N= 1643  sabit rho  +0.2273  MDE 0.0691  -> GORULUR
+      top_ls           N= 1610  sabit rho  +0.0031  MDE 0.0698  -> goremiyoruz
+      glob_ls          N= 1609  sabit rho  -0.1142  MDE 0.0699  -> GORULUR
+      komp             N= 1609  sabit rho  +0.1674  MDE 0.0699  -> GORULUR
+   --- P3 DAR (N=956 · MDE 0.0907) ---
+      funding          N=  946  sabit rho  +0.1848  MDE 0.0912  -> GORULUR
+      oi24             N=  946  sabit rho  -0.1063  MDE 0.0912  -> GORULUR
+      oi3              N=  946  sabit rho  +0.1512  MDE 0.0912  -> GORULUR
+      top_ls           N=  946  sabit rho  +0.1630  MDE 0.0912  -> GORULUR
+      glob_ls          N=  945  sabit rho  -0.0805  MDE 0.0912  -> goremiyoruz
+      komp             N=  945  sabit rho  +0.2060  MDE 0.0912  -> GORULUR
+
+====================================================================================================
+HUKUM — ON_KAYIT bolum 6 (olcutler kosumdan once sabitti)
+====================================================================================================
+   NEGATIF KONTROLLER (cift yonlu, |rho| >= 0.020 duser):
+      vol_x            sabit rho  +0.0664 -> 🔴 GECTI (kotu)
+      funding_karisik  sabit rho  +0.0272 -> 🔴 GECTI (kotu)
+
+   🔴 G5 DUSTU — negatif kontrol(ler) esigi gecti: vol_x, funding_karisik
+   HUKUM YAZILMAZ.
