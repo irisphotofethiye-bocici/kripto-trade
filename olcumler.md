@@ -10497,3 +10497,71 @@ sorusuna eldeki en iyi veri bu ve cevabı **hayır** yönünde.
   Bu betik o hükmü **değiştirmez**.
 
 **Bot dosyalarına yazım: YOK** (yalnız `klines_cache` birleştirilerek güncellendi).
+
+---
+
+## TAKER ≥ 1.0 KAPISI — 2026-09-06 · **DÜŞTÜ (5/5)** ama ÖN-KAYIT KUSURLU
+
+**Ön-kayıt:** `ON_KAYIT_taker_kapisi.md` · commit `08c8876` — koşumdan **önce**
+**Betikler:** `scratchpad/taker/00_yoklama.py` · `01_mum_indir.py` · `02_olcum.py`
+**Soru:** NOTR-LONG zincirinin son kapısı `taker ≥ 1.0` bilgi taşıyor mu?
+
+**N = 956 aday · 57 gün · 121 sembol · 378 (`≥1.0`) / 578 (`<1.0`)**
+Popülasyon: `stage` aktif + skor eşiği + `smart == LONG` (kapının **önündeki** zincir).
+
+#### Hüküm
+
+| # | ölçüt | eşik | sonuç |
+|---|---|---|---|
+| K1 | ham fark > 0 (+24s) | >0 | **DÜŞTÜ** `−0,353` |
+| K2 | `last1` sabitlenmiş fark | ≥ +0,30 | **DÜŞTÜ** `−0,293` |
+| K3 | gün-kümeli t | ≥ +2,0 | **DÜŞTÜ** `−0,79` (39 gün) |
+| K4 | merdivende ≥3 basamak aynı işaret | evet | **DÜŞTÜ** `1/5` |
+| K5 | en iyi 2 gün çıkınca hâlâ K1 | evet | **DÜŞTÜ** `−0,807` |
+
+Ufuk merdiveni (ham fark): `+1s −0,124` · `+4s −0,148` · `+12s **+0,897**` ·
+`+24s −0,353` · `+48s −0,531`. Sabitleyicilerin **dördü de** negatif
+(`last1 −0,293` · `last3 −0,209` · `pos −0,420` · `vol_x −0,485` · `chg24 −0,614`).
+
+#### 🔴 ÖN-KAYITIN KUSURU — etki tabanını MDE'den ÖNCE koydum
+
+```
++24s SE = 0,916 puan   ->   MDE (2,8*SE) = 2,57 puan
+on-kayitta koydugum etki tabani = 0,30 puan
+0,30'u gormek icin gereken N ~ 69.000  (mevcudun 73 KATI)
+```
+
+**K2 daha yazıldığı anda geçilemezdi** — etki tabanı örneklemin görebileceğinin
+**sekizde biri**. Bu, ölçümün değil **ön-kaydın** hatası ve aynen kayda geçiyor.
+
+**Bu yüzden doğru okuma şudur:** `|−0,353| ≪ MDE` → *"göremiyoruz"*,
+**"etki yok" DEĞİL**. Söylenebilen tek şey: **+2,57 puandan büyük bir yarar
+YOK** — o büyüklükte olsa görülürdü.
+
+#### Ne KULLANILMADI
+
+- `+12s` tek başına pozitif (`+0,897`, t=1,99). **Seçilmedi** — "en iyi hücre
+  seçilmez"; merdivenin 4/5 basamağı ters işaretli.
+- Ters işaret **kural yapılmadı** (ön-kayıt bölüm 9 uyarısı): tek pencere.
+
+#### Zaman damgası hizası — zorunlu doğrulama
+
+`radar_archive.ts` **yerel (UTC+3)** çıktı: kayma `+3 sa` medyan bağıl hata
+`0,00502`, `0 sa` ile `0,01747`. Bu sınama yapılmasa **tüm ileri getiri 3 saat
+kayardı**. `create_time` dersinin (metrics arşivi, −5 dk) aynı sınıfı.
+
+#### Negatif kontrol — ön-kayıt gereği geçti, ama tasarımı zayıftı
+
+`glob_ls` aynı eşikle: ham `−1,802`, sabitlenmiş `−2,530`. K2 (`≥ +0,30`)
+geçilmedi → düzenek "sağlam" sayıldı. ⚠️ **Ama ölçüt tek yönlüydü**;
+`|−2,53|` büyük bir nokta tahmini ve "hiçbir şey" demek değil. Kollar
+784/160 ile çok dengesiz. Negatif kontrol ölçütü **çift yönlü** yazılmalıydı.
+
+#### Sonuç ve etkisi
+
+Kapı **ölçülebilir bir yarar göstermiyor** ve adayların **%56'sını** kesiyor
+(arşiv tabanı: `smart-LONG 367 → taker≥1.0 161`). `notrlong` bu kapıda
+terminal darboğaz yaşıyor (stage+skor geçen 6 adayın 6'sı burada öldü).
+
+**Karar verilmedi** — kaldırma `notrlong`'un hangi işlemi açacağını değiştirir
+(D/8 → pencere sıfırlanır) ve kullanıcı onayı gerektirir.
