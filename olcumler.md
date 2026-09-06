@@ -11418,3 +11418,73 @@ bununla **düzeltilmiştir**.
   Bugüne kadar hep stop üzerinden dolaylı bakıldı.
 
 Çıkış/stop varyantı sayacı: **34 varyantta 1 geçti.**
+
+---
+
+## `ATR/FİYAT` GİRİŞ FİLTRESİ — 2026-09-06 · **GÖREMİYORUZ** · 🔑 bugünün EN GÜÇLÜ izi
+
+**Ön-kayıt:** `ON_KAYIT_atr_fiyat.md` · commit `8273a10` — koşumdan **önce**
+**Betik:** `scratchpad/atr_fiyat/01_olcum.py`
+**N = 2.082 · 72 gün** · keşif 1.006 · holdout 1.076
+🔴 Spearman **hesaplanmadı** (ortak payda tuzağı, ön-kayıt bölüm 2)
+
+### Hüküm
+
+```
+V1 holdout fark > 0            GECTI   +0,6605
+V2 gun-kumeli t >= 2,0         DUSTU   t = +1,38  (yalniz 25 gunde iki hucre de dolu)
+V3 |fark| > MDE                GECTI   0,6605 > 0,4956   <- BUGUN ILK KEZ
+V4 kesif+holdout ayni isaret   GECTI
+V5 negatif kontrol temiz       GECTI   sahte fark +0,1183 · t -0,87
+                                       -> GOREMIYORUZ
+```
+
+### 🔑 HOLDOUT'ta MONOTON
+
+```
+ort ATR%      ort R       net%    isabet%   amp.basabas
+   1,70     +0,5096    +1,179%     26,5%       22,5%     -> +4,0 FAZLA
+   2,40     +0,2352    +0,841%     27,9%       27,8%
+   3,14     -0,0843    -0,491%     23,7%       29,9%
+   4,16     -0,0746    -0,516%     26,5%       31,6%
+   7,08     -0,1509    -0,713%     33,3%       40,8%     -> -7,5 EKSIK
+```
+
+**Beş dilim, kusursuz sıralı.** Ve mekanizma ampirik başabaşta görünüyor:
+**oynak coinler DAHA SIK isabet ediyor** (`%33,3` vs `%26,5`) ama başabaşları
+çok daha yüksek (`%40,8` vs `%22,5`) → net **kaybediyorlar**.
+
+Keşifte monotonluk yok, **ama en düşük dilim orada da tek pozitif hücre**
+(`+0,0205`, taban `−0,158` iken).
+
+### Neden düştü
+
+`V2` — gün-kümeli `t = +1,38`. Holdout'ta **iki hücrenin de dolu olduğu
+yalnız 25 gün** var. Bu bir **gün sayısı** sorunu, etki sorunu değil.
+
+⚠️ Ve dürüstlük: keşif yarısında ham fark pozitif (`+0,1720`) ama **gün-kümeli
+`t` NEGATİF** (`−0,41`). Yani keşifte gün gün tutarlı değil. `V4` ham işaretle
+tanımlanmıştı ve geçti; gün düzeyinde geçmezdi.
+
+### `ATR/fiyat` ile `stop_pct` aynı şey mi? — **kısmen**
+
+```
+ATR% medyan 3,21 · stop% medyan 3,58
+stop/ATR orani: medyan 1,50 · p25 0,92 · p75 1,50
+stop = 1,5 x ATR olan (ATR yedegi baglamis) pay: %56,4
+```
+
+Yarısında aynı, yarısında değil (yapısal stop daha yakın). Yani bu, tam olarak
+`genis_stop` ölçümünün yeniden etiketlenmiş hâli **değil** — ama akrabası.
+
+### 🔑 Bugünün on üç ölçümü içinde konumu
+
+Bu, **MDE'yi aşan tek ölçüm**. Ve destekleyen üç bağımsız bulgu var:
+`R(m)` mekanizma tablosu · `geniş stop eleme` (t −1,44) · `stop mesafesi LONG`
+(stop genişletilse de sakin hücre en iyi → karıştırıcı elendi).
+
+**Eksik olan tek şey gün sayısı.** `radar_archive` her gün büyüyor;
+~110 günle `V2` yeniden sınanabilir.
+
+🔴 **Kural çıkarılmadı** (`V2` düştü, şüphede statüko). Ama bugün *"bakmaya
+değer"* diyebileceğim tek iz budur.
