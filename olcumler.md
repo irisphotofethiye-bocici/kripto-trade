@@ -11870,3 +11870,80 @@ kurulmuştu) — sınama doğru davranıp **dışladı**.
 kayda geçti: sorun *"kilit fikri"* değil, **aralığın ATR'ye göre çok dar
 olması**. Aralık ATR cinsinden tanımlansaydı (örn. `1,0 × ATR`) davranış
 bambaşka olurdu. Bu **ölçülmedi**, öneri olarak duruyor.
+
+---
+
+## KÂR KİLİDİNİN ARALIĞI — 2026-09-07 · **DÜŞTÜ** (ve kilit REJİME BAĞLI çıktı)
+
+**Ön-kayıt:** `ON_KAYIT_kilit_aralik.md` · `eb990f7` + düzeltme `04af05b`
+**Betik:** `scratchpad/kilit_aralik/01_olcum.py`
+**N = 2.082 · 72 gün** · keşif 1.006 · holdout 1.076 · **eşleşmiş** tasarım
+
+### Zorunlu sınama bir tasarım hatamı yakaladı
+
+İlk koşumda betik **çalışmayı reddetti**: merdiveni `G0.35 ≤ G1.00 ≤ G1.50
+≤ GBE` diye ilan etmiştim ama tetik `1,2 ATR` olduğu için `G1.50` stopu
+girişin **0,3 ATR altına** düşüyor — `GBE`'den de aşağı. Düzeltme
+koşumdan **önce**, sonuç görülmeden commit edildi (`04af05b`); ölçüt
+değişmedi. 🔴 **`G1.50` bir "kâr kilidi" değildir — zarar kilitler.**
+
+### Hüküm
+
+```
+P1 holdout fark > 0            DUSTU   -0,3009
+P2 gun-kumeli t >= 2,0         DUSTU   -0,87
+P3 |fark| > MDE                GECTI   0,3009 > 0,2883
+P4 kesif+holdout ayni isaret   DUSTU   <- ISARET DONDU
+P5 permutasyon p < 0,05        DUSTU   p = 0,4175
+```
+
+**Aralığı ATR'ye bağlamak İŞE YARAMIYOR.** `G1.00` holdout'ta `A0`'ın
+**altında**.
+
+### 🔑 ASIL BULGU — kilit SİGORTADIR: kötü rejimde öder, iyi rejimde maliyet
+
+```
+              KESIF (taban -0,599)        HOLDOUT (taban +0,059)
+kol           fark      gun-t             fark      gun-t
+G0.35       +0,3237     +2,64            -0,2356    -0,56
+G1.00       +0,2346     +3,03            -0,3009    -0,87
+G1.50       +0,1507     +2,39            -0,3259    -1,56
+GBE         +0,1967     +2,82            -0,3256    -1,21
+```
+
+**Dört kolun DÖRDÜ de keşifte pozitif, holdout'ta negatif.** Ve taban iki
+yarı arasında `−0,599 → +0,059` kaydı (aynı `+0,66` kayması `giris_arama`'da
+da görülmüştü).
+
+🔑 Kilit **kaybeden rejimde kazandırıyor, kazanan rejimde kaybettiriyor.**
+Mekanik olarak tutarlı: kilit bir **sigortadır**. Ve bugünün canlı sonucunu
+da açıklıyor — bugün güçlü BOĞA, kilit `−538,77 $` yedi.
+
+⚠️ İşaret dönüşü tek başına kanıt değil (`p = 0,4175`); ama yön, mekanizma
+ve canlı gözlem **aynı yere** bakıyor.
+
+### 🔴 MEKANİZMA TABLOSU — faydanın TAVANI sabit
+
+```
+kol     kilit-stopla kapanan   A0'da HEDEF   A0'da STOP
+G0.35            358               156           156
+G1.00            291                97           156
+G1.50            251                64           156
+GBE              276                84           156
+                            (kural KESTI)  (kural KURTARDI)
+```
+
+🔑 **"Kurtardığı" sayı her kolda TAM 156 — değişmiyor.** Aralığı genişletmek
+yalnızca **kaç kazananı kestiğini** azaltıyor (`156 → 97 → 64`), kurtardığını
+**hiç artırmıyor**. Yani bu ailede *"en iyi aralık"* **sonsuzdur** — ki o da
+`A0`, yani **kilit yok**.
+
+⚠️ **Ölçülmeyen kol:** *"sadece %20 al, stopu HİÇ oynatma."* Kolların
+hepsinde `%20` erken alım **sabitti**; maliyetin ne kadarı stop oynatmadan,
+ne kadarı erken alımdan geliyor **ayrılmadı**. Ayrı bir ön-kayıt konusudur.
+
+### Karar
+
+**Kod değişmedi.** `P1`+`P4` düştü → hipotez düştü, şüphede statüko.
+Kullanıcının kuralı **yürürlükte kalıyor** (onun kararı); hakem `PENCERE-3`.
+Ön-kayıt sayacı: **on altı ön-kayıt, on altısı da geçemedi.**
