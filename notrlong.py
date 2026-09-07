@@ -87,6 +87,35 @@ SABIT_HEDEF_PCT = 10.0      # kismi kar KAPALI, iz-suren KAPALI
 TEKRAR_SAAT = 4.0
 REJIM_ZORLA = "NOTR"
 
+# --- KAR KILIDI (2026-09-07, KULLANICI KARARI) ------------------------------
+# Kullanici, kendi cumlesiyle:
+#   "ben 100 usd poz, 20 usd kazaninca pozun yuzde 20 sini alsin,
+#    yuzde 5 alta stop koysun demek istiyorum"
+#   "kendi actigim pozlarda da boyle yapacagim"
+#
+# 🔴 "POZ" = KOYULAN PARA = pos["marjin"].  NOTIONAL DEGIL.
+#   Dogrulandi: kullanici daha once "900 dolarlik pozda 90 dolarda kar" dedi;
+#   o pozisyonun (ARX) marjini 907,25 $ · notional'i 4.536,22 $ idi.
+#
+# Kural, kullanicinin 100 $ ornegiyle:
+#     TETIK : kar 20 $  (= koyulan paranin %20'si)
+#     ALIM  : pozisyonun %20'si kapanir (kalan %80 kosmaya devam)
+#     STOP  : "%5 alta"  ->  20 - 5 = 15 $ karda      (= %15 kar KILITLENIR)
+#
+# 🔴 NEDEN ROI (marjin yuzdesi), FIYAT YUZDESI DEGIL — hesaplandi ve gosterildi:
+#   "tetik fiyatinin %5 alti" okumasinda kilitlenen ROI = 20 - 5 x kaldirac.
+#   3x -> +5% · 4x -> 0% · 5x -> -5% · 6x -> -10% · 7x -> -15%
+#   Yani 3,8x ustunde kural KAR degil ZARAR kilitliyordu (TIA 6x: -90,16 $).
+#   Bot 3x-7x kullaniyor. Kullanici bunu gorup ROI okumasini secti.
+#
+# Fiyat karsiliklari (LONG):  tetik = G x (1 + 0.20/k)   stop = G x (1 + 0.15/k)
+# Kaldiractan BAGIMSIZ: her kaldiracta +%15 marjin kari kilitlenir.
+#
+# GERI ALMA: kripto-config.json -> esikler.kilit_tetik_roi: 0  (kural etkisiz kalir)
+KILIT_TETIK_ROI = 20.0      # kar marjinin yuzde kaci olunca tetiklensin
+KILIT_STOP_ROI = 15.0       # stop marjinin yuzde kac karina cekilsin
+KILIT_PAY = 0.20            # tetikte pozisyonun ne kadari kapansin
+
 STATEF = os.path.join(HERE, "notrlong_state.json")
 ISLEMLERF = os.path.join(HERE, "notrlong_islemler.jsonl")
 EQUITYF = os.path.join(HERE, "notrlong_equity.jsonl")
@@ -185,16 +214,143 @@ def _defterde(fn, *a, **kw):
        yani bu takas ayna sizintisini da kapatir (CLAUDE.md'de UC KEZ isiran sinif).
     """
     eski = (testbot._DEFTER, testbot.telegram_gonder,
-            testbot.toast_gonder, testbot.VETO_LOGF)
+            testbot.toast_gonder, testbot.VETO_LOGF,
+            testbot.pozisyon_kismi_tp1)
     testbot._DEFTER = ISLEMLERF
     testbot.telegram_gonder = _sessiz
     testbot.toast_gonder = _sessiz
     testbot.VETO_LOGF = VETOF
+    # [KAR KILIDI 2026-09-07] Kismi kar yolu BIZIM surumumuze yonlendirilir.
+    #   testbot.py'ye DOKUNULMAZ; takas finally ile geri alinir, yani
+    #   testbot/golge/benim/ayna defterleri BU KURALDAN ETKILENMEZ.
+    testbot.pozisyon_kismi_tp1 = _kilit_tp1
     try:
         return fn(*a, **kw)
     finally:
         (testbot._DEFTER, testbot.telegram_gonder,
-         testbot.toast_gonder, testbot.VETO_LOGF) = eski
+         testbot.toast_gonder, testbot.VETO_LOGF,
+         testbot.pozisyon_kismi_tp1) = eski
+
+
+# --- KAR KILIDI: seviyeler + testbot.pozisyon_kismi_tp1 YERINE gecen surum ---
+def _kilit_esik(ad, vars):
+    """Esik once config'ten, yoksa koddaki sabit. GERI ALMA tek satir."""
+    try:
+        return float(evren.esik(ad, vars))
+    except Exception:
+        return float(vars)
+
+
+def kilit_seviyeleri(giris, kaldirac, yon):
+    """-> (tetik_fiyat, kilit_stop_fiyat). Kural ROI tabanli, kaldiractan bagimsiz.
+
+    LONG :  tetik = G x (1 + tetik_roi/100/k)   stop = G x (1 + stop_roi/100/k)
+    SHORT:  simetrik (isaret ters). notrlong yalniz LONG acar; simetri yine de
+            yazildi ki fonksiyon baska yerde yanlis kullanilmasin.
+    """
+    tr = _kilit_esik("kilit_tetik_roi", KILIT_TETIK_ROI) / 100.0
+    sr = _kilit_esik("kilit_stop_roi", KILIT_STOP_ROI) / 100.0
+    if tr <= 0 or not giris or not kaldirac:
+        return None, None
+    isaret = 1 if yon == "LONG" else -1
+    return (giris * (1 + isaret * tr / kaldirac),
+            giris * (1 + isaret * sr / kaldirac))
+
+
+def _kilit_tp1(st, pos, cikis_fiyat_piyasa):
+    """testbot.pozisyon_kismi_tp1'in YERINE gecer (yalniz _defterde icinde).
+
+    Fark: yariyi degil KILIT_PAY kadarini kapatir, ve stopu basabasa degil
+    KILIT_STOP_ROI karina ceker. Muhasebe testbot ile BIREBIR ayni sirada:
+    equity += pnl_net · miktar azalir · marjin AYNI ORANDA azalir.
+
+    🔴 marjin da olceklenmek ZORUNDA: pozisyon_liq tam marjini siler
+    (testbot.py 2026-08-11 Bulgu 4). Miktar duserken marjin ayni kalirsa
+    likidasyonda zarar kat kat yazilir.
+    """
+    cst = testbot._maliyet()
+    taker = float(cst.get("taker_fee_pct", 0.045)) / 100.0
+    cikis_ef = testbot.maliyet_uygula_cikis(cikis_fiyat_piyasa, pos["yon"], cst)
+    pay = _kilit_esik("kilit_pay", KILIT_PAY)
+    pay = min(max(pay, 0.01), 0.99)
+    dilim = pos["miktar"] * pay
+    yon_isaret = 1 if pos["yon"] == "LONG" else -1
+    pnl_ham = (cikis_ef - pos["giris"]) * dilim * yon_isaret
+    ucret = dilim * cikis_ef * taker
+    pnl_net = pnl_ham - ucret
+
+    marjin_dilim = pos["marjin"] * pay          # kayda giren dilimin marjini
+    st["equity"] += pnl_net
+    pos["miktar"] -= dilim
+    pos["marjin"] = round(pos["marjin"] * (1 - pay), 2)
+
+    # --- STOP: kar bolgesine. Sadece LEHE oynatilir (asla geri cekilmez).
+    _, kilit_stop = kilit_seviyeleri(pos["giris"], pos.get("kaldirac"), pos["yon"])
+    if kilit_stop:
+        if pos["yon"] == "LONG":
+            pos["stop"] = round(max(pos["stop"], kilit_stop), 6)
+        else:
+            pos["stop"] = round(min(pos["stop"], kilit_stop), 6)
+    pos["tp1_alindi"] = True
+    pos["kilit_alindi"] = True
+    pos["kilit_ts"] = testbot.now_iso()
+
+    tutma = (testbot.now_dt() - testbot.parse_iso(pos["giris_ts"])).total_seconds() / 3600
+    kayit = {
+        "ts": testbot.now_iso(), "id": pos["id"], "sym": pos["sym"], "yon": pos["yon"],
+        "giris": round(pos["giris"], 6), "cikis": round(cikis_ef, 6),
+        "kaldirac": pos["kaldirac"], "marjin": round(marjin_dilim, 2),
+        "notional": round(dilim * pos["giris"], 2), "sonuc_usdt": round(pnl_net, 2),
+        "roi_pct": round(pnl_net / marjin_dilim * 100, 1) if marjin_dilim else None,
+        "r": None, "sebep": "KAR_KILIDI", "kismi": True, "kilit_pay": pay,
+        "yeni_stop": pos["stop"], "tutma_saat": round(tutma, 1),
+        "skor_giriste": pos.get("skor_giriste"), "smart_giriste": pos.get("smart_giriste"),
+        "chg24_giriste": pos.get("chg24_giriste"),
+        "range_pos_giriste": pos.get("range_pos_giriste"),
+        "stage_giriste": pos.get("stage_giriste"), "sebep_giris": pos.get("sebep_giris"),
+        "derinlik_giriste": pos.get("derinlik_giriste"),
+        "rejim_giriste": pos.get("rejim_giriste", "BILINMIYOR"),
+        "kaynak": pos.get("kaynak"), "stop_elle": pos.get("stop_elle"),
+        "funding_usdt": testbot._funding_dilim(pos),
+    }
+    testbot._append_jsonl(ISLEMLERF, kayit)
+    print("    KAR KILIDI %s: %%%.0f kapandi %+.2f$ · stop -> %.6f"
+          % (pos["sym"], pay * 100, pnl_net, pos["stop"]))
+
+
+def kilit_kur(pos):
+    """Pozisyona kilit seviyelerini yazar. Zaten kilit alinmissa DOKUNMAZ.
+
+    tp1 alanini tetik fiyatina cevirip tp1_alindi'yi False yapar; boylece
+    testbot'un MEVCUT bar dongusu (stop -> tp1 -> tp2 sirasi) kilidi dogru
+    ANDA tetikler. Sira testbot'ta zaten dogru: ayni barda stop varsa stop
+    once isler, ileri-bakis olmaz.
+    ⚠️ testbot bu modda tp1_efektif_hesapla'yi ATLAR (cikis_modu=sabit_hedef),
+       yani yazdigimiz tp1 uzerine yazilmaz.
+    """
+    if pos.get("kilit_alindi") or pos.get("tp1_alindi") is False:
+        return False
+    tetik, _ = kilit_seviyeleri(pos.get("giris"), pos.get("kaldirac"), pos.get("yon"))
+    if not tetik:
+        return False
+    pos["kilit_tetik"] = round(tetik, 6)
+    pos["tp1"] = round(tetik, 6)
+    pos["tp1_alindi"] = False          # kismi kar yolu ACIK -> kilit tetiklenebilir
+    return True
+
+
+def kilit_geri_doldur(st):
+    """Kural KONULMADAN ONCE acilmis pozisyonlara seviyeleri ekler.
+
+    🔴 Elle state duzenlemek YERINE botun KENDI turunda yapiliyor: es zamanli
+    yazim riski (check-then-act) hic dogmuyor.
+    """
+    n = 0
+    for pos in st.get("acik_pozisyonlar", []):
+        if kilit_kur(pos):
+            n += 1
+            print("    kilit geri-dolduruldu: %s tetik %.6f" % (pos["sym"], pos["tp1"]))
+    return n
 
 
 # ---------------------------------------------------------------------------
@@ -223,6 +379,10 @@ def sabit_hedef_kur(st, yon):
     pos["tp1_alindi"] = True          # kismi kar KAPALI (config kismi_pay BYPASS)
     pos["tp1"] = pos["tp2"]
     pos["kaynak"] = "notrlong"
+    # [KAR KILIDI 2026-09-07] tp1'i tetik fiyatina cevirir, tp1_alindi'yi False
+    #   yapar. SIRA ONEMLI: yukaridaki iki satirdan SONRA gelmeli, yoksa uzerine
+    #   yazilir. Kilit kapaliysa (config kilit_tetik_roi: 0) hicbir sey degismez.
+    kilit_kur(pos)
     return True
 
 
@@ -521,6 +681,10 @@ def tur():
 
     yeni_kayit = []
     if st["acik_pozisyonlar"]:
+        # [KAR KILIDI 2026-09-07] Kural konmadan ONCE acilmis pozisyonlara
+        #   seviyeleri BOTUN KENDI TURUNDA ekler (elle state duzenlemek yerine
+        #   -> es zamanli yazim riski yok). Idempotent: ikinci kez dokunmaz.
+        kilit_geri_doldur(st)
         n0 = len(_defter_kayitlari())
         _defterde(testbot.yonet_acik_pozisyonlar, st)
         yeni_kayit = _defter_kayitlari()[n0:]
