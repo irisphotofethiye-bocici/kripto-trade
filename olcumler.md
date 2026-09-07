@@ -12325,3 +12325,91 @@ tek yolu `radar_archive`'ın ~110 güne ulaşması (bugün 74). Bu ölçüm onu
 **yapmadı ve yapamaz** — farklı popülasyon.
 
 Ön-kayıt sayacı: **yirmi bir ön-kayıt, yirmi biri de kural üretmedi.**
+
+---
+
+## 🔴 `ATR/FİYAT` — SEÇİM YANLILIĞI GİDERİLMİŞ · 2026-09-07 · **TERS YÖN, AMA ÇELİŞKİLİ**
+
+**Ön-kayıt:** `ON_KAYIT_atr_temiz.md` · commit `55ca5a9` — koşumdan **önce**
+**Betik:** `scratchpad/atr_fiyat/04_temiz.py` · teşhis: `03_teshis.py`
+**Kaynak:** kullanıcı — *"sanki ölçümünde hata varmış gibi geliyor bana"*
+
+### Kullanıcı haklıydı — kusur doğrulandı
+
+```
+asgari_stop (%2) kapisi ATR'ye gore ASIRI SECICI:
+  ATR 0,00-1,04 -> 58.092 aday,      0 gecti  (%100 elendi)
+  ATR 1,04-1,34 -> 58.092 aday,    306 gecti  (%99,5 elendi)
+stop/ATR orani dilimler arasi 1,48 -> 1,12 (SABIT DEGIL)
+```
+
+**Gerçek düşük-ATR evreni önceki iki ölçümde HİÇ YOKTU.** Aynı kusur
+`8273a10`'daki (2026-09-06, skorlu) ölçümde de var.
+
+### Düzeltilmiş sonuç — `N=290.382 · 738 gün · 566 sembol`
+
+`C0` yapısal sınama **kusursuz**: `stop/ATR = 1,5000` ve `R:R = 3,0000`
+beş dilimde de birebir aynı (sapma `%0,0000`).
+
+```
+ATR% dilimi           N   ort ATR%      ort R    ham net%     stop%
+0,00-0,97        30.401      0,74%    -0,6399    -0,111%     1,11%   <<<
+0,97-1,26        30.401      1,12%    -0,0924    -0,154%     1,68%
+1,26-1,60        30.401      1,42%    -0,1010    -0,217%     2,13%
+1,60-2,20        30.401      1,86%    -0,1123    -0,313%     2,78%
+2,20-19,95       30.401      3,52%    -0,0656    -0,299%     5,28%
+
+HOLDOUT fark -0,5743 · gun-t -14,03 (295 gun) · MDE 0,1402
+KESIF   fark -0,2331   (ayni yon)
+```
+
+🔑 **En sakin dilim (ATR %0,74) FELAKET: `R = −0,6399`.** Yani seçim
+yanlılığı kalkınca *"düşük ATR iyi"* bulgusu **tam tersine döndü** ve
+etki büyük.
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **C0** | geometri sabit | **GEÇTİ** (`%0,0000` sapma) |
+| **C1** | R farkı > 0 | **DÜŞTÜ** `−0,5743` |
+| **C2** | gün-kümeli t ≥ 2,5 | **DÜŞTÜ** (`−14,03`, ters yönde) |
+| **C3** | \|fark\| > MDE | GEÇTİ |
+| **C4** | keşif+holdout aynı işaret | GEÇTİ |
+| **C5** | negatif kontrol temiz | GEÇTİ (`t −0,26`) |
+| **C6** | sembol-kümeli t ≥ 2,5 | **DÜŞTÜ** `+2,07` |
+
+### 🔴 AMA HÜKÜM YAZILAMAZ — kümeleme İŞARETİ ÇELİŞİYOR
+
+```
+GUN   -kumeli fark  -0,5743   (t -14,03)
+SEMBOL-kumeli fark  +0,0515   (t  +2,07)   <- TERS ISARET
+```
+
+**Aynı veride, iki kümeleme zıt işaret veriyor.** Bu bir Simpson deseni:
+**semboller arasında** düşük-ATR kötü, ama **sembolün kendi içinde**
+düşük-ATR dönemleri hafif iyi. Yani bulgu bir **zamanlama** kuralı değil,
+**hangi coini seçtiğin** kuralı olurdu — ve o çapraz-kesitte de mekanik
+bir şüpheli var:
+
+```
+sabit maliyet %0,09  ->  stop %1,11 iken R'nin %8,1'i
+                         stop %5,28 iken R'nin %1,7'si
+```
+
+Maliyet farkın ~%11'ini açıklıyor; gerisi dar stopun gürültüde
+kalmasından olabilir (**ölçülmedi**).
+
+### Karar
+
+**Kural yazılmadı** — ne *"sakin coin al"* ne *"oynak coin al"*.
+`C6` çelişkisi bulguyu askıya alıyor.
+
+🔑 **Ama üç şey kesinleşti:**
+1. **`asgari_stop` seçim yanlılığı gerçek** ve önceki iki `ATR/fiyat`
+   ölçümünü de etkiliyor — `8273a10`'un *"MDE'yi aşan tek ölçüm"*
+   ünvanı **bu kusurla birlikte okunmalı**.
+2. **Sabit geometriyle ölçmek mümkün** (`C0` `%0,0000`) — payda artefaktı
+   yapısal olarak kapatılabiliyor.
+3. **Gün-kümeli ve sembol-kümeli çıkarım ayrışabiliyor** ve bu proje bunu
+   ilk kez gördü. Bundan sonra **ikisi birden** raporlanmalı.
+
+Ön-kayıt sayacı: **yirmi iki ön-kayıt, yirmi ikisi de kural üretmedi.**
