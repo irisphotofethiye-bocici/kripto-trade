@@ -30,7 +30,7 @@ for _s in (_sys.stdout, _sys.stderr):
     except Exception:
         pass
 
-import json, os, time, argparse, datetime, urllib.request
+import json, os, time, argparse, datetime, urllib.request, urllib.parse, subprocess, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -115,6 +115,38 @@ def karne(kayitlar):
         })
     out.sort(key=lambda x: x["ts"] or "")
     return out
+
+
+def liqmap_bedava_calistir(sym):
+    """liqmap_bedava.py'yi ALT SUREC olarak kosar ve seviyeleri doner.
+
+    🔴 UCRETSIZ: Binance aggTrades. Apify/CoinGlass CAGRILMAZ.
+    Panel salt-okunurlugu KORUNUR — betik de hicbir dosyaya yazmaz.
+    """
+    if not sym or not sym.isalnum():
+        return {"hata": "gecersiz sembol"}
+    yol = os.path.join(HERE, "liqmap_bedava.py")
+    if not os.path.exists(yol):
+        return {"hata": "liqmap_bedava.py yok"}
+    try:
+        r = subprocess.run([sys.executable, yol, "--symbol", sym,
+                            "--pay", "1", "--poz", "--n", "5"],
+                           capture_output=True, text=True, timeout=300,
+                           encoding="utf-8", errors="replace")
+    except subprocess.TimeoutExpired:
+        return {"hata": "zaman asimi (300 sn)"}
+    if r.returncode != 0:
+        return {"hata": (r.stderr or "")[-200:]}
+    sat = []
+    for l in (r.stdout or "").splitlines():
+        l = l.rstrip()
+        if "ANLIK" in l or ("%" in l and l.strip().startswith(("0", "1", "2", "3",
+                                                               "4", "5", "6", "7",
+                                                               "8", "9"))):
+            sat.append(l.strip())
+    bilgi = [l.strip() for l in (r.stdout or "").splitlines()
+             if "efektif esik" in l or "secilen" in l]
+    return {"sym": sym, "satirlar": sat, "bilgi": bilgi, "maliyet_usd": 0.0}
 
 
 def durum():
@@ -340,10 +372,30 @@ async function yenile(){
    '<b>"ölçülemedi"</b> olur ve pencere <b>uzatılmaz</b>.</div></div>';
 
   const n0=(v,d0)=>(v===null||v===undefined)?'-':Number(v).toFixed(d0??2);
+  window.liqmap=async function(sym){
+    const btn=document.getElementById('lqb_'+sym), out=document.getElementById('lq_'+sym);
+    if(!btn||!out) return;
+    btn.disabled=true; btn.textContent='çekiliyor…'; out.textContent='';
+    try{
+      const r=await (await fetch('/api/liqmap?sym='+encodeURIComponent(sym))).json();
+      if(r.hata){ out.innerHTML='<span class="kotu">'+r.hata+'</span>'; }
+      else{
+        let h='<div class="sonuk">'+(r.bilgi||[]).join(' · ')+'</div>';
+        for(const l of (r.satirlar||[])){
+          const anlik=l.indexOf('ANLIK')>=0, stop=l.indexOf('STOP')>=0;
+          h+='<div style="font-family:monospace'+(anlik?';font-weight:700':'')+
+             (stop?';color:#c0392b':'')+'">'+l.replace(/</g,'&lt;')+'</div>';
+        }
+        h+='<div class="sonuk">maliyet 0 USD · bağlam katmanı, sinyal değil</div>';
+        out.innerHTML=h;
+      }
+    }catch(e){ out.innerHTML='<span class="kotu">hata</span>'; }
+    btn.disabled=false; btn.textContent='harita çek';
+  };
   let ah='<table><tr><th>sembol</th><th>yön</th><th>kald.</th><th>marjin $</th>'+
          '<th>büyüklük $</th><th>risk $</th><th>giriş</th><th>anlık</th>'+
          '<th>PnL $</th><th>PnL %</th><th>stop</th><th>hedef</th>'+
-         '<th>R:R</th><th>başabaş</th><th>kâr kilidi</th><th>çıkış modu</th></tr>';
+         '<th>R:R</th><th>başabaş</th><th>kâr kilidi</th><th>liqmap</th><th>çıkış modu</th></tr>';
   for(const p of d.acik)
     ah+='<tr><td><b>'+p.sym+'</b><div class="sonuk" style="font-size:11px">'+
           (p.giris_ts??'')+' · skor '+(p.skor??'-')+' · '+(p.stage??'-')+'</div></td>'+
@@ -372,6 +424,10 @@ async function yenile(){
             '<div style="font-size:11px">stop &rarr; '+(p.kilit_stop??'-')+'</div>'+
             (p.kilit_alindi?'<div style="font-size:11px"><b>ALINDI ✓</b></div>':''))
             : '<span style="font-size:11px">kurulmadı</span>')+'</td>'+
+        // --- LIQMAP dugmesi (UCRETSIZ surum; Apify CAGRILMAZ)
+        '<td><button onclick="liqmap(''+p.sym+'')" id="lqb_'+p.sym+'" '+
+          'style="font-size:11px;padding:3px 7px;cursor:pointer">harita çek</button>'+
+          '<div id="lq_'+p.sym+'" style="font-size:10px;line-height:1.5;margin-top:4px"></div></td>'+
         '<td class="sonuk">'+(p.kismi_kapali
             ? '<b>sabit %10 hedef</b><div style="font-size:11px">kısmi kâr (TP1) kapalı</div>'
             : (p.tp1_alindi?'<b>TP1 alındı</b><div style="font-size:11px">kısmi kâr açık</div>'
@@ -428,6 +484,14 @@ class Handler(BaseHTTPRequestHandler):
             if self.path.startswith("/api/durum"):
                 self._gonder(200, "application/json; charset=utf-8",
                              json.dumps(durum(), ensure_ascii=False).encode("utf-8"))
+            elif self.path.startswith("/api/liqmap"):
+                # 🔴 YALNIZ UCRETSIZ SURUM. Apify/CoinGlass'a BU UCTAN ASLA
+                #    gidilmez (ucretli cagri onay ister — CLAUDE.md).
+                q = urllib.parse.urlparse(self.path).query
+                sym = (urllib.parse.parse_qs(q).get("sym") or [""])[0].upper()
+                self._gonder(200, "application/json; charset=utf-8",
+                             json.dumps(liqmap_bedava_calistir(sym),
+                                        ensure_ascii=False).encode("utf-8"))
             elif self.path in ("/", "/index.html"):
                 self._gonder(200, "text/html; charset=utf-8", SAYFA.encode("utf-8"))
             else:
