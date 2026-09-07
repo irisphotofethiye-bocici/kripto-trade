@@ -167,6 +167,16 @@ def durum():
                    if (hedef and stop and abs(stop - g) > 0) else None),
             "basabas": ((100.0 / (1.0 + abs(hedef - g) / abs(stop - g)))
                         if (hedef and stop and abs(stop - g) > 0) else None),
+            # --- KAR KILIDI (2026-09-07, kullanici karari) ---
+            #   Kullanici bu kurali KENDI actigi pozlarda da elle uygulayacak;
+            #   seviyeler burada okunabilsin diye tasiniyor.
+            #   Seviyeler notrlong.kilit_kur() tarafindan pozisyona YAZILIR;
+            #   panel formulu KOPYALAMAZ (tek kaynak = notrlong.kilit_seviyeleri).
+            "kilit_tetik": p.get("kilit_tetik"),
+            "kilit_stop": p.get("kilit_stop"),
+            "kilit_alindi": bool(p.get("kilit_alindi")),
+            "kilit_uzak_pct": ((p.get("kilit_tetik") / px - 1) * 100.0
+                               if (px and p.get("kilit_tetik")) else None),
         })
     # --- FUNDING ve MUHASEBE (2026-09-06)
     # CLAUDE.md: sonuc_usdt FONLAMAYI ICERMEZ; funding dogrudan equity'den duser.
@@ -274,7 +284,7 @@ h3{font-size:13px;margin:22px 0 10px;font-weight:600;color:var(--y2)}
   <span class="sonuk" style="margin-left:auto;font-size:11px" id="zaman"></span></div>
 <main>
   <div class="izgara" id="kartlar"></div>
-  <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px"><b>Hedef %10 = FİYAT hareketi</b>, marjinin %10&apos;u değil — marjine göre getiri = fiyat%% &times; kaldıraç. Dolar riski her pozisyonda sabit ($150); kaldıraç R:R&apos;yi <b>değiştirmez</b>. &#9888; Hedef sabit %10, stop ATR&apos;ye bağlı &rarr; <b>R:R ve başabaş pozisyondan pozisyona değişir</b>; başabaş &gt;%35 olan pozisyon kırmızı gösterilir (ölçülen isabet ~%25). PnL % = marjine göre (kaldıraçlı). <b>Çıkış modu:</b> hedef <b>sabit %10 AKTİF</b> (tp2 = giriş &times; 1,10); <b>kapalı olan KISMİ KÂR (TP1)</b>dır, hedef değil — bu bot pozisyonu tek seferde kapatır (ön-kayıt bölüm 2: kısmi kâr kenarı ~%9 küçültüyordu).</div><div class="sar" id="acik"></div>
+  <h3>Açık pozisyonlar</h3><div class="bos" style="margin:0 0 6px"><b>Hedef %10 = FİYAT hareketi</b>, marjinin %10&apos;u değil — marjine göre getiri = fiyat%% &times; kaldıraç. Dolar riski her pozisyonda sabit ($150); kaldıraç R:R&apos;yi <b>değiştirmez</b>. &#9888; Hedef sabit %10, stop ATR&apos;ye bağlı &rarr; <b>R:R ve başabaş pozisyondan pozisyona değişir</b>; başabaş &gt;%35 olan pozisyon kırmızı gösterilir (ölçülen isabet ~%25). PnL % = marjine göre (kaldıraçlı). <b>Çıkış modu:</b> hedef <b>sabit %10 AKTİF</b> (tp2 = giriş &times; 1,10). <b>KÂR KİLİDİ AKTİF (2026-09-07, kullanıcı kararı):</b> koyulan paranın <b>%20&apos;si kadar kâr</b> olunca pozisyonun <b>%20&apos;si kapanır</b> ve stop <b>%15 kâra</b> çekilir. Fiyat karşılığı: tetik = giriş &times; (1 + 0,20/kaldıraç), stop = giriş &times; (1 + 0,15/kaldıraç) &mdash; <b>kaldıraçtan bağımsız</b>. &#9888; Bu, ön-kayıt bölüm 2&apos;deki <b>&quot;kısmi kâr kapalı&quot;</b> kararını <b>DEĞİŞTİRİR</b> (D/8: ölçüm penceresi sıfırlandı).</div><div class="sar" id="acik"></div>
   <h3>Skor bandına göre sonuç <span class="sonuk" style="font-weight:400">— kapı yok, ölçüm sonradan</span></h3>
   <div class="sar" id="skor"></div>
   <h3>Kapanan pozisyonlar</h3><div class="bos" style="margin:0 0 6px">ROI % = marjine göre &middot; R = kapanış kaydının R degeri (&#9888; kısmi kâr alınmışsa R yalnız <b>kalan yarıyı</b> gösterir, net $ ise tümünü) &middot; funding ayrı sütunda, net $ içinde <b>değildir</b>.</div><div class="sar" id="son"></div>
@@ -333,7 +343,7 @@ async function yenile(){
   let ah='<table><tr><th>sembol</th><th>yön</th><th>kald.</th><th>marjin $</th>'+
          '<th>büyüklük $</th><th>risk $</th><th>giriş</th><th>anlık</th>'+
          '<th>PnL $</th><th>PnL %</th><th>stop</th><th>hedef</th>'+
-         '<th>R:R</th><th>başabaş</th><th>çıkış modu</th></tr>';
+         '<th>R:R</th><th>başabaş</th><th>kâr kilidi</th><th>çıkış modu</th></tr>';
   for(const p of d.acik)
     ah+='<tr><td><b>'+p.sym+'</b><div class="sonuk" style="font-size:11px">'+
           (p.giris_ts??'')+' · skor '+(p.skor??'-')+' · '+(p.stage??'-')+'</div></td>'+
@@ -353,6 +363,15 @@ async function yenile(){
         '<td><b>'+n0(p.rr,2)+'</b></td>'+
         '<td class="'+((p.basabas??0)>35?'kotu':'sonuk')+'">'+n0(p.basabas,1)+'%'+
           '<div style="font-size:11px">ölçülen ~%25</div></td>'+
+        // --- KAR KILIDI (2026-09-07): tetik / kilitlenen stop / durum
+        '<td class="'+(p.kilit_alindi?'iyi':'sonuk')+'">'+
+          (p.kilit_tetik?('tetik <b>'+p.kilit_tetik+'</b>'+
+            (p.kilit_uzak_pct!==null&&p.kilit_uzak_pct!==undefined
+               ? '<div style="font-size:11px">'+(p.kilit_uzak_pct>0?'+':'')+n0(p.kilit_uzak_pct,2)+'% uzak</div>'
+               : '')+
+            '<div style="font-size:11px">stop &rarr; '+(p.kilit_stop??'-')+'</div>'+
+            (p.kilit_alindi?'<div style="font-size:11px"><b>ALINDI ✓</b></div>':''))
+            : '<span style="font-size:11px">kurulmadı</span>')+'</td>'+
         '<td class="sonuk">'+(p.kismi_kapali
             ? '<b>sabit %10 hedef</b><div style="font-size:11px">kısmi kâr (TP1) kapalı</div>'
             : (p.tp1_alindi?'<b>TP1 alındı</b><div style="font-size:11px">kısmi kâr açık</div>'

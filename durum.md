@@ -2077,6 +2077,36 @@ uzatılmaz.
 **Okuma komutu:** `python notrlong.py --durum` · canlı rakam hiçbir `.md`
 dosyasından okunmaz.
 
+### 🔴 PENCERE-3 — KÂR KİLİDİ EKLENDİ, PENCERE SIFIRLANDI (2026-09-07)
+
+**Kullanıcı kararı, kendi cümlesiyle:** *"ben 100 usd poz, 20 usd kazanınca
+pozun yüzde 20 sini alsın, yüzde 5 alta stop koysun demek istiyorum"* ·
+*"kendi açtığım pozlarda da böyle yapacağım"* · *"şu anda açık olan pozlara
+da bunu uygula."*
+
+```
+TETIK  kar = KOYULAN PARANIN %20'si   ->  fiyat = giris x (1 + 0.20/kaldirac)
+ALIM   pozisyonun %20'si kapanir       (kalan %80 kosmaya devam)
+STOP   "%5 alta" = 20-5 = +%15 karda   ->  fiyat = giris x (1 + 0.15/kaldirac)
+```
+
+🔴 **"POZ" = KOYULAN PARA = `marjin`.** Notional değil. Doğrulaması ve
+`ROI vs fiyat-yüzdesi` aritmetiği `notrlong.py` başlığında.
+
+🔴 **D/8 GEREĞİ PENCERE SIFIRLANDI.** Bu değişiklik botun hangi işlemi
+**kapatacağını** değiştiriyor. Sıfırlama anındaki sayaç: **1 gün / 5
+pozisyon** — yani kayıp ihmal edilebilir.
+
+⚠️ **Ön-kayıt bölüm 2'nin *"kısmi kâr KAPALI"* kararı DEĞİŞTİ.** Eski karar
+silinmedi; `[DEĞİŞTİ 2026-09-07]` olarak bu satır eklendi (D/9).
+
+⚠️ **Açık pozisyonlar geriye dönük dahil edildi** — elle state düzenlenmedi;
+`kilit_geri_doldur()` botun kendi turunda yazıyor (eşzamanlı yazım riski yok).
+İlk tur `03:16:12`'de üçünü de doldurdu ve **TIA aynı turda tetikledi.**
+
+**Geri alma:** `kripto-config.json` → `esikler.kilit_tetik_roi: 0`
+**Test:** `scratchpad/notrlong_kilit_test.py` — 33 sınama, diske yazım yok.
+
 ---
 
 ## 🆕 TEMİZ SAYFA — ESKİ DEFTERLER KAPATILDI (2026-09-06, KULLANICI KARARI)

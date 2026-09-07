@@ -330,10 +330,12 @@ def kilit_kur(pos):
     """
     if pos.get("kilit_alindi") or pos.get("tp1_alindi") is False:
         return False
-    tetik, _ = kilit_seviyeleri(pos.get("giris"), pos.get("kaldirac"), pos.get("yon"))
+    tetik, kstop = kilit_seviyeleri(pos.get("giris"), pos.get("kaldirac"), pos.get("yon"))
     if not tetik:
         return False
     pos["kilit_tetik"] = round(tetik, 6)
+    # Panel bu alani OKUR (formulu kopyalamasin diye) — tek kaynak burasi.
+    pos["kilit_stop"] = round(kstop, 6)
     pos["tp1"] = round(tetik, 6)
     pos["tp1_alindi"] = False          # kismi kar yolu ACIK -> kilit tetiklenebilir
     return True
