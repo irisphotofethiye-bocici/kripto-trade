@@ -11661,3 +11661,79 @@ durumdadır; geçen tek varyant **gevşetiyordu**.
 ### Karar
 
 **Kod değişmedi.** `K1` düştü, şüphede statüko.
+
+---
+
+## KÂR KİLİDİ — BOTUN ESKİ POZİSYONLARINDA (KARŞI-OLGU) · 2026-09-07
+
+**Ön-kayıt:** `ON_KAYIT_kilit_gecmis.md` · commit `737abf9` — koşumdan **önce**
+**Betik:** `scratchpad/kilit_gecmis/01_olcum.py`
+**Kaynak:** kullanıcı — *"botun eski pozlarına uygulayabilir misin bunu"*
+
+🔴 **HÜKÜM YOK — betimleyici.** Karar veriyi üreten veriyle sınandı;
+örneklem dışı kanıt **değildir**. Kural değiştirilmedi.
+
+### Zorunlu sınama
+
+```
+198 / 240 yeniden kuruldu (%82,5) · dislanan 42 (%17,5) < %25 esigi
+  zaman uyusmadi 36 · sebep uyusmadi 3 · mum yok 3
+```
+
+### Tetikleme — kaldıraca ÇOK bağlı
+
+```
+kilit tetikleyen 8 / 198  (%4,0)
+
+kald    N   tetik      %          <- tetik = giris x (1 + 0.20/k)
+ 3x    98      1     1,0%            yani k buyudukce tetik FIYATTA YAKINLASIR
+ 4x    41      0     0,0%
+ 5x    23      1     4,3%
+ 6x    11      0     0,0%
+ 7x     5      0     0,0%
+ 8x    11      2    18,2%
+ 9x     3      2    66,7%
+10x     6      2    33,3%
+```
+
+### Dolar etkisi
+
+```
+GERCEK       -19.372,54 $
+KARSI-OLGU   -17.296,29 $
+FARK          +2.076,25 $   (poz basina +10,49 · MEDYAN +0,00)
+iyilesen 7 · kotulesen 1 · DEGISMEYEN 190
+yalniz tetikleyenlerde: poz basina +259,53 $
+```
+
+### Kuralın maliyeti — bu örneklemde GÖRÜNMÜYOR
+
+```
+kilit stopuyla kapanan 7
+   gercekte HEDEFE varan (kural kaybettirdi) : 0
+   gercekte STOP olan    (kural kurtardi)    : 7   -> +2.116,48 $
+```
+
+🔴 **Bu sonuç OLUMLU görünüyor ama örneklem yapısı gereği maliyet tarafına
+KÖRDÜR.** Kural ancak *"kâra geçip sonra dönen"* pozisyonda kaybettirir —
+ve o pozisyonların çoğu kısmi kâr aldığı için **örneklemde yok**:
+
+```
+394 pozisyon -> 241 tek kayitli (bunlarin 198'i kuruldu, %99'u STOP)
+                153 cok kayitli = TP1'e ULASMIS = KAZANANLAR -> DISARIDA
+   bunlarin 43'unde TP1 ROI'si >= %20 -> kilit TP1'DEN ONCE tetiklerdi
+```
+
+**Yani ölçülen 8 tetiklemenin yanında, ölçülmeyen en az 43 tetikleme var**
+ve onların hepsi kazanan tarafta. Kuralın onlarda ne yaptığı **bilinmiyor**.
+
+### Okuma
+
+Kaybedenlerde kilit **zarar veremiyor** (tetiklerse zaten kârdadır) ve
+7 vakada gerçekten kurtarmış. Ama bu, kuralın karnesi **değil** — karne
+kazananlarda yazılır ve orası ölçülmedi. Hakem **`PENCERE-3`**.
+
+⚠️ Tek net yapısal bulgu: **tetikleme kaldıraca çok bağlı.** `3x`'te `%1`,
+`9x`'te `%67`. Sebep aritmetik: tetik fiyat hareketi `20/k` — kaldıraç
+büyüdükçe tetik fiyatta yakınlaşıyor. Yani kural **yüksek kaldıraçlı
+pozisyonlarda çok daha sık** iş görecek.
