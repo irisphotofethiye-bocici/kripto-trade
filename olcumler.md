@@ -11791,3 +11791,82 @@ Hakem hâlâ `PENCERE-3`.
 `cikis`'tan türetiliyordu ve hedefi stop sanıyordu (tutar doğru, **sebep**
 yanlış). Sınama yayımlamayı reddetti, türetme `01_olcum.py` ile aynı
 dallanmaya çevrildi.
+
+---
+
+## 🔴 KÂR KİLİDİNİN **CANLI** ETKİSİ — 2026-09-07 · KURAL PARA KAYBETTİRİYOR
+
+**Betik:** `scratchpad/kilit_gecmis/03_canli_etki.py`
+**Neden ayrı:** `01`/`02` botun **eski** defterindeydi ve kaybedene yanlıydı.
+Burada kilit **gerçekten açıktı**; ölçülen şey onun **gerçek** etkisi.
+
+### Temiz ayrım — kilit girişte açık mıydı?
+
+```
+kurulum 2026-09-07 03:16:15
+
+GERI-DOLDURULAN (5) : ARX · UAI · METIS · TAO · TIA      net +479,21 $
+TEMIZ SINAMA    (4) : INJ · METIS · CFG · ARX            net   +7,61 $
+```
+
+Geri doldurulanlar **temiz sınama değil** — kilit uçuş ortasında kuruldu.
+
+### Kilit VAR vs kilit YOK (yeniden kurulan 7 pozisyon)
+
+```
+id  sym    kald    GERCEK    kilitli   KILITSIZ      FARK   kilitli cik  kilitsiz cik
+1   ARX    5x     -152.84   -150.75    -150.75     +0.00   STOP         STOP
+2   UAI    3x     +135.12   +135.12    +144.84     -9.72   TP2          TP2
+4   TAO    7x     -150.94   -149.04    -149.04     +0.00   STOP         STOP
+6   INJ    7x     +125.98   +125.98    +277.35   -151.36   STOP_KILIT   ZAMAN
+7   METIS  3x     -156.56   -155.51    -155.51     +0.00   STOP         STOP
+9   CFG    5x     +176.17   +177.26    +561.76   -384.49   STOP_KILIT   TP2
+10  ARX    3x     -137.98   -137.22    -137.22     +0.00   STOP         STOP
+                             -154.16   +391.42   -545.58
+```
+
+🔴 **Kilit tetiklediği ÜÇ vakada da KAYBETTİRDİ. İyileşen: SIFIR.**
+
+**Yalnız temiz dörtlüde:** `+7,61 $` (kilitli) vs `+546,38 $` (kilitsiz) →
+**−538,77 $**.
+
+### 🔑 TEŞHİS — tetik ile kilit stopu arasındaki mesafe ATR'nin ÜÇTE BİRİ
+
+Aralık, tanım gereği **`5/kaldıraç`** (fiyat yüzdesi). Ölçüldü:
+
+```
+sym   kald    ARALIK%   ATR1s%   aralik/ATR
+TAO    7x      0,71%     2,49%      0,29
+TIA    6x      0,83%     2,77%      0,30
+METIS  3x      1,67%     5,26%      0,32
+ARX    5x      1,00%     3,07%      0,33
+...
+ICP    7x      0,71%     1,68%      0,43
+CFG    5x      1,00%     2,21%      0,45
+WLD    5x      1,00%     2,08%      0,48
+
+MEDYAN aralik/ATR = 0,35
+```
+
+**Kilit stopu, tetiğin yalnızca 0,35 ATR altında.** Yani **gürültünün
+içinde**. Herhangi bir geri çekilme onu yiyor — kural tetiklediği anda
+pozisyonun ömrü fiilen bitiyor.
+
+Somut: `TIA` tetiği `01:42`'de aştı, **`01:44`'te** (iki dakika) kilit
+stopunun `0,00006 $` altına indi, sonra `+%12,6` yaptı.
+
+### Sınırlar
+
+⚠️ **N=7 (3 tetikleme), tek gün, güçlü BOĞA.** Koşan bir piyasada kazananı
+kesmek **azami** maliyetli; yatay/düşen piyasada kilit **yardım edebilir**.
+Bu ölçüm o rejimi görmedi.
+⚠️ Hüküm ölçütü hâlâ **80 kapanmış pozisyon** (`PENCERE-3`).
+⚠️ `METIS(3)` ve `TIA(5)` yeniden kurulamadı (kilit onlarda uçuş ortasında
+kurulmuştu) — sınama doğru davranıp **dışladı**.
+
+### Karar
+
+**Kural DEĞİŞTİRİLMEDİ** — kullanıcının kararı, hakem pencere. Ama teşhis
+kayda geçti: sorun *"kilit fikri"* değil, **aralığın ATR'ye göre çok dar
+olması**. Aralık ATR cinsinden tanımlansaydı (örn. `1,0 × ATR`) davranış
+bambaşka olurdu. Bu **ölçülmedi**, öneri olarak duruyor.
