@@ -12249,3 +12249,79 @@ karıştırıcı, ve ben yalnız birini sınamıştım.
 **Kural yazılmadı, kod değişmedi.** Taşınabilirlik adımı (`b`) **iptal** —
 taşınacak bir şey kalmadı. Ön-kayıt sayacı: **yirmi ön-kayıt, yirmisi de
 kural üretmedi.**
+
+---
+
+## 🔴 `ATR/FİYAT` — 2 YILLIK MEKANİK · 2026-09-07 · **DÜŞTÜ, İŞARET TERS**
+
+**Ön-kayıt:** `ON_KAYIT_atr_2yil.md` · commit `4474a75` — koşumdan **önce**
+**Betik:** `scratchpad/atr_fiyat/02_uzun.py`
+**N = 82.085 · 738 gün · 554 sembol** · keşif 43.604 · holdout 38.481
+
+### Sonuç
+
+```
+ATR% dilimi          N    ort ATR%      ort R    ham net%     stop%   log hacim
+1,33-1,66        7.696       1,49%    -0,0731    -0,165%     2,22%      5,29
+1,66-2,04        7.696       1,84%    -0,0946    -0,253%     2,61%      5,42
+2,04-2,57        7.696       2,29%    -0,1765    -0,526%     3,06%      5,56
+2,57-3,59        7.696       3,01%    -0,0822    -0,283%     3,72%      5,80
+3,59-422,4       7.697       6,01%    -0,0539    -0,250%     6,09%      6,41
+
+HOLDOUT  R farki -0,0191 (dusuk ATR DAHA KOTU) · gun-t -1,60 · MDE 0,0758
+KESIF    R farki -0,1287  (ayni yon)
+HAM net% farki   +0,0854%  ->  ISARETLER AYRISTI
+```
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **B1** | holdout R farkı > 0 | **DÜŞTÜ** `−0,0191` |
+| **B2** | gün-kümeli t ≥ 2,5 | **DÜŞTÜ** `−1,60` |
+| **B3** | \|fark\| > MDE | **DÜŞTÜ** |
+| **B4** | keşif+holdout aynı işaret | GEÇTİ (ama işaret **negatif**) |
+| **B5** | ham net% aynı işaret | **DÜŞTÜ** → **PAYDA ARTEFAKTI** |
+| **B6** | negatif kontrol temiz | GEÇTİ |
+| **B7** | sembol-kümeli t ≥ 2,5 | **DÜŞTÜ** `+2,36` |
+
+**HÜKÜM: PAYDA ARTEFAKTI — kural yazılmaz.**
+
+### 🔑 Ne oldu
+
+2026-09-06'da `radar_archive`'da (`N=2.082 · 72 gün`) *"düşük ATR daha iyi"*
+çıkmıştı ve holdout **kusursuz monotondu**. `40 kat` büyük mekanik
+popülasyonda **işaret tersine döndü** — ve `R` ile ham `net%`
+**ayrıştı** (`R` düşük ATR'yi kötü, ham getiri iyi gösteriyor).
+
+`B5` ilk kez bu ölçümde kondu ve **işini gördü**: `R = net%/stop%`,
+`stop% ≈ 1,5×ATR` → dar stoplu hücrede aynı fiyat hareketi büyük `R`
+verir. İki metrik ayrışınca **hangisinin doğru olduğu bilinemez**.
+
+⚠️ **Ama önceki ölçüm doğrudan çürütülmedi:** orada `R` ve `net%`
+**aynı işaretteydi** (`+0,5096 / +1,179%` vs `−0,1509 / −0,713%`), yani
+o popülasyonda artefakt belirtisi yoktu. Popülasyonlar farklı — biri
+**skorlu** (botun evreni), biri **mekanik**.
+
+🔑 **Doğru okuma: bulgu GENELLENMİYOR.** Skorlu evrende görülen şey
+2 yıllık mekanik evrende yok, hatta ters. Bu, *"botun evreninde geçerli
+olabilir ama genel bir piyasa yasası değil"* demektir — ve `N=2.082`,
+`72 gün`, tek rejimlik bir pencerede görülmüş bir şeyin genellenmemesi
+**beklenen** sonuçtur.
+
+### Ters karıştırıcı (ek rapor)
+
+```
+ATR% dilimi     log fiyat   log hacim    stop%
+1,33-1,66          -1,06        5,29    2,22%
+3,59-422,4         -1,00        6,41    6,09%
+```
+
+**Hacim ATR ile birlikte artıyor** (`5,29 → 6,41`); fiyat düzeyi düz.
+Yani `ATR/fiyat` kısmen **hacmin** de vekili.
+
+### Karar
+
+**Kod değişmedi.** `ATR/fiyat`'ın skorlu evrendeki sınavı hâlâ açık ve
+tek yolu `radar_archive`'ın ~110 güne ulaşması (bugün 74). Bu ölçüm onu
+**yapmadı ve yapamaz** — farklı popülasyon.
+
+Ön-kayıt sayacı: **yirmi bir ön-kayıt, yirmi biri de kural üretmedi.**
