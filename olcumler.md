@@ -12173,3 +12173,79 @@ Bugün **on dokuz ön-kayıt** yazıldı; **ilk ve tek geçen** budur. Ve
 geçmesinin sebebi yeni bir fikir değil, **güç**: aynı ölçüm 71 günde
 `N=2.019` ile `MDE 13,1 puan` veriyordu, 2 yılda `N=82.085` ile
 `MDE 2,04 puan`. Etki hep oradaydı (`+1,1` → `+3,85` puan), görülemiyordu.
+
+---
+
+## 🔴 STOP-LİKİDİTE — `ATR/FİYAT` KARIŞTIRICI SINAMASI · 2026-09-07 · **BULGU ÇÖKTÜ**
+
+**Ön-kayıt:** `ON_KAYIT_stop_likidite_atr.md` · commit `6f2c715` — koşumdan **önce**
+**Betik:** `scratchpad/stop_likidite/03_atr_katman.py` · aynı `N=82.085`
+
+### Sonuç — etki ATR/fiyat sabitlenince SIFIRLANIYOR
+
+```
+HAM (katmansiz)       +3,85 puan
+ATR-MESAFESI katman   +4,58 puan     <- 02_uzun'un tabani, U5 bunu gecmisti
+ATR/FIYAT katman      -0,03 puan     <- SIFIR
+CIFT katman (5x5)     +0,51 puan
+KESIF ayni hesap      +0,35 puan     -> isaret zayif/tutarsiz
+
+tabana gore koruma: -1%   (A2 esigi %50)
+```
+
+### Neden — karıştırıcı tabloda açıkça duruyordu
+
+```
+stop_p dilimi        N       ATR%    stop ATR    stop%
+0,00-0,07        7.696      4,12%      1,25     4,48%
+0,07-0,42        7.696      2,95%      1,28     3,51%
+0,42-0,66        7.696      2,67%      1,32     3,33%
+0,66-0,85        7.696      2,52%      1,34     3,22%
+0,85-1,00        7.697      2,37%      1,37     3,14%
+```
+
+**`ATR/fiyat` `4,12% → 2,37%`ye düşüyor.** Yani *"stop kümenin içinde"*
+demek büyük ölçüde *"coin sakin"* demekmiş. Ve `ATR/fiyat` bu projede
+MDE'yi aşan **tek** değişken — yani `stop_p`, onun vekili çıktı.
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **A1** | ATR/fiyat katmanlı fark > 0 | **DÜŞTÜ** `−0,03` |
+| **A2** | ≥ tabanın %50'si (2,29 puan) | **DÜŞTÜ** |
+| **A3** | gün-kümeli t ≥ 2,5 | GEÇTİ `+5,48` |
+| **A4** | keşif+holdout aynı işaret | **DÜŞTÜ** |
+| **A5** | ekonomik taban ≥ 3,0 puan | **DÜŞTÜ** |
+| **A6** | çift katmanlı ≥ ATR-katmanlının %50'si | GEÇTİ ⚠️ |
+| **A7** | sembol-kümeli t ≥ 2,5 | GEÇTİ `+3,85` |
+
+**HÜKÜM: `ATR`'NİN KILIĞI — bulgu çöktü.**
+
+⚠️ **`A6` GEÇTİ ama ANLAMSIZ — ölçüt kusuru, kayda geçiyor.** Payda
+(`ATR/fiyat` katmanlı) `−0,03` olunca *"≥ %50'si"* koşulu **her pozitif
+sayıyla** sağlanıyor. Eşiği koşumdan önce yazdım ama **paydanın sıfıra
+yaklaşabileceğini** hesaba katmadım. `A6` bu koşumda **hüküm taşımaz**.
+
+### 🔑 İNCE AMA ÖNEMLİ AYRIM
+
+Önceki ölçümde `stop_p` ile `stop_pct` çakışması **%16/%14** çıkmıştı —
+rastgele beklentinin **altında** — ve ben bunu *"gerçekten ayrı bir
+değişken"* diye okumuştum. **Doğruydu ama yetersizdi:** `stop_p`, stop
+**mesafesinin** vekili değil, **oynaklık düzeyinin** vekiliymiş. İki ayrı
+karıştırıcı, ve ben yalnız birini sınamıştım.
+
+### Ne öğrenildi
+
+1. **`U5` yanıltıcıydı.** ATR-**mesafesi** sabitlenince etki büyüyordu
+   (%119); ATR-**düzeyi** sabitlenince sıfırlandı. *"Karıştırıcı kontrolü
+   geçti"* demek, **hangi** karıştırıcının kontrol edildiğine bağlı.
+2. **Sembol kümelemesi sorun değildi** (`A7` geçti, 494 sembol) — etki
+   birkaç sembolden gelmiyordu; **her sembolde** vardı, çünkü her sembolde
+   oynaklık farkı vardı.
+3. `ATR/fiyat`'ın gücü bir kez daha teyit edildi: bugün **iki** ayrı
+   ölçümde belirleyici çıktı.
+
+### Karar
+
+**Kural yazılmadı, kod değişmedi.** Taşınabilirlik adımı (`b`) **iptal** —
+taşınacak bir şey kalmadı. Ön-kayıt sayacı: **yirmi ön-kayıt, yirmisi de
+kural üretmedi.**
