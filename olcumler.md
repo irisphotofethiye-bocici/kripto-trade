@@ -11947,3 +11947,82 @@ ne kadarı erken alımdan geliyor **ayrılmadı**. Ayrı bir ön-kayıt konusudu
 **Kod değişmedi.** `P1`+`P4` düştü → hipotez düştü, şüphede statüko.
 Kullanıcının kuralı **yürürlükte kalıyor** (onun kararı); hakem `PENCERE-3`.
 Ön-kayıt sayacı: **on altı ön-kayıt, on altısı da geçemedi.**
+
+---
+
+## LİKİDASYON DENGESİZLİĞİ — 2026-09-07 · **YÖN YOK** (işaret döndü)
+
+**Ön-kayıt:** `ON_KAYIT_likidasyon.md` · commit `5cee2d9` — koşumdan **önce**
+**Betikler:** `scratchpad/liq/00_yoklama.py` · `01_indir.py` · `02_olcum.py`
+**Kaynak:** kullanıcı — *"liqmap ne kadar çalışır ölçelim"* → *"coin analyze"*
+
+### 🔴 Önce bir ayrım: `liqmap` ÖLÇÜLEMEZ
+
+| | geçmiş | maliyet |
+|---|---|---|
+| **liqmap / ısı haritası** (CoinGlass) | **YOK** — anlık, üstelik bir **model** çıktısı | Apify, **ücretli** |
+| **likidasyon geçmişi** (Coinalyze) | **VAR** | **ücretsiz** |
+
+**Apify çağrılmadı.** Ölçülen: gerçekleşen likidasyonların **yönü**.
+
+### Veri — kapsam ölçüldü
+
+```
+Binance perp 781 sembol · 10 sembol/istek (20'de 429)
+BTC gecmisi 67 gun; altlarda 90 gune kadar
+indirildi: 381/381 sembol · 282.831 kayit · 0 hata
+⚠️ Retry-After ONDALIK geliyor ("45.503") -> int() patliyor
+```
+
+### Sonuç — işaret DÖNDÜ
+
+```
+                dusuk deng    yuksek deng      fark      gun-t
+KESIF                                       +4,6499%    +1,99
+HOLDOUT          -1,9070%      +1,2836%     -3,1905%    -1,48   (MDE 3,2959)
+```
+
+Keşifte *"long tasfiyesi iyi"*, holdout'ta **tam tersi**. `N=1.614 · 71 gün`.
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **L1** | keşif+holdout aynı işaret | **DÜŞTÜ** |
+| **L2** | \|t\| ≥ 2,5 | **DÜŞTÜ** (−1,48) |
+| **L3** | \|fark\| > MDE | **DÜŞTÜ** |
+| **L4** | katmanlı ≥ hamın %50'si | **GEÇTİ** (%141) |
+| **L5** | negatif kontrol temiz | **GEÇTİ** |
+
+**HÜKÜM: YÖN YOK.**
+
+### 🔑 İlginç olan: `L4` GEÇTİ
+
+`chg24` katmanları içinde etki **korunuyor** (%141) — yani dengesizlik
+*"fiyatın kılığı"* **değil**. Dilim çakışması da bunu destekliyor:
+`%47,2` alt uçta, `%29,1` üst uçta (rastgele `%20`).
+
+🔴 **Ama kararlı bir etki de yok.** Fiyattan ayrı bir şey ölçüyor, o ayrı
+şeyin **yönü** yok. Bu, *"göremiyoruz"*dan farklı ve daha kesin bir sonuç:
+işaret **döndü**.
+
+### Büyüklük — emir defteri dersi AYNEN tekrarlandı
+
+```
+toplam likidasyon USD: holdout fark +1,8064% · t +0,89 · MDE 3,7110
+```
+
+`defter_usdt_20` büyüklük ölçüp **tam sıfır** taşımıştı; burada da büyüklük
+hiçbir şey söylemiyor. **Yön taşıyan şey dengesizlik** — ve o da döndü.
+
+### ⚠️ Örneklem uyarısı
+
+`5.521` ham kayıt *"24 saatlik pencerede 12 saatten az likidasyon kaydı"*
+diye elendi. Coinalyze yalnız **likidasyon olan** saatleri döndürüyor →
+bu koşul **çok likide olan** (oynak/aktif) sembolleri seçiyor. Sakin
+semboller örneklemde eksik temsil ediliyor.
+
+### Karar
+
+**Kod değişmedi.** Bant-dışı/bitişik aday sayacı: **5 aday, 5'i de düştü**
+(bekleyen likidite · basis · çapraz borsa · pozisyon kompozisyonu ·
+likidasyon dengesizliği).
+Ön-kayıt sayacı: **on yedi ön-kayıt, on yedisi de geçemedi.**
