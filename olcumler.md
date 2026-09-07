@@ -12026,3 +12026,75 @@ semboller örneklemde eksik temsil ediliyor.
 (bekleyen likidite · basis · çapraz borsa · pozisyon kompozisyonu ·
 likidasyon dengesizliği).
 Ön-kayıt sayacı: **on yedi ön-kayıt, on yedisi de geçemedi.**
+
+---
+
+## STOP LİKİDİTE KÜMESİNDE Mİ — 2026-09-07 · **GÖREMİYORUZ** (ama karıştırıcıyı GEÇTİ)
+
+**Ön-kayıt:** `ON_KAYIT_stop_likidite.md` · commit `224162f` — koşumdan **önce**
+**Betik:** `scratchpad/stop_likidite/01_olcum.py`
+**Kaynak:** kullanıcı — *"işleme girmeden önce buna bakmak faydalı olur,
+likidite temizliği ihtimali yüksek"*
+**N = 2.019 · 71 gün** · keşif 986 · holdout 1.033 · Apify **çağrılmadı**
+
+### Yöntem
+
+Liqmap `py-liquidation-map` formülüyle **diskteki mumlardan** kuruldu
+(`klines_1h_uzun` + `taze_1h`, `tbv` ile alıcı/satıcı ayrımı yapıldı).
+`stop_p` = stopun düştüğü kovanın yoğunluğunun, **aynı haritadaki** tüm
+kovalara göre yüzdelik sırası → sembolden ve oynaklıktan bağımsız.
+
+⚠️ Boru hattının kendi mum kaynağı (`fund_ls/klines`) **hacim taşımıyor**
+(`c,h,l,t`); harita için ayrı kaynak yüklendi, giriş/stop mantığı
+değişmedi (kardeş ölçümlerle popülasyon eşleşsin diye).
+
+### Hüküm
+
+```
+S1 katmanli fark > 0            GECTI   +0,0180
+S2 gun-kumeli t >= 2,0          DUSTU   +0,50
+S3 |fark| > MDE                 DUSTU   0,0113 < 0,1307
+S4 kesif+holdout ayni isaret    GECTI
+S5 katmanli >= hamin %50si      GECTI   %159
+S6 negatif kontrol temiz        GECTI
+```
+
+**GÖREMİYORUZ.**
+
+### 🔑 İKİ KAZANIM — hüküm olmasa da
+
+**1 · `S5` GEÇTİ (%159) — bu "stop mesafesinin kılığı" DEĞİL.**
+`stop_atr` katmanları içinde etki **korunuyor, hatta büyüyor**. Dilim
+çakışması bunu doğruluyor: `stop_p` ile `stop_pct` alt uçta **%16**,
+üst uçta **%14** örtüşüyor — **rastgele beklentinin (%20) ALTINDA**.
+Yani gerçekten **ayrı bir değişken** ölçtük. Bu, bugün düşen on yedi
+ölçümün çoğunda başaramadığımız şey.
+
+**2 · Keşif yarısı MÜKEMMEL MONOTON:**
+
+```
+stop_p dilimi     STOP%    (KESIF)
+0,00-0,00         66,5%
+0,00-0,29         70,1%
+0,30-0,54         73,1%
+0,54-0,78         74,6%
+0,78-0,99         75,8%     -> +9,3 puanlik duzgun merdiven
+```
+
+**Holdout'ta düzleşti:** `65,5 · 66,7 · 70,4 · 66,2 · 66,7` → fark
+`+9,3` puandan **`+1,1` puana** indi.
+
+### 🔴 VE BU KOL "VERİ BEKLİYOR" DEĞİL — kapanıyor
+
+`MDE = 0,1307` (13 puan), gözlenen etki **1,1 puan**. Eşiği geçmek için
+`N × (13/1,1)² ≈ 141 kat` veri gerekir → **~285.000 giriş**. Ulaşılamaz.
+
+🔑 Daha önemlisi: etki gerçekten `~1 puan`sa **ekonomik olarak da
+önemsiz** — 100 işlemde bir stop farkı. Yani bu kol `pos<0.25` gibi
+*"N bekliyor"* değil; **bu büyüklükteki bir etki zaten işe yaramaz.**
+
+### Karar
+
+**Kod değişmedi.** Kullanıcının sezgisi (*"likidite temizliği"*) yanlış
+çıkmadı — yönü tutarlı ve karıştırıcıyı geçti — ama **büyüklüğü kullanılabilir
+değil.** Ön-kayıt sayacı: **on sekiz ön-kayıt, on sekizi de geçemedi.**
