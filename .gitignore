@@ -192,3 +192,6 @@ scratchpad/obi/panel.jsonl
 
 # Uc defter birlestirme onbellegi (uc_defter_birlestir.py uretir, yeniden uretilebilir)
 scratchpad/uc_defter.pkl
+
+# Kar kilidi karsi-olgu olcumu — 1m mum onbellegi (2026-09-07, yeniden indirilebilir)
+scratchpad/kilit_gecmis/mum/
