@@ -12098,3 +12098,78 @@ stop_p dilimi     STOP%    (KESIF)
 **Kod değişmedi.** Kullanıcının sezgisi (*"likidite temizliği"*) yanlış
 çıkmadı — yönü tutarlı ve karıştırıcıyı geçti — ama **büyüklüğü kullanılabilir
 değil.** Ön-kayıt sayacı: **on sekiz ön-kayıt, on sekizi de geçemedi.**
+
+---
+
+## 🔑 STOP LİKİDİTE KÜMESİ — 2 YILLIK VERİ — 2026-09-07 · **YEDİ ÖLÇÜTÜN YEDİSİ GEÇTİ**
+
+**Ön-kayıt:** `ON_KAYIT_stop_likidite_2yil.md` · commit `5a66803` — koşumdan **önce**
+**Betik:** `scratchpad/stop_likidite/02_uzun.py`
+**N = 82.085 · 738 gün · 554 sembol** · keşif 43.604 (2024-08-16…2025-11-01) ·
+holdout 38.481 (2025-11-01…)
+
+### Sonuç
+
+```
+stop_p dilimi        N      STOP%   HEDEF%   stop ATR   stop%      (HOLDOUT)
+0,00-0,07        7.696      69,3%    23,4%      1,25     4,48%
+0,07-0,42        7.696      72,5%    19,4%      1,28     3,51%
+0,42-0,66        7.696      72,2%    19,2%      1,32     3,33%
+0,66-0,85        7.696      72,2%    18,5%      1,34     3,22%
+0,85-1,00        7.697      73,2%    18,2%      1,37     3,14%
+
+HOLDOUT  kume ici 73,20%  ·  bos bolge 69,35%
+         fark +3,85 puan · gun-t +5,48 (296 gun) · MDE 2,04 puan
+KESIF    fark +4,45 puan · t +7,99
+KATMANLI +4,58 puan · koruma %119
+NEGATIF  -1,07 puan · t -0,00  -> temiz
+```
+
+| # | ölçüt | sonuç |
+|---|---|---|
+| **U1** | katmanlı fark > 0 | **GEÇTİ** |
+| **U2** | gün-kümeli t ≥ 2,5 | **GEÇTİ** `+5,48` |
+| **U3** | \|fark\| > MDE | **GEÇTİ** `3,85 > 2,04` |
+| **U4** | keşif+holdout aynı işaret | **GEÇTİ** |
+| **U5** | katmanlı ≥ hamın %50'si | **GEÇTİ** `%119` |
+| **U6** | negatif kontrol temiz | **GEÇTİ** |
+| **U7** | katmanlı ≥ **3,0 puan** (ekonomik taban) | **GEÇTİ** `4,58` |
+
+🔑 **Ekonomik taban koşumdan ÖNCE ilan edilmişti** ve geçti — yani bu,
+*"anlamlı ama işe yaramaz"* sınıfından değil.
+
+### 🔴 AMA KURAL YAZILMADI — üç sebeple
+
+**1 · Popülasyon botun evreni DEĞİL.** Girişler mekanik (skor yok),
+ön-kayıtta böyle ilan edildi. Bu, *"genel olarak geçerli"* der;
+*"botun girişlerinde geçerli"* **demez**.
+
+**2 · 🔴 SINANMAMIŞ KARIŞTIRICI: `ATR/fiyat`.** Tabloda `stop%` dilimler
+boyunca `4,48 → 3,14`'e **düşüyor** ama `stop ATR` `1,25 → 1,37`'ye
+**çıkıyor** — yani yüksek `stop_p` grubu **daha düşük oynaklıklı**
+sembollerde. Ve `ATR/fiyat` bugün MDE'yi aşan **tek** ölçümdü
+(`olcumler.md`, aynı gün). Etkinin bir kısmı onun kılığı olabilir.
+`U5` yalnız **ATR-mesafesini** sabitledi, **oynaklık düzeyini** değil.
+
+**3 · Sözde-tekrar.** Günlük örnekleme + `48s` ufuk → ardışık örneklerin
+ufukları örtüşüyor. Çıkarım gün-kümeli yapıldı ama `t` yine de şişer.
+Ön-kayıtta yazılıydı.
+
+### Ne yapılmalı (ayrı ön-kayıt)
+
+```
+1) ATR/fiyat KATMANLARI icinde ayni olcum  -> karistirici kapanir mi
+2) botun evreninde (radar_archive) yeniden -> tasinabilir mi
+3) ancak ikisi de gecerse: STOP YERLESTIRME kurali + portfoy simulasyonu
+```
+
+🔴 **Ön-kayıt bölüm 1: DÖRDÜNCÜ BAKIŞ YOK.** Bu hipotez kapandı; yukarıdaki
+üç adım **yeni** sorulardır (karıştırıcı ve taşınabilirlik), aynı hipoteze
+tekrar bakış değil.
+
+### Kayda değer
+
+Bugün **on dokuz ön-kayıt** yazıldı; **ilk ve tek geçen** budur. Ve
+geçmesinin sebebi yeni bir fikir değil, **güç**: aynı ölçüm 71 günde
+`N=2.019` ile `MDE 13,1 puan` veriyordu, 2 yılda `N=82.085` ile
+`MDE 2,04 puan`. Etki hep oradaydı (`+1,1` → `+3,85` puan), görülemiyordu.
