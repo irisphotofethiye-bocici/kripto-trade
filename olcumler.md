@@ -11737,3 +11737,57 @@ kazananlarda yazılır ve orası ölçülmedi. Hakem **`PENCERE-3`**.
 `9x`'te `%67`. Sebep aritmetik: tetik fiyat hareketi `20/k` — kaldıraç
 büyüdükçe tetik fiyatta yakınlaşıyor. Yani kural **yüksek kaldıraçlı
 pozisyonlarda çok daha sık** iş görecek.
+
+### EK — ARX · TAO · TIA tek tek (2026-09-07)
+
+**Kullanıcı:** *"tao ve arx da neler olurdu uygulansa"*
+**Betik:** `scratchpad/kilit_gecmis/02_arx_tao.py`
+
+```
+sym  kald   giris        TETIK        EN IYI        MFE ROI   tetikler mi
+ARX   5x   0.146529   0.152390    0.151600 (+3,46%)  +17,3%   HAYIR (2,7 puan eksik · fiyatta %0,54)
+TAO   7x   268.5537   276.2267    272.3700 (+1,42%)   +9,9%   HAYIR (10,1 puan eksik · fiyatta %1,44)
+```
+
+**İkisinde de FARK `+0,00 $`.** Kilit hiç tetiklenmezdi; ARX kıl payı
+(fiyatta binde beş) yaklaştı, TAO uzaktı. Sınama ikisinde de geçti
+(yeniden kurulan `−152,83` vs defter `−152,84`; `−150,94` vs `−150,94`).
+
+### 🔴 AMA TIA, KURALIN MALİYETİNİ CANLI GÖSTERDİ
+
+`TIA` bugün kilidi **gerçekten** tetikledi ve kalan %80 hedefe vardı:
+
+```
+gercek: KAR_KILIDI +32,12  +  TP2 +390,60  =  +422,72 $
+```
+
+Karşı-olgu — kilit **girişten beri** açık olsaydı:
+
+```
+00:11:57  giris  0.426985
+01:42     tetik  0.441218 asildi (h 0.442200)   -> kilit TETIKLERDI
+01:44     dip    0.437600  <  kilit stop 0.437660  -> KILIT STOPU YERDI
+03:16:15  canli kilit KURULDU  (o dip COKTAN GECMISTI)
+03:26     hedef  0.469684 -> TP2
+
+karsi-olgu toplam +102,28 $   vs   gercek +422,72 $   ->  -288,31 $
+```
+
+🔑 **İki dakika ve 0,00006 dolar.** Tetikten `01:44`'te dönen fiyat kilit
+stopunun **altı on-binde bir** altına indi. Kilit o an açık olsaydı pozisyon
+orada kesilir, `+%12,6`'lık asıl hareket kaçırılırdı.
+
+🔴 **Bu, `198` pozisyonluk karşı-olgunun GÖREMEDİĞİ maliyet mekanizmasıdır**
+— ve ilk canlı kazananda ortaya çıktı. O ölçüm *"kilit stopuyla kapanan
+7'nin 7'si de gerçekte stop oluyordu, hiçbiri hedefe varmıyordu"* diyordu;
+**TIA tam olarak o eksik sınıftır** (kilit stopu yer, ama gerçekte hedefe
+varır) ve örneklemde yoktu çünkü kısmi kâr almıştı.
+
+⚠️ **N=1. Kural değiştirilmedi.** Bir vaka `+2.076 $`'ı çürütmez, ama
+mekanizmanın **var olduğunu** ve ölçümün ona kör olduğunu **gösterir**.
+Hakem hâlâ `PENCERE-3`.
+
+⚠️ Betikte bir kusur sınama tarafından **yakalandı**: `TP2` çıkışında stop
+`cikis`'tan türetiliyordu ve hedefi stop sanıyordu (tutar doğru, **sebep**
+yanlış). Sınama yayımlamayı reddetti, türetme `01_olcum.py` ile aynı
+dallanmaya çevrildi.
