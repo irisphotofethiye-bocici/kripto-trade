@@ -141,3 +141,40 @@ sıkılaştırmadır.
 ve `0,35 ATR` teşhisi aynı yeri gösteriyor.
 
 ⚠️ Ve bugün **on beş ön-kayıt yazıldı, on beşi de geçemedi.**
+
+---
+
+## [DEĞİŞTİ 2026-09-07 — koşumdan önce, SONUÇ GÖRÜLMEDEN]
+
+**Ne oldu:** Betik ilk koşumda **zorunlu sınama 1'de durdu** (bölüm 6).
+Sınama doğru davrandı; hata **benim ön-kayıtımdaydı.**
+
+**Hata:** Merdiveni `G0.35 ≤ G1.00 ≤ G1.50 ≤ GBE` diye ilan etmiştim,
+yani `GBE`'yi **en geniş** rung varsaymıştım. Yanlış. Ölçülen:
+
+```
+kilit stopunun giristen uzakligi:
+   G0.35  +2,73%      G1.00  +0,64%      GBE  +0,00%      G1.50  -0,96%
+```
+
+Tetik `1,2 ATR` olduğu için `1,5 ATR` aralık stopu **girişin 0,3 ATR
+altına** koyuyor — başabaştan **daha aşağı**. Doğru sıra:
+`G0.35 > G1.00 > GBE > G1.50`.
+
+**Düzeltme — YALNIZCA sınamanın sıralama varsayımı:**
+
+```
+Merdiven monotonlugu UC ATR RUNG'una uygulanir:  G0.35 > G1.00 > G1.50
+GBE bir RUNG DEGIL, REFERANS koldur (klasik basabas) ve merdiven disinda.
+```
+
+🔴 **Hiçbir ölçüt değişmedi.** `P1..P5` birincil kol `G1.00` üzerinde ve
+aynen duruyor. Permütasyon ailesi hâlâ **dört kol** (`P5`).
+
+🔴 **VE BİR OLGU AÇIKÇA KAYDA GEÇİYOR:** `G1.50` bir *"kâr kilidi"*
+**değildir** — stopu girişin altına koyar, yani **zarar kilitler**. İlan
+edilmiş parametrelerin sonucudur, sonradan fark edildi. Kol kaldırılmıyor
+(kaldırmak koşumdan sonra kol elemek olurdu); **ne olduğu yazılıyor** ve
+hüküm yazılırken bu bilinerek okunacak.
+
+⚠️ Eski merdiven metni **silinmedi** — bölüm 6'da duruyor (D/9).
